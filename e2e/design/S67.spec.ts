@@ -11,9 +11,7 @@
  * scheduled slot shows the probables, not win probability (owner, 2026-10-19: Status is
  * pitchers / count / probables; win probability is left out at launch), and the
  * scheduled module body no longer repeats them; probables carry no throwing hand (the
- * scoreboard data has none); the count is the shared ball / strike / out pips beside the
- * bases (the story reuses `BsoPips`) rather than the frame's "0-2, 2 out" text; the
- * module itself is S66's; the "Best of … highlights" digest is not built yet; the room
+ * scoreboard data has none); the module itself is S66's; the "Best of … highlights" digest is not built yet; the room
  * menu frame's signed-in header shows the account icon; the footer's "Fetched … ago"
  * is the real time.
  */

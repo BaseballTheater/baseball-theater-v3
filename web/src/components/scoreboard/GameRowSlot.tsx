@@ -1,14 +1,13 @@
 import {
-	Anchor, Box, Stack, Text,
+	Anchor, Box, Group, Stack, Text,
 } from "@mantine/core";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
-	gamePhase, probableLine, roomsForPhase, slotOccupant,
+	countShorthand, gamePhase, probableLine, roomsForPhase, slotOccupant,
 } from "@bt/domain";
 import type { GameRowSlot as GameRowSlotSetting } from "@bt/domain";
 import { BaseDiamond } from "../game/BaseDiamond.js";
-import { BsoPips } from "../game/BsoPips.js";
 import { roomLabel, shortPlayerName } from "../game/format.js";
 import type { ScoreboardGame } from "./ScoreboardModule.js";
 
@@ -34,14 +33,20 @@ function PitchersOfRecord({ game }: { game: ScoreboardGame })
 	);
 }
 
-/** Live: the bases and the count, then who is batting and pitching. */
+/** Live: the bases beside the count as shorthand text (`0-2, 2 out`, no pips), then who is batting and pitching. */
 function Count({ game }: { game: ScoreboardGame })
 {
 	const live = game.live ?? null;
+	const count = live ? countShorthand(live) : null;
 	return (
 		<Stack gap={4} data-testid="slot-count">
-			<BaseDiamond live={live} />
-			<BsoPips balls={live?.balls ?? null} strikes={live?.strikes ?? null} outs={live?.outs ?? null} gap={6} />
+			<Group gap={6} wrap="nowrap">
+				<BaseDiamond live={live} />
+				{count ? <Text fz={11} fw={700} style={{
+					whiteSpace: "nowrap",
+				}}
+				>{count}</Text> : null}
+			</Group>
 			{live?.batterName ? <Line>AB: {shortPlayerName(live.batterName)}</Line> : null}
 			{live?.pitcherName ? <Line>P: {shortPlayerName(live.pitcherName)}</Line> : null}
 		</Stack>

@@ -14,7 +14,7 @@ source "$(dirname "$0")/lib/checks.sh"
 
 check 1 "slotOccupant(setting, phase) in packages/domain: pitchers of record / count / probables for Status by phase, room menu otherwise (table test)"
 check 2 "the room-menu occupant lists exactly roomsForPhase(gamePhase(game)) as links to /game/:pk/:room (a test per phase)"
-check 3 "the count occupant reuses BaseDiamond and BsoPips; no second diamond or pip component exists under web/src/"
+check 3 "the count occupant reuses BaseDiamond and shows the count as shorthand text from countShorthand (no pips; owner, 2026-10-30); no second diamond exists under web/src/"
 check 4 "Settings → Game List has a Game-Row Slot radio with exactly Status (default) and Room Menu; changing it re-renders a mounted scoreboard without reload and saves to the account (test)"
 check 5 "files this story adds or edits have no team logo and no useMediaQuery / hiddenFrom / visibleFrom outside web/src/layout/"
 check 6 "design match: e2e/design/S67.spec.ts names scoreboard-mobile / -medium / -desktop and scoreboard-slot-room-menu-mobile; docs/v3/design-checks/S67/ holds them at 390/768/1200/390"
@@ -56,15 +56,17 @@ for phase in pregame live final; do
   run_vitest 2 web "$WT" -t "room menu: $phase"
 done
 
-# --- Check 3: one diamond, one set of pips ------------------------------------------------------
-for c in BaseDiamond BsoPips; do
-  defs="$(grep -rlE "export function $c\(" web/src --include='*.tsx' | tr '\n' ' ')"
-  [ "$(echo "$defs" | wc -w | tr -d ' ')" = "1" ] || bad 3 "$c is defined in: ${defs:-nowhere}"
-  grep -qw "$c" "$SLOT" 2>/dev/null || bad 3 "$SLOT does not render $c"
-  grep -qw "$c" web/src/components/game/LiveStatus.tsx || bad 3 "LiveStatus no longer renders $c"
-done
-others="$(grep -rlE 'function [A-Za-z]*(Diamond|Pips)[A-Za-z]*\(' web/src --include='*.tsx' | grep -vE '/(BaseDiamond|BsoPips)\.tsx$' | tr '\n' ' ')"
-[ -z "$others" ] || bad 3 "a second diamond or pip component: $others"
+# --- Check 3: one diamond; the count as shorthand text, no pips ---------------------------------
+# Re-scoped by the owner, 2026-10-30: "There shouldn't be pips in s67. BSO are just shorthand text as seen in the design".
+defs="$(grep -rlE "export function BaseDiamond\(" web/src --include='*.tsx' | tr '\n' ' ')"
+[ "$(echo "$defs" | wc -w | tr -d ' ')" = "1" ] || bad 3 "BaseDiamond is defined in: ${defs:-nowhere}"
+grep -qw 'BaseDiamond' "$SLOT" 2>/dev/null || bad 3 "$SLOT does not render BaseDiamond"
+grep -qw 'countShorthand' "$SLOT" 2>/dev/null || bad 3 "$SLOT does not write the count with countShorthand"
+grep -qwE 'BsoPips|Pips' "$SLOT" 2>/dev/null && bad 3 "$SLOT draws pips"
+grep -rqE 'export function countShorthand\(' packages/domain/src || bad 3 "packages/domain exports no countShorthand"
+others="$(grep -rlE 'function [A-Za-z]*Diamond[A-Za-z]*\(' web/src --include='*.tsx' | grep -vE '/BaseDiamond\.tsx$' | tr '\n' ' ')"
+[ -z "$others" ] || bad 3 "a second diamond component: $others"
+run_vitest 3 packages/domain "$DT" -t "countShorthand"
 run_vitest 3 web "$WT" -t "count"
 
 # --- Check 4: the setting -----------------------------------------------------------------------

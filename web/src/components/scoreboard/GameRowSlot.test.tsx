@@ -85,22 +85,15 @@ describe("GameRowSlot Status (S67)", () =>
 		expect(slot.queryByText(/^S:/)).toBeNull();
 	});
 
-	it("count on a live game: the shared BaseDiamond and BsoPips (bases loaded, 2–2, two out), then AB / P", () =>
+	it("count on a live game: the shared BaseDiamond (bases loaded) beside the count as shorthand text, no pips, then AB / P", () =>
 	{
 		renderSlot(GAMES.live, "status");
 		const slot = within(screen.getByTestId("slot-count"));
 		expect(slot.getByRole("img", {
 			name: "Runners on second, third, first",
 		})).toBeInTheDocument();
-		expect(slot.getByRole("img", {
-			name: "Balls: 2 of 3",
-		})).toBeInTheDocument();
-		expect(slot.getByRole("img", {
-			name: "Strikes: 2 of 2",
-		})).toBeInTheDocument();
-		expect(slot.getByRole("img", {
-			name: "Outs: 2 of 2",
-		})).toBeInTheDocument();
+		expect(slot.getByText("2-2, 2 out")).toBeInTheDocument();
+		expect(slot.queryByTestId(/^pips-/)).toBeNull();
 		expect(slot.getByText("AB: A. Bregman")).toBeInTheDocument();
 		expect(slot.getByText("P: R. Gusto")).toBeInTheDocument();
 	});
@@ -246,14 +239,12 @@ function renderModule(game: ScoreboardGame)
 
 describe("sparse data (S66 module, S67 slot)", () =>
 {
-	it("sparse: a live game with no linescore or live moment reads LIVE, dashes for R·H·E, empty pips and no AB / P", () =>
+	it("sparse: a live game with no linescore or live moment reads LIVE, dashes for R·H·E, no count and no AB / P", () =>
 	{
 		renderModule(sparse("I"));
 		expect(screen.getByText("LIVE")).toBeInTheDocument();
 		expect(screen.getAllByTestId("runs").map((c) => c.textContent)).toEqual(["–", "–"]);
-		expect(screen.getByRole("img", {
-			name: "Balls: 0 of 3",
-		})).toBeInTheDocument();
+		expect(screen.queryByText(/out$/)).toBeNull();
 		expect(screen.queryByText(/^AB:/)).toBeNull();
 	});
 

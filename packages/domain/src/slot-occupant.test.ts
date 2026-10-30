@@ -4,7 +4,9 @@ import {
 import type { GamePhase } from "./game-phase.js";
 import type { GameRowSlot } from "./settings.js";
 import type { SlotOccupant } from "./slot-occupant.js";
-import { probableLine, slotOccupant } from "./slot-occupant.js";
+import {
+	countShorthand, probableLine, slotOccupant,
+} from "./slot-occupant.js";
 
 describe("slotOccupant (S67)", () =>
 {
@@ -48,6 +50,32 @@ describe("probableLine (S67)", () =>
 			wins: null,
 			losses: null,
 			era: null,
+		})).toBeNull();
+	});
+});
+
+describe("countShorthand (S67)", () =>
+{
+	it("balls-strikes, then outs, as the frame writes it", () =>
+	{
+		expect(countShorthand({
+			balls: 0,
+			strikes: 2,
+			outs: 2,
+		})).toBe("0-2, 2 out");
+		expect(countShorthand({
+			balls: 3,
+			strikes: 1,
+			outs: null,
+		})).toBe("3-1");
+	});
+
+	it("null until MLB sends a count", () =>
+	{
+		expect(countShorthand({
+			balls: null,
+			strikes: 0,
+			outs: 1,
 		})).toBeNull();
 	});
 });

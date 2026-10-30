@@ -33,3 +33,17 @@ export function probableLine(pitcher: Pick<ProbablePitcher, "wins" | "losses" | 
 	const parts = [record, pitcher.era].filter((part): part is string => part !== null);
 	return parts.length > 0 ? parts.join(", ") : null;
 }
+
+/**
+ * The count as the live slot writes it, `0-2, 2 out` — balls-strikes, then outs, as
+ * shorthand text, not pips (owner, 2026-10-30: "BSO are just shorthand text as seen in
+ * the design"). `null` until MLB sends a count.
+ */
+export function countShorthand(count: { balls: number | null;
+	strikes: number | null;
+	outs: number | null; }): string | null
+{
+	if (count.balls === null || count.strikes === null) return null;
+	const pitchCount = `${count.balls}-${count.strikes}`;
+	return count.outs === null ? pitchCount : `${pitchCount}, ${count.outs} out`;
+}
