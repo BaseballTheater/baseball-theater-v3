@@ -11459,3 +11459,18 @@ Owner, 2026-10-30, answering the 2026-10-30 backlog review and the S67 AC change
 **Answers and what was applied**
 
 S47 AC 3 re-scope (owner-directed backlog change). Asked whether S47's AC 3 should require S17's own test (functions/src/services/refresh.test.ts) instead of scripts/verify-S17.sh, which only has to hold at S17's own commit (S84); owner: "sounds good" (and earlier: "These should only be expected to succeed against the codebase as it was when they were created... right?"). Asked whether the change needs a backlog review (recommended no); owner: "sounds good". No review; the next scheduled review checks it.
+
+---
+
+## 2026-10-30 — backlog review answers (2026-10-30)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-10-30 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-10-30T20:13:05Z` |
+| HEAD at capture | `dc1343e` (tree dirty) |
+| Applied in | `7ae10cc` — S69 checkpoint (parked for the owner's design match): the owner's Videos-room changes (2026-10-30). Cards are top-aligned, so a one-line title no longer pushes its still down. A sort pill (Impact / Newest / Oldest, through the new sortHighlights in packages/domain) sits left of the Grid / List control, which now shows icons. The quick filters are rounded rectangles of one height (FilterPill) and show as many as fit by the row's own width, not device size (QuickFilters + fittingFilters): all when they fit, else those that fit in order, then a last Filters button opening a bottom drawer with every filter in a scrolling list and a fixed Apply. AC 3 and AC 4 and grader checks 3 and 4 amended with the owner's words (the old AC 4 forbade any Filter button). New capture: game-videos-filters-drawer-mobile (no ratified frame). Grader 7/8 (Status waits for the verdict); pnpm verify 0. |
+
+**Answers and what was applied**
+
+S68 AC 2 (86cc816: collapsed bars centered, score between the teams, the state muted underneath; the favorite's module full-width at medium / desktop while anything is collapsed) and S69 AC 3 / AC 4 (7ae10cc: a sort with Impact as the default; the quick filters show as many as fit, then a Filters button opening a bottom drawer) are owner-directed backlog changes. Asked whether they need a backlog review (recommended no: both stay inside their own story, and nothing else builds on the collapsed bar or the Videos filter row); owner: "no". Asked whether Impact / Newest / Oldest is the right set of sort options; owner: "yes". No review; the next scheduled review checks them.
