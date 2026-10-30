@@ -11426,3 +11426,21 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-10-30 — backlog review answers (2026-10-30)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-10-30 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-10-30T08:11:12Z` |
+| HEAD at capture | `3d70149` (tree dirty) |
+| Applied in | `3d70149` — Owner's answers to the 2026-10-30 backlog review: S47's edge cache is Workers Cache (owner: "Workers cache") — new AC 6 enables it in wrangler.jsonc, AC 5's README line names it and its billing, Status renumbered to AC 7, cap 12 → 13, back to todo; recording ADR-017's cost line is left to the next review. Also logged: S67's AC 3 change needs no review (owner: "No review - the design already had it that way"). |
+
+**Answers and what was applied**
+
+Owner, 2026-10-30, answering the 2026-10-30 backlog review and the S67 AC change:
+1. S47's edge cache — Workers Cache or the Cache API? "Workers cache" — applied in 3d70149: S47 AC 6 enables Workers Cache in wrangler.jsonc, AC 5's README line names it and its billing, cap 12 → 13, status back to todo. Recording ADR-017's new cost line (every request billed at the Workers rate) is left to the next backlog review.
+2. Does the owner-directed change to S67 AC 3 (no pips; 6c0e367) need its own backlog review? "No review - the design already had it that way". Logged here; the next scheduled or drift review still checks it.
+3. S69's Featured team: "Featured team is just a way to filter or label videos. Most highlights feature a particular team - the team benefiting from the play". Not yet applied: S69 (parked) will change to it after one follow-up question on how the filter picks a team.
