@@ -67,16 +67,47 @@ const line = (away: number | null, home: number | null, inning = 7, inningState 
 
 describe("collapsedBarState (S68)", () =>
 {
-	it("score and inning while live, score and Final after (A2)", () =>
+	it("score over the inning while live, score over Final after (A2; owner, 2026-10-30)", () =>
 	{
 		expect(collapsedBarState({
 			status: status("I"),
 			linescore: line(2, 1),
-		}, false)).toBe("2–1 · Bot 7th");
+		}, false)).toEqual({
+			score: "2–1",
+			state: "Bot 7th",
+		});
 		expect(collapsedBarState({
 			status: status("F"),
 			linescore: line(5, 3),
-		}, false)).toBe("5–3 · Final");
+		}, false)).toEqual({
+			score: "5–3",
+			state: "Final",
+		});
+	});
+
+	it("live: the count rides under the score with the inning", () =>
+	{
+		expect(collapsedBarState({
+			status: status("I"),
+			linescore: line(2, 1),
+			live: {
+				balls: 2,
+				strikes: 2,
+				outs: 2,
+			} as never,
+		}, false)).toEqual({
+			score: "2–1",
+			state: "Bot 7th · 2-2, 2 out",
+		});
+		expect(collapsedBarState({
+			status: status("F"),
+			linescore: line(5, 3),
+			live: {
+				balls: 2,
+				strikes: 2,
+				outs: 2,
+			} as never,
+		}, false)?.state).toBe("Final");
 	});
 
 	it("with scores hidden, the state only (A3)", () =>
@@ -84,11 +115,17 @@ describe("collapsedBarState (S68)", () =>
 		expect(collapsedBarState({
 			status: status("I"),
 			linescore: line(2, 1),
-		}, true)).toBe("Bot 7th");
+		}, true)).toEqual({
+			score: null,
+			state: "Bot 7th",
+		});
 		expect(collapsedBarState({
 			status: status("F"),
 			linescore: line(5, 3),
-		}, true)).toBe("Final");
+		}, true)).toEqual({
+			score: null,
+			state: "Final",
+		});
 	});
 
 	it("no score yet reads the state alone; before first pitch there is none", () =>
@@ -96,7 +133,10 @@ describe("collapsedBarState (S68)", () =>
 		expect(collapsedBarState({
 			status: status("I"),
 			linescore: null,
-		}, false)).toBe("Live");
+		}, false)).toEqual({
+			score: null,
+			state: "Live",
+		});
 		expect(collapsedBarState({
 			status: status("S"),
 			linescore: null,

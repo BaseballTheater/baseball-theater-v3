@@ -33,6 +33,7 @@ import { clearPersonalData } from "../../storage/storage.js";
 import { jsonResponse } from "../../test/jsonResponse.js";
 import { DEV_ACCOUNT } from "../../test/meApi.js";
 import { viewerTimeZone } from "../../format/datetime.js";
+import type { LayoutVariant } from "../../layout/variant.js";
 import { CollapsedBar } from "./CollapsedBar.js";
 import type { ScoreboardGame } from "./ScoreboardModule.js";
 
@@ -85,7 +86,7 @@ function stubApi(stored: AccountSettings)
 }
 
 /** The scoreboard with the store hydrated from `settings`. */
-async function renderScoreboard(settings: Partial<AccountSettings>)
+async function renderScoreboard(settings: Partial<AccountSettings>, variant: LayoutVariant = "mobile")
 {
 	stubApi({
 		...DEFAULT_SETTINGS,
@@ -98,7 +99,7 @@ async function renderScoreboard(settings: Partial<AccountSettings>)
 			<QueryClientProvider client={createQueryClient()}>
 				<MemoryRouter initialEntries={["/games/2026-09-05"]}>
 					<Routes>
-						<Route path="/games/:date" element={<ScoreboardPage variant="mobile" />} />
+						<Route path="/games/:date" element={<ScoreboardPage variant={variant} />} />
 					</Routes>
 				</MemoryRouter>
 			</QueryClientProvider>
@@ -131,7 +132,8 @@ describe("collapse non-favorites (S68)", () =>
 		expect(b.getAllByTestId("team-edge")).toHaveLength(2);
 		expect(b.getByText("SF")).toBeInTheDocument();
 		expect(b.getByText("NYM")).toBeInTheDocument();
-		expect(b.getByTestId("collapsed-state")).toHaveTextContent("9–5 · Final");
+		expect(b.getByTestId("collapsed-score")).toHaveTextContent("9–5");
+		expect(b.getByTestId("collapsed-state")).toHaveTextContent(/^Final$/);
 	});
 
 	it("expands: choosing a collapsed bar opens the full module", async () =>
@@ -154,7 +156,9 @@ describe("collapse non-favorites (S68)", () =>
 		});
 		const [live, pregame] = screen.getAllByTestId("collapsed-bar");
 		expect(live).toHaveAccessibleName("CHC at MIA, Top 3rd: show the game");
-		expect(within(live!).getByTestId("collapsed-state")).toHaveTextContent("1–0 · Top 3rd");
+		expect(within(live!).getByTestId("collapsed-score")).toHaveTextContent("1–0");
+		expect(within(live!).getByTestId("collapsed-state")).toHaveTextContent("Top 3rd · 2-2, 2 out");
+		expect(within(pregame!).getByTestId("collapsed-score")).toHaveTextContent("@");
 		expect(within(pregame!).getByTestId("collapsed-state")).toHaveTextContent(formatGameTime("2026-09-05T20:10:00Z", viewerTimeZone()));
 		cleanup();
 		render(
@@ -168,6 +172,29 @@ describe("collapse non-favorites (S68)", () =>
 		);
 		expect(screen.getByTestId("collapsed-state")).toBeEmptyDOMElement();
 		expect(screen.getByTestId("collapsed-bar")).toHaveAccessibleName("CHC at MIA: show the game");
+	});
+
+	it("collapsed bar: at medium and desktop the favorite's module spans the row; on mobile, and with nothing collapsed, it doesn't", async () =>
+	{
+		const spans = () => screen.getAllByTestId("scoreboard-module").map((m) => m.closest("[data-testid=scoreboard-wide]") !== null);
+		await renderScoreboard({
+			favoriteTeamIds: [112],
+			collapseNonFavorites: true,
+		}, "desktop");
+		expect(spans()).toEqual([true, true]);
+		cleanup();
+		resetSettings();
+		await renderScoreboard({
+			favoriteTeamIds: [112],
+			collapseNonFavorites: true,
+		});
+		expect(spans()).toEqual([false, false]);
+		cleanup();
+		resetSettings();
+		await renderScoreboard({
+			favoriteTeamIds: [112],
+		}, "desktop");
+		expect(spans()).toEqual([false, false, false]);
 	});
 
 	it("with no favorites nothing collapses", async () =>
@@ -208,6 +235,7 @@ describe("Hide Scores (S68)", () =>
 			hideScores: true,
 		});
 		expect(screen.getByTestId("collapsed-state")).toHaveTextContent(/^Final$/);
+		expect(screen.getByTestId("collapsed-score")).toHaveTextContent("@");
 	});
 
 	it("structure: a masked module keeps the same cells and rows as an unmasked one, so its height doesn't change", async () =>

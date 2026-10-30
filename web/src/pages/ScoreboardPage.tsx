@@ -1,5 +1,5 @@
 import {
-	SimpleGrid, Stack, Text,
+	Box, SimpleGrid, Stack, Text,
 } from "@mantine/core";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
@@ -18,7 +18,10 @@ import { useSettings } from "../settings/store.js";
 /**
  * The day's games under their `GAMES — SEP 21, 2026` label, or the empty sentence. With
  * Collapse Non-Favorites on, `scoreboardRows` folds games without a favorite team into
- * `CollapsedBar`s after the favorites; a bar opens to its full module when chosen.
+ * `CollapsedBar`s after the favorites; a bar opens to its full module when chosen. While
+ * anything is collapsed, a favorite's module spans the whole row at medium and desktop
+ * (owner, 2026-10-30: "on desktop, when the collapsed mode is on, make the favorite one
+ * full-width").
  */
 function Games({ day, variant }: { day: ScheduleDayPayload;
 	variant: LayoutVariant; })
@@ -29,15 +32,29 @@ function Games({ day, variant }: { day: ScheduleDayPayload;
 	{
 		return <ViewState kind="empty" message="No games scheduled for this date." />;
 	}
+	const rows = scoreboardRows(day.games, favoriteTeamIds, collapseNonFavorites);
+	const wide = variant !== "mobile" && rows.some((row) => row.collapsed);
 	return (
 		<Stack gap="sm">
 			<Text size="xs" fw={700} tt="uppercase">
 				Games — {formatDate(day.date)}
 			</Text>
 			<SimpleGrid cols={variant === "mobile" ? 1 : 2} spacing="md" verticalSpacing="md" data-testid="scoreboard-grid">
-				{scoreboardRows(day.games, favoriteTeamIds, collapseNonFavorites).map(({ game, collapsed }) => (collapsed && !expanded.has(game.gamePk) ? (
-					<CollapsedBar key={game.gamePk} game={game} onExpand={() => setExpanded(new Set(expanded).add(game.gamePk))} />
-				) : <ScoreboardModule key={game.gamePk} game={game} />))}
+				{rows.map(({ game, collapsed }) =>
+				{
+					if (collapsed && !expanded.has(game.gamePk))
+					{
+						return <CollapsedBar key={game.gamePk} game={game} onExpand={() => setExpanded(new Set(expanded).add(game.gamePk))} />;
+					}
+					return wide && !collapsed ? (
+						<Box key={game.gamePk} data-testid="scoreboard-wide" style={{
+							gridColumn: "1 / -1",
+						}}
+						>
+							<ScoreboardModule game={game} />
+						</Box>
+					) : <ScoreboardModule key={game.gamePk} game={game} />;
+				})}
 			</SimpleGrid>
 		</Stack>
 	);

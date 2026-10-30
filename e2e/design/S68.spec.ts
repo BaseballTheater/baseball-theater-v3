@@ -11,6 +11,10 @@
  *   `-desktop`: Hide Scores on.
  * - `scoreboard-collapsed-hidden-nonotice-mobile` (A3 + A4): both on.
  *
+ * Owner-directed changes from the frames (2026-10-30): every collapsed bar is centered —
+ * `CHC  1–0  MIA`, swatches outside, the inning and count (or Final, or the start time)
+ * muted underneath — and at medium / desktop the favorite's module spans the row.
+ *
  * Expected differences, not judged (owner, 2026-10-28: "Judge only the story's own
  * parts"): the frames' sample day versus the fixture games; the medium and desktop
  * collapsed frames' "Collapsed" label is A2's score and state, and the medium / desktop

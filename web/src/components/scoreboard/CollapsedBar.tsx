@@ -9,30 +9,35 @@ import { useScoresHidden } from "../../settings/useScoresHidden.js";
 import { TeamEdge } from "../team/TeamEdge.js";
 import type { ScoreboardGame } from "./ScoreboardModule.js";
 
-/** A team in the bar: its color edge as a short swatch, then its abbreviation. */
-function Team({ team }: { team: ScoreboardGame["teams"]["away"] })
+/** A team in the bar: its abbreviation with its color swatch on the outer side. */
+function Team({ team, side }: { team: ScoreboardGame["teams"]["away"];
+	side: "away" | "home"; })
 {
 	return (
-		<Group gap={8} wrap="nowrap" h={20}>
-			<TeamEdge teamId={team.id} />
+		<Group gap={8} wrap="nowrap" h={20} justify={side === "away" ? "flex-end" : "flex-start"}>
+			{side === "away" ? <TeamEdge teamId={team.id} /> : null}
 			<Text fw={700} c="var(--bt-muted)">{team.abbreviation}</Text>
+			{side === "home" ? <TeamEdge teamId={team.id} /> : null}
 		</Group>
 	);
 }
 
 /**
  * A non-favorite game folded into a slim bar (S68; shell-scoreboard `scoreboard-collapsed-*`,
- * S56 A2, S57 A3): `LAD @ SD` with each team's color swatch, and on the right the score and
- * state (`2–1 · Bot 7th`, `5–3 · Final`) — the state alone with scores hidden, the start
- * time before first pitch. The inning reads through `inningLabel` inside
- * `collapsedBarState` (`packages/domain`), like every live label. The bar is a button:
- * choosing it opens the full module.
+ * S56 A2, S57 A3), centered in every state (owner, 2026-10-30): `NYY  5–2  BOS`, the
+ * teams either side of the score with their color swatches outside, and a muted line
+ * under it — the inning and count while live, `Final` after, the start time before first
+ * pitch. With scores hidden, or before any runs, `@` stands where the score would. What
+ * it says comes from `collapsedBarState` (`packages/domain`), whose inning reads through
+ * `inningLabel` like every live label. The bar is a button: choosing it opens the full
+ * module.
  */
 export function CollapsedBar({ game, onExpand }: { game: ScoreboardGame;
 	onExpand: () => void; })
 {
 	const hidden = useScoresHidden(game);
-	const state = collapsedBarState(game, hidden) ?? (game.startTime ? formatGameTime(game.startTime, viewerTimeZone()) : "");
+	const bar = collapsedBarState(game, hidden);
+	const state = bar?.state ?? (game.startTime ? formatGameTime(game.startTime, viewerTimeZone()) : "");
 	// Only a live game has an inning to name; a pre-game linescore already says "Top 1st".
 	const live = gamePhase(game.status.codedGameState) === "live" ? inningLabel(game.linescore) : null;
 	return (
@@ -47,22 +52,21 @@ export function CollapsedBar({ game, onExpand }: { game: ScoreboardGame;
 				borderRadius: "var(--mantine-radius-md)",
 				border: "1px solid var(--bt-hairline)",
 				background: "var(--bt-raised)",
-				padding: "14px 16px",
+				padding: "10px 16px",
 			}}
 		>
-			<Group justify="space-between" wrap="nowrap">
-				<Group gap={10} wrap="nowrap">
-					<Team team={game.teams.away} />
-					<Text size="sm" c="var(--bt-muted)">@</Text>
-					<Team team={game.teams.home} />
-				</Group>
-				<Box style={{
-					minWidth: 0,
-				}}
-				>
-					<Text size="sm" c="var(--bt-muted)" truncate data-testid="collapsed-state">{state}</Text>
-				</Box>
-			</Group>
+			<Box style={{
+				display: "grid",
+				gridTemplateColumns: "1fr auto 1fr",
+				alignItems: "center",
+				columnGap: 14,
+			}}
+			>
+				<Team team={game.teams.away} side="away" />
+				<Text fw={700} ta="center" c={bar?.score ? undefined : "var(--bt-muted)"} data-testid="collapsed-score">{bar?.score ?? "@"}</Text>
+				<Team team={game.teams.home} side="home" />
+			</Box>
+			<Text fz={11} c="var(--bt-muted)" ta="center" truncate mih={16} data-testid="collapsed-state">{state}</Text>
 		</UnstyledButton>
 	);
 }

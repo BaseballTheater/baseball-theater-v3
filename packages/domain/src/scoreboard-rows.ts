@@ -5,6 +5,7 @@
  */
 import { gamePhase } from "./game-phase.js";
 import { inningLabel } from "./inning.js";
+import { countShorthand } from "./slot-occupant.js";
 import type { ScheduleGameSummary } from "./types.js";
 
 export type ScoreboardRow = {
@@ -39,18 +40,32 @@ export function scoreboardRows(games: readonly ScheduleGameSummary[], favoriteTe
 	];
 }
 
+export type CollapsedBarState = {
+	/** `5–2`, centered between the teams; `null` with scores hidden or no runs yet (the bar shows `@`). */
+	score: string | null;
+	/** The muted line under it: `Final`, or the inning and count while live (`Bot 7th · 2-2, 2 out`). */
+	state: string;
+};
+
 /**
- * The right side of a collapsed bar (S56 A2, S57 A3): `2–1 · Bot 7th` while live,
- * `5–3 · Final` after; with scores hidden, the state alone (`Bot 7th`, `Final`). Before
- * first pitch there is no score or inning, so `null` — the bar shows its start time.
+ * What a collapsed bar says (S56 A2, S57 A3; owner, 2026-10-30: "the collapsed ones should
+ * show the score (when it's not hidden) by centering the score with the teams on either
+ * side, like: NYY  5 - 2  BOS, with the BSO subtly under it"). Live: the score, then the
+ * inning and the count (`countShorthand`) under it; final: the score over `Final`. With
+ * scores hidden the score is left out and the state stays — the count too, as on the
+ * module (A3). Before first pitch there is no score or inning, so `null`: the bar shows
+ * its start time.
  */
-export function collapsedBarState(game: Pick<ScheduleGameSummary, "status" | "linescore">, scoresHidden: boolean): string | null
+export function collapsedBarState(game: Pick<ScheduleGameSummary, "status" | "linescore" | "live">, scoresHidden: boolean): CollapsedBarState | null
 {
 	const phase = gamePhase(game.status.codedGameState);
 	if (phase === "pregame") return null;
-	const state = phase === "final" ? "Final" : inningLabel(game.linescore) ?? "Live";
+	const count = phase === "live" && game.live ? countShorthand(game.live) : null;
+	const inning = phase === "final" ? "Final" : inningLabel(game.linescore) ?? "Live";
 	const away = game.linescore?.teams.away.runs;
 	const home = game.linescore?.teams.home.runs;
-	if (scoresHidden || away == null || home == null) return state;
-	return `${away}–${home} · ${state}`;
+	return {
+		score: scoresHidden || away == null || home == null ? null : `${away}–${home}`,
+		state: count ? `${inning} · ${count}` : inning,
+	};
 }
