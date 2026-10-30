@@ -17,7 +17,7 @@ check 1 "MediaHighlight additively gains kind, date, teamIds and tags, mapped fr
 check 2 "the grid has 2 / 3 / 4 columns at mobile / medium / desktop; List mode shows rows of the same VideoCard (RTL; one card component)"
 # Checks 3 and 4 re-scoped by the owner, 2026-10-30: "Add a sort option to the left of the grid/list option" and, for the
 # filters, "If not, show as many as possible with the last item being a Filters button that opens a drawer from the bottom".
-check 3 "search filters by title or blurb through filterHighlights in packages/domain; the quick filters use classifyHighlight there; impact order by default, and the sort reorders through sortHighlights (tests)"
+check 3 "search filters by title or blurb through filterHighlights in packages/domain; the quick filters use classifyHighlight there; impact order by default, and the sort reorders through sortHighlights; results show in Pre-game / Game highlights / Statcast / Post-game groups through groupHighlights, empty groups left out (tests)"
 check 4 "the quick filters show as many as fit, then a last Filters button opening a bottom drawer with every filter and Apply (RTL); the empty state reads \"No videos yet.\" via ViewState"
 check 5 "a card is a button that calls onPlay(highlight) (test)"
 check 6 "files this story adds or edits have no team logo and no useMediaQuery / hiddenFrom / visibleFrom outside web/src/layout/"
@@ -70,7 +70,7 @@ run_vitest 2 web "$WT" -t "columns"
 run_vitest 2 web "$WT" -t "list"
 
 # --- Check 3: search and quick filters in packages/domain ---------------------------------------
-for f in filterHighlights classifyHighlight sortHighlights; do
+for f in filterHighlights classifyHighlight sortHighlights groupHighlights; do
   grep -rqE "export function $f\(" packages/domain/src || bad 3 "packages/domain exports no $f"
   grep -qE "describe\(\"$f" "packages/domain/$DT" 2>/dev/null || bad 3 "packages/domain/$DT has no describe(\"${f}…\")"
 done
@@ -82,6 +82,9 @@ run_vitest 3 web "$WT" -t "search"
 run_vitest 3 web "$WT" -t "quick filter"
 grep -qw 'sortHighlights' "$ROOM" 2>/dev/null || bad 3 "$ROOM does not sort with sortHighlights"
 run_vitest 3 web "$WT" -t "sort"
+# Groups added by the owner, 2026-10-30: "The videos need to be separated into categories, and the categories should be hidden when no videos are in them."
+grep -qw 'groupHighlights' "$ROOM" 2>/dev/null || bad 3 "$ROOM does not group with groupHighlights"
+run_vitest 3 web "$WT" -t "groups"
 
 # --- Check 4: no Filter button; empty state -----------------------------------------------------
 grep -qF 'No videos yet.' "$ROOM" 2>/dev/null || bad 4 "$ROOM has no \"No videos yet.\""

@@ -76,6 +76,51 @@ export function sortHighlights(highlights: readonly MediaHighlight[], sort: High
 	}).map(({ highlight }) => highlight);
 }
 
+/** The Videos room's groups, in the order they show (owner, 2026-10-30). */
+export const HIGHLIGHT_GROUPS = ["pregame", "highlights", "statcast", "postgame"] as const;
+export type HighlightGroup = (typeof HIGHLIGHT_GROUPS)[number];
+
+/** Tags MLB puts on clips made after the final out: press conferences and postgame interviews. */
+const POSTGAME_TAGS = new Set(["press-conference", "manager-postgame", "player-postgame", "postgame", "post-game"]);
+/** Tags on the graphics and talk MLB publishes before first pitch: lineups, bullpen and bench, alignments. */
+const PREGAME_TAGS = new Set(["darkroom-starting-lineup", "darkroom-bullpen", "darkroom-fielding-alignment", "manager-pregame", "pregame", "pre-game"]);
+
+/**
+ * Which group a clip falls in (owner, 2026-10-30: "The groups are: Pre-game, Game
+ * highlights, Statcast, Post-Game"), from MLB's keywords, first match wins:
+ * - `postgame`: the recap, the condensed game, press conferences and postgame interviews;
+ * - `pregame`: lineups, bullpen / bench availability and fielding alignments — a
+ *   data-visualization clip MLB did not tag `in-game-data-visualization` is made before
+ *   the game, so it lands here too;
+ * - `statcast`: the remaining stat / viz clips (`classifyHighlight`'s `statViz`: bat
+ *   tracking, pitch breakdowns, home-run distance);
+ * - `highlights`: everything else — play highlights, ABS challenges, in-game interviews.
+ */
+export function highlightGroup(highlight: Pick<MediaHighlight, "kind" | "tags" | "teamIds">): HighlightGroup
+{
+	const tags = highlight.tags ?? [];
+	if (highlight.kind === "recap" || highlight.kind === "condensed" || tags.some((tag) => POSTGAME_TAGS.has(tag))) return "postgame";
+	if (tags.some((tag) => PREGAME_TAGS.has(tag))) return "pregame";
+	if (tags.includes("data-visualization") && !tags.includes("in-game-data-visualization")) return "pregame";
+	if (classifyHighlight(highlight).statViz) return "statcast";
+	return "highlights";
+}
+
+/**
+ * The clips split into their groups, in `HIGHLIGHT_GROUPS` order, each keeping the
+ * order given (the chosen sort). A group with no clips is left out: the groups reflect
+ * what is there, not boxes to fill (owner, 2026-10-30: "More like groups than categories
+ * (i.e. a reflection of what is there, not a set of boxes to put things in)").
+ */
+export function groupHighlights(highlights: readonly MediaHighlight[]): { group: HighlightGroup;
+	highlights: MediaHighlight[]; }[]
+{
+	return HIGHLIGHT_GROUPS.map((group) => ({
+		group,
+		highlights: highlights.filter((highlight) => highlightGroup(highlight) === group),
+	})).filter((entry) => entry.highlights.length > 0);
+}
+
 /**
  * MLB's `HH:MM:SS` duration as the video badge prints it (game-shell frames): `0:29`,
  * `3:06`, `12:12`, and `1:02:05` past an hour. `null` for anything not a duration.

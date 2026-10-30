@@ -5,8 +5,10 @@ import {
 	IconArrowsSort, IconChevronDown, IconLayoutGrid, IconList, IconSearch,
 } from "@tabler/icons-react";
 import { useState } from "react";
-import { filterHighlights, sortHighlights } from "@bt/domain";
-import type { HighlightSort } from "@bt/domain";
+import {
+	filterHighlights, groupHighlights, sortHighlights,
+} from "@bt/domain";
+import type { HighlightGroup, HighlightSort } from "@bt/domain";
 import type { GamePayload } from "../../api/game.js";
 import type { LayoutVariant } from "../../layout/variant.js";
 import { ViewState } from "../ViewState.js";
@@ -25,6 +27,14 @@ const SORT_LABELS: Readonly<Record<HighlightSort, string>> = {
 	impact: "Impact",
 	newest: "Newest",
 	oldest: "Oldest",
+};
+
+/** Each group's heading (owner, 2026-10-30: "The groups are: Pre-game, Game highlights, Statcast, Post-Game"). */
+const GROUP_LABELS: Readonly<Record<HighlightGroup, string>> = {
+	pregame: "Pre-game",
+	highlights: "Game highlights",
+	statcast: "Statcast",
+	postgame: "Post-game",
 };
 
 /** The quick filters' values; the drawer edits a copy and applies it whole. */
@@ -134,6 +144,9 @@ function FilterDrawer({
  * `rankHighlightsByImpact` order) and the Grid / List icons (owner, 2026-10-30). The grid
  * has 2 / 3 / 4 columns at mobile / medium / desktop from the host's `variant`; List
  * shows the same `VideoCard`s as rows. Filtering is `filterHighlights` (packages/domain).
+ * The results show in groups — Pre-game, Game highlights, Statcast, Post-game
+ * (`groupHighlights`), each in the chosen sort — and a group with nothing in it is left
+ * out (owner, 2026-10-30).
  * Choosing a video calls `onPlay`; the player is S70's.
  */
 export function VideosRoom({
@@ -160,7 +173,6 @@ export function VideosRoom({
 		query,
 		...filters,
 	}), sort);
-	const cards = videos.map((video) => <VideoCard key={video.id} video={video} layout={layout} onPlay={onPlay} />);
 	const pills = [
 		{
 			key: "team",
@@ -238,15 +250,23 @@ export function VideosRoom({
 				/>
 			</Group>
 			{videos.length === 0 ? <ViewState kind="empty" message="No videos match." /> : null}
-			{videos.length > 0 && layout === "grid" ? (
-				<SimpleGrid cols={COLUMNS[variant]} spacing="md" verticalSpacing="lg" data-testid="videos-grid" style={{
-					alignItems: "start",
-				}}
-				>
-					{cards}
-				</SimpleGrid>
-			) : null}
-			{videos.length > 0 && layout === "list" ? <Stack gap="sm" data-testid="videos-list">{cards}</Stack> : null}
+			{groupHighlights(videos).map(({ group, highlights }) =>
+			{
+				const cards = highlights.map((video) => <VideoCard key={video.id} video={video} layout={layout} onPlay={onPlay} />);
+				return (
+					<Stack key={group} gap="xs" component="section" aria-label={GROUP_LABELS[group]} data-testid="videos-group" data-group={group}>
+						<Text size="xs" fw={700} tt="uppercase" c="var(--bt-muted)">{GROUP_LABELS[group]}</Text>
+						{layout === "grid" ? (
+							<SimpleGrid cols={COLUMNS[variant]} spacing="md" verticalSpacing="lg" data-testid="videos-grid" style={{
+								alignItems: "start",
+							}}
+							>
+								{cards}
+							</SimpleGrid>
+						) : <Stack gap="sm" data-testid="videos-list">{cards}</Stack>}
+					</Stack>
+				);
+			})}
 			{drawer ? <FilterDrawer game={game} opened filters={filters} onApply={(next) =>
 			{
 				setFilters(next);

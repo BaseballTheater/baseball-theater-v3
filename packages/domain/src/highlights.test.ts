@@ -4,7 +4,7 @@ import {
 	describe, expect, it,
 } from "vitest";
 import {
-	classifyHighlight, clipDuration, filterHighlights, sortHighlights,
+	classifyHighlight, clipDuration, filterHighlights, groupHighlights, highlightGroup, sortHighlights,
 } from "./highlights.js";
 import { rankHighlightsByImpact } from "./impact.js";
 import type { MediaHighlight } from "./types.js";
@@ -133,5 +133,45 @@ describe("clipDuration (S69)", () =>
 		expect(clipDuration(null)).toBeNull();
 		expect(clipDuration(undefined)).toBeNull();
 		expect(clipDuration("0:29")).toBeNull();
+	});
+});
+
+describe("groupHighlights (S69)", () =>
+{
+	it("puts each clip in Pre-game, Game highlights, Statcast or Post-game from MLB's keywords", () =>
+	{
+		const group = (title: string) => highlightGroup(VIDEOS.find((h) => h.title.startsWith(title))!);
+		expect(group("Starting lineups")).toBe("pregame");
+		expect(group("Bullpen availability for Chicago")).toBe("pregame");
+		expect(group("Bench availability for Miami")).toBe("pregame");
+		expect(group("Fielding alignment for Miami")).toBe("pregame");
+		expect(group("Griffin Conine's two-run home run")).toBe("highlights");
+		expect(group("Ball 1 overturned")).toBe("highlights");
+		expect(group("Kyle Stowers' home run through bat tracking")).toBe("statcast");
+		expect(group("Breaking down Javier Assad's pitches")).toBe("statcast");
+		expect(group("Kyle Stowers' 442-foot home run")).toBe("statcast");
+		expect(group("Condensed Game")).toBe("postgame");
+		expect(group("Conforto clubs")).toBe("postgame");
+		expect(group("Clayton McCullough discusses")).toBe("postgame");
+		expect(highlightGroup({
+			tags: ["manager-pregame"],
+		})).toBe("pregame");
+		expect(highlightGroup({})).toBe("highlights");
+	});
+
+	it("groups in order, each keeping the order given, and leaves out a group with no clips", () =>
+	{
+		const groups = groupHighlights(VIDEOS);
+		expect(groups.map((g) => g.group)).toEqual(["pregame", "highlights", "statcast", "postgame"]);
+		expect(groups.flatMap((g) => g.highlights)).toHaveLength(VIDEOS.length);
+		for (const { highlights } of groups)
+		{
+			expect(titles(highlights)).toEqual(titles(VIDEOS).filter((title) => highlights.some((h) => h.title === title)));
+		}
+		const onlyHighlights = filterHighlights(VIDEOS, {
+			query: "ABS challenge",
+		});
+		expect(groupHighlights(onlyHighlights).map((g) => g.group)).toEqual(["highlights"]);
+		expect(groupHighlights([])).toEqual([]);
 	});
 });

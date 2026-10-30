@@ -5,7 +5,9 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { rankHighlightsByImpact, sortHighlights } from "@bt/domain";
+import {
+	groupHighlights, rankHighlightsByImpact, sortHighlights,
+} from "@bt/domain";
 import { MantineProvider } from "@mantine/core";
 import {
 	cleanup, render, screen, within,
@@ -40,6 +42,12 @@ function renderRoom(variant: LayoutVariant = "mobile", g: GamePayload = game(), 
 	return onPlay;
 }
 
+/** Titles in the order the room shows them: by group, each group in the order given. */
+function grouped(highlights: GamePayload["highlights"]): string[]
+{
+	return groupHighlights(highlights).flatMap((g) => g.highlights.map((h) => h.title));
+}
+
 function cardTitles(): string[]
 {
 	return screen.getAllByTestId("video-card").map((c) => c.getAttribute("aria-label")!.replace(/^Play /, ""));
@@ -60,9 +68,11 @@ describe("VideosRoom layout (S69)", () =>
 	] as const)("columns: %s shows a %s-column grid of every video, impact order kept", (variant, cols) =>
 	{
 		renderRoom(variant);
-		const grid = screen.getByTestId("videos-grid");
-		expect(getComputedStyle(grid).getPropertyValue("--sg-cols")).toBe(cols);
-		expect(cardTitles()).toEqual(game().highlights.map((h) => h.title));
+		for (const grid of screen.getAllByTestId("videos-grid"))
+		{
+			expect(getComputedStyle(grid).getPropertyValue("--sg-cols")).toBe(cols);
+		}
+		expect(cardTitles()).toEqual(grouped(game().highlights));
 	});
 
 	it("each card shows the still's duration, the title and a Kind · date meta line", () =>
@@ -83,13 +93,31 @@ describe("VideosRoom layout (S69)", () =>
 			name: "List",
 		}));
 		expect(screen.queryByTestId("videos-grid")).toBeNull();
-		const rows = within(screen.getByTestId("videos-list")).getAllByTestId("video-card");
+		const rows = screen.getAllByTestId("videos-list").flatMap((list) => within(list).getAllByTestId("video-card"));
 		expect(rows).toHaveLength(40);
 		expect(rows.every((r) => r.dataset.layout === "list")).toBe(true);
 		await user.click(screen.getByRole("radio", {
 			name: "Grid",
 		}));
-		expect(screen.getByTestId("videos-grid")).toBeInTheDocument();
+		expect(screen.getAllByTestId("videos-grid").length).toBeGreaterThan(0);
+	});
+
+	it("groups: Pre-game, Game highlights, Statcast, Post-game, each headed; a group with nothing in it is left out", async () =>
+	{
+		const user = userEvent.setup();
+		renderRoom();
+		const groups = () => screen.getAllByTestId("videos-group").map((g) => g.getAttribute("aria-label"));
+		expect(groups()).toEqual(["Pre-game", "Game highlights", "Statcast", "Post-game"]);
+		expect(screen.getByText("Game highlights")).toBeInTheDocument();
+		expect(within(screen.getByRole("region", {
+			name: "Post-game",
+		})).getByRole("button", {
+			name: "Play Condensed Game: CHC@MIA - 9/5/26",
+		})).toBeInTheDocument();
+		await user.type(screen.getByRole("textbox", {
+			name: "Search videos",
+		}), "ABS challenge");
+		expect(groups()).toEqual(["Game highlights"]);
 	});
 });
 
@@ -118,7 +146,7 @@ describe("VideosRoom search and quick filters (S69)", () =>
 	{
 		const user = userEvent.setup();
 		renderRoom();
-		const all = game().highlights.map((h) => h.title);
+		const all = grouped(game().highlights);
 		expect(cardTitles()).toEqual(all);
 		await user.click(screen.getByRole("button", {
 			name: "Featured team",
@@ -127,7 +155,7 @@ describe("VideosRoom search and quick filters (S69)", () =>
 		await user.click(screen.getByRole("menuitem", {
 			name: "MIA",
 		}));
-		const marlins = game().highlights.filter((h) => h.teamIds?.includes(146)).map((h) => h.title);
+		const marlins = grouped(game().highlights.filter((h) => h.teamIds?.includes(146)));
 		expect(cardTitles()).toEqual(marlins);
 		await user.click(screen.getByRole("button", {
 			name: "Stat / viz",
@@ -215,19 +243,19 @@ describe("VideosRoom states and play (S69)", () =>
 		room.mockRestore();
 	});
 
-	it("sort: Impact by default; Newest and Oldest reorder through sortHighlights", async () =>
+	it("sort: Impact by default; Newest and Oldest reorder through sortHighlights, within each group", async () =>
 	{
 		const user = userEvent.setup();
 		renderRoom();
 		const impact = cardTitles();
-		expect(impact).toEqual(game().highlights.map((h) => h.title));
+		expect(impact).toEqual(grouped(game().highlights));
 		await user.click(screen.getByRole("button", {
 			name: "Sort: Impact",
 		}));
 		await user.click(await screen.findByRole("menuitem", {
 			name: "Newest",
 		}));
-		const newest = sortHighlights(game().highlights, "newest").map((h) => h.title);
+		const newest = grouped(sortHighlights(game().highlights, "newest"));
 		expect(cardTitles()).toEqual(newest);
 		expect(newest).not.toEqual(impact);
 		await user.click(screen.getByRole("button", {
@@ -236,7 +264,7 @@ describe("VideosRoom states and play (S69)", () =>
 		await user.click(await screen.findByRole("menuitem", {
 			name: "Oldest",
 		}));
-		expect(cardTitles()).toEqual(sortHighlights(game().highlights, "oldest").map((h) => h.title));
+		expect(cardTitles()).toEqual(grouped(sortHighlights(game().highlights, "oldest")));
 	});
 
 	it("onPlay: choosing a card calls onPlay with that video", async () =>
