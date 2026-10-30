@@ -214,7 +214,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 65 | [S41](#s41--plays-room--inning-sidebar-at-bat-accordions-scoring-plays) | Plays room to the ratified design | `done` |
 | 66 | [S65](#s65--scoreboard-data-records-start-time-probables-decisions-live-count--runners) | Scoreboard data fields | `done` |
 | 67 | [S66](#s66--scoreboard-to-the-ratified-frames-modules-date-control-states) | Scoreboard modules + states | `done` |
-| 68 | [S67](#s67--scoreboard-game-row-slot-occupants--its-setting) | Scoreboard slot occupants + setting | `todo` |
+| 68 | [S67](#s67--scoreboard-game-row-slot-occupants--its-setting) | Scoreboard slot occupants + setting | `blocked` |
 | 69 | [S68](#s68--favorites-driven-collapse--hide-scores-on-the-scoreboard) | Collapse non-favorites + Hide Scores | `todo` |
 | 70 | [S69](#s69--videos-room-impact-sorted-grid-list-search-quick-filters) | Videos room grid / list / search | `todo` |
 | 71 | [S75](#s75--hide-scores-in-the-game-rooms-and-the-recap-video-title) | Hide Scores in the rooms | `todo` |
@@ -240,7 +240,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 103 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
 | 104 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
 
-**Next (generated):** **68 / S67** — the lowest **Priority** `todo` story not waiting on a design.
+**Next (generated):** **69 / S68** — the lowest **Priority** `todo` story not waiting on a design.
 
 **Before starting it:** confirm no [backlog review](#backlog-reviews) is due — the review-debt line in that section counts stories, but a drift event makes one due regardless.
 
@@ -4071,7 +4071,7 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 /goal docs/v3/BACKLOG.md S67. Work item 0 first: if scripts/verify-S67.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S67.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/vitest.config.ts, functions/src/, functions/vitest.config.ts, openapi/, packages/domain/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S67.sh, or stop after 16 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `todo`
+**Status:** `blocked`
 
 ---
 

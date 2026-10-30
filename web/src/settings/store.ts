@@ -10,7 +10,9 @@
  * (ADR-028). It only spares a reload from flashing the defaults; the account
  * stays the source of truth.
  */
-import type { AccountSettings, OpensFirst } from "@bt/domain";
+import type {
+	AccountSettings, GameRowSlot, OpensFirst,
+} from "@bt/domain";
 import { applyIfNewer, DEFAULT_SETTINGS } from "@bt/domain";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -81,6 +83,14 @@ export function setOpensFirst(room: OpensFirst): Promise<void>
 {
 	return save({
 		opensFirst: room,
+	});
+}
+
+/** What the scoreboard shows at the right of each game (S67): Status or Room Menu. */
+export function setGameRowSlot(slot: GameRowSlot): Promise<void>
+{
+	return save({
+		gameRowSlot: slot,
 	});
 }
 

@@ -62,6 +62,7 @@ describe("personal data registry", () =>
 		const doc = {
 			favoriteTeamIds: [147],
 			opensFirst: "live" as const,
+			gameRowSlot: "status" as const,
 			version: 1,
 		};
 		await settings.upsert("uid-1", doc);

@@ -121,7 +121,9 @@ describe("ScoreboardModule (S66)", () =>
 		expect(m.getAllByTestId("runs").map((c) => c.textContent)).toEqual(["9", "5"]);
 		expect(m.getAllByTestId("hits").map((c) => c.textContent)).toEqual(["10", "5"]);
 		expect(m.getAllByTestId("errors").map((c) => c.textContent)).toEqual(["1", "0"]);
-		expect(final).toHaveAttribute("href", "/game/823577");
+		expect(m.getByRole("link", {
+			name: "Giants at Mets",
+		})).toHaveAttribute("href", "/game/823577");
 	});
 
 	it("live: the blinking LiveIndicator labeled with inningLabel, R·H·E and records", async () =>

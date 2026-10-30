@@ -79,8 +79,12 @@ export const ACCOUNT_DELETION_PHRASE = "delete my account";
 /** The signed-in user's settings document (ADR-027); the house defaults until they first save. */
 export type SettingsResponse = AccountSettings;
 
-/** A settings write: the whole document with a bumped `version`; an older version is ignored (ADR-022). */
-export type SettingsRequest = AccountSettings;
+/**
+ * A settings write: the whole document with a bumped `version`; an older version is
+ * ignored (ADR-022). `gameRowSlot` (S67) may be left out — it reads as the default —
+ * so a page loaded before it shipped can still save.
+ */
+export type SettingsRequest = Omit<AccountSettings, "gameRowSlot"> & Partial<Pick<AccountSettings, "gameRowSlot">>;
 
 /** The one error-body shape every 4xx path returns. */
 export interface ApiErrorResponse {

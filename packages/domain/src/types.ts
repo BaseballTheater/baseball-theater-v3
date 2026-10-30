@@ -179,8 +179,13 @@ export type GameDecisions = {
 	save: PlayerRef | null;
 };
 
-/** The live moment on the scoreboard (S65): S63's runners and matchup, plus the count. */
+/**
+ * The live moment on the scoreboard (S65): S63's runners and matchup, plus the count,
+ * and who is batting and pitching by name for the count slot's "AB / P" lines (S67).
+ */
 export type ScheduleLive = GameLive & {
+	batterName: string | null;
+	pitcherName: string | null;
 	balls: number | null;
 	strikes: number | null;
 	outs: number | null;

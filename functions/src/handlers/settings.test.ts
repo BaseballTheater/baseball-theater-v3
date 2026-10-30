@@ -81,6 +81,7 @@ function get(base: string, authorization = DEV): Promise<Response>
 const saved: AccountSettings = {
 	favoriteTeamIds: [147, 111],
 	opensFirst: "live",
+	gameRowSlot: "status",
 	version: 2,
 };
 

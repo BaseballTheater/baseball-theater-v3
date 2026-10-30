@@ -316,7 +316,7 @@ describe("scoreboard fields — sparse input (S65)", () =>
 		});
 	});
 
-	it("mapScheduleLive: in progress reads runners, batter, pitcher and count; otherwise null", () =>
+	it("mapScheduleLive: in progress reads runners, batter, pitcher (with names, S67) and count; otherwise null", () =>
 	{
 		expect(mapScheduleLive("F", undefined)).toBeNull();
 		expect(mapScheduleLive("I", {
@@ -327,6 +327,7 @@ describe("scoreboard fields — sparse input (S65)", () =>
 			offense: {
 				batter: {
 					id: 10,
+					fullName: "Manny Machado",
 				},
 				second: {
 					id: 22,
@@ -345,6 +346,8 @@ describe("scoreboard fields — sparse input (S65)", () =>
 			},
 			batterId: 10,
 			pitcherId: 30,
+			batterName: "Manny Machado",
+			pitcherName: null,
 			balls: 1,
 			strikes: 2,
 			outs: 0,
@@ -357,6 +360,8 @@ describe("scoreboard fields — sparse input (S65)", () =>
 			},
 			batterId: null,
 			pitcherId: null,
+			batterName: null,
+			pitcherName: null,
 			balls: null,
 			strikes: null,
 			outs: null,

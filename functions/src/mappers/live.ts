@@ -297,6 +297,8 @@ export function mapLiveFeedSummary(feed: LiveFeedResponse): ScheduleGameSummary
 		decisions: mapDecisions(liveData.decisions),
 		live: live ? {
 			...live,
+			batterName: liveData.plays.currentPlay?.matchup?.batter?.fullName ?? null,
+			pitcherName: liveData.plays.currentPlay?.matchup?.pitcher?.fullName ?? null,
 			balls: liveData.linescore?.balls ?? null,
 			strikes: liveData.linescore?.strikes ?? null,
 			outs: liveData.linescore?.outs ?? null,

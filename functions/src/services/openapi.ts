@@ -169,7 +169,7 @@ export const ROUTE_DESCRIPTIONS: Record<ApiRoute, RouteDescription> = {
 		summary: "Saves the whole settings document. Applies only if `version` is newer than the stored one (ADR-022); answers with what is stored either way.",
 		parameters: [],
 		errors: {
-			400: "The body is not a settings document (known team ids, an offered room, a whole non-negative version).",
+			400: "The body is not a settings document (known team ids, an offered room, a known game-row slot or none, a whole non-negative version).",
 			401: "No session, or the account no longer exists.",
 		},
 	},

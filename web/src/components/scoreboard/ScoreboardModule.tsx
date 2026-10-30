@@ -9,8 +9,10 @@ import {
 import type { GamePhase } from "@bt/domain";
 import type { ScheduleDayPayload } from "../../api/schedule.js";
 import { viewerTimeZone } from "../../format/datetime.js";
+import { useSettings } from "../../settings/store.js";
 import { LiveIndicator } from "../game/LiveIndicator.js";
 import { TeamEdge } from "../team/TeamEdge.js";
+import { GameRowSlot } from "./GameRowSlot.js";
 
 export type ScoreboardGame = ScheduleDayPayload["games"][number];
 
@@ -87,7 +89,8 @@ function TeamCell({ team, phase }: { team: ScoreboardGame["teams"]["away"];
  * the record with its percentage, the start time and the venue. Team color is a 4px
  * edge only; names and numbers stay Light. Every label comes from `packages/domain`
  * (phase, inning, record, start time); this only lays them out. The right-hand slot
- * is S67's; Hide Scores and collapsed bars are S68's.
+ * (S67) shows what the user's Game-Row Slot setting picks; the rest of the module
+ * links to the game. Hide Scores and collapsed bars are S68's.
  */
 export function ScoreboardModule({ game }: { game: ScoreboardGame })
 {
@@ -95,28 +98,34 @@ export function ScoreboardModule({ game }: { game: ScoreboardGame })
 	const teams = [game.teams.away, game.teams.home];
 	const lines = [game.linescore?.teams.away, game.linescore?.teams.home];
 	const scored = phase !== "pregame";
+	const { gameRowSlot } = useSettings();
 	return (
 		<Paper
-			component={Link}
-			to={`/game/${game.gamePk}`}
 			data-testid="scoreboard-module"
 			data-phase={phase}
 			bg="var(--bt-raised)"
 			radius="md"
 			p={12}
 			style={{
-				display: "block",
-				color: "inherit",
-				textDecoration: "none",
+				display: "flex",
+				gap: 12,
 				border: "1px solid var(--bt-hairline)",
 			}}
 		>
-			<Box style={{
-				display: "grid",
-				gridTemplateColumns: scored ? SCORED_GRID : "minmax(0, 1fr)",
-				alignItems: "center",
-				rowGap: 8,
-			}}
+			<Box
+				component={Link}
+				to={`/game/${game.gamePk}`}
+				aria-label={`${game.teams.away.teamName} at ${game.teams.home.teamName}`}
+				style={{
+					flex: 1,
+					minWidth: 0,
+					color: "inherit",
+					textDecoration: "none",
+					display: "grid",
+					gridTemplateColumns: scored ? SCORED_GRID : "minmax(0, 1fr)",
+					alignItems: "center",
+					rowGap: 8,
+				}}
 			>
 				<Box mih={20} style={{
 					display: "flex",
@@ -143,6 +152,7 @@ export function ScoreboardModule({ game }: { game: ScoreboardGame })
 					</Box>
 				))}
 			</Box>
+			<GameRowSlot game={game} setting={gameRowSlot} />
 		</Paper>
 	);
 }

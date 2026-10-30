@@ -7,16 +7,26 @@ export const OPENS_FIRST_ROOMS = ["videos", "live", "box"] as const satisfies re
 export type OpensFirst = (typeof OPENS_FIRST_ROOMS)[number];
 
 /**
+ * What sits at the right of each scoreboard game (S67; the Settings frame's Game-Row
+ * Slot). `status` is the drawn per-phase mix and the default; `roomMenu` links into
+ * the game's rooms. Win Probability is left out at launch (owner, 2026-10-19).
+ */
+export const GAME_ROW_SLOTS = ["status", "roomMenu"] as const;
+
+export type GameRowSlot = (typeof GAME_ROW_SLOTS)[number];
+
+/**
  * A user's settings, stored on their account (ADR-027) and synced to every
  * device. Versioned like every BT document (ADR-022): a write applies only if
  * its `version` is newer than the stored one, so a stale device can't undo a
- * newer change. Controls that land later (game-row slot S67, collapse and Hide
- * Scores S68, Video Player S70) add their fields with their reader.
+ * newer change. Controls that land later (collapse and Hide Scores S68, Video
+ * Player S70) add their fields with their reader.
  */
 export type AccountSettings = {
 	/** MLB team ids (`MLB_TEAMS`), in the order the user picked them. */
 	favoriteTeamIds: number[];
 	opensFirst: OpensFirst;
+	gameRowSlot: GameRowSlot;
 	version: number;
 };
 
@@ -24,6 +34,7 @@ export type AccountSettings = {
 export const DEFAULT_SETTINGS: AccountSettings = {
 	favoriteTeamIds: [],
 	opensFirst: "videos",
+	gameRowSlot: "status",
 	version: 0,
 };
 
@@ -32,22 +43,25 @@ const TEAM_IDS = new Set(MLB_TEAMS.map((t) => t.id));
 /**
  * `value` as settings when it is a well-formed document (every field present,
  * known team ids without repeats, an offered room, a whole non-negative
- * version), else null. The server uses it on every write, so nothing malformed
+ * version), else null. A missing `gameRowSlot` reads as the default: a page loaded
+ * before S67 saves documents without it, and must not get a 400 for that. The server uses it on every write, so nothing malformed
  * is stored.
  */
 export function parseAccountSettings(value: unknown): AccountSettings | null
 {
 	if (value === null || typeof value !== "object") return null;
 	const {
-		favoriteTeamIds, opensFirst, version,
+		favoriteTeamIds, opensFirst, gameRowSlot = DEFAULT_SETTINGS.gameRowSlot, version,
 	} = value as Record<string, unknown>;
 	if (!Array.isArray(favoriteTeamIds) || !favoriteTeamIds.every((id) => typeof id === "number" && TEAM_IDS.has(id))) return null;
 	if (new Set(favoriteTeamIds).size !== favoriteTeamIds.length) return null;
 	if (!OPENS_FIRST_ROOMS.some((room) => room === opensFirst)) return null;
+	if (!GAME_ROW_SLOTS.some((slot) => slot === gameRowSlot)) return null;
 	if (typeof version !== "number" || !Number.isInteger(version) || version < 0) return null;
 	return {
 		favoriteTeamIds: favoriteTeamIds as number[],
 		opensFirst: opensFirst as OpensFirst,
+		gameRowSlot: gameRowSlot as GameRowSlot,
 		version,
 	};
 }

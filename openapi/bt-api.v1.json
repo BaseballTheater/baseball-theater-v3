@@ -14,17 +14,18 @@
 			},
 			"AccountSettings": {
 				"additionalProperties": false,
-				"description": "A user's settings, stored on their account (ADR-027) and synced to every device. Versioned like every BT document (ADR-022): a write applies only if its `version` is newer than the stored one, so a stale device can't undo a newer change. Controls that land later (game-row slot S67, collapse and Hide Scores S68, Video Player S70) add their fields with their reader.",
+				"description": "A user's settings, stored on their account (ADR-027) and synced to every device. Versioned like every BT document (ADR-022): a write applies only if its `version` is newer than the stored one, so a stale device can't undo a newer change. Controls that land later (collapse and Hide Scores S68, Video Player S70) add their fields with their reader.",
 				"properties": {
 					"favoriteTeamIds": {
 						"description": "MLB team ids (`MLB_TEAMS`), in the order the user picked them.",
 						"items": { "type": "number" },
 						"type": "array"
 					},
+					"gameRowSlot": { "$ref": "#/components/schemas/GameRowSlot" },
 					"opensFirst": { "$ref": "#/components/schemas/OpensFirst" },
 					"version": { "type": "number" }
 				},
-				"required": ["favoriteTeamIds", "opensFirst", "version"],
+				"required": ["favoriteTeamIds", "opensFirst", "gameRowSlot", "version"],
 				"type": "object"
 			},
 			"ApiErrorResponse": {
@@ -243,6 +244,7 @@
 				"required": ["headline", "text"],
 				"type": "object"
 			},
+			"GameRowSlot": { "enum": ["status", "roomMenu"], "type": "string" },
 			"GameSnapshot": {
 				"additionalProperties": false,
 				"properties": {
@@ -718,12 +720,14 @@
 			},
 			"ScheduleLive": {
 				"additionalProperties": false,
-				"description": "The live moment on the scoreboard (S65): S63's runners and matchup, plus the count.",
+				"description": "The live moment on the scoreboard (S65): S63's runners and matchup, plus the count, and who is batting and pitching by name for the count slot's \"AB / P\" lines (S67).",
 				"properties": {
 					"balls": { "type": ["number", "null"] },
 					"batterId": { "type": ["number", "null"] },
+					"batterName": { "type": ["string", "null"] },
 					"outs": { "type": ["number", "null"] },
 					"pitcherId": { "type": ["number", "null"] },
+					"pitcherName": { "type": ["string", "null"] },
 					"runners": {
 						"additionalProperties": false,
 						"properties": {
@@ -736,7 +740,16 @@
 					},
 					"strikes": { "type": ["number", "null"] }
 				},
-				"required": ["balls", "batterId", "outs", "pitcherId", "runners", "strikes"],
+				"required": [
+					"balls",
+					"batterId",
+					"batterName",
+					"outs",
+					"pitcherId",
+					"pitcherName",
+					"runners",
+					"strikes"
+				],
 				"type": "object"
 			},
 			"ScheduleTeam": {
@@ -753,8 +766,20 @@
 				"type": "object"
 			},
 			"SettingsRequest": {
-				"$ref": "#/components/schemas/AccountSettings",
-				"description": "A settings write: the whole document with a bumped `version`; an older version is ignored (ADR-022)."
+				"additionalProperties": false,
+				"description": "A settings write: the whole document with a bumped `version`; an older version is ignored (ADR-022). `gameRowSlot` (S67) may be left out — it reads as the default — so a page loaded before it shipped can still save.",
+				"properties": {
+					"favoriteTeamIds": {
+						"description": "MLB team ids (`MLB_TEAMS`), in the order the user picked them.",
+						"items": { "type": "number" },
+						"type": "array"
+					},
+					"gameRowSlot": { "$ref": "#/components/schemas/GameRowSlot" },
+					"opensFirst": { "$ref": "#/components/schemas/OpensFirst" },
+					"version": { "type": "number" }
+				},
+				"required": ["favoriteTeamIds", "opensFirst", "version"],
+				"type": "object"
 			},
 			"SettingsResponse": {
 				"$ref": "#/components/schemas/AccountSettings",
@@ -993,7 +1018,7 @@
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
 						},
-						"description": "The body is not a settings document (known team ids, an offered room, a whole non-negative version)."
+						"description": "The body is not a settings document (known team ids, an offered room, a known game-row slot or none, a whole non-negative version)."
 					},
 					"401": {
 						"content": {

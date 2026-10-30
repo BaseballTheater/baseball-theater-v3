@@ -183,6 +183,7 @@ describeRepositoryContract<string, StoredSettings>("InMemorySettingsRepository",
 		settings: {
 			favoriteTeamIds: [147, 111, 121].slice(0, version),
 			opensFirst: version % 2 === 0 ? "live" : "box",
+			gameRowSlot: "status",
 			version,
 		},
 	}),
@@ -226,6 +227,7 @@ describePersonalDataStoreContract(SETTINGS_STORE, {
 	create: registeredStore(SETTINGS_STORE, (deps, uid) => deps.settings.upsert(uid, {
 		favoriteTeamIds: [147],
 		opensFirst: "live",
+		gameRowSlot: "status",
 		version: 1,
 	})),
 });

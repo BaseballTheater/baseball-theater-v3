@@ -2,7 +2,7 @@ import {
 	describe, expect, it,
 } from "vitest";
 import {
-	DEFAULT_SETTINGS, OPENS_FIRST_ROOMS, parseAccountSettings,
+	DEFAULT_SETTINGS, GAME_ROW_SLOTS, OPENS_FIRST_ROOMS, parseAccountSettings,
 } from "./settings.js";
 import { MLB_TEAMS } from "./teams.js";
 
@@ -25,12 +25,30 @@ describe("parseAccountSettings", () =>
 		expect(parseAccountSettings({
 			favoriteTeamIds: [147, 111],
 			opensFirst: "live",
+			gameRowSlot: "roomMenu",
 			version: 3,
 			extra: "dropped",
 		})).toEqual({
 			favoriteTeamIds: [147, 111],
 			opensFirst: "live",
+			gameRowSlot: "roomMenu",
 			version: 3,
+		});
+	});
+
+	it("gameRowSlot: Status is the default, and a document saved before S67 (no gameRowSlot) reads as it", () =>
+	{
+		expect(GAME_ROW_SLOTS).toEqual(["status", "roomMenu"]);
+		expect(DEFAULT_SETTINGS.gameRowSlot).toBe("status");
+		expect(parseAccountSettings({
+			favoriteTeamIds: [],
+			opensFirst: "box",
+			version: 2,
+		})).toEqual({
+			favoriteTeamIds: [],
+			opensFirst: "box",
+			gameRowSlot: "status",
+			version: 2,
 		});
 	});
 
@@ -59,6 +77,10 @@ describe("parseAccountSettings", () =>
 			{
 				...good,
 				opensFirst: "plays",
+			},
+			{
+				...good,
+				gameRowSlot: "winProbability",
 			},
 			{
 				...good,

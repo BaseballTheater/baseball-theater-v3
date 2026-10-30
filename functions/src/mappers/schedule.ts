@@ -155,6 +155,8 @@ export function mapScheduleLive(codedGameState: string, linescore: Linescore | u
 		},
 		batterId: linescore?.offense?.batter?.id ?? null,
 		pitcherId: linescore?.defense?.pitcher?.id ?? null,
+		batterName: linescore?.offense?.batter?.fullName ?? null,
+		pitcherName: linescore?.defense?.pitcher?.fullName ?? null,
 		balls: linescore?.balls ?? null,
 		strikes: linescore?.strikes ?? null,
 		outs: linescore?.outs ?? null,

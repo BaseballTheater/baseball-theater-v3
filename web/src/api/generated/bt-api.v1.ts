@@ -134,10 +134,11 @@ export interface components {
             name: string;
             teamName: string;
         };
-        /** @description A user's settings, stored on their account (ADR-027) and synced to every device. Versioned like every BT document (ADR-022): a write applies only if its `version` is newer than the stored one, so a stale device can't undo a newer change. Controls that land later (game-row slot S67, collapse and Hide Scores S68, Video Player S70) add their fields with their reader. */
+        /** @description A user's settings, stored on their account (ADR-027) and synced to every device. Versioned like every BT document (ADR-022): a write applies only if its `version` is newer than the stored one, so a stale device can't undo a newer change. Controls that land later (collapse and Hide Scores S68, Video Player S70) add their fields with their reader. */
         AccountSettings: {
             /** @description MLB team ids (`MLB_TEAMS`), in the order the user picked them. */
             favoriteTeamIds: number[];
+            gameRowSlot: components["schemas"]["GameRowSlot"];
             opensFirst: components["schemas"]["OpensFirst"];
             version: number;
         };
@@ -247,6 +248,8 @@ export interface components {
             headline: string;
             text: string;
         };
+        /** @enum {string} */
+        GameRowSlot: "status" | "roomMenu";
         GameSnapshot: {
             /** @description The box score (S2); absent until MLB has one, and on older recordings. */
             boxscore?: components["schemas"]["GameBoxscore"];
@@ -491,12 +494,14 @@ export interface components {
                 name: string;
             } | null;
         };
-        /** @description The live moment on the scoreboard (S65): S63's runners and matchup, plus the count. */
+        /** @description The live moment on the scoreboard (S65): S63's runners and matchup, plus the count, and who is batting and pitching by name for the count slot's "AB / P" lines (S67). */
         ScheduleLive: {
             balls: number | null;
             batterId: number | null;
+            batterName: string | null;
             outs: number | null;
             pitcherId: number | null;
+            pitcherName: string | null;
             runners: {
                 first: number | null;
                 second: number | null;
@@ -512,8 +517,14 @@ export interface components {
             record?: components["schemas"]["TeamRecord"] | null;
             teamName: string;
         };
-        /** @description A settings write: the whole document with a bumped `version`; an older version is ignored (ADR-022). */
-        SettingsRequest: components["schemas"]["AccountSettings"];
+        /** @description A settings write: the whole document with a bumped `version`; an older version is ignored (ADR-022). `gameRowSlot` (S67) may be left out — it reads as the default — so a page loaded before it shipped can still save. */
+        SettingsRequest: {
+            /** @description MLB team ids (`MLB_TEAMS`), in the order the user picked them. */
+            favoriteTeamIds: number[];
+            gameRowSlot?: components["schemas"]["GameRowSlot"];
+            opensFirst: components["schemas"]["OpensFirst"];
+            version: number;
+        };
         /** @description The signed-in user's settings document (ADR-027); the house defaults until they first save. */
         SettingsResponse: components["schemas"]["AccountSettings"];
         /** @description A team's season record (S65; the scoreboard module's `81-62`). */
@@ -813,7 +824,7 @@ export interface operations {
                     "application/json": components["schemas"]["SettingsResponse"];
                 };
             };
-            /** @description The body is not a settings document (known team ids, an offered room, a whole non-negative version). */
+            /** @description The body is not a settings document (known team ids, an offered room, a known game-row slot or none, a whole non-negative version). */
             400: {
                 headers: {
                     [name: string]: unknown;
