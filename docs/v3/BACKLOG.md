@@ -221,7 +221,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 72 | [S70](#s70--video-player-dialog-by-default-persistent-stage-by-setting) | Video player (dialog / stage) | `todo` |
 | 73 | [S71](#s71--day-highlights-digest-best-of-date) | Day highlights digest | `todo` |
 | 74 | [S45](#s45--api-runs-as-a-worker-on-the-local-workers-runtime) | Worker entry + local Workers runtime + Workers tests | `done` |
-| 75 | [S47](#s47--graduated-edge-caching--refresh-on-read) | Graduated edge caching + refresh-on-read | `blocked` |
+| 75 | [S47](#s47--graduated-edge-caching--refresh-on-read) | Graduated edge caching + refresh-on-read | `todo` |
 | 76 | [S48](#s48--per-game-ingest-durable-object--cron-ensure-running) | Ingest Durable Object + cron | `todo` |
 | 77 | [S18](#s18--live-hub-durable-object--livegamehub-port--one-way-websocket) | Live hub object + one-way WebSocket | `todo` |
 | 78 | [S19](#s19--web-client-auto-updates-watched-game) | Web client auto-updates watched game | `todo` |
@@ -5226,7 +5226,7 @@ Wire changes (`version` / `lastChangedAt` on `GameSnapshot`) are S46; applying t
 - **Workers Cache:** `"cache": { "enabled": true }` in `wrangler.jsonc` (wrangler 4.149.0's schema has it). Cloudflare then checks the cache before running the Worker, honors `Cache-Control` per RFC 9111 (`stale-while-revalidate` included), and is *"tiered by default"*, as ADR-021 asks. But *"when caching is enabled, every request to your Worker is charged at the standard Workers request rate … including requests that are normally free: static asset requests"*, which changes ADR-017's cost line.
 - **Cache API** (`caches.default.match` / `put` in the Worker): no billing change, but *"The Cache API is not compatible with tiered caching"* (one data center at a time), and the Worker still runs on every request.
 
-Which one is the owner's call (it amends ADR-017's cost shape or ADR-021's Tiered Cache line). Once answered, the chosen route goes into AC 1 / AC 5 and `wrangler.jsonc` (inside this fence), and the story returns to `todo`. Until then `blocked` keeps the loop moving to S48.
+**Answered (owner, 2026-10-30): "Workers cache".** The edge cache is Workers Cache, so ADR-021's tiered edge cache holds as written and ADR-017's cost line now includes every request at the Workers rate (static assets too); recording that in ADR-017 is left to the next backlog review, outside this fence. New AC 6 enables it in `wrangler.jsonc`; AC 5's README line names it. Back to `todo`.
 
 **Work**
 
@@ -5238,12 +5238,13 @@ Which one is the owner's call (it amends ADR-017's cost shape or ADR-021's Tiere
 2. In-window responses never carry an `s-maxage` above the floor (test).
 3. Refresh-on-read decides staleness with `cacheLifetimeMs`; `export const CACHE_TTL_MS` remains as the documented floor, and `scripts/verify-S17.sh` exits 0.
 4. A refresh that finds changed content resets the lifetime: the next response uses the floor (test).
-5. `README.md` documents Tiered Cache and the intent to purge a game when ingest knows it changed (the purge itself is out of scope).
-6. This file’s S47 **Status** (story heading and top table) is `done`.
+5. `README.md` documents the edge cache — Workers Cache, tiered by default, every request billed at the Workers rate — and the intent to purge a game when ingest knows it changed (the purge itself is out of scope).
+6. `wrangler.jsonc` enables Workers Cache (`"cache": { "enabled": true }`), so Cloudflare answers from its cache before running the Worker (owner, 2026-10-30: *"Workers cache"*).
+7. This file’s S47 **Status** (story heading and top table) is `done`.
 
 **Reuse check** (ADR-025): before writing code, search `packages/domain` (`cacheLifetimeMs`, `CACHE_LIFETIME_FLOOR_MS`, `isGameInActiveWindow`) and `functions/src/services/refresh.ts` (`isStale`, `RefreshCoordinator`) for what this story needs; record what was reused, or why nothing fit, in the story's ledger notes.
 
-**Turn cap:** 12 — assumes one header helper, one refresh-policy swap, and one test file; no purge implementation.
+**Turn cap:** 13 (+1 for AC 6, the owner's Workers Cache answer, 2026-10-30; was 12) — assumes one header helper, one refresh-policy swap, one test file and one `wrangler.jsonc` line; no purge implementation.
 
 **Goal condition:** scripts/verify-S47.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, wrangler.jsonc, README.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 
@@ -5253,7 +5254,7 @@ Which one is the owner's call (it amends ADR-017's cost shape or ADR-021's Tiere
 /goal docs/v3/BACKLOG.md S47. Work item 0 first: if scripts/verify-S47.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S47.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, wrangler.jsonc, README.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S47.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `blocked`
+**Status:** `todo`
 
 ---
 
