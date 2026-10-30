@@ -6,26 +6,26 @@ import {
 } from "@bt/domain";
 import { viewerTimeZone } from "../../format/datetime.js";
 import { useScoresHidden } from "../../settings/useScoresHidden.js";
-import { TeamEdge } from "../team/TeamEdge.js";
+import { TeamSwatch } from "../team/TeamSwatch.js";
 import type { ScoreboardGame } from "./ScoreboardModule.js";
 
-/** A team in the bar: its abbreviation with its color swatch on the outer side. */
+/** A team in the bar: its abbreviation with its round color swatch on the inner side, toward the score (owner, 2026-10-30: "CHC o 1-0 o MIA"). */
 function Team({ team, side }: { team: ScoreboardGame["teams"]["away"];
 	side: "away" | "home"; })
 {
 	return (
 		<Group gap={8} wrap="nowrap" h={20} justify={side === "away" ? "flex-end" : "flex-start"}>
-			{side === "away" ? <TeamEdge teamId={team.id} /> : null}
+			{side === "home" ? <TeamSwatch teamId={team.id} /> : null}
 			<Text fw={700} c="var(--bt-muted)">{team.abbreviation}</Text>
-			{side === "home" ? <TeamEdge teamId={team.id} /> : null}
+			{side === "away" ? <TeamSwatch teamId={team.id} /> : null}
 		</Group>
 	);
 }
 
 /**
  * A non-favorite game folded into a slim bar (S68; shell-scoreboard `scoreboard-collapsed-*`,
- * S56 A2, S57 A3), centered in every state (owner, 2026-10-30): `NYY  5–2  BOS`, the
- * teams either side of the score with their color swatches outside, and a muted line
+ * S56 A2, S57 A3), centered in every state (owner, 2026-10-30): `NYY ● 5–2 ● BOS`, the
+ * teams either side of the score with their round color swatches inside, by the score, and a muted line
  * under it — the inning and count while live, `Final` after, the start time before first
  * pitch. With scores hidden, or before any runs, `@` stands where the score would. What
  * it says comes from `collapsedBarState` (`packages/domain`), whose inning reads through

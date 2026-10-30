@@ -13,8 +13,8 @@ cd "$(dirname "$0")/.."
 source "$(dirname "$0")/lib/checks.sh"
 
 check 1 "scoreboardRows(games, favoriteTeamIds, collapseNonFavorites) in packages/domain marks non-favorite games collapsed; with no favorites nothing collapses (test)"
-# Check 2 re-scoped by the owner, 2026-10-30: the bar centered — "NYY  5 - 2  BOS, with the BSO subtly under it" — and the favorite full-width on desktop.
-check 2 "a collapsed bar is centered: swatches and abbreviations either side of {away}–{home} (@ when hidden or before runs), the inning and count or Final or start time under it; it expands to the full module on click; at medium / desktop a favorite's module spans the row (RTL)"
+# Check 2 re-scoped by the owner, 2026-10-30: the bar centered — "NYY  5 - 2  BOS, with the BSO subtly under it" — and the favorite full-width on desktop; then the swatches as circles inside, "like CHC o 1-0 o MIA".
+check 2 "a collapsed bar is centered: abbreviations and round swatches (inside) either side of {away}–{home} (@ when hidden or before runs), the inning and count or Final or start time under it; it expands to the full module on click; at medium / desktop a favorite's module spans the row (RTL)"
 check 3 "Hide Scores on: R·H·E show –, records ▒▒-▒▒, pitchers of record masked while count, AB / P and probables stay; collapsed bars show the state only; same module structure (RTL); no \"Scores hidden in settings\" text; one HiddenValue component"
 check 4 "shouldHideScores(settings, game?) in packages/domain (tested on, off, with and without a game); one useScoresHidden(game?) hook in web/src/settings/; nothing else reads the Hide Scores setting"
 check 5 "Settings → Game List toggles for Collapse Non-Favorites and Hide Scores save to the account and update a mounted scoreboard without reload (test)"

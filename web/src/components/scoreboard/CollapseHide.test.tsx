@@ -129,9 +129,11 @@ describe("collapse non-favorites (S68)", () =>
 		expect(modules.map((m) => m.dataset.phase)).toEqual(["live", "pregame"]);
 		const [bar] = screen.getAllByTestId("collapsed-bar");
 		const b = within(bar!);
-		expect(b.getAllByTestId("team-edge")).toHaveLength(2);
-		expect(b.getByText("SF")).toBeInTheDocument();
-		expect(b.getByText("NYM")).toBeInTheDocument();
+		// Round swatches inside, by the score (owner, 2026-10-30: "like CHC o 1-0 o MIA").
+		const order = [b.getByText("SF"), ...b.getAllByTestId("team-swatch"), b.getByText("NYM")];
+		order.slice(1).forEach((node, i) => expect(order[i]!.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy());
+		expect(b.getByTestId("collapsed-score").compareDocumentPosition(order[2]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+		expect(b.getByTestId("collapsed-score").compareDocumentPosition(order[1]!) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
 		expect(b.getByTestId("collapsed-score")).toHaveTextContent("9–5");
 		expect(b.getByTestId("collapsed-state")).toHaveTextContent(/^Final$/);
 	});
