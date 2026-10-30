@@ -11474,3 +11474,38 @@ S47 AC 3 re-scope (owner-directed backlog change). Asked whether S47's AC 3 shou
 **Answers and what was applied**
 
 S68 AC 2 (86cc816: collapsed bars centered, score between the teams, the state muted underneath; the favorite's module full-width at medium / desktop while anything is collapsed) and S69 AC 3 / AC 4 (7ae10cc: a sort with Impact as the default; the quick filters show as many as fit, then a Filters button opening a bottom drawer) are owner-directed backlog changes. Asked whether they need a backlog review (recommended no: both stay inside their own story, and nothing else builds on the collapsed bar or the Videos filter row); owner: "no". Asked whether Impact / Newest / Oldest is the right set of sort options; owner: "yes". No review; the next scheduled review checks them.
+
+---
+
+## 2026-10-30 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-10-30T20:59:55Z` |
+| HEAD at review | `372c3d5` (tree dirty) |
+| Trigger | S93–S102 added; FEATURES.md changed (372c3d5) |
+| Stories `done` since last review | S93, S94, S95, S96, S97, S98, S99, S100, S101, S102; next todo S75, S70, S71 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+**1. Citation honesty**
+
+- **S93, S94, S99, S100, S101, S102 → Feature: More MLB game data.** Holds. The row lists exactly what these six ingest (play metrics, GraphQL game content, player of the game, ABS rule settings, uniforms, division names), and its quotes match the owner's words this session verbatim: *"I also found a bunch more URLs we can get data from"* and *"Also add stories to ingest all of this extra data."* Each story's Gap quotes the second line exactly. Each one matches a URL the owner gave: playMetrics (S93), data-graph GraphQL getGamesByGamePks (S94), player-of-the-game winners JSON (S99), live feed hydrate=ruleSettings (S100), uniforms/game (S101), standings hydrate=division (S102). S102 could also cite the Standings carry row, but "More MLB game data" names division names on purpose, so it is honest.
+- **S95, S96, S97 → Feature: Video play links.** Holds. The row and the three Gaps quote *"The ones with plays associated should havea link to the play in question. And yes, we should associate the ABS ones."*, which is the start of the owner's message, verbatim (typo kept). The ABS association matches the "And yes".
+- **S98 → Feature: Impact curation.** Holds. FEATURES §Impact curation is "heuristic first, model later". Ranking by the win probability a play added replaces the title-keyword heuristic, and that is what the row describes. The owner said "Yes" to making it its own story (answer "2. Yes" to whether playMetrics win probability for the impact sort should be a separate story), and the story says the same.
+- **Next 3 todo by priority:** S75 (Settings: Hide Scores) holds, because the row carries the owner's Hide Scores rules that S75's Gap restates. S70 (Game → Videos; Settings playback prefs) holds: the dialog-default and Stage player is in both rows. S71 ("Best of [date]") holds: the row commits it for launch, ranked by the per-game impact rule. Once S98 lands, that rule is win probability, which is consistent.
+- **Open:** none. **Pillar-cited stories:** none was added or re-scoped since e8eff3c (372c3d5 changed only `order:` on S11–S48).
+
+**2. Doc reflects reality**
+
+- **Amended:** the FEATURES "Game → Videos / highlights" row described only the 2026-10-13 filters. Since the last parity review the owner decided four things for the Videos room, recorded in commits d55e447, 7ae10cc, 6373fb0 and 87082d1 and in S69's AC 3 and Answered note: what Featured team means (*"One of the game's two teams and the default filter value should be none"*), groups (*"More like groups than categories … The groups are: Pre-game, Game highlights, Statcast, Post-Game"*, an empty group hidden), *"the groups should be collapsible"*, and a sort control left of the Grid / List icons. The row now records them in the owner's words. Nothing in it contradicts S69's AC 4 Filters drawer, which is a layout detail and stays in the story.
+- No contradiction found between the new rows and VISUAL-DESIGN or ARCHITECTURE. The new feeds are pulled at ingest; clients read BT only (ADR-002).
+
+**3. Coverage, for the next backlog review**
+
+- **Gameday config feed has no story.** The owner gave the bdfed gameday config URL twice (with and without `appContext=mlb`) and said to *"ingest all of this extra data."* S93–S102 cover every other URL, but no story ingests the config, and "More MLB game data" doesn't list it. A question goes to the owner (below). The next backlog review must check the answer and add or rule out a story.
+- **Ingest-only stories S99, S101, S102** keep data "ready for a view to use", and no story shows it yet. That matches the owner's "ingest" request. Flagged only so the review can see the gap from ingested data to a view.
+
+**Question for the owner:** should BT ingest the bdfed gameday config feed too, and if so, for what? It is the one URL from your list with no story (both variants, with and without appContext=mlb).
