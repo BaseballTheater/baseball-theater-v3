@@ -15,8 +15,10 @@ source "$(dirname "$0")/lib/checks.sh"
 
 check 1 "MediaHighlight additively gains kind, date, teamIds and tags, mapped from fixtures/raw/content-823823.json (regeneration test; pnpm api:breaking exits 0)"
 check 2 "the grid has 2 / 3 / 4 columns at mobile / medium / desktop; List mode shows rows of the same VideoCard (RTL; one card component)"
-check 3 "search filters by title or blurb through filterHighlights in packages/domain; the quick filters use classifyHighlight there; results stay impact-ordered (tests)"
-check 4 "no Filter button renders, and the empty state reads \"No videos yet.\" via ViewState"
+# Checks 3 and 4 re-scoped by the owner, 2026-10-30: "Add a sort option to the left of the grid/list option" and, for the
+# filters, "If not, show as many as possible with the last item being a Filters button that opens a drawer from the bottom".
+check 3 "search filters by title or blurb through filterHighlights in packages/domain; the quick filters use classifyHighlight there; impact order by default, and the sort reorders through sortHighlights (tests)"
+check 4 "the quick filters show as many as fit, then a last Filters button opening a bottom drawer with every filter and Apply (RTL); the empty state reads \"No videos yet.\" via ViewState"
 check 5 "a card is a button that calls onPlay(highlight) (test)"
 check 6 "files this story adds or edits have no team logo and no useMediaQuery / hiddenFrom / visibleFrom outside web/src/layout/"
 check 7 "design match: e2e/design/S69.spec.ts names game-videos-grid-mobile / -medium / -desktop and game-videos-list-mobile; docs/v3/design-checks/S69/ holds them at 390/768/1200/390"
@@ -68,7 +70,7 @@ run_vitest 2 web "$WT" -t "columns"
 run_vitest 2 web "$WT" -t "list"
 
 # --- Check 3: search and quick filters in packages/domain ---------------------------------------
-for f in filterHighlights classifyHighlight; do
+for f in filterHighlights classifyHighlight sortHighlights; do
   grep -rqE "export function $f\(" packages/domain/src || bad 3 "packages/domain exports no $f"
   grep -qE "describe\(\"$f" "packages/domain/$DT" 2>/dev/null || bad 3 "packages/domain/$DT has no describe(\"${f}…\")"
 done
@@ -78,14 +80,15 @@ run_vitest 3 packages/domain "$DT"
 run_vitest 3 packages/domain "$DT" -t "impact"
 run_vitest 3 web "$WT" -t "search"
 run_vitest 3 web "$WT" -t "quick filter"
+grep -qw 'sortHighlights' "$ROOM" 2>/dev/null || bad 3 "$ROOM does not sort with sortHighlights"
+run_vitest 3 web "$WT" -t "sort"
 
 # --- Check 4: no Filter button; empty state -----------------------------------------------------
-hits="$(grep -rnE '>\s*Filters?\s*<|"Filters?"' web/src/components/videos web/src/pages/GamePage.tsx 2>/dev/null | grep -v '\.test\.' | tr '\n' ' ')"
-[ -z "$hits" ] || bad 4 "a Filter button: $hits"
 grep -qF 'No videos yet.' "$ROOM" 2>/dev/null || bad 4 "$ROOM has no \"No videos yet.\""
 grep -qw 'ViewState' "$ROOM" 2>/dev/null || bad 4 "$ROOM does not use ViewState"
 run_vitest 4 web "$WT" -t "empty"
-run_vitest 4 web "$WT" -t "no Filter"
+run_vitest 4 web "$WT" -t "filters overflow"
+run_vitest 4 web src/components/videos/fit-filters.test.ts
 
 # --- Check 5: a card plays through onPlay -------------------------------------------------------
 grep -qw 'onPlay' "$CARD" 2>/dev/null || bad 5 "$CARD has no onPlay"

@@ -49,6 +49,33 @@ export function filterHighlights(highlights: readonly MediaHighlight[], filter: 
 	});
 }
 
+/** The Videos room's sort choices: impact (the server's order, the default), then by publish time. */
+export type HighlightSort = "impact" | "newest" | "oldest";
+
+/**
+ * The clips in `sort` order (owner, 2026-10-30: "Add a sort option to the left of the
+ * grid/list option"). `impact` keeps the order given — the list arrives ranked by
+ * `rankHighlightsByImpact` — and `newest` / `oldest` order by `date`, ties and undated
+ * clips keeping their impact order (undated last).
+ */
+export function sortHighlights(highlights: readonly MediaHighlight[], sort: HighlightSort): MediaHighlight[]
+{
+	if (sort === "impact") return [...highlights];
+	const sign = sort === "newest" ? -1 : 1;
+	const time = (highlight: MediaHighlight) => (highlight.date ? Date.parse(highlight.date) : Number.NaN);
+	return highlights.map((highlight, index) => ({
+		highlight,
+		index,
+	})).sort((a, b) =>
+	{
+		const ta = time(a.highlight);
+		const tb = time(b.highlight);
+		if (Number.isNaN(ta) !== Number.isNaN(tb)) return Number.isNaN(ta) ? 1 : -1;
+		if (Number.isNaN(ta) || ta === tb) return a.index - b.index;
+		return sign * (ta - tb);
+	}).map(({ highlight }) => highlight);
+}
+
 /**
  * MLB's `HH:MM:SS` duration as the video badge prints it (game-shell frames): `0:29`,
  * `3:06`, `12:12`, and `1:02:05` past an hour. `null` for anything not a duration.

@@ -5,6 +5,11 @@
  * recorded videos the dev API serves impact-ranked. The search row is A1's (no Filter
  * button), so `game-videos-no-filter-mobile` is matched by the grid-mobile capture.
  *
+ * Owner-directed changes from the frames (2026-10-30): cards top-aligned; a sort pill
+ * (Impact / Newest / Oldest) left of the Grid / List control, which shows icons; the
+ * quick filters are rounded rectangles of one height and show as many as fit, then a
+ * Filters button opening a bottom drawer — on mobile, Stat / viz then Filters.
+ *
  * Expected differences, not judged (owner, 2026-10-28: "Judge only the story's own
  * parts"): the frames' sample game (NYY @ BOS, five clips) versus the fixture's 40, so
  * stills, titles, durations, dates and order differ; the meta line names each video's
@@ -23,9 +28,8 @@ async function videos(page: Page, list: boolean): Promise<void>
 	await page.getByTestId("videos-grid").waitFor();
 	if (list)
 	{
-		await page.getByText("List", {
-			exact: true,
-		}).click();
+		// The segmented control's radio is hidden under its icon label; click the label.
+		await page.locator("label[for$='-list']").click();
 		await page.getByTestId("videos-list").waitFor();
 	}
 	// Stills load from MLB's image CDN; wait for those on screen so the capture shows them.
@@ -66,3 +70,22 @@ for (const { frame, list } of FRAMES)
 		await capture(page, testInfo, frame);
 	});
 }
+
+// The filter drawer (owner, 2026-10-30) has no ratified frame; captured so the owner can judge it.
+test("game-videos-filters-drawer-mobile", async ({ page }, testInfo) =>
+{
+	test.skip(testInfo.project.name !== "mobile", "drawn at mobile only");
+	await videos(page, false);
+	await page.getByRole("button", {
+		name: "Filters",
+	}).click();
+	await page.getByRole("button", {
+		name: "Apply",
+	}).waitFor();
+	await page.waitForTimeout(400);
+	// A full-page shot of a fixed drawer over a long page lands it mid-page; keep the shot to one phone screen.
+	await page.addStyleTag({
+		content: "html, body, #root { height: 844px !important; overflow: hidden !important; }",
+	});
+	await capture(page, testInfo, "game-videos-filters-drawer-mobile");
+});

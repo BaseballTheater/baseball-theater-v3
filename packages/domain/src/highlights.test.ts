@@ -4,7 +4,7 @@ import {
 	describe, expect, it,
 } from "vitest";
 import {
-	classifyHighlight, clipDuration, filterHighlights,
+	classifyHighlight, clipDuration, filterHighlights, sortHighlights,
 } from "./highlights.js";
 import { rankHighlightsByImpact } from "./impact.js";
 import type { MediaHighlight } from "./types.js";
@@ -93,6 +93,28 @@ describe("filterHighlights (S69)", () =>
 		const positions = filtered.map((h) => VIDEOS.indexOf(h));
 		expect(positions).toEqual([...positions].sort((a, b) => a - b));
 		expect(filtered[0]).toBe(VIDEOS.find((h) => h.teamIds?.includes(146)));
+	});
+});
+
+describe("sortHighlights (S69)", () =>
+{
+	const clip = (id: string, date?: string) => ({
+		id,
+		title: id,
+		date,
+	}) as never;
+	const clips = [clip("a", "2026-09-05T22:00:00Z"), clip("b"), clip("c", "2026-09-05T23:00:00Z"), clip("d", "2026-09-05T22:00:00Z")];
+	const ids = (list: { id: string }[]) => list.map((h) => h.id);
+
+	it("impact keeps the given (impact-ranked) order", () =>
+	{
+		expect(ids(sortHighlights(clips, "impact"))).toEqual(["a", "b", "c", "d"]);
+	});
+
+	it("newest / oldest order by date; ties keep impact order; undated clips go last", () =>
+	{
+		expect(ids(sortHighlights(clips, "newest"))).toEqual(["c", "a", "d", "b"]);
+		expect(ids(sortHighlights(clips, "oldest"))).toEqual(["a", "d", "c", "b"]);
 	});
 });
 

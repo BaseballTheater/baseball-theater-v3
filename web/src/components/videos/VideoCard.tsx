@@ -108,6 +108,8 @@ export function VideoCard({
 				display: "block",
 				width: "100%",
 				color: "inherit",
+				// A button centers its content; pin it to the top so a one-line title's still lines up with its row.
+				alignSelf: "start",
 			}}
 		>
 			{layout === "grid" ? (

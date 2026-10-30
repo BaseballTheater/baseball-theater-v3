@@ -5,7 +5,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { rankHighlightsByImpact } from "@bt/domain";
+import { rankHighlightsByImpact, sortHighlights } from "@bt/domain";
 import { MantineProvider } from "@mantine/core";
 import {
 	cleanup, render, screen, within,
@@ -79,12 +79,16 @@ describe("VideosRoom layout (S69)", () =>
 	{
 		const user = userEvent.setup();
 		renderRoom();
-		await user.click(screen.getByText("List"));
+		await user.click(screen.getByRole("radio", {
+			name: "List",
+		}));
 		expect(screen.queryByTestId("videos-grid")).toBeNull();
 		const rows = within(screen.getByTestId("videos-list")).getAllByTestId("video-card");
 		expect(rows).toHaveLength(40);
 		expect(rows.every((r) => r.dataset.layout === "list")).toBe(true);
-		await user.click(screen.getByText("Grid"));
+		await user.click(screen.getByRole("radio", {
+			name: "Grid",
+		}));
 		expect(screen.getByTestId("videos-grid")).toBeInTheDocument();
 	});
 });
@@ -125,13 +129,13 @@ describe("VideosRoom search and quick filters (S69)", () =>
 		}));
 		const marlins = game().highlights.filter((h) => h.teamIds?.includes(146)).map((h) => h.title);
 		expect(cardTitles()).toEqual(marlins);
-		await user.click(screen.getByRole("checkbox", {
+		await user.click(screen.getByRole("button", {
 			name: "Stat / viz",
 		}));
 		expect(cardTitles()).toContain("Breaking down Kyle Stowers' home run");
 		expect(cardTitles()).not.toContain("Kyle Stowers' solo home run (19)");
 		expect(cardTitles().every((t) => marlins.includes(t))).toBe(true);
-		await user.click(screen.getByRole("checkbox", {
+		await user.click(screen.getByRole("button", {
 			name: "Stat / viz",
 		}));
 		await user.click(screen.getByRole("button", {
@@ -153,13 +157,86 @@ describe("VideosRoom states and play (S69)", () =>
 		expect(screen.queryByRole("textbox")).toBeNull();
 	});
 
-	it("no Filter button renders (A1)", () =>
+	it("filters overflow: when every pill fits there is no Filters button", () =>
 	{
 		renderRoom();
-		expect(screen.queryByRole("button", {
-			name: /^Filters?$/,
+		expect(within(screen.getByTestId("filter-row")).queryByRole("button", {
+			name: "Filters",
 		})).toBeNull();
-		expect(screen.queryByText(/^Filters?$/)).toBeNull();
+		expect(within(screen.getByTestId("filter-row")).getAllByRole("button")).toHaveLength(2);
+	});
+
+	it("filters overflow: pills that don't fit move behind a last Filters button whose drawer lists every filter, applied with Apply", async () =>
+	{
+		// jsdom lays nothing out: each pill 100px, the Filters button 60px, and the row room for one pill plus the button.
+		const widths = vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockImplementation(function (this: HTMLElement)
+		{
+			return this.textContent === "Filters" ? 60 : 100;
+		});
+		const room = vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(180);
+		const user = userEvent.setup();
+		renderRoom();
+		const row = within(screen.getByTestId("filter-row"));
+		expect(row.getAllByRole("button").map((b) => b.textContent)).toEqual(["Featured team", "Filters"]);
+		await user.click(row.getByRole("button", {
+			name: "Filters",
+		}));
+		const drawer = within(await screen.findByRole("dialog", {
+			name: "Filters",
+		}));
+		expect(drawer.getByTestId("filter-drawer-list")).toBeInTheDocument();
+		await user.click(drawer.getByRole("radio", {
+			name: "MIA",
+		}));
+		await user.click(drawer.getByRole("checkbox", {
+			name: "Stat / viz",
+		}));
+		expect(cardTitles()).toHaveLength(game().highlights.length);
+		await user.click(drawer.getByRole("button", {
+			name: "Apply",
+		}));
+		const marlinsViz = cardTitles();
+		expect(marlinsViz).toContain("Breaking down Kyle Stowers' home run");
+		expect(marlinsViz).not.toContain("Kyle Stowers' solo home run (19)");
+		expect(marlinsViz.length).toBeLessThan(game().highlights.length);
+		// Dismissing the drawer discards its edits.
+		await user.click(row.getByRole("button", {
+			name: "Filters",
+		}));
+		const again = within(await screen.findByRole("dialog", {
+			name: "Filters",
+		}));
+		await user.click(again.getByRole("radio", {
+			name: "All teams",
+		}));
+		await user.keyboard("{Escape}");
+		expect(cardTitles()).toEqual(marlinsViz);
+		widths.mockRestore();
+		room.mockRestore();
+	});
+
+	it("sort: Impact by default; Newest and Oldest reorder through sortHighlights", async () =>
+	{
+		const user = userEvent.setup();
+		renderRoom();
+		const impact = cardTitles();
+		expect(impact).toEqual(game().highlights.map((h) => h.title));
+		await user.click(screen.getByRole("button", {
+			name: "Sort: Impact",
+		}));
+		await user.click(await screen.findByRole("menuitem", {
+			name: "Newest",
+		}));
+		const newest = sortHighlights(game().highlights, "newest").map((h) => h.title);
+		expect(cardTitles()).toEqual(newest);
+		expect(newest).not.toEqual(impact);
+		await user.click(screen.getByRole("button", {
+			name: "Sort: Newest",
+		}));
+		await user.click(await screen.findByRole("menuitem", {
+			name: "Oldest",
+		}));
+		expect(cardTitles()).toEqual(sortHighlights(game().highlights, "oldest").map((h) => h.title));
 	});
 
 	it("onPlay: choosing a card calls onPlay with that video", async () =>
