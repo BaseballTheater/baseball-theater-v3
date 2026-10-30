@@ -4,7 +4,7 @@ import {
 	describe, expect, it,
 } from "vitest";
 import {
-	classifyHighlight, clipDuration, featuredTeamId, filterHighlights,
+	classifyHighlight, clipDuration, filterHighlights,
 } from "./highlights.js";
 import { rankHighlightsByImpact } from "./impact.js";
 import type { MediaHighlight } from "./types.js";
@@ -93,17 +93,6 @@ describe("filterHighlights (S69)", () =>
 		const positions = filtered.map((h) => VIDEOS.indexOf(h));
 		expect(positions).toEqual([...positions].sort((a, b) => a - b));
 		expect(filtered[0]).toBe(VIDEOS.find((h) => h.teamIds?.includes(146)));
-	});
-});
-
-describe("featuredTeamId (S69)", () =>
-{
-	it("the reader's first favorite playing in the game, else the home team", () =>
-	{
-		expect(featuredTeamId([147, 112], 112, 146)).toBe(112);
-		expect(featuredTeamId([146, 112], 112, 146)).toBe(146);
-		expect(featuredTeamId([147], 112, 146)).toBe(146);
-		expect(featuredTeamId([], 112, 146)).toBe(146);
 	});
 });
 

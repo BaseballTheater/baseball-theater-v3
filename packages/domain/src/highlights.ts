@@ -50,15 +50,6 @@ export function filterHighlights(highlights: readonly MediaHighlight[], filter: 
 }
 
 /**
- * The team the Featured team chip narrows to: the reader's first favorite playing in
- * this game, else the home team (agent's reading of the single drawn chip; see S69).
- */
-export function featuredTeamId(favoriteTeamIds: readonly number[], awayId: number, homeId: number): number
-{
-	return favoriteTeamIds.find((id) => id === awayId || id === homeId) ?? homeId;
-}
-
-/**
  * MLB's `HH:MM:SS` duration as the video badge prints it (game-shell frames): `0:29`,
  * `3:06`, `12:12`, and `1:02:05` past an hour. `null` for anything not a duration.
  */

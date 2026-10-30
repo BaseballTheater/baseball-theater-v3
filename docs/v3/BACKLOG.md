@@ -4159,6 +4159,8 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 
 **Scope files:** `fixtures/`, `packages/domain/`, `functions/src/`, `functions/vitest.config.ts`, `openapi/`, `web/src/`, `web/vitest.config.ts`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`, `e2e/design/`, `docs/v3/design-checks/`
 
+**Answered (owner, 2026-10-30): the Featured team chip.** *"One of the game's two teams and the default filter value should be none."* The chip opens a menu of the game's two teams plus "All teams"; nothing is chosen until the reader picks, and a clip counts for a team when MLB tags it with that team. This replaces the agent's first reading (the reader's favorite, else the home team). No AC changes: AC 3's "quick filters use `classifyHighlight`" still holds.
+
 **Work**
 
 0. Write `scripts/verify-S69.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** writing any product code (rule 9).

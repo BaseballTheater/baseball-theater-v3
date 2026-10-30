@@ -110,12 +110,18 @@ describe("VideosRoom search and quick filters (S69)", () =>
 		expect(screen.getByText("No videos match.")).toBeInTheDocument();
 	});
 
-	it("quick filter: Featured team keeps the home team's clips (signed out), Stat / viz the viz clips, together both", async () =>
+	it("quick filter: Featured team starts on none, narrows to the team picked from the game's two, and clears with All teams; Stat / viz the viz clips, together both", async () =>
 	{
 		const user = userEvent.setup();
 		renderRoom();
-		await user.click(screen.getByRole("checkbox", {
+		const all = game().highlights.map((h) => h.title);
+		expect(cardTitles()).toEqual(all);
+		await user.click(screen.getByRole("button", {
 			name: "Featured team",
+		}));
+		expect((await screen.findAllByRole("menuitem")).map((item) => item.textContent)).toEqual(["All teams", "CHC", "MIA"]);
+		await user.click(screen.getByRole("menuitem", {
+			name: "MIA",
 		}));
 		const marlins = game().highlights.filter((h) => h.teamIds?.includes(146)).map((h) => h.title);
 		expect(cardTitles()).toEqual(marlins);
@@ -125,6 +131,16 @@ describe("VideosRoom search and quick filters (S69)", () =>
 		expect(cardTitles()).toContain("Breaking down Kyle Stowers' home run");
 		expect(cardTitles()).not.toContain("Kyle Stowers' solo home run (19)");
 		expect(cardTitles().every((t) => marlins.includes(t))).toBe(true);
+		await user.click(screen.getByRole("checkbox", {
+			name: "Stat / viz",
+		}));
+		await user.click(screen.getByRole("button", {
+			name: "Featured team: MIA",
+		}));
+		await user.click(await screen.findByRole("menuitem", {
+			name: "All teams",
+		}));
+		expect(cardTitles()).toEqual(all);
 	});
 });
 

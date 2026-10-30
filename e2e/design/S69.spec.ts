@@ -9,7 +9,8 @@
  * parts"): the frames' sample game (NYY @ BOS, five clips) versus the fixture's 40, so
  * stills, titles, durations, dates and order differ; the meta line names each video's
  * kind (Highlight / Recap / Condensed game / Video) and its date in the reader's zone;
- * the desktop grid sits in the 1200px app's narrower canvas beside the rail; the top
+ * the Featured team chip carries a chevron because it opens a picker of the game's two
+ * teams (owner, 2026-10-30); the desktop grid sits in the 1200px app's narrower canvas beside the rail; the top
  * bar and tabs are S40's and S60's; the footer's "Fetched … ago" is the real time.
  */
 import { test } from "@playwright/test";
