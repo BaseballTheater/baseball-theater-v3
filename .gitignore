@@ -41,3 +41,6 @@ docs/v3/backlog/.obsidian/
 # Playwright output (S81); design captures live in docs/v3/design-checks/
 e2e/test-results/
 e2e/playwright-report/
+
+# Design-match pairs laid out for the owner (pnpm design:review); delete a story's folder after the verdict
+.designreview/
