@@ -3,7 +3,7 @@ import {
 } from "@mantine/core";
 import { IconChevronLeft } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
-import { formatOfficialDate } from "./format.js";
+import { formatDate } from "../../format/datetime.js";
 import { LiveIndicator } from "./LiveIndicator.js";
 
 interface GameTopBarProps
@@ -34,7 +34,7 @@ export function GameTopBar({
 				</Text>
 				{live ? <LiveIndicator /> : null}
 			</Group>
-			<Text size="sm">{formatOfficialDate(officialDate)}</Text>
+			<Text size="sm">{formatDate(officialDate)}</Text>
 		</Group>
 	);
 }

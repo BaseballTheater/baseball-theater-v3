@@ -1,30 +1,41 @@
 import {
-	Badge,
-	Card,
-	Group,
-	SimpleGrid,
-	Stack,
-	Text,
-	Title,
+	SimpleGrid, Stack, Text,
 } from "@mantine/core";
-import { Link, useParams } from "react-router-dom";
-import type { ScheduleGameSummary } from "@bt/domain";
-import { gamePhase } from "@bt/domain";
+import { useParams } from "react-router-dom";
 import { useScheduleDay } from "../api/schedule.js";
+import type { ScheduleDayPayload } from "../api/schedule.js";
 import { ViewState } from "../components/ViewState.js";
+import { DateControl } from "../components/scoreboard/DateControl.js";
+import { ScoreboardModule } from "../components/scoreboard/ScoreboardModule.js";
+import { formatDate } from "../format/datetime.js";
 import { FooterMeta } from "../layout/FooterMeta.js";
 import type { LayoutVariant } from "../layout/variant.js";
 
-function scoreLine(game: ScheduleGameSummary): string
+/** The day's games under their `GAMES — SEP 21, 2026` label, or the empty sentence. */
+function Games({ day, variant }: { day: ScheduleDayPayload;
+	variant: LayoutVariant; })
 {
-	const away = game.linescore?.teams.away.runs ?? "-";
-	const home = game.linescore?.teams.home.runs ?? "-";
-	return `${away} – ${home}`;
+	if (day.games.length === 0)
+	{
+		return <ViewState kind="empty" message="No games scheduled for this date." />;
+	}
+	return (
+		<Stack gap="sm">
+			<Text size="xs" fw={700} tt="uppercase">
+				Games — {formatDate(day.date)}
+			</Text>
+			<SimpleGrid cols={variant === "mobile" ? 1 : 2} spacing="md" verticalSpacing="md" data-testid="scoreboard-grid">
+				{day.games.map((game) => <ScoreboardModule key={game.gamePk} game={game} />)}
+			</SimpleGrid>
+		</Stack>
+	);
 }
 
 /**
- * The day's games (pre-design cards until S65–S68 build the ratified modules):
- * one column on mobile, two on medium and desktop, from the host's `variant`.
+ * The scoreboard (S31 frames; S66): the date control, then the day's games as
+ * `ScoreboardModule`s — one column on mobile, two on medium and desktop, from the
+ * host's `variant` — or the loading, empty or error state from `ViewState`. The
+ * date control stays through every state so the reader can always move to another day.
  */
 export function ScoreboardPage({ variant }: { variant: LayoutVariant })
 {
@@ -33,64 +44,29 @@ export function ScoreboardPage({ variant }: { variant: LayoutVariant })
 		data: day, error, refetch,
 	} = useScheduleDay(date);
 
+	let body;
 	if (error)
 	{
-		return <ViewState kind="error" title="Couldn't load games" onRetry={() => void refetch()} />;
+		body = <ViewState kind="error" title="Couldn't load games" onRetry={() => void refetch()} />;
 	}
-
-	if (!day)
+	else if (!day)
 	{
-		return <ViewState kind="loading" title="Scoreboard" />;
+		body = <ViewState kind="loading" title={`${formatDate(date)} Scoreboard`} />;
+	}
+	else
+	{
+		body = (
+			<>
+				<Games day={day} variant={variant} />
+				<FooterMeta fetchedAt={day.fetchedAt} />
+			</>
+		);
 	}
 
 	return (
-		<Stack gap="lg">
-			<div>
-				<Title order={2}>Scoreboard</Title>
-				<Text c="dimmed">
-					{day.date} · {day.windowMode}
-				</Text>
-			</div>
-
-			<SimpleGrid cols={variant === "mobile" ? 1 : 2} spacing="md">
-				{day.games.map((game) => (
-					<Card
-						key={game.gamePk}
-						component={Link}
-						to={`/game/${game.gamePk}`}
-						padding="lg"
-						radius="md"
-						withBorder
-						style={{
-							background: "rgba(255,255,255,0.04)",
-							borderColor: "rgba(232,226,214,0.12)",
-							transition: "transform 160ms ease, border-color 160ms ease",
-						}}
-					>
-						<Group justify="space-between" mb="xs">
-							<Badge
-								variant="light"
-								color={gamePhase(game.status.codedGameState) === "live" ? "green" : "gray"}
-							>
-								{game.status.detailedState}
-							</Badge>
-							<Text size="sm" c="dimmed">
-								{game.venue?.name}
-							</Text>
-						</Group>
-						<Title order={4}>
-							{game.teams.away.abbreviation} @ {game.teams.home.abbreviation}
-						</Title>
-						<Text size="xl" fw={700} mt="xs">
-							{scoreLine(game)}
-						</Text>
-						<Text size="sm" c="dimmed" mt="sm">
-							{game.teams.away.name} at {game.teams.home.name}
-						</Text>
-					</Card>
-				))}
-			</SimpleGrid>
-			<FooterMeta fetchedAt={day.fetchedAt} />
+		<Stack gap="md">
+			<DateControl date={date} />
+			{body}
 		</Stack>
 	);
 }

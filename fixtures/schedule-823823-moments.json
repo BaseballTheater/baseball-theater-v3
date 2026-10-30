@@ -1,0 +1,205 @@
+{
+  "pregame": {
+    "gamePk": 823823,
+    "gameDate": "2026-09-05",
+    "officialDate": "2026-09-05",
+    "startTime": "2026-09-05T20:10:00Z",
+    "status": {
+      "abstractGameState": "Preview",
+      "codedGameState": "P",
+      "detailedState": "Pre-Game"
+    },
+    "teams": {
+      "home": {
+        "id": 146,
+        "abbreviation": "MIA",
+        "name": "Miami Marlins",
+        "teamName": "Marlins",
+        "record": {
+          "wins": 71,
+          "losses": 72
+        }
+      },
+      "away": {
+        "id": 112,
+        "abbreviation": "CHC",
+        "name": "Chicago Cubs",
+        "teamName": "Cubs",
+        "record": {
+          "wins": 81,
+          "losses": 62
+        }
+      }
+    },
+    "venue": {
+      "id": 4169,
+      "name": "loanDepot park"
+    },
+    "linescore": {
+      "currentInning": 1,
+      "inningState": "Top",
+      "isTopInning": true,
+      "outs": 0,
+      "balls": 0,
+      "strikes": 0,
+      "teams": {
+        "home": {
+          "runs": 0,
+          "hits": 0,
+          "errors": 0
+        },
+        "away": {
+          "runs": 0,
+          "hits": 0,
+          "errors": 0
+        }
+      },
+      "scheduledInnings": 9,
+      "innings": [
+        {
+          "num": 1,
+          "away": {
+            "runs": null
+          },
+          "home": {
+            "runs": null
+          }
+        }
+      ]
+    },
+    "probablePitchers": {
+      "away": {
+        "id": 665871,
+        "fullName": "Javier Assad",
+        "wins": 6,
+        "losses": 1,
+        "era": "3.46"
+      },
+      "home": {
+        "id": 687473,
+        "fullName": "Ryan Gusto",
+        "wins": 1,
+        "losses": 3,
+        "era": "3.86"
+      }
+    },
+    "decisions": null,
+    "live": null
+  },
+  "live": {
+    "gamePk": 823823,
+    "gameDate": "2026-09-05",
+    "officialDate": "2026-09-05",
+    "startTime": "2026-09-05T20:10:00Z",
+    "status": {
+      "abstractGameState": "Live",
+      "codedGameState": "I",
+      "detailedState": "In Progress"
+    },
+    "teams": {
+      "home": {
+        "id": 146,
+        "abbreviation": "MIA",
+        "name": "Miami Marlins",
+        "teamName": "Marlins",
+        "record": {
+          "wins": 71,
+          "losses": 72
+        }
+      },
+      "away": {
+        "id": 112,
+        "abbreviation": "CHC",
+        "name": "Chicago Cubs",
+        "teamName": "Cubs",
+        "record": {
+          "wins": 81,
+          "losses": 62
+        }
+      }
+    },
+    "venue": {
+      "id": 4169,
+      "name": "loanDepot park"
+    },
+    "linescore": {
+      "currentInning": 3,
+      "inningState": "Top",
+      "isTopInning": true,
+      "outs": 2,
+      "balls": 2,
+      "strikes": 2,
+      "teams": {
+        "home": {
+          "runs": 0,
+          "hits": 0,
+          "errors": 0
+        },
+        "away": {
+          "runs": 1,
+          "hits": 5,
+          "errors": 0
+        }
+      },
+      "scheduledInnings": 9,
+      "innings": [
+        {
+          "num": 1,
+          "away": {
+            "runs": 0
+          },
+          "home": {
+            "runs": 0
+          }
+        },
+        {
+          "num": 2,
+          "away": {
+            "runs": 0
+          },
+          "home": {
+            "runs": 0
+          }
+        },
+        {
+          "num": 3,
+          "away": {
+            "runs": 1
+          },
+          "home": {
+            "runs": null
+          }
+        }
+      ]
+    },
+    "probablePitchers": {
+      "away": {
+        "id": 665871,
+        "fullName": "Javier Assad",
+        "wins": 6,
+        "losses": 1,
+        "era": "3.38"
+      },
+      "home": {
+        "id": 687473,
+        "fullName": "Ryan Gusto",
+        "wins": 1,
+        "losses": 3,
+        "era": "3.84"
+      }
+    },
+    "decisions": null,
+    "live": {
+      "runners": {
+        "first": 608324,
+        "second": 673548,
+        "third": 665804
+      },
+      "batterId": 608324,
+      "pitcherId": 687473,
+      "balls": 2,
+      "strikes": 2,
+      "outs": 2
+    }
+  }
+}

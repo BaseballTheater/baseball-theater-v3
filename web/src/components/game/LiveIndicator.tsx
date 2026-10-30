@@ -5,11 +5,12 @@ import { useReducedMotion } from "@mantine/hooks";
 
 /**
  * The live marker (S32 `game-topbar`; S31 live row): an Accent 2 dot that
- * blinks, and the LIVE label. One component for every live marker (S60).
+ * blinks, and a label — `LIVE` in the game top bar, the inning on the scoreboard's
+ * live row (`BOT 7`, S66), always in capitals. One component for every live marker (S60).
  * Under `prefers-reduced-motion` the dot holds still (VISUAL-DESIGN §7) — an
  * accessibility preference, not a viewport read.
  */
-export function LiveIndicator()
+export function LiveIndicator({ label = "LIVE" }: { label?: string })
 {
 	const reduceMotion = useReducedMotion();
 	return (
@@ -25,8 +26,8 @@ export function LiveIndicator()
 				}}
 				aria-hidden
 			/>
-			<Text size="xs" fw={700} c="accent2">
-				LIVE
+			<Text size="xs" fw={700} c="accent2" tt="uppercase">
+				{label}
 			</Text>
 		</Group>
 	);

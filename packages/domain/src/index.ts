@@ -23,4 +23,6 @@ export * from "./linescore.js";
 export * from "./inning.js";
 export * from "./live.js";
 export * from "./game-time.js";
+export * from "./team-record.js";
+export * from "./calendar-date.js";
 export * from "./settings.js";

@@ -18,7 +18,7 @@ import { HttpMlbStatsClient } from "../adapters/http/mlb.js";
 import { fixtureGet } from "../handlers/fixture-request.js";
 import { mapLiveFeedSummary } from "../mappers/live.js";
 import {
-	LIVE_FIXTURE_TIMECODE, PREGAME_TIMECODE, recordedFeedAt, recordedFetch,
+	LIVE_FIXTURE_TIMECODE, PREGAME_TIMECODE, recordedFeedAt, recordedFetch, scheduleMomentsAt,
 } from "./live-fixture.js";
 import { recordNormalized } from "./recorder.js";
 
@@ -93,6 +93,12 @@ describe("the 2026-09-05 scoreboard data (S65)", REPLAY_TIMEOUT, () =>
 		});
 		expect(summary.probablePitchers?.away?.fullName).toBe("Javier Assad");
 		expect(summary.probablePitchers?.home?.fullName).toBe("Ryan Gusto");
+	});
+
+	it("moments: regenerates fixtures/schedule-823823-moments.json — the pre-game and in-progress folds above, equal to the committed file (S66)", () =>
+	{
+		const regenerated = `${JSON.stringify(scheduleMomentsAt(RAW), null, 2)}\n`;
+		expect(regenerated).toBe(readFileSync(path.join(FIXTURES, "schedule-823823-moments.json"), "utf8"));
 	});
 
 	it("GET /api/v1/schedule?date=2026-09-05 returns the start time, records, probables, decisions and live moment", async () =>

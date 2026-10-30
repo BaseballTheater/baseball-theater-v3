@@ -5,7 +5,8 @@
  * moment — top of the 3rd, two out, bases loaded, Alex Bregman 2–2 against Ryan Gusto,
  * five pitches into the at-bat. Offline: the same `reconstructReplay` the replay
  * service uses, then the same `mapLiveFeed` live data goes through. The pre-game
- * moment and the recordings-backed `fetch` serve S65's scoreboard summaries too.
+ * moment and the recordings-backed `fetch` serve S65's scoreboard summaries too, and
+ * both moments are committed as the scoreboard's scheduled and live rows (S66).
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -13,8 +14,10 @@ import {
 	parseLiveFeedResponse, parseRecordedReplayWalk, reconstructReplay,
 } from "@bt/mlb-api";
 import type { LiveFeedResponse } from "@bt/mlb-api";
-import type { GameSnapshot, Unversioned } from "@bt/domain";
-import { mapLiveFeed } from "../mappers/live.js";
+import type {
+	GameSnapshot, ScheduleGameSummary, Unversioned,
+} from "@bt/domain";
+import { mapLiveFeed, mapLiveFeedSummary } from "../mappers/live.js";
 import { rawEndpoints } from "./recorder.js";
 import type { RecorderTarget } from "./recorder.js";
 
@@ -50,6 +53,21 @@ export function liveFixtureAt(rawDir: string, timecode = LIVE_FIXTURE_TIMECODE):
 		fetchedAt: _fetchedAt, windowMode: _windowMode, ...game
 	} = mapLiveFeed(recordedFeedAt(rawDir, timecode), "");
 	return game;
+}
+
+/**
+ * 823823 on the scoreboard at its two unfinished moments, as
+ * `fixtures/schedule-823823-moments.json` holds them (S66): before first pitch
+ * (`PREGAME_TIMECODE`) and in progress (`LIVE_FIXTURE_TIMECODE`). The committed
+ * schedules are all finished games; these give the scoreboard its scheduled and live rows.
+ */
+export function scheduleMomentsAt(rawDir: string): { pregame: ScheduleGameSummary;
+	live: ScheduleGameSummary; }
+{
+	return {
+		pregame: mapLiveFeedSummary(recordedFeedAt(rawDir, PREGAME_TIMECODE)),
+		live: mapLiveFeedSummary(recordedFeedAt(rawDir, LIVE_FIXTURE_TIMECODE)),
+	};
 }
 
 /**
