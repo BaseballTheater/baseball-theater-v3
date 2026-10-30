@@ -37,6 +37,47 @@ describe("mapContentHighlights", () =>
 			expect(highlight.playbackUrl).toBeTruthy();
 		}
 	});
+
+	it("keywords: kind, date, team ids and tags come from MLB's keywords (S69)", () =>
+	{
+		const recap = highlights.find((h) => h.title === "Conforto clubs Cubs' 200th homer in close win")!;
+		expect(recap).toMatchObject({
+			kind: "recap",
+			date: "2026-09-06T00:21:36.579Z",
+			teamIds: [146, 112],
+		});
+		expect(recap.tags).toContain("game-recap");
+		expect(highlights.find((h) => h.title.startsWith("Condensed Game"))?.kind).toBe("condensed");
+		const homer = highlights.find((h) => h.title === "Michael Conforto hits Cubs' 200th home run (14)")!;
+		expect(homer.kind).toBe("highlight");
+		expect(homer.teamIds).toEqual([112]);
+		const viz = highlights.find((h) => h.title === "Breaking down Kyle Stowers' home run")!;
+		expect(viz.kind).toBe("video");
+		expect(viz.tags).toContain("data-visualization");
+		// Bench reports carry no team_id keyword: no teams, not a guess.
+		expect(highlights.find((h) => h.title.startsWith("Bench availability for Miami"))?.teamIds).toEqual([]);
+	});
+
+	it("keywords: an item with none is a plain video with no teams or tags", () =>
+	{
+		const [bare] = mapContentHighlights({
+			highlights: {
+				highlights: {
+					items: [{
+						title: "t",
+						blurb: "",
+						playbacks: [],
+					}],
+				},
+			},
+		} as never);
+		expect(bare).toMatchObject({
+			kind: "video",
+			date: null,
+			teamIds: [],
+			tags: [],
+		});
+	});
 });
 
 describe("pickPlaybackUrl", () =>

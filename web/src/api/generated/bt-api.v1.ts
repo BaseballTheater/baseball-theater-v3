@@ -287,6 +287,11 @@ export interface components {
         GameSnapshotResponse: components["schemas"]["GameSnapshot"];
         /** @enum {string} */
         GameStatusCode: "S" | "P" | "I" | "F" | "O" | "C" | "D" | "U";
+        /**
+         * @description What a video is, from MLB's content keywords (S69): a play `highlight`, the game `recap`, the `condensed` game, or another `video` (interviews, lineups, analysis).
+         * @enum {string}
+         */
+        HighlightKind: "highlight" | "recap" | "condensed" | "video";
         HitData: {
             coordinates: {
                 coordX: number;
@@ -366,11 +371,19 @@ export interface components {
         };
         MediaHighlight: {
             blurb: string | null;
+            /** @description S69: when MLB published it (ISO instant); absent on older recordings. */
+            date?: string | null;
             duration: string | null;
             id: string;
             imageUrl: string | null;
+            /** @description S69: what the video is; absent on older recordings. */
+            kind?: components["schemas"]["HighlightKind"];
             playId: string | null;
             playbackUrl: string | null;
+            /** @description S69: MLB's taxonomy tags (`data-visualization`, `home-run`, …); absent on older recordings. */
+            tags?: string[];
+            /** @description S69: the MLB team ids it features (`team_id` keywords); absent on older recordings. */
+            teamIds?: number[];
             title: string;
         };
         /** @enum {string} */

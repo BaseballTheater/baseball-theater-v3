@@ -104,6 +104,12 @@ export type GameBoxscore = {
 	info: BoxscoreInfoLine[];
 };
 
+/**
+ * What a video is, from MLB's content keywords (S69): a play `highlight`, the game
+ * `recap`, the `condensed` game, or another `video` (interviews, lineups, analysis).
+ */
+export type HighlightKind = "highlight" | "recap" | "condensed" | "video";
+
 export type MediaHighlight = {
 	id: string;
 	playId: string | null;
@@ -112,6 +118,14 @@ export type MediaHighlight = {
 	duration: string | null;
 	imageUrl: string | null;
 	playbackUrl: string | null;
+	/** S69: what the video is; absent on older recordings. */
+	kind?: HighlightKind;
+	/** S69: when MLB published it (ISO instant); absent on older recordings. */
+	date?: string | null;
+	/** S69: the MLB team ids it features (`team_id` keywords); absent on older recordings. */
+	teamIds?: number[];
+	/** S69: MLB's taxonomy tags (`data-visualization`, `home-run`, …); absent on older recordings. */
+	tags?: string[];
 };
 
 import type { AtBat } from "./plays.js";

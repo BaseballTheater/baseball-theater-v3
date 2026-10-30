@@ -1,6 +1,4 @@
-import {
-	List, Stack, Tabs, Text,
-} from "@mantine/core";
+import { Stack, Tabs } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGame } from "../api/game.js";
 import { BoxRoom } from "../components/game/BoxRoom.js";
@@ -8,6 +6,7 @@ import { GameTopBar } from "../components/game/GameTopBar.js";
 import { LiveRoom } from "../components/game/LiveRoom.js";
 import { RecapRoom } from "../components/game/RecapRoom.js";
 import { PlaysPanel } from "../components/pitch/PlaysPanel.js";
+import { VideosRoom } from "../components/videos/VideosRoom.js";
 import { ViewState } from "../components/ViewState.js";
 import { FooterMeta } from "../layout/FooterMeta.js";
 import type { LayoutVariant } from "../layout/variant.js";
@@ -86,27 +85,8 @@ export function GamePage({ variant }: { variant: LayoutVariant })
 				</Tabs.List>
 
 				<Tabs.Panel value="videos" pt="md">
-					{game.highlights.length === 0 ? (
-						<ViewState kind="empty" message="No videos yet." />
-					) : (
-						<>
-							<Text size="sm" c="dimmed" mb="sm">
-								Impact-sorted (Phase A heuristic)
-							</Text>
-							<List spacing="sm">
-								{game.highlights.map((h) => (
-									<List.Item key={h.id}>
-										<Text fw={600}>{h.title}</Text>
-										{h.blurb ? (
-											<Text size="sm" c="dimmed">
-												{h.blurb}
-											</Text>
-										) : null}
-									</List.Item>
-								))}
-							</List>
-						</>
-					)}
+					{/* The player is S70's; until then choosing a video does nothing. */}
+					<VideosRoom game={game} variant={variant} onPlay={() => undefined} />
 				</Tabs.Panel>
 
 				{rooms.includes("live") ? (

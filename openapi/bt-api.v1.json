@@ -328,6 +328,11 @@
 			},
 			"GameSnapshotResponse": { "$ref": "#/components/schemas/GameSnapshot" },
 			"GameStatusCode": { "enum": ["S", "P", "I", "F", "O", "C", "D", "U"], "type": "string" },
+			"HighlightKind": {
+				"description": "What a video is, from MLB's content keywords (S69): a play `highlight`, the game `recap`, the `condensed` game, or another `video` (interviews, lineups, analysis).",
+				"enum": ["highlight", "recap", "condensed", "video"],
+				"type": "string"
+			},
 			"HitData": {
 				"additionalProperties": false,
 				"properties": {
@@ -479,11 +484,29 @@
 				"additionalProperties": false,
 				"properties": {
 					"blurb": { "type": ["string", "null"] },
+					"date": {
+						"description": "S69: when MLB published it (ISO instant); absent on older recordings.",
+						"type": ["string", "null"]
+					},
 					"duration": { "type": ["string", "null"] },
 					"id": { "type": "string" },
 					"imageUrl": { "type": ["string", "null"] },
+					"kind": {
+						"$ref": "#/components/schemas/HighlightKind",
+						"description": "S69: what the video is; absent on older recordings."
+					},
 					"playId": { "type": ["string", "null"] },
 					"playbackUrl": { "type": ["string", "null"] },
+					"tags": {
+						"description": "S69: MLB's taxonomy tags (`data-visualization`, `home-run`, …); absent on older recordings.",
+						"items": { "type": "string" },
+						"type": "array"
+					},
+					"teamIds": {
+						"description": "S69: the MLB team ids it features (`team_id` keywords); absent on older recordings.",
+						"items": { "type": "number" },
+						"type": "array"
+					},
 					"title": { "type": "string" }
 				},
 				"required": ["id", "playId", "title", "blurb", "duration", "imageUrl", "playbackUrl"],

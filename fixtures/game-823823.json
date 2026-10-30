@@ -137,7 +137,17 @@
       "blurb": "An animated look at Griffin Conine's home run",
       "duration": "00:00:11",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/whpatfnzsa0tqcclcbwp.jpg",
-      "playbackUrl": "https://darkroom-clips.mlb.com/95195421-e08f-4ce4-be40-0bd6b2eb7496.mp4"
+      "playbackUrl": "https://darkroom-clips.mlb.com/95195421-e08f-4ce4-be40-0bd6b2eb7496.mp4",
+      "kind": "video",
+      "date": "2026-09-05T20:10:00Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "data-visualization",
+        "in-game-data-visualization",
+        "darkroom-bat-track"
+      ]
     },
     {
       "id": "breaking-down-kyle-stowers-home-run-x7115",
@@ -146,7 +156,17 @@
       "blurb": "Breaking down Kyle Stowers' home run",
       "duration": "00:00:13",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/hsfgakhcqdbc12ilsnyx.jpg",
-      "playbackUrl": "https://darkroom-clips.mlb.com/4d841de8-2ba1-481b-8181-754fffb5ce33.mp4"
+      "playbackUrl": "https://darkroom-clips.mlb.com/4d841de8-2ba1-481b-8181-754fffb5ce33.mp4",
+      "kind": "video",
+      "date": "2026-09-05T20:10:00Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "data-visualization",
+        "in-game-data-visualization",
+        "darkroom-home-run-single"
+      ]
     },
     {
       "id": "griffin-conine-homers-15-on-a-fly-ball-to-right-field-javier-sanoja-scores",
@@ -155,7 +175,32 @@
       "blurb": "Griffin Conine's two-run home run (15)",
       "duration": "00:00:29",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/yvbuvua7rxumimlhh1pf.jpg",
-      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/14a4ae76-3a25da95-de37775b-csvm-diamondgcp-asset_1280x720_59_4000K.mp4"
+      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/14a4ae76-3a25da95-de37775b-csvm-diamondgcp-asset_1280x720_59_4000K.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T22:07:38.195Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "hitting",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "vod",
+        "game-story-highlight",
+        "sporty-cc",
+        "2-yahoo-mlb-ads-feed",
+        "yahoo-in-game",
+        "send-to-news-mlb-feed",
+        "imagen-feed",
+        "long-home-runs",
+        "home-run",
+        "eclat-feed",
+        "bet-mgm",
+        "international-feed",
+        "fan-duel",
+        "apple-news"
+      ]
     },
     {
       "id": "griffin-conine-s-430-foot-home-run-vs-cubs",
@@ -164,7 +209,18 @@
       "blurb": "Griffin Conine's 430-foot home run vs. Cubs",
       "duration": "00:00:33",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/evlzkdiji2qgkbbd89ve.jpg",
-      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/e881e7a7-854c82f6-e9878c21-csvm-diamondgcp-asset_1280x720_59_4000K.mp4"
+      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/e881e7a7-854c82f6-e9878c21-csvm-diamondgcp-asset_1280x720_59_4000K.mp4",
+      "kind": "video",
+      "date": "2026-09-05T23:08:54.268Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "imagen-feed",
+        "alexa",
+        "game-action-tracking",
+        "player-tracking"
+      ]
     },
     {
       "id": "kyle-stowers-442-foot-home-run",
@@ -173,7 +229,18 @@
       "blurb": "Kyle Stowers' 442-foot home run",
       "duration": "00:00:33",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/qssmhyzj0iczo7l6zzxl.jpg",
-      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/48cc2661-f7393f99-24224f59-csvm-diamondgcp-asset_1280x720_59_4000K.mp4"
+      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/48cc2661-f7393f99-24224f59-csvm-diamondgcp-asset_1280x720_59_4000K.mp4",
+      "kind": "video",
+      "date": "2026-09-06T00:07:49.863Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "imagen-feed",
+        "alexa",
+        "game-action-tracking",
+        "player-tracking"
+      ]
     },
     {
       "id": "kyle-stowers-home-run-through-bat-tracking-data-x1113",
@@ -182,7 +249,17 @@
       "blurb": "Kyle Stowers' home run through bat tracking data",
       "duration": "00:00:11",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/rdibljgusdcfervtezud.jpg",
-      "playbackUrl": "https://darkroom-clips.mlb.com/1fef58f2-7686-46c5-b3a8-2d2988257dd9.mp4"
+      "playbackUrl": "https://darkroom-clips.mlb.com/1fef58f2-7686-46c5-b3a8-2d2988257dd9.mp4",
+      "kind": "video",
+      "date": "2026-09-05T20:10:00Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "data-visualization",
+        "in-game-data-visualization",
+        "darkroom-bat-track"
+      ]
     },
     {
       "id": "kyle-stowers-homers-19-on-a-fly-ball-to-center-field",
@@ -191,7 +268,29 @@
       "blurb": "Kyle Stowers' solo home run (19)",
       "duration": "00:00:30",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/td2x1nhucbyujlxlqwsn.jpg",
-      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/412bb432-93b39d88-e0196755-csvm-diamondgcp-asset_1280x720_59_4000K.mp4"
+      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/412bb432-93b39d88-e0196755-csvm-diamondgcp-asset_1280x720_59_4000K.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T22:49:34.158Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "hitting",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "vod",
+        "game-story-highlight",
+        "sporty-cc",
+        "home-run",
+        "long-home-runs",
+        "eclat-feed",
+        "bet-mgm",
+        "imagen-feed",
+        "international-feed",
+        "fan-duel",
+        "apple-news"
+      ]
     },
     {
       "id": "measuring-the-stats-on-michael-conforto-s-home-run-x6434",
@@ -200,7 +299,17 @@
       "blurb": "Measuring the stats on Michael Conforto's home run",
       "duration": "00:00:11",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/qcot3tgoto686g7u2n0c.jpg",
-      "playbackUrl": "https://darkroom-clips.mlb.com/35de5e81-4523-4f72-9af8-0247be03efa1.mp4"
+      "playbackUrl": "https://darkroom-clips.mlb.com/35de5e81-4523-4f72-9af8-0247be03efa1.mp4",
+      "kind": "video",
+      "date": "2026-09-05T20:10:00Z",
+      "teamIds": [
+        112
+      ],
+      "tags": [
+        "data-visualization",
+        "in-game-data-visualization",
+        "darkroom-home-run-single"
+      ]
     },
     {
       "id": "ryan-gusto-in-play-run-s-to-michael-conforto",
@@ -209,7 +318,31 @@
       "blurb": "Michael Conforto hits Cubs' 200th home run (14)",
       "duration": "00:00:29",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/w15m3qse1rfrtvjmumj3.jpg",
-      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/c4b45d7f-8dc5270e-34ecddd7-csvm-diamondgcp-asset_1280x720_59_4000K.mp4"
+      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/c4b45d7f-8dc5270e-34ecddd7-csvm-diamondgcp-asset_1280x720_59_4000K.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T20:46:31.445Z",
+      "teamIds": [
+        112
+      ],
+      "tags": [
+        "hitting",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "vod",
+        "game-story-highlight",
+        "sporty-cc",
+        "2-yahoo-mlb-ads-feed",
+        "yahoo-in-game",
+        "send-to-news-mlb-feed",
+        "imagen-feed",
+        "home-run",
+        "fan-duel",
+        "eclat-feed",
+        "bet-mgm",
+        "international-feed",
+        "apple-news"
+      ]
     },
     {
       "id": "the-distance-behind-griffin-conine-s-home-run-x9673",
@@ -218,7 +351,17 @@
       "blurb": "The distance behind Griffin Conine's home run",
       "duration": "00:00:13",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/le1z6mh3ls3t903wbacs.jpg",
-      "playbackUrl": "https://darkroom-clips.mlb.com/45f34d8b-740b-4587-ab03-a4058b5e1d23.mp4"
+      "playbackUrl": "https://darkroom-clips.mlb.com/45f34d8b-740b-4587-ab03-a4058b5e1d23.mp4",
+      "kind": "video",
+      "date": "2026-09-05T20:10:00Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "data-visualization",
+        "in-game-data-visualization",
+        "darkroom-home-run-single"
+      ]
     },
     {
       "id": "anibal-sanchez-joins-the-broadcast",
@@ -227,7 +370,19 @@
       "blurb": "Aníbal Sánchez joins the broadcast",
       "duration": "00:02:25",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/gmo4cmevq3mhr5dr2r6i.jpg",
-      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/423b2ea7-ede569ca-d7917231-csvm-diamondgcp-asset_1280x720_59_4000K.mp4"
+      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/423b2ea7-ede569ca-d7917231-csvm-diamondgcp-asset_1280x720_59_4000K.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T23:59:48.282Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "highlight",
+        "in-game-highlight",
+        "vod",
+        "game-action-tracking",
+        "interview"
+      ]
     },
     {
       "id": "ball-1-overturned-after-abs-challenge-ce1ab5",
@@ -236,7 +391,22 @@
       "blurb": "Ball 1 overturned after ABS challenge",
       "duration": "00:00:25",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/lyieujsqvppend7f4xlv.jpg",
-      "playbackUrl": "https://bdata-producedclips.mlb.com/fdf931b3-cfca-4f46-aa50-e662c7f0f7be.mp4"
+      "playbackUrl": "https://bdata-producedclips.mlb.com/fdf931b3-cfca-4f46-aa50-e662c7f0f7be.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T21:53:38.063Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "abs",
+        "highlight",
+        "in-game-highlight",
+        "fan-duel",
+        "imagen-feed",
+        "international-feed",
+        "bet-mgm",
+        "eclat-feed"
+      ]
     },
     {
       "id": "bench-availability-for-chicago-september-5-vs-marlins",
@@ -245,7 +415,13 @@
       "blurb": "Bench availability for Chicago, September 5 vs Marlins",
       "duration": "00:00:08",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/bzv4m9c1ilg2kvsbeq42.jpg",
-      "playbackUrl": "https://darkroom-clips.mlb.com/01ee7c0c-1042-4799-acbb-8fcbbd245187.mp4"
+      "playbackUrl": "https://darkroom-clips.mlb.com/01ee7c0c-1042-4799-acbb-8fcbbd245187.mp4",
+      "kind": "video",
+      "date": "2026-09-05T17:00:59.984Z",
+      "teamIds": [],
+      "tags": [
+        "data-visualization"
+      ]
     },
     {
       "id": "bench-availability-for-miami-september-5-vs-cubs",
@@ -254,7 +430,13 @@
       "blurb": "Bench availability for Miami, September 5 vs Cubs",
       "duration": "00:00:08",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/t0b7lp6m6ejs7jyetxgy.jpg",
-      "playbackUrl": "https://darkroom-clips.mlb.com/047fcf22-28c5-415f-8f22-c5f82134c5b8.mp4"
+      "playbackUrl": "https://darkroom-clips.mlb.com/047fcf22-28c5-415f-8f22-c5f82134c5b8.mp4",
+      "kind": "video",
+      "date": "2026-09-05T17:06:54.539Z",
+      "teamIds": [],
+      "tags": [
+        "data-visualization"
+      ]
     },
     {
       "id": "breaking-down-javier-assad-s-pitches-x7260",
@@ -263,7 +445,17 @@
       "blurb": "Breaking down Javier Assad's pitches",
       "duration": "00:00:04",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/me3e1ug9cbw7v20hhvra.jpg",
-      "playbackUrl": "https://darkroom-clips.mlb.com/93d90374-0135-4775-aca2-bf90d4b9776a.mp4"
+      "playbackUrl": "https://darkroom-clips.mlb.com/93d90374-0135-4775-aca2-bf90d4b9776a.mp4",
+      "kind": "video",
+      "date": "2026-09-05T20:10:00Z",
+      "teamIds": [
+        112
+      ],
+      "tags": [
+        "data-visualization",
+        "in-game-data-visualization",
+        "darkroom-pitcher-diagram"
+      ]
     },
     {
       "id": "breaking-down-ryan-gusto-s-pitches-x2340",
@@ -272,7 +464,17 @@
       "blurb": "Breaking down Ryan Gusto's pitches",
       "duration": "00:00:04",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/h2vfib94lkhyo1dmsjg8.jpg",
-      "playbackUrl": "https://darkroom-clips.mlb.com/be9554b9-d8ac-4971-8b03-45b3f5a00fbf.mp4"
+      "playbackUrl": "https://darkroom-clips.mlb.com/be9554b9-d8ac-4971-8b03-45b3f5a00fbf.mp4",
+      "kind": "video",
+      "date": "2026-09-05T20:10:00Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "data-visualization",
+        "in-game-data-visualization",
+        "darkroom-pitcher-diagram"
+      ]
     },
     {
       "id": "bullpen-availability-for-chicago-september-5-vs-marlins",
@@ -281,7 +483,16 @@
       "blurb": "Bullpen availability for Chicago, September 5 vs Marlins",
       "duration": "00:00:09",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/twewqzoeowtb4fe3ihmd.jpg",
-      "playbackUrl": "https://darkroom-clips.mlb.com/8f94de23-bc12-4827-abb4-dac36f651210.mp4"
+      "playbackUrl": "https://darkroom-clips.mlb.com/8f94de23-bc12-4827-abb4-dac36f651210.mp4",
+      "kind": "video",
+      "date": "2026-09-05T14:07:43.151Z",
+      "teamIds": [
+        112
+      ],
+      "tags": [
+        "data-visualization",
+        "darkroom-bullpen"
+      ]
     },
     {
       "id": "calvin-faucher-in-play-run-s-to-michael-busch",
@@ -290,7 +501,26 @@
       "blurb": "Michael Busch's RBI single",
       "duration": "00:00:19",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/koqxayrrav0pwos8cnfk.jpg",
-      "playbackUrl": "https://bdata-producedclips.mlb.com/584b60a5-6c74-46eb-ac7c-e74312369698.mp4"
+      "playbackUrl": "https://bdata-producedclips.mlb.com/584b60a5-6c74-46eb-ac7c-e74312369698.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T22:27:23.105Z",
+      "teamIds": [
+        112
+      ],
+      "tags": [
+        "hitting",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "vod",
+        "game-story-highlight",
+        "sporty-cc",
+        "international-feed",
+        "bet-mgm",
+        "eclat-feed",
+        "imagen-feed",
+        "fan-duel"
+      ]
     },
     {
       "id": "clayton-mccullough-discusses-loss-to-cubs",
@@ -299,7 +529,18 @@
       "blurb": "Clayton McCullough discusses loss to Cubs",
       "duration": "00:02:32",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/c8fer1gmhkkbyjavlohg.jpg",
-      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/51b8e4f7-780c421f-de79e53b-csvm-diamondgcp-asset_1280x720_59_4000K.mp4"
+      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/51b8e4f7-780c421f-de79e53b-csvm-diamondgcp-asset_1280x720_59_4000K.mp4",
+      "kind": "video",
+      "date": "2026-09-06T00:17:35.424Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "press-conference",
+        "imagen-feed",
+        "send-to-news-mlb-feed",
+        "manager-postgame"
+      ]
     },
     {
       "id": "condensed-game-chc-mia-9-5-26",
@@ -308,7 +549,22 @@
       "blurb": "Condensed Game: CHC@MIA - 9/5/26",
       "duration": "00:12:12",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/kulzscx7wbhtv80xwnvx.jpg",
-      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/3b796004-a5f5f400-9117045e-csvm-diamondgcp-asset_1280x720_59_4000K.mp4"
+      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/3b796004-a5f5f400-9117045e-csvm-diamondgcp-asset_1280x720_59_4000K.mp4",
+      "kind": "condensed",
+      "date": "2026-09-06T00:16:01.506Z",
+      "teamIds": [
+        146,
+        112
+      ],
+      "tags": [
+        "international-feed",
+        "eclat-feed",
+        "condensed-game",
+        "condensed_game",
+        "imagen-feed",
+        "alexa",
+        "roku-vod"
+      ]
     },
     {
       "id": "conforto-clubs-cubs-200th-homer-in-close-win",
@@ -317,7 +573,23 @@
       "blurb": "Conforto clubs Cubs' 200th homer in close win",
       "duration": "00:03:06",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/q7kpn3mb0u8ja8vccgcc.jpg",
-      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/68e1ef46-6669f6b0-5b1ac736-csvm-diamondgcp-asset_1280x720_59_4000K.mp4"
+      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/68e1ef46-6669f6b0-5b1ac736-csvm-diamondgcp-asset_1280x720_59_4000K.mp4",
+      "kind": "recap",
+      "date": "2026-09-06T00:21:36.579Z",
+      "teamIds": [
+        146,
+        112
+      ],
+      "tags": [
+        "international-feed",
+        "eclat-feed",
+        "game-recap",
+        "mlb_recap",
+        "3-yahoo-ads-feed",
+        "apple-news",
+        "send-to-news-mlb-feed",
+        "alexa"
+      ]
     },
     {
       "id": "cubs-challenged-pitch-result-call-on-the-field-was-confirmed-jakob-marsee-walks",
@@ -326,7 +598,27 @@
       "blurb": "Walk confirmed after ABS challenge",
       "duration": "00:00:26",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/yrqr8hqau7mhtw9g2o1s.jpg",
-      "playbackUrl": "https://bdata-producedclips.mlb.com/e141e5b6-209e-41d0-b373-415b26f79bc3.mp4"
+      "playbackUrl": "https://bdata-producedclips.mlb.com/e141e5b6-209e-41d0-b373-415b26f79bc3.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T21:32:53.73Z",
+      "teamIds": [
+        112
+      ],
+      "tags": [
+        "pitching",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "vod",
+        "sporty-cc",
+        "abs",
+        "challenge",
+        "bet-mgm",
+        "imagen-feed",
+        "international-feed",
+        "eclat-feed",
+        "fan-duel"
+      ]
     },
     {
       "id": "dax-fulton-ball-to-pete-crow-armstrong-capture-review",
@@ -335,7 +627,27 @@
       "blurb": "Pete Crow-Armstrong strikes out after ABS challenge",
       "duration": "00:00:28",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/uamzuf87hcyqa5e7gfxf.jpg",
-      "playbackUrl": "https://bdata-producedclips.mlb.com/2beefbd7-fd2f-4d66-8955-06942b231cbb.mp4"
+      "playbackUrl": "https://bdata-producedclips.mlb.com/2beefbd7-fd2f-4d66-8955-06942b231cbb.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T23:01:37.908Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "pitching",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "vod",
+        "sporty-cc",
+        "abs",
+        "challenge",
+        "bet-mgm",
+        "international-feed",
+        "imagen-feed",
+        "fan-duel",
+        "eclat-feed"
+      ]
     },
     {
       "id": "fielding-alignment-for-chicago-september-5-vs-marlins",
@@ -344,7 +656,16 @@
       "blurb": "Fielding alignment for Chicago, September 5 vs Marlins",
       "duration": "00:00:11",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/bjg92ljjwvvuhoqsyjos.jpg",
-      "playbackUrl": "https://darkroom-clips.mlb.com/27fd8d5a-c422-44b2-ad0a-e9b30599c621.mp4"
+      "playbackUrl": "https://darkroom-clips.mlb.com/27fd8d5a-c422-44b2-ad0a-e9b30599c621.mp4",
+      "kind": "video",
+      "date": "2026-09-05T16:56:41.82Z",
+      "teamIds": [
+        112
+      ],
+      "tags": [
+        "data-visualization",
+        "darkroom-fielding-alignment"
+      ]
     },
     {
       "id": "fielding-alignment-for-miami-september-5-vs-cubs",
@@ -353,7 +674,16 @@
       "blurb": "Fielding alignment for Miami, September 5 vs Cubs",
       "duration": "00:00:11",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/yj9288s2uq4mnz0lzzkh.jpg",
-      "playbackUrl": "https://darkroom-clips.mlb.com/9e753d57-e185-44d9-b066-6c434ed16e78.mp4"
+      "playbackUrl": "https://darkroom-clips.mlb.com/9e753d57-e185-44d9-b066-6c434ed16e78.mp4",
+      "kind": "video",
+      "date": "2026-09-05T17:04:06.217Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "data-visualization",
+        "darkroom-fielding-alignment"
+      ]
     },
     {
       "id": "ian-happ-singles-on-a-sharp-line-drive-to-right-fielder-owen-caissie-migu",
@@ -362,7 +692,31 @@
       "blurb": "Ian Happ's two-run single",
       "duration": "00:00:12",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/rlsjkthpffohjycevkrx.jpg",
-      "playbackUrl": "https://bdata-producedclips.mlb.com/4b03089e-85b8-45bb-b5bd-940b0201ade3.mp4"
+      "playbackUrl": "https://bdata-producedclips.mlb.com/4b03089e-85b8-45bb-b5bd-940b0201ade3.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T21:01:11.712Z",
+      "teamIds": [
+        112
+      ],
+      "tags": [
+        "hitting",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "vod",
+        "game-story-highlight",
+        "sporty-cc",
+        "2-yahoo-mlb-ads-feed",
+        "yahoo-in-game",
+        "send-to-news-mlb-feed",
+        "imagen-feed",
+        "pennant-chase",
+        "international-feed",
+        "bet-mgm",
+        "fan-duel",
+        "eclat-feed",
+        "apple-news"
+      ]
     },
     {
       "id": "jakob-marsee-lines-out-to-left-fielder-ian-happ",
@@ -371,7 +725,25 @@
       "blurb": "Ian Happ's stupendous diving catch",
       "duration": "00:00:28",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/hndlisnwz5vhuplcehmi.jpg",
-      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/9eb2907e-6f26a65e-45502e4a-csvm-diamondgcp-asset_1280x720_59_4000K.mp4"
+      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/9eb2907e-6f26a65e-45502e4a-csvm-diamondgcp-asset_1280x720_59_4000K.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T20:43:31.291Z",
+      "teamIds": [
+        112
+      ],
+      "tags": [
+        "defense",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "game-story-highlight",
+        "wow",
+        "bet-mgm",
+        "international-feed",
+        "imagen-feed",
+        "fan-duel",
+        "eclat-feed"
+      ]
     },
     {
       "id": "japanese-highlights-cubs-marlins-x0558",
@@ -380,7 +752,17 @@
       "blurb": "Japanese Highlights: Cubs-Marlins",
       "duration": "00:08:53",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/xbtcuptla5zsfproscoy.jpg",
-      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/667617a6-7720cd87-24ec5135-csvm-diamondgcp-asset_1280x720_59_4000K.mp4"
+      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/667617a6-7720cd87-24ec5135-csvm-diamondgcp-asset_1280x720_59_4000K.mp4",
+      "kind": "video",
+      "date": "2026-09-06T03:44:31.212Z",
+      "teamIds": [
+        112,
+        146
+      ],
+      "tags": [
+        "japanese-language",
+        "vod"
+      ]
     },
     {
       "id": "javier-assad-foul-tip-to-kyle-stowers",
@@ -389,7 +771,24 @@
       "blurb": "Javier Assad strikes out Kyle Stowers",
       "duration": "00:00:06",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/r14z0boyooygcvr3rpug.jpg",
-      "playbackUrl": "https://bdata-producedclips.mlb.com/97c6a7d0-2629-48de-9777-d9a2240c59c3.mp4"
+      "playbackUrl": "https://bdata-producedclips.mlb.com/97c6a7d0-2629-48de-9777-d9a2240c59c3.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T22:14:37.705Z",
+      "teamIds": [
+        112
+      ],
+      "tags": [
+        "pitching",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "sporty-cc",
+        "fan-duel",
+        "international-feed",
+        "bet-mgm",
+        "imagen-feed",
+        "eclat-feed"
+      ]
     },
     {
       "id": "javier-assad-in-play-run-s-to-joe-mack",
@@ -398,7 +797,30 @@
       "blurb": "Otto Lopez scores on a forceout",
       "duration": "00:01:12",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/ldtlgs49mep9bplmsggy.jpg",
-      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/04/9dad9c49-33023ec2-6c2c8b49-csvm-diamondgcp-asset_1280x720_59_4000K.mp4"
+      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/04/9dad9c49-33023ec2-6c2c8b49-csvm-diamondgcp-asset_1280x720_59_4000K.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T21:38:40.804Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "hitting",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "vod",
+        "game-story-highlight",
+        "sporty-cc",
+        "2-yahoo-mlb-ads-feed",
+        "yahoo-in-game",
+        "send-to-news-mlb-feed",
+        "imagen-feed",
+        "pennant-chase",
+        "fan-duel",
+        "eclat-feed",
+        "international-feed",
+        "bet-mgm"
+      ]
     },
     {
       "id": "javier-assad-in-play-run-s-to-owen-caissie",
@@ -407,7 +829,26 @@
       "blurb": "Griffin Conine scores on a groundout",
       "duration": "00:00:10",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/rwqwmhdeazptqfyf2fsg.jpg",
-      "playbackUrl": "https://bdata-producedclips.mlb.com/7d7932ad-574b-4148-9e33-49f98e0ea177.mp4"
+      "playbackUrl": "https://bdata-producedclips.mlb.com/7d7932ad-574b-4148-9e33-49f98e0ea177.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T21:34:35.756Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "hitting",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "vod",
+        "game-story-highlight",
+        "sporty-cc",
+        "fan-duel",
+        "imagen-feed",
+        "bet-mgm",
+        "international-feed",
+        "eclat-feed"
+      ]
     },
     {
       "id": "marlins-challenged-pitch-result-griffin-conine-called-out-on-strikes-capture-rev",
@@ -416,7 +857,27 @@
       "blurb": "Griffin Conine walks after ABS challenge",
       "duration": "00:00:26",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/u7cok3hcx9lgk8ntkgch.jpg",
-      "playbackUrl": "https://bdata-producedclips.mlb.com/438a9c3f-ebba-402c-8ad9-670f34797c3a.mp4"
+      "playbackUrl": "https://bdata-producedclips.mlb.com/438a9c3f-ebba-402c-8ad9-670f34797c3a.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T23:33:22.508Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "hitting",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "vod",
+        "sporty-cc",
+        "abs",
+        "challenge",
+        "eclat-feed",
+        "international-feed",
+        "imagen-feed",
+        "fan-duel",
+        "bet-mgm"
+      ]
     },
     {
       "id": "michael-conforto-called-out-on-strikes-ju6lir",
@@ -425,7 +886,25 @@
       "blurb": "Ryan Gusto strikes out Michael Conforto",
       "duration": "00:00:07",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/lola99k2svc0qh2k40ia.jpg",
-      "playbackUrl": "https://bdata-producedclips.mlb.com/e1bda4a9-f1d8-4e54-89d4-e99e10753416.mp4"
+      "playbackUrl": "https://bdata-producedclips.mlb.com/e1bda4a9-f1d8-4e54-89d4-e99e10753416.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T21:20:26.252Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "pitching",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "game-story-highlight",
+        "sporty-cc",
+        "eclat-feed",
+        "imagen-feed",
+        "fan-duel",
+        "international-feed",
+        "bet-mgm"
+      ]
     },
     {
       "id": "pete-crow-armstrong-grounds-out-second-baseman-javier-sanoja-to-first-bas",
@@ -434,7 +913,24 @@
       "blurb": "Javier Sanoja's spinning stop",
       "duration": "00:00:20",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/ip8mt5qpcsxeg9orvhd0.jpg",
-      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/576be238-c131e043-a2737d9f-csvm-diamondgcp-asset_1280x720_59_4000K.mp4"
+      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/576be238-c131e043-a2737d9f-csvm-diamondgcp-asset_1280x720_59_4000K.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T22:27:33.742Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "defense",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "sporty-cc",
+        "eclat-feed",
+        "fan-duel",
+        "bet-mgm",
+        "imagen-feed",
+        "international-feed"
+      ]
     },
     {
       "id": "ryan-gusto-in-play-no-out-to-nico-hoerner",
@@ -443,7 +939,27 @@
       "blurb": "Jakob Marsee throws out Ian Happ at third",
       "duration": "00:00:33",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/ixf7xhfd0b0dalrvplss.jpg",
-      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/b33bd4bf-c9d34bf7-2295d91a-csvm-diamondgcp-asset_1280x720_59_4000K.mp4"
+      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/b33bd4bf-c9d34bf7-2295d91a-csvm-diamondgcp-asset_1280x720_59_4000K.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T20:32:03.168Z",
+      "teamIds": [
+        146
+      ],
+      "tags": [
+        "defense",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "vod",
+        "game-story-highlight",
+        "sporty-cc",
+        "hard-throw",
+        "imagen-feed",
+        "fan-duel",
+        "eclat-feed",
+        "bet-mgm",
+        "international-feed"
+      ]
     },
     {
       "id": "ryan-gusto-in-play-run-s-to-nico-hoerner",
@@ -452,7 +968,26 @@
       "blurb": "Nico Hoerner's RBI single",
       "duration": "00:00:19",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/whwevp0elwifithekrqc.jpg",
-      "playbackUrl": "https://bdata-producedclips.mlb.com/0ecdc549-4bf6-4660-9784-438012af90e7.mp4"
+      "playbackUrl": "https://bdata-producedclips.mlb.com/0ecdc549-4bf6-4660-9784-438012af90e7.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T21:52:14.071Z",
+      "teamIds": [
+        112
+      ],
+      "tags": [
+        "hitting",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "vod",
+        "game-story-highlight",
+        "sporty-cc",
+        "international-feed",
+        "bet-mgm",
+        "imagen-feed",
+        "eclat-feed",
+        "fan-duel"
+      ]
     },
     {
       "id": "ryan-gusto-in-play-run-s-to-pete-crow-armstrong",
@@ -461,7 +996,27 @@
       "blurb": "Pete Crow-Armstrong's RBI single",
       "duration": "00:00:15",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/vvriovrrgzuhldhzhcye.jpg",
-      "playbackUrl": "https://bdata-producedclips.mlb.com/4790f739-cc62-492d-b26a-360c426d94b9.mp4"
+      "playbackUrl": "https://bdata-producedclips.mlb.com/4790f739-cc62-492d-b26a-360c426d94b9.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T21:19:46.901Z",
+      "teamIds": [
+        112
+      ],
+      "tags": [
+        "hitting",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "vod",
+        "game-story-highlight",
+        "sporty-cc",
+        "pennant-chase",
+        "bet-mgm",
+        "eclat-feed",
+        "international-feed",
+        "fan-duel",
+        "imagen-feed"
+      ]
     },
     {
       "id": "ryan-zeferjahn-in-play-out-s-to-otto-lopez",
@@ -470,7 +1025,27 @@
       "blurb": "Ryan Zeferjahn secures the save",
       "duration": "00:00:19",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/ky8gxxtrjdolsxoul9hc.jpg",
-      "playbackUrl": "https://bdata-producedclips.mlb.com/bfb955df-4d39-4ce9-b386-f8a134dcf2ca.mp4"
+      "playbackUrl": "https://bdata-producedclips.mlb.com/bfb955df-4d39-4ce9-b386-f8a134dcf2ca.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T23:35:01.854Z",
+      "teamIds": [
+        112
+      ],
+      "tags": [
+        "pitching",
+        "highlight",
+        "in-game-highlight",
+        "game-action-tracking",
+        "vod",
+        "game-story-highlight",
+        "sporty-cc",
+        "international-feed",
+        "eclat-feed",
+        "imagen-feed",
+        "fan-duel",
+        "bet-mgm",
+        "player-of-the-game"
+      ]
     },
     {
       "id": "starting-lineups-for-cubs-at-marlins-september-5-2026",
@@ -479,7 +1054,17 @@
       "blurb": "Starting lineups for Cubs at Marlins - September 5, 2026",
       "duration": "00:00:10",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/tuevzsrdsu1ulpnte3mx.jpg",
-      "playbackUrl": "https://darkroom-clips.mlb.com/da375f74-bca4-478c-9999-787a7fb81b07.mp4"
+      "playbackUrl": "https://darkroom-clips.mlb.com/da375f74-bca4-478c-9999-787a7fb81b07.mp4",
+      "kind": "video",
+      "date": "2026-09-05T17:07:57.852Z",
+      "teamIds": [
+        146,
+        112
+      ],
+      "tags": [
+        "data-visualization",
+        "darkroom-starting-lineup"
+      ]
     },
     {
       "id": "strike-1-confirmed-after-abs-challenge-x3644",
@@ -488,7 +1073,25 @@
       "blurb": "Strike 1 confirmed after ABS challenge",
       "duration": "00:00:25",
       "imageUrl": "https://img.mlbstatic.com/mlb-images/image/upload/w_1920,h_1080,f_jpg,c_fill,g_auto/mlb/ki0rksnjmbvgpoyadfef.jpg",
-      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/336b09a7-41e40ccd-3fb43962-csvm-diamondgcp-asset_1280x720_59_4000K.mp4"
+      "playbackUrl": "https://mlb-cuts-diamond.mlb.com/FORGE/2026/2026-09/05/336b09a7-41e40ccd-3fb43962-csvm-diamondgcp-asset_1280x720_59_4000K.mp4",
+      "kind": "highlight",
+      "date": "2026-09-05T23:47:36.963Z",
+      "teamIds": [
+        146,
+        112
+      ],
+      "tags": [
+        "highlight",
+        "abs",
+        "in-game-highlight",
+        "vod",
+        "game-action-tracking",
+        "imagen-feed",
+        "bet-mgm",
+        "international-feed",
+        "fan-duel",
+        "eclat-feed"
+      ]
     }
   ],
   "boxscore": {
