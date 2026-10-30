@@ -11078,3 +11078,113 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-10-30 — S66 completed
+
+**Scoreboard modules + states**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-10-30T07:16:47Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `8b82d35` (tree dirty) |
+| Grader | `scripts/verify-S66.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: one ScoreboardModule renders final (FINAL, R·H·E, ABBR (W-L)), live (LiveIndicator + inningLabel) and scheduled (formatGameTime, venue, W - L (.pct)) games, venue on scheduled only (RTL on the S65 fixtures, the folded moments committed and drift-checked)
+check 2 PASS: each team row has a TeamEdge colored by contrastSafeTeamColor (RTL asserts the style)
+check 3 PASS: one column at mobile, two at medium / desktop (RTL via variant)
+check 4 PASS: the date control's previous / next navigate to /games/<date ± 1> (test)
+check 5 PASS: empty, loading (title kept) and error (Couldn't load games, hint, Retry refetches) use ViewState (a test per state)
+check 6 PASS: teamRecordLabel and inningLabel live in packages/domain with tests; the scoreboard files pass the no-domain-arithmetic lint rule
+check 7 PASS: a render-count baseline is recorded for one schedule update
+check 8 PASS: files this story adds or edits have no team logo and no useMediaQuery / hiddenFrom / visibleFrom outside web/src/layout/
+check 9 PASS: design match: e2e/design/S66.spec.ts names the scoreboard, empty, loading and error frames at each pairing; docs/v3/design-checks/S66/ holds them at 390/768/1200
+check 10 PASS: one date formatter: formatDate in web/src/format/datetime.ts prints calendar dates too, formatOfficialDate is gone, the date control formats through it, and no month table or Intl.DateTimeFormat date formatter sits under web/src/components/ or web/src/pages/
+check 11 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**11/11 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with its ratified frame
+
+| Frame | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/shell-scoreboard/scoreboard-desktop.png` | `a03403e19954fe2aa50f9b7146aea260f759f17b463d334fcc12dbabe457414a` | `docs/v3/design-checks/S66/scoreboard-desktop.png` | `979640acc0610364f43966163741dced04a5e3115be964de3a9627ebaf1bd05e` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-empty-desktop.png` | `6bd72b831acf1c71f39b393d7629ac03347dbfeb31354312ad41ca979fec759b` | `docs/v3/design-checks/S66/scoreboard-empty-desktop.png` | `272a28288f8f854ef75b0b564bb8c39efce1c91ea4c41fb1fb42ca1b8a86308d` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-empty-medium.png` | `092c99c17da25ff160c13ecac396d5fec7e5fdb953873a384b7197397579cbb8` | `docs/v3/design-checks/S66/scoreboard-empty-medium.png` | `5dba3e076c5a9569490039160e292c25b238acb11725610afcf6da24c4d579cd` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-empty-mobile.png` | `0f2b25d9bd3a9e4be60d1c5f10cb3e4c2a302fb9382f4ac6d0749a5732a93bcb` | `docs/v3/design-checks/S66/scoreboard-empty-mobile.png` | `b11432d69a7fa9a53f5fd78c6d03c82d63765f76df3425177955d5597c599fc8` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-error-desktop.png` | `3b316a40ba6d48b1a35609bb39243722f88139226a310992158ea644497c2fbf` | `docs/v3/design-checks/S66/scoreboard-error-desktop.png` | `a45c665088411f693237367e39fa85746c2b841ae6edf2132f0a586d80b54084` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-error-medium.png` | `2ebc78ec85def2aae2ce3e10c31831718f0782520dc8fdea736b899d8985e3ad` | `docs/v3/design-checks/S66/scoreboard-error-medium.png` | `ccf6c3b2dc7ebb1f3b6d806c1374db7374d4b2b6d43b68530d2424ee6c8b76a1` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-error-mobile.png` | `f1510767502595914739b865955346f24d9a2e92408dc5035f83ccbca4a5d098` | `docs/v3/design-checks/S66/scoreboard-error-mobile.png` | `fd55e807dba9ca5c0267f19341b20e517a68c2ebc6ad0eda3ed70474b72bf1c0` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-loading-desktop.png` | `db769688177acc72c82d0103527605e4aa8f1aa15f4dee4907e4b5146190b7ca` | `docs/v3/design-checks/S66/scoreboard-loading-desktop.png` | `f6a9757c34f0f2922a00f34a3b23e7a56cd01ff6af61592446cb1ad16305d949` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-loading-medium.png` | `0af82bcae41ac546a669ce312ed746961fff01a326c68c3ddbece9cc8bbb86aa` | `docs/v3/design-checks/S66/scoreboard-loading-medium.png` | `acf8e2e77f0c6c95fcc1ad3344176d59596dcd8a784f7b7a17b1ea64dfd211cb` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-loading-mobile.png` | `7df6a59d8662be016eba92102c93a9997c63aad175685b75b9a9c235f45fcf3b` | `docs/v3/design-checks/S66/scoreboard-loading-mobile.png` | `d118318e3f8af37ed4a0c8246cf8d78ac85bfab6541839bd4374b4725579ab04` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-medium.png` | `7cfb63af52eb6a2a52d88dd13023083e1073d948901c61864239a5da7dbc958e` | `docs/v3/design-checks/S66/scoreboard-medium.png` | `70768f5faa2f21b3c27e34318447008f49af25407b5281a7e21224a4da2fe955` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-mobile.png` | `031a036814cbbf3e5bd33a2e7ca77ae6663d10af1a4ffd9bd250bfb95ff4a936` | `docs/v3/design-checks/S66/scoreboard-mobile.png` | `433634bbee98d26289c2091b0019ca3f83dec049546b1e03397ac9a4c1946ed5` |
+Owner: "Owner, 2026-10-30: "yeah s66 sorry, s66 looks good" — every S66 capture (scoreboard, -empty, -loading, -error at mobile / medium / desktop) matches its frame."
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S66 check results ---
+check 1 PASS: one ScoreboardModule renders final (FINAL, R·H·E, ABBR (W-L)), live (LiveIndicator + inningLabel) and scheduled (formatGameTime, venue, W - L (.pct)) games, venue on scheduled only (RTL on the S65 fixtures, the folded moments committed and drift-checked)
+check 2 PASS: each team row has a TeamEdge colored by contrastSafeTeamColor (RTL asserts the style)
+check 3 PASS: one column at mobile, two at medium / desktop (RTL via variant)
+check 4 PASS: the date control's previous / next navigate to /games/<date ± 1> (test)
+check 5 PASS: empty, loading (title kept) and error (Couldn't load games, hint, Retry refetches) use ViewState (a test per state)
+check 6 PASS: teamRecordLabel and inningLabel live in packages/domain with tests; the scoreboard files pass the no-domain-arithmetic lint rule
+check 7 PASS: a render-count baseline is recorded for one schedule update
+check 8 PASS: files this story adds or edits have no team logo and no useMediaQuery / hiddenFrom / visibleFrom outside web/src/layout/
+check 9 PASS: design match: e2e/design/S66.spec.ts names the scoreboard, empty, loading and error frames at each pairing; docs/v3/design-checks/S66/ holds them at 390/768/1200
+check 10 PASS: one date formatter: formatDate in web/src/format/datetime.ts prints calendar dates too, formatOfficialDate is gone, the date control formats through it, and no month table or Intl.DateTimeFormat date formatter sits under web/src/components/ or web/src/pages/
+check 11 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S66: 11/11 checks passed ---
+verify-S66: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+packages/ports build: Done
+web build: vite v6.4.3 building for production...
+web build: transforming...
+web build: ✓ 7078 modules transformed.
+web build: rendering chunks...
+web build: computing gzip size...
+web build: dist/index.html                     1.00 kB │ gzip:   0.53 kB
+web build: dist/assets/batter-J7FnW6ss.webp   74.81 kB
+web build: dist/assets/index-BEBfbMX0.css    201.84 kB │ gzip:  29.52 kB
+web build: dist/assets/index-DSU1uH2Q.js     589.45 kB │ gzip: 187.33 kB
+web build: ✓ built in 1.71s
+web build: (!) Some chunks are larger than 500 kB after minification. Consider:
+web build: - Using dynamic import() to code-split the application
+web build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+web build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 187016,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

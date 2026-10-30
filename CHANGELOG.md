@@ -14,6 +14,16 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## A scoreboard you can read at a glance
+
+- **Before, the scoreboard was a rough grid of score cards with the ballpark on every game and raw error
+  text. Now each game is a clean card with its team colors down the edge and each team's record: finished and
+  live games show runs, hits and errors, a live game shows a blinking dot with the inning, and a game that
+  hasn't started shows its start time in your own time zone and the ballpark.** Arrows step to the day before
+  or after, and loading, no-games and error screens match the approved design. Details: S66 —
+  `ScoreboardModule`, `DateControl`, `teamRecordLabel` / `addDays` in `packages/domain`, one date formatter
+  (`formatDate`); design matched by the owner. _(2026-10-30)_
+
 ## Browsing a game's plays inning by inning
 
 - **Before, the Plays tab was one long list of every at-bat in the game, opening at the first pitch. Now it opens
