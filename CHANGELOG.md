@@ -14,6 +14,14 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## Each scoreboard game shows what you care about at a glance
+
+- **Before, the right side of each game on the scoreboard was empty. Now it shows the winning and losing
+  pitchers once a game ends, the bases, count and who's batting and pitching while it's live, and tonight's
+  starters before first pitch — or, if you choose Room Menu in Settings, quick links straight into the game's
+  Videos, Live, Plays, Box and Recap.** Details: S67 — `GameRowSlot`, `slotOccupant` / `countShorthand` /
+  `probableLine` in `packages/domain`, the Game-Row Slot setting; design matched by the owner. _(2026-10-30)_
+
 ## The backend runs the way it will in production
 
 - **Before, the API only ran as a laptop-style Node server, unlike anything it would be deployed on. Now

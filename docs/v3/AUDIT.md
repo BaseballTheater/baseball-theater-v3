@@ -11332,3 +11332,97 @@ Trigger: drift event 7. S45 (65ddcfe) changed what `pnpm verify` runs (`function
 **Questions for the owner (not blocking the loop; S47 is parked):**
 1. **Should finished games be edge-cached with Workers Cache, which bills every request (static assets included), or with the Cache API (one data center, no billing change)?** ADR-021 wants an edge `s-maxage` with Tiered Cache, but a Worker runs before Cloudflare's cache, so headers alone cache nothing. Workers Cache gives exactly ADR-021 (tiered, honors `stale-while-revalidate`, no Worker run on a hit) and costs the standard request rate on requests that are free today. The Cache API keeps today's billing but caches per data center and still runs the Worker on every request. S47 waits on this.
 2. **In the Videos room, should "Featured team" narrow to your first favorite team playing in that game, else the home team?** S69 built it that way (`featuredTeamId`). FEATURES and VISUAL-DESIGN name a "Featured team" filter but don't say whose team, and the screenshots you'll judge for S69 can't show the rule.
+
+---
+
+## 2026-10-30 — S67 completed
+
+**Scoreboard slot occupants + setting**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-10-30T08:08:44Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `6c0e367` (tree dirty) |
+| Grader | `scripts/verify-S67.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: slotOccupant(setting, phase) in packages/domain: pitchers of record / count / probables for Status by phase, room menu otherwise (table test)
+check 2 PASS: the room-menu occupant lists exactly roomsForPhase(gamePhase(game)) as links to /game/:pk/:room (a test per phase)
+check 3 PASS: the count occupant reuses BaseDiamond and shows the count as shorthand text from countShorthand (no pips; owner, 2026-10-30); no second diamond exists under web/src/
+check 4 PASS: Settings → Game List has a Game-Row Slot radio with exactly Status (default) and Room Menu; changing it re-renders a mounted scoreboard without reload and saves to the account (test)
+check 5 PASS: files this story adds or edits have no team logo and no useMediaQuery / hiddenFrom / visibleFrom outside web/src/layout/
+check 6 PASS: design match: e2e/design/S67.spec.ts names scoreboard-mobile / -medium / -desktop and scoreboard-slot-room-menu-mobile; docs/v3/design-checks/S67/ holds them at 390/768/1200/390
+check 7 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**7/7 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with its ratified frame
+
+| Frame | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/shell-scoreboard/scoreboard-desktop.png` | `a03403e19954fe2aa50f9b7146aea260f759f17b463d334fcc12dbabe457414a` | `docs/v3/design-checks/S67/scoreboard-desktop.png` | `1eeba73327cd2fa1a342a5b1deb128abc25e5d00b25382e24a40589c28279256` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-medium.png` | `7cfb63af52eb6a2a52d88dd13023083e1073d948901c61864239a5da7dbc958e` | `docs/v3/design-checks/S67/scoreboard-medium.png` | `e57ae69c4c78dadb3724af534eaf4d98d1f16bdb6b209f618ac3dd0dcfc9d672` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-mobile.png` | `031a036814cbbf3e5bd33a2e7ca77ae6663d10af1a4ffd9bd250bfb95ff4a936` | `docs/v3/design-checks/S67/scoreboard-mobile.png` | `f17f088bcf6a8306c33b4c8ab95b2d65e4764a016c82097e52d5ae1f0f62c7dd` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-slot-room-menu-mobile.png` | `3f01a326ad5b46ea099423eba497da21d7c8cb7cb7d7259014f0398d22674fdb` | `docs/v3/design-checks/S67/scoreboard-slot-room-menu-mobile.png` | `b398dfe8f774f9e875a9e06c367c5fcbebed3a38f544cb8cb073db6247135505` |
+Owner: "Owner, 2026-10-30: "S67 looks good" — after the re-capture with the count as shorthand text (owner, 2026-10-30: "There shouldn’t be pips in s67. BSO are just shorthand text as seen in the design"); every S67 capture (scoreboard-mobile / -medium / -desktop, scoreboard-slot-room-menu-mobile) matches its frame."
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S67 check results ---
+check 1 PASS: slotOccupant(setting, phase) in packages/domain: pitchers of record / count / probables for Status by phase, room menu otherwise (table test)
+check 2 PASS: the room-menu occupant lists exactly roomsForPhase(gamePhase(game)) as links to /game/:pk/:room (a test per phase)
+check 3 PASS: the count occupant reuses BaseDiamond and shows the count as shorthand text from countShorthand (no pips; owner, 2026-10-30); no second diamond exists under web/src/
+check 4 PASS: Settings → Game List has a Game-Row Slot radio with exactly Status (default) and Room Menu; changing it re-renders a mounted scoreboard without reload and saves to the account (test)
+check 5 PASS: files this story adds or edits have no team logo and no useMediaQuery / hiddenFrom / visibleFrom outside web/src/layout/
+check 6 PASS: design match: e2e/design/S67.spec.ts names scoreboard-mobile / -medium / -desktop and scoreboard-slot-room-menu-mobile; docs/v3/design-checks/S67/ holds them at 390/768/1200/390
+check 7 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S67: 7/7 checks passed ---
+verify-S67: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+packages/ports build: Done
+web build: vite v6.4.3 building for production...
+web build: transforming...
+web build: ✓ 7084 modules transformed.
+web build: rendering chunks...
+web build: computing gzip size...
+web build: dist/index.html                     1.00 kB │ gzip:   0.52 kB
+web build: dist/assets/batter-J7FnW6ss.webp   74.81 kB
+web build: dist/assets/index-BEBfbMX0.css    201.84 kB │ gzip:  29.52 kB
+web build: dist/assets/index-BtV1VtgL.js     604.16 kB │ gzip: 191.83 kB
+web build: (!) Some chunks are larger than 500 kB after minification. Consider:
+web build: - Using dynamic import() to code-split the application
+web build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+web build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+web build: ✓ built in 1.78s
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 191516,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

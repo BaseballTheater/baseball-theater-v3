@@ -37,7 +37,8 @@ export default defineConfig({
 				lines: 96,
 				functions: 95,
 				// Raised 2026-10-29 by S87 (deletion cookie and cookie-law tests): branches 87.18.
-				branches: 88,
+				// Raised 2026-10-30 by S67 (S45's Worker composition and S69's keyword mapping folded in): branches 89.62.
+				branches: 89,
 				statements: 96,
 			},
 		},

@@ -47,10 +47,12 @@ export default defineConfig({
 				// lines 75.63, functions 88.88, branches 96.09, statements 75.63.
 				// Raised 2026-10-29 by S64 (Live pitch theater, catcher's view, Plays replays): lines 97.29, functions 94.68, branches 96.81.
 				// Raised 2026-10-29 by S41 (Plays room: inning sidebar, half-inning rows, scoring plays): functions 95.83, branches 97.16.
-				lines: 97,
-				functions: 95,
-				branches: 97,
-				statements: 97,
+				// Raised 2026-10-30 by S67 (S66's scoreboard, S69's Videos room and S67's slot folded in):
+				// lines 99.1, functions 97.16, branches 98.11, statements 99.1.
+				lines: 99,
+				functions: 97,
+				branches: 98,
+				statements: 99,
 			},
 		},
 	},
