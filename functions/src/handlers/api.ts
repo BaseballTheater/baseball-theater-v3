@@ -274,7 +274,7 @@ export const API_ROUTER: readonly RouteEntry[] = [
 			{
 				return sendError(400, {
 					error: "invalid_settings",
-					hint: "{ favoriteTeamIds, opensFirst, gameRowSlot?, version }",
+					hint: "{ favoriteTeamIds, opensFirst, gameRowSlot?, collapseNonFavorites?, hideScores?, version }",
 				});
 			}
 			// Apply-if-newer (ADR-022): an older version is ignored, and the answer is what is stored.

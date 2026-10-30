@@ -16,16 +16,31 @@
 				"additionalProperties": false,
 				"description": "A user's settings, stored on their account (ADR-027) and synced to every device. Versioned like every BT document (ADR-022): a write applies only if its `version` is newer than the stored one, so a stale device can't undo a newer change. Controls that land later (collapse and Hide Scores S68, Video Player S70) add their fields with their reader.",
 				"properties": {
+					"collapseNonFavorites": {
+						"description": "Fold games without a favorite team into slim bars (S68).",
+						"type": "boolean"
+					},
 					"favoriteTeamIds": {
 						"description": "MLB team ids (`MLB_TEAMS`), in the order the user picked them.",
 						"items": { "type": "number" },
 						"type": "array"
 					},
 					"gameRowSlot": { "$ref": "#/components/schemas/GameRowSlot" },
+					"hideScores": {
+						"description": "Hide every score and record (S68). Read it through `shouldHideScores`, never directly (owner, 2026-10-21), so the setting can outgrow an on/off switch.",
+						"type": "boolean"
+					},
 					"opensFirst": { "$ref": "#/components/schemas/OpensFirst" },
 					"version": { "type": "number" }
 				},
-				"required": ["favoriteTeamIds", "opensFirst", "gameRowSlot", "version"],
+				"required": [
+					"favoriteTeamIds",
+					"opensFirst",
+					"gameRowSlot",
+					"collapseNonFavorites",
+					"hideScores",
+					"version"
+				],
 				"type": "object"
 			},
 			"ApiErrorResponse": {
@@ -790,14 +805,22 @@
 			},
 			"SettingsRequest": {
 				"additionalProperties": false,
-				"description": "A settings write: the whole document with a bumped `version`; an older version is ignored (ADR-022). `gameRowSlot` (S67) may be left out — it reads as the default — so a page loaded before it shipped can still save.",
+				"description": "A settings write: the whole document with a bumped `version`; an older version is ignored (ADR-022). `gameRowSlot` (S67), `collapseNonFavorites` and `hideScores` (S68) may be left out — each reads as its default — so a page loaded before they shipped can still save.",
 				"properties": {
+					"collapseNonFavorites": {
+						"description": "Fold games without a favorite team into slim bars (S68).",
+						"type": "boolean"
+					},
 					"favoriteTeamIds": {
 						"description": "MLB team ids (`MLB_TEAMS`), in the order the user picked them.",
 						"items": { "type": "number" },
 						"type": "array"
 					},
 					"gameRowSlot": { "$ref": "#/components/schemas/GameRowSlot" },
+					"hideScores": {
+						"description": "Hide every score and record (S68). Read it through `shouldHideScores`, never directly (owner, 2026-10-21), so the setting can outgrow an on/off switch.",
+						"type": "boolean"
+					},
 					"opensFirst": { "$ref": "#/components/schemas/OpensFirst" },
 					"version": { "type": "number" }
 				},
@@ -1041,7 +1064,7 @@
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
 						},
-						"description": "The body is not a settings document (known team ids, an offered room, a known game-row slot or none, a whole non-negative version)."
+						"description": "The body is not a settings document (known team ids, an offered room, a known game-row slot or none, true or false or none for collapse and hide scores, a whole non-negative version)."
 					},
 					"401": {
 						"content": {

@@ -136,9 +136,13 @@ export interface components {
         };
         /** @description A user's settings, stored on their account (ADR-027) and synced to every device. Versioned like every BT document (ADR-022): a write applies only if its `version` is newer than the stored one, so a stale device can't undo a newer change. Controls that land later (collapse and Hide Scores S68, Video Player S70) add their fields with their reader. */
         AccountSettings: {
+            /** @description Fold games without a favorite team into slim bars (S68). */
+            collapseNonFavorites: boolean;
             /** @description MLB team ids (`MLB_TEAMS`), in the order the user picked them. */
             favoriteTeamIds: number[];
             gameRowSlot: components["schemas"]["GameRowSlot"];
+            /** @description Hide every score and record (S68). Read it through `shouldHideScores`, never directly (owner, 2026-10-21), so the setting can outgrow an on/off switch. */
+            hideScores: boolean;
             opensFirst: components["schemas"]["OpensFirst"];
             version: number;
         };
@@ -530,11 +534,15 @@ export interface components {
             record?: components["schemas"]["TeamRecord"] | null;
             teamName: string;
         };
-        /** @description A settings write: the whole document with a bumped `version`; an older version is ignored (ADR-022). `gameRowSlot` (S67) may be left out — it reads as the default — so a page loaded before it shipped can still save. */
+        /** @description A settings write: the whole document with a bumped `version`; an older version is ignored (ADR-022). `gameRowSlot` (S67), `collapseNonFavorites` and `hideScores` (S68) may be left out — each reads as its default — so a page loaded before they shipped can still save. */
         SettingsRequest: {
+            /** @description Fold games without a favorite team into slim bars (S68). */
+            collapseNonFavorites?: boolean;
             /** @description MLB team ids (`MLB_TEAMS`), in the order the user picked them. */
             favoriteTeamIds: number[];
             gameRowSlot?: components["schemas"]["GameRowSlot"];
+            /** @description Hide every score and record (S68). Read it through `shouldHideScores`, never directly (owner, 2026-10-21), so the setting can outgrow an on/off switch. */
+            hideScores?: boolean;
             opensFirst: components["schemas"]["OpensFirst"];
             version: number;
         };
@@ -837,7 +845,7 @@ export interface operations {
                     "application/json": components["schemas"]["SettingsResponse"];
                 };
             };
-            /** @description The body is not a settings document (known team ids, an offered room, a known game-row slot or none, a whole non-negative version). */
+            /** @description The body is not a settings document (known team ids, an offered room, a known game-row slot or none, true or false or none for collapse and hide scores, a whole non-negative version). */
             400: {
                 headers: {
                     [name: string]: unknown;

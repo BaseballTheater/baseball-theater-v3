@@ -81,10 +81,13 @@ export type SettingsResponse = AccountSettings;
 
 /**
  * A settings write: the whole document with a bumped `version`; an older version is
- * ignored (ADR-022). `gameRowSlot` (S67) may be left out — it reads as the default —
- * so a page loaded before it shipped can still save.
+ * ignored (ADR-022). `gameRowSlot` (S67), `collapseNonFavorites` and `hideScores` (S68)
+ * may be left out — each reads as its default — so a page loaded before they shipped can still save.
  */
-export type SettingsRequest = Omit<AccountSettings, "gameRowSlot"> & Partial<Pick<AccountSettings, "gameRowSlot">>;
+export type SettingsRequest = Omit<AccountSettings, OptionalSettings> & Partial<Pick<AccountSettings, OptionalSettings>>;
+
+/** Settings added after launch of the document, which a write may leave out (S67, S68). */
+type OptionalSettings = "gameRowSlot" | "collapseNonFavorites" | "hideScores";
 
 /** The one error-body shape every 4xx path returns. */
 export interface ApiErrorResponse {

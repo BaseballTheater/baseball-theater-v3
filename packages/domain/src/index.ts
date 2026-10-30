@@ -27,4 +27,6 @@ export * from "./team-record.js";
 export * from "./calendar-date.js";
 export * from "./slot-occupant.js";
 export * from "./highlights.js";
+export * from "./hide-scores.js";
+export * from "./scoreboard-rows.js";
 export * from "./settings.js";

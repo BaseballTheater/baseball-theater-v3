@@ -94,6 +94,25 @@ export function setGameRowSlot(slot: GameRowSlot): Promise<void>
 	});
 }
 
+/** Fold games without a favorite team into slim bars on the scoreboard (S68). */
+export function setCollapseNonFavorites(on: boolean): Promise<void>
+{
+	return save({
+		collapseNonFavorites: on,
+	});
+}
+
+/**
+ * Turn Hide Scores on or off (S68). Views never read it back directly: they ask
+ * `useScoresHidden`, which asks `shouldHideScores` (owner, 2026-10-21).
+ */
+export function setHideScores(on: boolean): Promise<void>
+{
+	return save({
+		hideScores: on,
+	});
+}
+
 /** Reads the account's settings into the store (after sign-in). */
 export async function hydrateSettings(): Promise<void>
 {

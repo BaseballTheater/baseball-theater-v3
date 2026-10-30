@@ -82,6 +82,8 @@ const saved: AccountSettings = {
 	favoriteTeamIds: [147, 111],
 	opensFirst: "live",
 	gameRowSlot: "status",
+	collapseNonFavorites: false,
+	hideScores: false,
 	version: 2,
 };
 

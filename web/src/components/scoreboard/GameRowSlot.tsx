@@ -9,6 +9,7 @@ import {
 import type { GameRowSlot as GameRowSlotSetting } from "@bt/domain";
 import { BaseDiamond } from "../game/BaseDiamond.js";
 import { roomLabel, shortPlayerName } from "../game/format.js";
+import { HiddenValue } from "../HiddenValue.js";
 import type { ScoreboardGame } from "./ScoreboardModule.js";
 
 /** A muted, one-line slot row (`W: C. Rodón`, `AB: M. Machado`), cut with an ellipsis when long. */
@@ -17,8 +18,9 @@ function Line({ children }: { children: ReactNode })
 	return <Text fz={11} fw={700} c="var(--bt-muted)" lh={1.4} truncate>{children}</Text>;
 }
 
-/** Final: the pitchers of record, W / L / S, each only when MLB named one. */
-function PitchersOfRecord({ game }: { game: ScoreboardGame })
+/** Final: the pitchers of record, W / L / S, each only when MLB named one; masked with scores hidden (A3). */
+function PitchersOfRecord({ game, hidden }: { game: ScoreboardGame;
+	hidden: boolean; })
 {
 	const decisions = game.decisions;
 	const rows = [
@@ -28,7 +30,7 @@ function PitchersOfRecord({ game }: { game: ScoreboardGame })
 	] as const;
 	return (
 		<Stack gap={2} data-testid="slot-pitchers">
-			{rows.map(([letter, player]) => (player ? <Line key={letter}>{letter}: {shortPlayerName(player.fullName)}</Line> : null))}
+			{rows.map(([letter, player]) => (player ? <Line key={letter}>{letter}: {hidden ? <HiddenValue kind="name" /> : shortPlayerName(player.fullName)}</Line> : null))}
 		</Stack>
 	);
 }
@@ -98,8 +100,12 @@ function RoomMenu({ game }: { game: ScoreboardGame })
  * the count on a live game and the probables before first pitch; Room Menu links into
  * the game's rooms. Win probability is left out at launch (owner, 2026-10-19).
  */
-export function GameRowSlot({ game, setting }: { game: ScoreboardGame;
-	setting: GameRowSlotSetting; })
+export function GameRowSlot({
+	game, setting, scoresHidden = false,
+}: { game: ScoreboardGame;
+	setting: GameRowSlotSetting;
+	/** Hide Scores (S68): masks the pitchers of record; the count, AB / P and probables stay (A3). */
+	scoresHidden?: boolean; })
 {
 	const occupant = slotOccupant(setting, gamePhase(game.status.codedGameState));
 	return (
@@ -116,7 +122,7 @@ export function GameRowSlot({ game, setting }: { game: ScoreboardGame;
 				minWidth: 0,
 			}}
 		>
-			{occupant === "pitchersOfRecord" ? <PitchersOfRecord game={game} /> : null}
+			{occupant === "pitchersOfRecord" ? <PitchersOfRecord game={game} hidden={scoresHidden} /> : null}
 			{occupant === "count" ? <Count game={game} /> : null}
 			{occupant === "probables" ? <Probables game={game} /> : null}
 			{occupant === "roomMenu" ? <RoomMenu game={game} /> : null}

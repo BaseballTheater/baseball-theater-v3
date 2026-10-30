@@ -63,6 +63,8 @@ describe("personal data registry", () =>
 			favoriteTeamIds: [147],
 			opensFirst: "live" as const,
 			gameRowSlot: "status" as const,
+			collapseNonFavorites: false,
+			hideScores: false,
 			version: 1,
 		};
 		await settings.upsert("uid-1", doc);

@@ -1,20 +1,30 @@
 import {
 	SimpleGrid, Stack, Text,
 } from "@mantine/core";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { scoreboardRows } from "@bt/domain";
 import { useScheduleDay } from "../api/schedule.js";
 import type { ScheduleDayPayload } from "../api/schedule.js";
 import { ViewState } from "../components/ViewState.js";
+import { CollapsedBar } from "../components/scoreboard/CollapsedBar.js";
 import { DateControl } from "../components/scoreboard/DateControl.js";
 import { ScoreboardModule } from "../components/scoreboard/ScoreboardModule.js";
 import { formatDate } from "../format/datetime.js";
 import { FooterMeta } from "../layout/FooterMeta.js";
 import type { LayoutVariant } from "../layout/variant.js";
+import { useSettings } from "../settings/store.js";
 
-/** The day's games under their `GAMES — SEP 21, 2026` label, or the empty sentence. */
+/**
+ * The day's games under their `GAMES — SEP 21, 2026` label, or the empty sentence. With
+ * Collapse Non-Favorites on, `scoreboardRows` folds games without a favorite team into
+ * `CollapsedBar`s after the favorites; a bar opens to its full module when chosen.
+ */
 function Games({ day, variant }: { day: ScheduleDayPayload;
 	variant: LayoutVariant; })
 {
+	const { favoriteTeamIds, collapseNonFavorites } = useSettings();
+	const [expanded, setExpanded] = useState<ReadonlySet<number>>(new Set());
 	if (day.games.length === 0)
 	{
 		return <ViewState kind="empty" message="No games scheduled for this date." />;
@@ -25,7 +35,9 @@ function Games({ day, variant }: { day: ScheduleDayPayload;
 				Games — {formatDate(day.date)}
 			</Text>
 			<SimpleGrid cols={variant === "mobile" ? 1 : 2} spacing="md" verticalSpacing="md" data-testid="scoreboard-grid">
-				{day.games.map((game) => <ScoreboardModule key={game.gamePk} game={game} />)}
+				{scoreboardRows(day.games, favoriteTeamIds, collapseNonFavorites).map(({ game, collapsed }) => (collapsed && !expanded.has(game.gamePk) ? (
+					<CollapsedBar key={game.gamePk} game={game} onExpand={() => setExpanded(new Set(expanded).add(game.gamePk))} />
+				) : <ScoreboardModule key={game.gamePk} game={game} />))}
 			</SimpleGrid>
 		</Stack>
 	);

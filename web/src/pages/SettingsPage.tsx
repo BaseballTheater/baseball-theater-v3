@@ -3,7 +3,7 @@ import {
 	GAME_ROW_SLOTS, MLB_TEAMS, OPENS_FIRST_ROOMS,
 } from "@bt/domain";
 import {
-	Anchor, MultiSelect, Radio, SimpleGrid, Stack, Text, Title,
+	Anchor, Divider, MultiSelect, Radio, SimpleGrid, Stack, Switch, Text, Title,
 } from "@mantine/core";
 import type { ReactNode } from "react";
 import { roomLabel } from "../components/game/format.js";
@@ -11,7 +11,7 @@ import type { LayoutVariant } from "../layout/variant.js";
 import { useSession } from "../session/session.js";
 import { AccountData } from "./settings/AccountData.js";
 import {
-	setFavoriteTeams, setGameRowSlot, setOpensFirst, useSettings,
+	setCollapseNonFavorites, setFavoriteTeams, setGameRowSlot, setHideScores, setOpensFirst, useSettings,
 } from "../settings/store.js";
 
 const TEAM_OPTIONS = MLB_TEAMS.map((team) => ({
@@ -39,10 +39,10 @@ function SettingsGroup({ title, children }: { title: string;
 
 /**
  * Settings, as the ratified frames draw it (standings-search-settings, A3):
- * Game List (Favorite Teams, Game-Row Slot) on the left, Game Detail (Opens First)
- * and Account on the right; one column on mobile. Every control is one this story can make
- * work; the collapse, Hide Scores and Video Player controls arrive with
- * the screens that read them (S68, S70), and the Patreon rows with the
+ * Game List (Favorite Teams, Game-Row Slot, Collapse Non-Favorites, Hide Scores) on the
+ * left, Game Detail (Opens First) and Account on the right; one column on mobile. Every
+ * control is one this story can make work; the Video Player control arrives with
+ * the screen that reads it (S70), and the Patreon rows with the
  * Patreon link. Signed-in only (the route guards it), so the session has an
  * account. Download and delete your data sit at the end of Account (A4, S79).
  */
@@ -74,6 +74,29 @@ export function SettingsPage({ variant }: { variant: LayoutVariant })
 								{GAME_ROW_SLOTS.map((slot) => <Radio key={slot} value={slot} label={SLOT_LABELS[slot]} />)}
 							</Stack>
 						</Radio.Group>
+						<Divider my="xs" />
+						<Switch
+							label="Collapse Non-Favorites"
+							labelPosition="left"
+							checked={settings.collapseNonFavorites}
+							onChange={(event) => void setCollapseNonFavorites(event.currentTarget.checked)}
+							styles={{
+								body: {
+									justifyContent: "space-between",
+								},
+							}}
+						/>
+						<Switch
+							label="Hide Scores"
+							labelPosition="left"
+							checked={settings.hideScores}
+							onChange={(event) => void setHideScores(event.currentTarget.checked)}
+							styles={{
+								body: {
+									justifyContent: "space-between",
+								},
+							}}
+						/>
 					</SettingsGroup>
 				</Stack>
 				<Stack gap="xl">

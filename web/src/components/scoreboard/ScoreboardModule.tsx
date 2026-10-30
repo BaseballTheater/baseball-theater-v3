@@ -10,6 +10,8 @@ import type { GamePhase } from "@bt/domain";
 import type { ScheduleDayPayload } from "../../api/schedule.js";
 import { viewerTimeZone } from "../../format/datetime.js";
 import { useSettings } from "../../settings/store.js";
+import { useScoresHidden } from "../../settings/useScoresHidden.js";
+import { HiddenValue } from "../HiddenValue.js";
 import { LiveIndicator } from "../game/LiveIndicator.js";
 import { TeamEdge } from "../team/TeamEdge.js";
 import { GameRowSlot } from "./GameRowSlot.js";
@@ -60,11 +62,14 @@ function StatusLine({ game, phase }: { game: ScoreboardGame;
 	);
 }
 
-/** One team's row: its color edge, club name, and the record line under it. */
-function TeamCell({ team, phase }: { team: ScoreboardGame["teams"]["away"];
-	phase: GamePhase; })
+/** One team's row: its color edge, club name, and the record line under it (masked with scores hidden). */
+function TeamCell({
+	team, phase, hidden,
+}: { team: ScoreboardGame["teams"]["away"];
+	phase: GamePhase;
+	hidden: boolean; })
 {
-	const record = teamRecordLabel(team, phase);
+	const record = hidden ? <>{team.abbreviation} (<HiddenValue kind="record" />)</> : teamRecordLabel(team, phase);
 	return (
 		<Group gap={8} wrap="nowrap" mih={36} data-testid="team-row" style={{
 			minWidth: 0,
@@ -90,7 +95,9 @@ function TeamCell({ team, phase }: { team: ScoreboardGame["teams"]["away"];
  * edge only; names and numbers stay Light. Every label comes from `packages/domain`
  * (phase, inning, record, start time); this only lays them out. The right-hand slot
  * (S67) shows what the user's Game-Row Slot setting picks; the rest of the module
- * links to the game. Hide Scores and collapsed bars are S68's.
+ * links to the game. With Hide Scores on (S68, `useScoresHidden`) the R · H · E cells,
+ * records and pitchers of record are masked by `HiddenValue` in place, so the module
+ * keeps its size; collapsed bars are `CollapsedBar`.
  */
 export function ScoreboardModule({ game }: { game: ScoreboardGame })
 {
@@ -99,6 +106,7 @@ export function ScoreboardModule({ game }: { game: ScoreboardGame })
 	const lines = [game.linescore?.teams.away, game.linescore?.teams.home];
 	const scored = phase !== "pregame";
 	const { gameRowSlot } = useSettings();
+	const hidden = useScoresHidden(game);
 	return (
 		<Paper
 			data-testid="scoreboard-module"
@@ -141,18 +149,18 @@ export function ScoreboardModule({ game }: { game: ScoreboardGame })
 						display: "contents",
 					}}
 					>
-						<TeamCell team={team} phase={phase} />
+						<TeamCell team={team} phase={phase} hidden={hidden} />
 						{scored ? (
 							<>
-								<Text ta="center" fz={18} fw={700} data-testid="runs">{lines[i]?.runs ?? "–"}</Text>
-								<Text ta="center" fz={14} data-testid="hits">{lines[i]?.hits ?? "–"}</Text>
-								<Text ta="center" fz={14} data-testid="errors">{lines[i]?.errors ?? "–"}</Text>
+								<Text ta="center" fz={18} fw={700} data-testid="runs">{hidden ? <HiddenValue kind="score" /> : lines[i]?.runs ?? "–"}</Text>
+								<Text ta="center" fz={14} data-testid="hits">{hidden ? <HiddenValue kind="score" /> : lines[i]?.hits ?? "–"}</Text>
+								<Text ta="center" fz={14} data-testid="errors">{hidden ? <HiddenValue kind="score" /> : lines[i]?.errors ?? "–"}</Text>
 							</>
 						) : null}
 					</Box>
 				))}
 			</Box>
-			<GameRowSlot game={game} setting={gameRowSlot} />
+			<GameRowSlot game={game} setting={gameRowSlot} scoresHidden={hidden} />
 		</Paper>
 	);
 }

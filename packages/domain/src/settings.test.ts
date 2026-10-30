@@ -32,6 +32,8 @@ describe("parseAccountSettings", () =>
 			favoriteTeamIds: [147, 111],
 			opensFirst: "live",
 			gameRowSlot: "roomMenu",
+			collapseNonFavorites: false,
+			hideScores: false,
 			version: 3,
 		});
 	});
@@ -48,8 +50,34 @@ describe("parseAccountSettings", () =>
 			favoriteTeamIds: [],
 			opensFirst: "box",
 			gameRowSlot: "status",
+			collapseNonFavorites: false,
+			hideScores: false,
 			version: 2,
 		});
+	});
+
+	it("collapseNonFavorites and hideScores: off by default, kept when given, booleans only (S68)", () =>
+	{
+		expect(DEFAULT_SETTINGS).toMatchObject({
+			collapseNonFavorites: false,
+			hideScores: false,
+		});
+		expect(parseAccountSettings({
+			favoriteTeamIds: [],
+			opensFirst: "box",
+			collapseNonFavorites: true,
+			hideScores: true,
+			version: 2,
+		})).toMatchObject({
+			collapseNonFavorites: true,
+			hideScores: true,
+		});
+		expect(parseAccountSettings({
+			favoriteTeamIds: [],
+			opensFirst: "box",
+			hideScores: "yes",
+			version: 2,
+		})).toBeNull();
 	});
 
 	it("rejects anything malformed", () =>

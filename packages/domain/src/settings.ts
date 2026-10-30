@@ -27,6 +27,13 @@ export type AccountSettings = {
 	favoriteTeamIds: number[];
 	opensFirst: OpensFirst;
 	gameRowSlot: GameRowSlot;
+	/** Fold games without a favorite team into slim bars (S68). */
+	collapseNonFavorites: boolean;
+	/**
+	 * Hide every score and record (S68). Read it through `shouldHideScores`, never
+	 * directly (owner, 2026-10-21), so the setting can outgrow an on/off switch.
+	 */
+	hideScores: boolean;
 	version: number;
 };
 
@@ -35,6 +42,8 @@ export const DEFAULT_SETTINGS: AccountSettings = {
 	favoriteTeamIds: [],
 	opensFirst: "videos",
 	gameRowSlot: "status",
+	collapseNonFavorites: false,
+	hideScores: false,
 	version: 0,
 };
 
@@ -43,25 +52,32 @@ const TEAM_IDS = new Set(MLB_TEAMS.map((t) => t.id));
 /**
  * `value` as settings when it is a well-formed document (every field present,
  * known team ids without repeats, an offered room, a whole non-negative
- * version), else null. A missing `gameRowSlot` reads as the default: a page loaded
- * before S67 saves documents without it, and must not get a 400 for that. The server uses it on every write, so nothing malformed
+ * version), else null. A missing `gameRowSlot`, `collapseNonFavorites` or `hideScores`
+ * reads as the default: a page loaded before S67 / S68 saves documents without them,
+ * and must not get a 400 for that. The server uses it on every write, so nothing malformed
  * is stored.
  */
 export function parseAccountSettings(value: unknown): AccountSettings | null
 {
 	if (value === null || typeof value !== "object") return null;
 	const {
-		favoriteTeamIds, opensFirst, gameRowSlot = DEFAULT_SETTINGS.gameRowSlot, version,
+		favoriteTeamIds, opensFirst, version,
+		gameRowSlot = DEFAULT_SETTINGS.gameRowSlot,
+		collapseNonFavorites = DEFAULT_SETTINGS.collapseNonFavorites,
+		hideScores = DEFAULT_SETTINGS.hideScores,
 	} = value as Record<string, unknown>;
 	if (!Array.isArray(favoriteTeamIds) || !favoriteTeamIds.every((id) => typeof id === "number" && TEAM_IDS.has(id))) return null;
 	if (new Set(favoriteTeamIds).size !== favoriteTeamIds.length) return null;
 	if (!OPENS_FIRST_ROOMS.some((room) => room === opensFirst)) return null;
 	if (!GAME_ROW_SLOTS.some((slot) => slot === gameRowSlot)) return null;
+	if (typeof collapseNonFavorites !== "boolean" || typeof hideScores !== "boolean") return null;
 	if (typeof version !== "number" || !Number.isInteger(version) || version < 0) return null;
 	return {
 		favoriteTeamIds: favoriteTeamIds as number[],
 		opensFirst: opensFirst as OpensFirst,
 		gameRowSlot: gameRowSlot as GameRowSlot,
+		collapseNonFavorites,
+		hideScores,
 		version,
 	};
 }
