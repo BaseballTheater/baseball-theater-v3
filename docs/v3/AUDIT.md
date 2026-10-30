@@ -11444,3 +11444,18 @@ Owner, 2026-10-30, answering the 2026-10-30 backlog review and the S67 AC change
 1. S47's edge cache — Workers Cache or the Cache API? "Workers cache" — applied in 3d70149: S47 AC 6 enables Workers Cache in wrangler.jsonc, AC 5's README line names it and its billing, cap 12 → 13, status back to todo. Recording ADR-017's new cost line (every request billed at the Workers rate) is left to the next backlog review.
 2. Does the owner-directed change to S67 AC 3 (no pips; 6c0e367) need its own backlog review? "No review - the design already had it that way". Logged here; the next scheduled or drift review still checks it.
 3. S69's Featured team: "Featured team is just a way to filter or label videos. Most highlights feature a particular team - the team benefiting from the play". Not yet applied: S69 (parked) will change to it after one follow-up question on how the filter picks a team.
+
+---
+
+## 2026-10-30 — backlog review answers (2026-10-30)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-10-30 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-10-30T18:36:31Z` |
+| HEAD at capture | `d4fac0c` (tree dirty) |
+| Applied in | `d4fac0c` — S47 AC 3 re-scoped with the owner (2026-10-30, "sounds good"): "scripts/verify-S17.sh exits 0" becomes S17's own test, functions/src/services/refresh.test.ts, exiting 0 run alone. S17's grader is a commit-time proof (S84) and still holds at its shipping commit; at HEAD its Status check exits 141 because the S17→S18 span of the priority-ordered backlog now holds S43 and S47. Same fix the 2026-10-30 review gave S48's AC 6. Back to todo. |
+
+**Answers and what was applied**
+
+S47 AC 3 re-scope (owner-directed backlog change). Asked whether S47's AC 3 should require S17's own test (functions/src/services/refresh.test.ts) instead of scripts/verify-S17.sh, which only has to hold at S17's own commit (S84); owner: "sounds good" (and earlier: "These should only be expected to succeed against the codebase as it was when they were created... right?"). Asked whether the change needs a backlog review (recommended no); owner: "sounds good". No review; the next scheduled review checks it.
