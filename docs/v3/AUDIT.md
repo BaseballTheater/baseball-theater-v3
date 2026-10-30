@@ -11571,3 +11571,37 @@ The platform band (S47 → S48 → S18 / S19 → S20, then S50 / S51) is launch 
 1. Should the video play links (S93, S94, S95, then S98) move ahead of the platform work, or stay after the Postgres switch (S51)? See the report.
 2. Is it right that S102 changes the Standings headings to MLB's own short names ("AL East") and deletes BT's hand-kept list?
 3. Carried from the parity review: should BT ingest the gameday config feed? It is mlb.com app settings, not game data.
+
+---
+
+## 2026-10-30 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-10-30T21:14:55Z` |
+| HEAD at review | `8c59368` (tree dirty) |
+| Trigger | S103 added; FEATURES.md changed (8c59368) |
+| Stories `done` since last review | S103, S95 note, S99 note |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+**1. Citation honesty**
+
+- **S103 → Feature: More MLB game data.** Holds. The row now names Baseball Savant's game feed, and the story ingests exactly the fields the row lists. AC 4's field set (`xba`, `isBarrel`, spray x/y, `homeRunBallparks`, `batSpeed`, `isSword`, `savantInZone`, `timesThroughOrder`, `isAbsChallenge`, `plateXPoly`/`plateZPoly`) matches the row's plain-language list one for one. The quotes match the owner's words this session verbatim: *"oh, I forgot, there's also this: https://baseballsavant.mlb.com/gf?game_pk=823823"*, *"Yes re: S103"*, and *"Something that needs to be accounted for is the potential difference in arrival time for the baseball savant details"*. The story's Gap also quotes the rest of that message verbatim (*"Since the season is over, I can't tell whether there's any time delta in the realtime arrival of these, unless the data itself tells us something useful."*). AC 5 (own cadence, merge by version, logging of first arrival, bounded polling) answers it without inventing a delay. The owner also asked *"There are a TON of stats in there too, aren't those more robust?"* and *"like pitch trajectory metrics and stuff"*. The answer was that trajectory, zone and box-score values are identical to the live feed. AC 4's "no trajectory, zone, box-score or season field is copied" follows from that answer and the owner's "Yes".
+- **Amended (attribution):** the row hung the whole field list on *"Yes re: S103"*. The owner said yes to the question, not to a list. The row now says what the "Yes" answered ("asked whether to ingest only the Savant fields BT doesn't already have"), and that the list is what the 823823 recording holds beyond MLB's feeds.
+- **S95, S99 notes (8c59368).** These are notes only, with no Source, Gap, Impact or AC change. Both are feature-cited, so they need no new approval. S99's note quotes the owner's *"Ok, agreed"* correctly for the gameday-config decision.
+- **Next 3 todo by priority:** S70 (71), S75 (72), S71 (73). All hold, as in the 2026-10-30 review. Since e2855f0, S70 changed only its priority. S75 gained depends_on S70/S93/S102 and notes, with Gap, Impact and ACs unchanged. S71 is unchanged. Each still matches its row: Game → Videos / Settings playback prefs (Dialog default / Stage), Settings Hide Scores (the owner's spoiler principle), and "Best of [date]" committed for launch.
+- **Open:** none (grep `**Source:** Open` over the story notes finds nothing). **Pillar-cited stories:** none were added or re-scoped in 1dbfd80 or 8c59368.
+
+**2. Doc reflects reality**
+
+- **Amended (closes the last review's open question):** the 2026-10-30 parity review asked whether to ingest the bdfed Gameday config feed. The owner answered *"Ok, agreed"* to leaving it out, keeping only its player-of-the-game window as a note on S99. FEATURES' "More MLB game data" row now records that, in the owner's words.
+- **Amended (tension with Multi-source knowledge):** FEATURES §Multi-source knowledge put "Savant video/play data merged into game/player context" under **Complex stretch (later)**, which needs ingestion policy, caching, cost and legal/ToS care. S103 pulls Savant's per-pitch data in now, on the owner's word. That paragraph now says Savant's game feed comes earlier, under More MLB game data (*"Yes re: S103"*), and that the ToS care still applies, as S103's first note already says. No contradiction with ARCHITECTURE §3/ADR-009: §3 already calls Savant "the first **fetch** target for G2" and inline Statcast "Yes, carefully", with server-side fetch and caching. S103 does this at ingest (ADR-002).
+- No contradiction found with VISUAL-DESIGN. S103 adds no view ("No view shows these yet").
+
+**3. Coverage, for the next backlog review**
+
+- **Savant ToS check has no owner.** S103's note asks for a terms-of-use check before the HTTP adapter calls `baseballsavant.mlb.com/gf` outside a recording, but no AC requires the check or a record of it. The backlog review should decide whether that needs an AC or stays a note.
+- **No view for Savant's extras**, like S99/S101/S102. The data is ingest-only by the owner's request. Flagged so the gap from ingested data to a view is visible.
