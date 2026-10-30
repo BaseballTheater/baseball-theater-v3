@@ -14,8 +14,15 @@ Clean-slate rewrite of [baseball.theater](https://baseball.theater). Planning do
 ```bash
 nvm use          # Node 24 LTS (.nvmrc)
 pnpm install
-pnpm dev         # API :8787 + web :5173
+pnpm dev         # API :8787 (Worker on workerd) + web :5173
 ```
+
+`pnpm dev` runs the API as the Cloudflare Worker it ships as (`wrangler.jsonc`,
+`functions/src/worker.ts`) on the local Workers runtime, workerd, through `wrangler dev`.
+No Cloudflare account or login is needed: the Worker serves the bundled fixtures from
+in-memory repos. Set `BT_USE_LIVE_MLB=1` (or `BT_INGEST_TICK=1` to let the cron ingest
+tick run) with `--var`, or in a git-ignored `functions/.dev.vars`. The Node server
+(`pnpm --filter @bt/functions start`) still exists for the Node-only tools.
 
 Open http://localhost:5173 — scoreboard for `2024-07-04` loads from fixtures.
 
@@ -30,7 +37,7 @@ Useful routes:
 | Command              | What                                             |
 | -------------------- | ------------------------------------------------ |
 | `pnpm verify`        | **Single health gate** (lint + coverage + build) |
-| `pnpm dev`           | Local API + Vite                                 |
+| `pnpm dev`           | Local API (Worker on workerd) + Vite             |
 | `pnpm test`          | Vitest (all packages)                            |
 | `pnpm test:coverage` | Coverage + thresholds                            |
 | `pnpm lint`          | ESLint                                           |
@@ -45,7 +52,7 @@ Loop / agent automation: [docs/v3/LOOP.md](./docs/v3/LOOP.md) · backlog [docs/v
 ```
 packages/domain   # pure types + logic (coordinates, impact, entitlements)
 packages/ports    # repository / MLB / auth interfaces
-functions         # ingest + HTTP API (local Node server; Cloudflare Worker later)
+functions         # ingest + HTTP API (a Cloudflare Worker; Node tools beside it)
 web               # Mantine SPA
 fixtures/         # schedule + game JSON for local/CI
 ```

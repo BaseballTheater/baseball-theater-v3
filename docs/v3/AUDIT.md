@@ -11188,3 +11188,93 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-10-30 — S45 completed
+
+**Worker entry + local Workers runtime + Workers tests**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-10-30T07:40:16Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `969916a` (tree dirty) |
+| Grader | `scripts/verify-S45.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: wrangler.jsonc: main functions/src/worker.ts, assets from web/dist, one cron trigger, compatibility_date 2026-08-04 or later; no account_id, no secrets
+check 2 PASS: functions/src/worker.ts default-exports { fetch, scheduled }; fetch calls handleApiRequest; the Worker's fixture client loads fixtures without node:fs
+check 3 PASS: a @cloudflare/vitest-pool-workers test runs inside workerd and gets 200 for the schedule and game 744834; it exits 0 run alone
+check 4 PASS: the root dev script starts the API on the local Workers runtime plus the web app, no Cloudflare login; README documents it
+check 5 PASS: the Node-only tools still run: pnpm api:spec leaves openapi/bt-api.v1.json unchanged; pnpm mlb:scan-drift exits 0 offline
+check 6 PASS: functions coverage thresholds are unchanged or higher
+check 7 PASS: no package.json script contains wrangler deploy
+check 8 PASS: the Worker composition: fixture client by default, live only on BT_USE_LIVE_MLB; tickIngest from scheduled behind a BT_* gate in dev; no replay capture in fetch or dev; verify-S12/-S16/-S22 not edited
+check 9 PASS: CLAUDE.md's Testing line describes the Workers test runner, not a real http server
+check 10 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**10/10 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S45 check results ---
+check 1 PASS: wrangler.jsonc: main functions/src/worker.ts, assets from web/dist, one cron trigger, compatibility_date 2026-08-04 or later; no account_id, no secrets
+check 2 PASS: functions/src/worker.ts default-exports { fetch, scheduled }; fetch calls handleApiRequest; the Worker's fixture client loads fixtures without node:fs
+check 3 PASS: a @cloudflare/vitest-pool-workers test runs inside workerd and gets 200 for the schedule and game 744834; it exits 0 run alone
+check 4 PASS: the root dev script starts the API on the local Workers runtime plus the web app, no Cloudflare login; README documents it
+check 5 PASS: the Node-only tools still run: pnpm api:spec leaves openapi/bt-api.v1.json unchanged; pnpm mlb:scan-drift exits 0 offline
+check 6 PASS: functions coverage thresholds are unchanged or higher
+check 7 PASS: no package.json script contains wrangler deploy
+check 8 PASS: the Worker composition: fixture client by default, live only on BT_USE_LIVE_MLB; tickIngest from scheduled behind a BT_* gate in dev; no replay capture in fetch or dev; verify-S12/-S16/-S22 not edited
+check 9 PASS: CLAUDE.md's Testing line describes the Workers test runner, not a real http server
+check 10 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S45: 10/10 checks passed ---
+verify-S45: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+packages/ports build: Done
+web build: vite v6.4.3 building for production...
+web build: transforming...
+web build: ✓ 7084 modules transformed.
+web build: rendering chunks...
+web build: computing gzip size...
+web build: dist/index.html                     1.00 kB │ gzip:   0.53 kB
+web build: dist/assets/batter-J7FnW6ss.webp   74.81 kB
+web build: dist/assets/index-BEBfbMX0.css    201.84 kB │ gzip:  29.52 kB
+web build: dist/assets/index-Ku6OYggm.js     604.02 kB │ gzip: 191.78 kB
+web build: ✓ built in 1.73s
+web build: (!) Some chunks are larger than 500 kB after minification. Consider:
+web build: - Using dynamic import() to code-split the application
+web build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+web build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 191465,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

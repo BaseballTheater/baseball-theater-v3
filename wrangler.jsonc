@@ -1,0 +1,27 @@
+// The API and web app as one Cloudflare Worker (S45; ADR-017). `pnpm dev` runs it on
+// the local Workers runtime (workerd) with no Cloudflare login. No account id or
+// secrets live here: sessions use BT_SESSION_KEY from `.dev.vars` or a deploy secret.
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "baseball-theater",
+	"main": "functions/src/worker.ts",
+	"compatibility_date": "2026-08-04",
+	"compatibility_flags": ["nodejs_compat"],
+	// The built SPA. `/api/*` always reaches the Worker; any other unknown path is the
+	// app's index.html, so client routes like /games/2024-07-04 load on refresh.
+	"assets": {
+		"directory": "web/dist",
+		"not_found_handling": "single-page-application",
+		"run_worker_first": ["/api/*", "/health"]
+	},
+	// ADR-002's ingest tick, once a minute (the cron floor), until S48's ingest Durable
+	// Object owns cadence. In local dev it runs only with BT_INGEST_TICK=1.
+	"triggers": {
+		"crons": ["* * * * *"]
+	},
+	// No anonymous usage telemetry from local runs.
+	"send_metrics": false,
+	"observability": {
+		"enabled": true
+	}
+}

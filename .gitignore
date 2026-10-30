@@ -17,6 +17,10 @@ coverage/
 keys.json
 service-account*.json
 
+# Wrangler local state and local Worker vars (S45)
+.wrangler/
+.dev.vars
+
 # IDE / OS
 .DS_Store
 .idea/

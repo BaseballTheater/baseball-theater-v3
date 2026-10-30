@@ -14,6 +14,14 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## The backend runs the way it will in production
+
+- **Before, the API only ran as a laptop-style Node server, unlike anything it would be deployed on. Now
+  `pnpm dev` runs it as the Cloudflare Worker it will ship as, on Cloudflare's own local runtime, still with one
+  command and no cloud account — and the test suite checks it there too.** Details: S45 — `wrangler.jsonc`,
+  `functions/src/worker.ts` / `worker-app.ts`, fixtures bundled into the Worker, a workerd test via
+  `@cloudflare/vitest-pool-workers`; ADR-017. _(2026-10-30)_
+
 ## A scoreboard you can read at a glance
 
 - **Before, the scoreboard was a rough grid of score cards with the ballpark on every game and raw error

@@ -5,12 +5,15 @@ export default defineConfig({
 		name: "functions",
 		environment: "node",
 		include: ["src/**/*.test.ts"],
+		// `*.workerd.test.ts` run inside workerd under vitest.workers.config.ts (S45).
+		exclude: ["src/**/*.workerd.test.ts"],
 		coverage: {
 			provider: "v8",
 			reporter: ["text", "json-summary"],
 			include: ["src/**/*.ts"],
 			exclude: [
 				"src/**/*.test.ts",
+				"src/**/*.d.ts",
 				"src/local-server.ts",
 				"src/scripts/**",
 			],

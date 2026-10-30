@@ -56,7 +56,7 @@ Do **not** put Cloudflare, Postgres, Logto, or other platform SDKs (or Express) 
 
 - Colocate `*.test.ts(x)` next to source
 - Web tests: jsdom + `web/src/test/setup.ts` (mocks `matchMedia` for Mantine)
-- Functions tests spin a real `http` server against memory repos + fixtures
+- Functions tests run in Node against memory repos + fixtures, and `*.workerd.test.ts` run the real Worker inside workerd via `@cloudflare/vitest-pool-workers` (`functions/vitest.workers.config.ts`, S45)
 - Coverage floors are enforced in each package’s `vitest.config.ts`
 - **Truth gate:** `pnpm verify` (see `.claude/skills/verify/SKILL.md`)
 
