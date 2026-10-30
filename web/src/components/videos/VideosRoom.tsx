@@ -1,8 +1,8 @@
 import {
-	Button, Checkbox, Drawer, Group, Menu, Radio, ScrollArea, SegmentedControl, SimpleGrid, Stack, Text, TextInput, VisuallyHidden,
+	Button, Checkbox, Drawer, Group, Menu, Radio, ScrollArea, SegmentedControl, SimpleGrid, Stack, Text, TextInput, UnstyledButton, VisuallyHidden,
 } from "@mantine/core";
 import {
-	IconArrowsSort, IconChevronDown, IconLayoutGrid, IconList, IconSearch,
+	IconArrowsSort, IconChevronDown, IconChevronRight, IconLayoutGrid, IconList, IconSearch,
 } from "@tabler/icons-react";
 import { useState } from "react";
 import {
@@ -146,7 +146,9 @@ function FilterDrawer({
  * shows the same `VideoCard`s as rows. Filtering is `filterHighlights` (packages/domain).
  * The results show in groups — Pre-game, Game highlights, Statcast, Post-game
  * (`groupHighlights`), each in the chosen sort — and a group with nothing in it is left
- * out (owner, 2026-10-30).
+ * out (owner, 2026-10-30). Each group's heading, with its count, is a button that folds
+ * the group away and back (owner, 2026-10-30: "the groups should be collapsible"); all
+ * start open.
  * Choosing a video calls `onPlay`; the player is S70's.
  */
 export function VideosRoom({
@@ -162,6 +164,7 @@ export function VideosRoom({
 	});
 	const [drawer, setDrawer] = useState(false);
 	const [sort, setSort] = useState<HighlightSort>("impact");
+	const [collapsed, setCollapsed] = useState<ReadonlySet<HighlightGroup>>(new Set());
 	const [layout, setLayout] = useState<"grid" | "list">("grid");
 
 	if (game.highlights.length === 0)
@@ -253,10 +256,27 @@ export function VideosRoom({
 			{groupHighlights(videos).map(({ group, highlights }) =>
 			{
 				const cards = highlights.map((video) => <VideoCard key={video.id} video={video} layout={layout} onPlay={onPlay} />);
+				const open = !collapsed.has(group);
+				const Chevron = open ? IconChevronDown : IconChevronRight;
 				return (
 					<Stack key={group} gap="xs" component="section" aria-label={GROUP_LABELS[group]} data-testid="videos-group" data-group={group}>
-						<Text size="xs" fw={700} tt="uppercase" c="var(--bt-muted)">{GROUP_LABELS[group]}</Text>
-						{layout === "grid" ? (
+						<UnstyledButton
+							aria-expanded={open}
+							onClick={() =>
+							{
+								const next = new Set(collapsed);
+								if (open) next.add(group);
+								else next.delete(group);
+								setCollapsed(next);
+							}}
+						>
+							<Group gap={6} wrap="nowrap">
+								<Chevron size={14} color="var(--bt-muted)" aria-hidden />
+								<Text size="xs" fw={700} tt="uppercase" c="var(--bt-muted)">{GROUP_LABELS[group]}</Text>
+								<Text size="xs" c="var(--bt-muted)">{highlights.length}</Text>
+							</Group>
+						</UnstyledButton>
+						{!open ? null : layout === "grid" ? (
 							<SimpleGrid cols={COLUMNS[variant]} spacing="md" verticalSpacing="lg" data-testid="videos-grid" style={{
 								alignItems: "start",
 							}}

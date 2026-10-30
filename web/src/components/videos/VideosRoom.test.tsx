@@ -119,6 +119,28 @@ describe("VideosRoom layout (S69)", () =>
 		}), "ABS challenge");
 		expect(groups()).toEqual(["Game highlights"]);
 	});
+
+	it("groups collapse: each heading folds its group away and back; the others stay open", async () =>
+	{
+		const user = userEvent.setup();
+		renderRoom();
+		const heading = () => within(screen.getByRole("region", {
+			name: "Statcast",
+		})).getByRole("button", {
+			name: /^Statcast \d+$/,
+		});
+		expect(heading()).toHaveAttribute("aria-expanded", "true");
+		const all = cardTitles().length;
+		await user.click(heading());
+		expect(heading()).toHaveAttribute("aria-expanded", "false");
+		expect(within(screen.getByRole("region", {
+			name: "Statcast",
+		})).queryAllByTestId("video-card")).toHaveLength(0);
+		expect(cardTitles().length).toBeLessThan(all);
+		expect(screen.getAllByTestId("videos-group")).toHaveLength(4);
+		await user.click(heading());
+		expect(cardTitles()).toHaveLength(all);
+	});
 });
 
 describe("VideosRoom search and quick filters (S69)", () =>

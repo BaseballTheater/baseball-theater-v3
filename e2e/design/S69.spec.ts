@@ -9,7 +9,8 @@
  * (Impact / Newest / Oldest) left of the Grid / List control, which shows icons; the
  * quick filters are rounded rectangles of one height and show as many as fit, then a
  * Filters button opening a bottom drawer — on mobile, Stat / viz then Filters; the videos
- * show in Pre-game / Game highlights / Statcast / Post-game groups, empty ones left out.
+ * show in Pre-game / Game highlights / Statcast / Post-game groups, empty ones left out,
+ * each heading (with its count) collapsing its group.
  *
  * Expected differences, not judged (owner, 2026-10-28: "Judge only the story's own
  * parts"): the frames' sample game (NYY @ BOS, five clips) versus the fixture's 40, so
