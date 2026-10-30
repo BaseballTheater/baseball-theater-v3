@@ -221,7 +221,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 72 | [S70](#s70--video-player-dialog-by-default-persistent-stage-by-setting) | Video player (dialog / stage) | `todo` |
 | 73 | [S71](#s71--day-highlights-digest-best-of-date) | Day highlights digest | `todo` |
 | 74 | [S45](#s45--api-runs-as-a-worker-on-the-local-workers-runtime) | Worker entry + local Workers runtime + Workers tests | `done` |
-| 75 | [S47](#s47--graduated-edge-caching--refresh-on-read) | Graduated edge caching + refresh-on-read | `blocked` |
+| 75 | [S47](#s47--graduated-edge-caching--refresh-on-read) | Graduated edge caching + refresh-on-read | `todo` |
 | 76 | [S48](#s48--per-game-ingest-durable-object--cron-ensure-running) | Ingest Durable Object + cron | `todo` |
 | 77 | [S18](#s18--live-hub-durable-object--livegamehub-port--one-way-websocket) | Live hub object + one-way WebSocket | `todo` |
 | 78 | [S19](#s19--web-client-auto-updates-watched-game) | Web client auto-updates watched game | `todo` |
@@ -5240,7 +5240,7 @@ Wire changes (`version` / `lastChangedAt` on `GameSnapshot`) are S46; applying t
 
 1. Out-of-window `GET /api/v1/schedule` and `GET /api/v1/games/:gamePk` responses carry `Cache-Control: public, s-maxage=<cacheLifetimeMs(now − lastChangedAt) / 1000>, stale-while-revalidate=<n>`. A test with a game unchanged for 3h asserts `s-maxage=36000`.
 2. In-window responses never carry an `s-maxage` above the floor (test).
-3. Refresh-on-read decides staleness with `cacheLifetimeMs`; `export const CACHE_TTL_MS` remains as the documented floor, and `scripts/verify-S17.sh` exits 0.
+3. Refresh-on-read decides staleness with `cacheLifetimeMs`; `export const CACHE_TTL_MS` remains as the documented floor, and S17's own test, `functions/src/services/refresh.test.ts`, exits 0 run alone. (Amended with the owner, 2026-10-30, "sounds good": this said "`scripts/verify-S17.sh` exits 0". S17's grader is a commit-time proof (S84) and holds at S17's shipping commit; at HEAD its Status check exits 141 because the S17→S18 span of the priority-ordered backlog now holds S43 and S47. Same fix as S48's AC 6.)
 4. A refresh that finds changed content resets the lifetime: the next response uses the floor (test).
 5. `README.md` documents the edge cache — Workers Cache, tiered by default, every request billed at the Workers rate — and the intent to purge a game when ingest knows it changed (the purge itself is out of scope).
 6. `wrangler.jsonc` enables Workers Cache (`"cache": { "enabled": true }`), so Cloudflare answers from its cache before running the Worker (owner, 2026-10-30: *"Workers cache"*).
@@ -5258,7 +5258,7 @@ Wire changes (`version` / `lastChangedAt` on `GameSnapshot`) are S46; applying t
 /goal docs/v3/BACKLOG.md S47. Work item 0 first: if scripts/verify-S47.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S47.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, wrangler.jsonc, README.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S47.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `blocked`
+**Status:** `todo`
 
 ---
 
