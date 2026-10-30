@@ -11278,3 +11278,57 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-10-30 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-10-30T07:49:32Z` |
+| HEAD at review | `65ddcfe` (tree dirty) |
+| Trigger | drift: S45 changed what pnpm verify runs (workerd test via @cloudflare/vitest-pool-workers in functions test / test:coverage) and moved pnpm dev to wrangler dev (drift event 7) |
+| Stories `done` since last review | S64, S41, S66, S45 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Trigger: drift event 7. S45 (65ddcfe) changed what `pnpm verify` runs (`functions/package.json` `test` / `test:coverage` now also run `vitest run --config vitest.workers.config.ts`, the workerd pool 0.12.21) and moved `pnpm dev` to `wrangler dev` (`functions` `dev` script). `scripts/review-debt.sh` reported "not due" at 65ddcfe, because it reads only the root `verify` line (finding below). Stories done since the last review: S64, S41, S66, S45. S67 and S69 are parked `blocked` for the owner's design match (checkpoints e09fd93, 969916a).
+
+**Next 3.** By priority, the `todo` stories at 69–73 (S68, S75, S70, S71) can't start. S68 depends on S67, S70 on S69, S75 on S68 and S69, S71 on S70 and S68. S5, S72 and S74 wait the same way, and S18 / S19 wait on S48. The startable ones, in order: S47 (75), S48 (76), S20 (79), S4 (80), then S73, S28, S50, S89, S90, S92. S50 is also eligible: S45, S46, S76 and S6 are all `done`. S47 is parked by this review (below), so the next 3 are **S48, S20, S4**.
+
+**Check 1: coverage.**
+- **ADR-021's edge cache doesn't follow from headers alone.** Cloudflare docs ("How the cache works") say *"Cloudflare Workers run before the cache"*, so `s-maxage` on a Worker-built response is not stored at the edge. There are two routes. (a) **Workers Cache** (`"cache": { "enabled": true }`; wrangler 4.149.0's `config-schema.json` has `cache`): it honors Cache-Control per RFC 9111 and is *"tiered by default"*, but *"every request to your Worker is charged at the standard Workers request rate … including requests that are normally free: static asset requests"*, which changes ADR-017's cost line. (b) The **Cache API**: no billing change, but *"The Cache API is not compatible with tiered caching"*, which conflicts with ADR-021's Tiered Cache line. Choosing between them is the owner's call, so S47 is parked `blocked` with the note and question 1. As written, S47 AC 1 would pass while S47's Impact ("Cloudflare serves it straight from its cache") would not hold.
+- S69 introduced a product reading the owner hasn't confirmed: `featuredTeamId` (`packages/domain/src/highlights.ts:56`) narrows "Featured team" to the reader's first favorite playing in the game, else the home team. FEATURES (row "Game → Videos", owner 2026-10-13) and VISUAL-DESIGN §9 (line 483: "`team` / `team_id` keywords") name the facet but not whose team. The capture can't show the rule, so the design match won't settle it. Question 2.
+- The last doc parity review's queued item has been applied: trim S91 work item 4 and S92's "called it", and gate S91 on an evaluation the owner accepts (parity answers entry, owner 2026-10-29: "No, I don't want to show that. I won't even ship the prediction thing unless it's pretty good"). S91's Impact and AC 4 now say no right/wrong result and no hit rate (grep), and the owner must accept S90's `eval.md` before `doing` (a quoted line in the note, grader-checked). S92's Gap, Impact and AC 1 drop the after-pitch result, and the new AC 3 says it draws none. FEATURES and Source lines were not touched.
+- Workerd vs dev runtime: pool 0.12.21 (the last vitest-3 release; repo on vitest 3.2.7) falls back to compatibility date 2026-03-10, while `wrangler.jsonc` and `pnpm dev` use 2026-08-04. No story upgrades vitest. Recorded as pending drift, plus a note on S48 (the first Durable Object under the pool).
+- S67's additions (`BsoPips` extracted from `LiveStatus`, `ScheduleLive.batterName` / `pitcherName`) are reused, not duplicated: `BsoPips` / `BaseDiamond` are imported by `LiveStatus.tsx` and `GameRowSlot.tsx` only.
+
+**Check 2: ground truth at 65ddcfe.**
+- **S47** (parked): depends on S43, S45, S46, all `done`. `cacheLifetimeMs` is in `packages/domain/src/cache-lifetime.ts:59`, and the ladder gives 3 h unchanged → 10 h = `s-maxage=36000`, so AC 1's arithmetic holds. `CACHE_TTL_MS` is at `functions/src/services/refresh.ts:22`. `functions/src` has no `Cache-Control` (grep). The schedule / game routes are in `functions/src/handlers/api.ts:138,157`, and `lastChangedAt` is on `types.ts:162,240`. `wrangler.jsonc` is in the fence. The gap is the edge-cache route above. Added a Reuse check.
+- **S48:** depends on S45 and S46, both `done`. Paths: `functions/`, `wrangler.jsonc`, `packages/ports/` exist. AC 8's target is still there: `functions/src/services/ingest.ts:84` `summary.status.codedGameState !== "F"`. **AC 6 was unmeetable:** `scripts/verify-S16.sh` is red at HEAD, 5/6, because check 3 takes `grep -rl tickIngest … | head -1`, which is now `functions/src/worker.test.ts` (no clock, no zero-call assert). S16's grader is a commit-time proof (S84), and S48 can't touch `scripts/`. AC 6 now names `functions/src/services/tick-ingest.test.ts` run alone. The Gap's "setInterval in local-server.ts" is stale: `worker.ts` `scheduled()` already runs `tickIngest` behind `tickAllowed`, so a note says AC 1 replaces that call and that `worker.test.ts` changes with it. AC 7 runs in the pool (`functions/vitest.workers.config.ts` includes `src/**/*.workerd.test.ts` only). Coverage floors (96 / 95 / 88 / 96) are in the Node config only, so a note says to keep the logic in Node-tested modules with the Durable Object class as a thin shell. Notes also cover the `durable_objects` binding, `new_sqlite_classes` migration, the class exported from `main`, and the 2026-03-10 compatibility fallback. Cap 18 → 20 for the new AC 9.
+- **S20:** depends on S16, S25 and S81 (all `done`), design S31 (`done`), and prefers after S47 (parked; preference only). `web/src/pages/ScoreboardPage.tsx`, `web/src/api/freshness.ts` (`refetchInterval: 15 * SECOND`, line 31), `web/src/api/schedule.ts` and `client.ts:53` (`api.GET("/api/v1/schedule"`) exist, as does `web/src/test/jsonResponse.ts` (the shared Response helper). The frames `scoreboard-mobile` / `-medium` / `-desktop` exist. The note says AC 1's grep spans those files and that AC 4 re-captures the scoreboard frames after the refresh, listing S67's unmatched slot as an expected difference. Cap 8 holds, since the behavior mostly exists.
+- **S4:** depends on S81 (`done`), design S34 (`done`). `fixtures/standings-2026-09-05.json` exists and is already bundled for the Worker (`functions/src/adapters/fixtures/bundled.ts:18,32`), so the S45 fixture split needs nothing new. `web/src/pages/StandingsPage.tsx` is a stub. `openapi/` and `web/src/api/generated.types.test.ts` are fenced. `TeamSwatch` (S61) and `ViewState` exist. No amendment.
+
+**Check 3: prioritization.**
+- I argued for S50 (Postgres) ahead of S48: it is unblocked now, and S48's ADR-020 "writes Postgres" is only real with it. Kept S48 first. S48 writes through the repository ports, which S50 later backs with Postgres, S18 → S19 (live push) depend on S48, and S50 → S51 change `pnpm dev`, which every design capture runs on.
+- With S67 and S69 parked, the UI band (S68, S75, S70, S71, S5, S72, S74) is stalled on two owner verdicts, so the platform band runs next. That's correct, not an order problem. Nothing became obsolete. S20 stays after S48 even though it only prefers S47.
+- The class of work being underestimated: S45-type platform swaps break other stories' graders (`verify-S16.sh` check 3) and leave a second composition behind.
+
+**Duplication sweep (ADR-025).** `pnpm dup:check`: 0 clones over 142 files. Read `git diff 34ae89b..HEAD` over `packages functions/src web/src` (91 files) for formatting and arithmetic (`toFixed`, `Math.`, `reduce(`, `Intl.`, `toLocale`, `wins`). Hits:
+(1) The API composition is written twice. `functions/src/local-server.ts` (`createMlbClient`, `createSnapshotRepos`, secrets / auth / settings / account wiring) and `functions/src/worker-app.ts` (`createMlbClient`, `createWorkerApp`) build the same thing. S48 gets AC 9 (one composition; grep: no `new InMemory` and no `createMlbClient` in `local-server.ts`).
+(2) `svgPoints` is identical at `web/src/components/pitch/PitchTrajectoryView.tsx:83` and `StrikeZoneChart.tsx:91` (S64). It's too short for jscpd. S75, which edits the pitch sequence, gets a note to move one copy to `pitch/utils.ts`.
+`feetToInches` is reused from domain in `StrikeZoneChart.tsx:87`. `teamRecordLabel` and `slotOccupant` / `probableLine` are in domain.
+
+**Personal-data sweep (ADR-028).** `git diff 34ae89b..HEAD -- web/src functions/src packages e2e` adds no `console.*`, browser storage, cookie or table, and no email line beyond a comment. S67's `gameRowSlot` is a field on the settings record, which is covered by `InMemorySettingsRepository` → `SETTINGS_STORE` (`functions/src/services/data-classification.ts:68–70`) and deleted wholesale. S45's `"observability": { "enabled": true }` sends Worker logs to Cloudflare, which is ADR-028's "Server and email logs … Provider retention" row. Logs must still carry no personal fields, and the deploy theme should confirm invocation logs record no `Authorization` header. Next 3: S48 stores hub leases (not personal), and S20 and S4 store nothing. None found.
+
+**Rule 20.** Every `todo` story lacked a Reuse check except these six, which now have one: S18, S47, S48, S50, S51, S92 (design-only).
+
+**Baseline (rule 17).** The ingest cadence row now says the Worker cron runs `tickIngest` (S45). Cache freshness: S47 is parked, with why. Scoreboard and Videos rows say S67 / S69 are built and await the design match ("Plain title list" was false at HEAD). The As-of line was updated.
+
+**Pending drift recorded.** (a) The generated **Next** line names S68, which can't start (it ignores `Depends on`). (b) `scripts/review-debt.sh` misses gate changes in workspace `test*` scripts and LAWS.md. (c) The vitest-3 pin. All are `scripts/` process fixes outside every fence. Carried: P8's walker gap and LAWS.md's S84 row.
+
+**Questions for the owner (not blocking the loop; S47 is parked):**
+1. **Should finished games be edge-cached with Workers Cache, which bills every request (static assets included), or with the Cache API (one data center, no billing change)?** ADR-021 wants an edge `s-maxage` with Tiered Cache, but a Worker runs before Cloudflare's cache, so headers alone cache nothing. Workers Cache gives exactly ADR-021 (tiered, honors `stale-while-revalidate`, no Worker run on a hit) and costs the standard request rate on requests that are free today. The Cache API keeps today's billing but caches per data center and still runs the Worker on every request. S47 waits on this.
+2. **In the Videos room, should "Featured team" narrow to your first favorite team playing in that game, else the home team?** S69 built it that way (`featuredTeamId`). FEATURES and VISUAL-DESIGN name a "Featured team" filter but don't say whose team, and the screenshots you'll judge for S69 can't show the rule.
