@@ -11509,3 +11509,65 @@ S68 AC 2 (86cc816: collapsed bars centered, score between the teams, the state m
 - **Ingest-only stories S99, S101, S102** keep data "ready for a view to use", and no story shows it yet. That matches the owner's "ingest" request. Flagged only so the review can see the gap from ingested data to a view.
 
 **Question for the owner:** should BT ingest the bdfed gameday config feed too, and if so, for what? It is the one URL from your list with no story (both variants, with and without appContext=mlb).
+
+---
+
+## 2026-10-30 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-10-30T21:11:00Z` |
+| HEAD at review | `e2855f0` (tree dirty) |
+| Trigger | owner-directed backlog changes (372c3d5 S93–S102; dc1343e S68 AC 2; 6373fb0 / 87082d1 S69 AC 3) and the owner's "1. Yes." to whether they need a review (2026-10-30) |
+| Stories `done` since last review | S67 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Trigger: owner-directed backlog changes, and the owner's "1. Yes." (2026-10-30) to whether they need a review. The changes: S93–S102 added (372c3d5; owner: "The ones with plays associated should havea link to the play in question. And yes, we should associate the ABS ones."; "1. Yes, 2. Yes. Also add stories to ingest all of this extra data."), S68 AC 2 (dc1343e; "like CHC o 1-0 o MIA"), S69 AC 3 (6373fb0, 87082d1; "I forgot to say the groups should be collapsible"), and the doc parity review e2855f0. Stories done since the last review: S67 (1 of 6). S68 and S69 are parked `blocked` for the owner's design match.
+
+**Next 3.** By priority the `todo` stories are S70 (71 after this review), S75 (72), S71 (73). None can start: all wait on S69 (and S71 / S75 on S68), which wait on the owner's design match. The next startable: S47, S48, S20.
+
+**Check 1: coverage.**
+- **S75 AC 6 needs a component no dependency builds.** It has "the player dialog's title" use `highlightTitle`, but `PlayerDialog` is S70's (AC 1 / AC 4) and S75 neither depended on S70 nor ran after it (71 vs 72). `grep -rn PlayerDialog web/src` is empty at e2855f0. **Amended:** S75 depends on S70; priorities swapped (S70 71, S75 72).
+- **The parity review's queue.** (a) Gameday config feed with no story: the owner was asked and hasn't answered, so no story is added. In the fetched copy (`2-gameday-config.json` / `7-gameday-config-app.json`, the same 35,950 bytes) it is mlb.com Gameday app configuration (`disableFieldVision`, `bettingOddsSchedule`, `fieldVisionVenues`, `webSocketWindow`), not game data. Recorded as pending drift; question 3 below. (b) S99 / S101 / S102 ingest data with no view: it matches the owner's "ingest" request and each note says a view is a later story with its design. S102 is the exception, because its names do reach a view (the Standings headings, below). No amendment beyond S102.
+- ADR-017's cost line after the owner's "Workers cache" answer had been "left to the next backlog review" (answers entry, 3d70149). ARCHITECTURE is outside this review's write scope, so **S47 AC 5 now also requires ADR-017's Cost shape line to say every request, static assets included, counts at the Workers rate, and `docs/v3/ARCHITECTURE.md` joins S47's fence.** The ADR changes when S47 ships, which is a drift event then.
+- The S68 AC 2 and S69 AC 3 amendments stay inside their own stories. `CollapsedBar.tsx` uses `TeamSwatch`, and the groups go through `highlightGroup` / `groupHighlights` (`packages/domain/src/highlights.ts:99,115`). Downstream, S75 AC 6 (recap title) and S70 (the player opened from a card) don't depend on group order; S75's recap is the Post-game group's recap. No amendment.
+
+**Check 2: ground truth at e2855f0.**
+- **S70:** depends on S69 (`blocked`), S6 and S81 (`done`); design S32, S34, S56 `done`. Paths exist: `web/src/pages/SettingsPage.tsx`, `web/src/settings/store.ts` (`setFavoriteTeams:75`, `setOpensFirst:82`), `packages/domain/src/settings.ts`, `functions/src/handlers/api.ts`, `functions/src/services/openapi.ts`, `functions/src/services/personal-data.ts`, `scripts/verify-S54.sh`. The frames are `game-shell/video-player-dialog-{mobile,medium}.png`, `video-player-stage-{mobile,medium}.png` and `standings-search-settings/amendments/search-playing-mobile.png`. The settings note still holds: S68 added `collapseNonFavorites` / `hideScores` with the missing-field defaults the note asks for (`settings.ts`, diff 65ddcfe..HEAD), so S70's field follows that pattern. Cap 12 holds.
+- **S75:** depends on S68 / S69 (`blocked`) and S3, S41, S10, S64, S81 (`done`), now also S70. Design S32, S33, S57 `done`. Paths: `web/src/components/HiddenValue.tsx`, `web/src/settings/useScoresHidden.ts` (S68 checkpoint), `web/src/components/pitch/PitchSequence.tsx`, `utils.ts`, `web/src/components/game/Linescore` (test present), and frames `game-rooms/amendments/live-hidden-nonotice-{mobile,medium}.png` and `plays-scoring-hidden-nonotice-mobile.png`. Amended for the dependency (above). **Duplication risk:** S69 already finds the recap, through `highlightKind` (`functions/src/mappers/content.ts:37`, keyword `mlb_recap` → `kind: "recap"`), which `highlightGroup` reads (`highlights.ts:102`). AC 6's `isGameRecapHighlight` uses `game-recap` / `MLBCOM_GAME_RECAP`, and on `fixtures/raw/content-823823.json` the one recap clip carries all three. The note requires one rule. Cap 14 holds.
+- **S71:** depends on S44, S66, S81 (`done`) and S70 / S68 (not done); design S31, S56, S57 `done`. The frame `shell-scoreboard/amendments/scoreboard-digest-hidden-nonotice-mobile.png` exists, as do `web/src/api/client.ts` and `web/src/api/generated.types.test.ts`. `rankHighlightsByImpact` is still per game (`packages/domain/src/impact.ts:25`), and S98 changes the rule it reuses: the S98 note says the digest inherits it. Cap 16 holds.
+- **S47** (next startable): S43, S45, S46 `done`. `functions/src/services/refresh.test.ts` and `wrangler.jsonc` (no `"cache"` yet) exist, `CACHE_TTL_MS` is at `refresh.ts:22`, and `functions/src` sends no `Cache-Control` outside tests. Amended (ADR-017 clause, above).
+- **New stories S93–S102**, checked against the fetched feeds: playMetrics `absChallenge` [34, 39, 69, 82, 83] and `keyMoments` (14 entries: 15, 21, 41, 46, 53, 64, 67, 68, 72, 73, 74, 75, 82, 84). `allPlayMetrics[46].homeTeamWinProbabilityAdded` is 19.6 (S98 AC 2 holds), `isHighLeverage` is per at-bat although the request says `highLeverage=false`, POTG mediaWinner is 666171 "1.2 IP, 0 ER, K, BB", 40.7 with fanWinner all null, ruleSettings (under `gameData`) is 53.5 / 27.0 / 17, and uniforms include "Marlins Home White Jersey". Findings:
+  - **Rule 8: all ten lacked Turn cap, Goal condition and `/goal` command**, so `/goal S93 done` would stop at CLAUDE.md step 2. Added from each fence, with caps of 14, 14, 10, 12, 12, 8, 12, 12, 12, 10. S89–S92 lack them too, but their fences hold `scripts/` paths, so this is recorded as pending drift.
+  - **S102 AC 3 could not pass after S4.** `divisionName` (`packages/domain/src/team-colors.ts:129`, S61) is a hand map of ids to names, S4 AC 8 renders headings through it, and S102's fence had no `web/`. Amended: prefer-after S4; `web/src/pages/` and `web/src/components/` added to the fence; AC 3 extended (stricter) to remove `divisionName` and read the payload's `nameShort` ("AL East", what the ratified frames show, so no visual change). A note says the adapter requests `leagueId=103,104&hydrate=team` in one call (`functions/src/adapters/http/mlb.ts:83`), so the recording is that request plus `division`.
+  - **Local dev is the Worker, which reads only bundled fixtures** (`functions/src/adapters/fixtures/bundled.ts`; `raw/` is not bundled). S93, S94, S99, S100, S101 say "tests and local dev read it" of a `fixtures/raw/` file. Each gets a note: bundle it, or have `record-fixtures` project it into `fixtures/game-823823.json`. The HTTP adapter needs base URLs for the bdfed / data-graph / mlb.com hosts too.
+  - **S93 AC 4** "the key moments are 14" → the 14 at-bats listed (tightened, not eased).
+  - **S95:** AC 1 (the mapper reads `guid`) and AC 2 (`videoPlayLinks` starts from `guid`) must read it once (note). The impact play join (`impact.ts:27–44`) is dead today: no caller passes `playContext` (`mlb.ts:76,120`, `fixture-client.ts:88,101`) and `playId` = `mediaPlaybackId` (`content.ts:50`).
+  - **S98:** ranking runs in the client adapters before play metrics exist, so it has to move to where the game is assembled (note).
+  - **S96:** the fence named `docs/v3/visual/game-shell/` and `game-rooms/`, both ratified. It is narrowed to `amendments/`.
+  - **S97:** `web/src/components/videos/VideoCard.tsx` and `pitch/PlaysPanel.tsx` exist, and PlaysPanel reads no search params yet. A note warns that S70's player may live outside the fence.
+
+**Check 3: prioritization.** I argued for moving S93, S94, S95 (and S98) ahead of the platform band (S47–S51):
+(a) They are unblocked now, while the UI band waits on two owner verdicts.
+(b) S95 AC 1 fixes a wrong field (`playId` = `mediaPlaybackId`, 0 of 40 match).
+(c) S71's launch digest ranks by "the existing impact rule", which S98 replaces.
+(d) Postgres (S50) would hold the new fields from birth.
+On the evidence, I kept the placement:
+(b) is latent: no web code reads a highlight's `playId`, the only reader is the dead impact join, and the cards and filters don't use it.
+(c) S98 AC 3 keeps keyword order as the fallback, and S98's fence holds `packages/domain/`, so it can update S71's test after the fact without breaking it.
+(d) S50 stores game projections as JSONB (S50 AC 1), so additive snapshot fields need no migration either way.
+The platform band (S47 → S48 → S18 / S19 → S20, then S50 / S51) is launch infrastructure that every live feature waits on, while the play links are an enrichment the owner gave no urgency. S96 / S97 can't start before S69's verdict anyway. One order fix: S102 after S4 (above). Nothing is obsolete. The class of work being underestimated: stories added in bulk outside a review arrive without rule-8 goal blocks (14 of 14 since S89), and against the fixture plumbing as it was before S45. Question 1 asks the owner if they want the play links sooner.
+
+**Duplication sweep (ADR-025).** `pnpm dup:check`: 0 clones over 147 files. Read `git diff 65ddcfe..HEAD -- packages functions/src web/src e2e` (40 files, +1898). Searched `CollapsedBar.tsx`, `VideosRoom.tsx`, `QuickFilters.tsx`, `fit-filters.ts` and `ScoreboardPage.tsx` for `Math.`, `reduce(`, `toFixed`, `sort(`, `filter(` and score formatting. The score and state come from `collapsedBarState` / `scoreboardRows` in domain, the groups from `groupHighlights`, and `fittingFilters` is layout arithmetic only. Shipped code: none found. Planned duplicates caught before they are written: recap detection (S75 vs `content.ts:37`), `guid` read twice (S95), the division hand map (`team-colors.ts:129` vs S102). Each now has a note or AC.
+
+**Personal-data sweep (ADR-028).** In the new code, `git diff 65ddcfe..HEAD` adds no `console.*`, browser storage, cookie or email line (grep). S68's `collapseNonFavorites` / `hideScores` are fields on the settings record, covered by `SETTINGS_STORE` and deleted whole. In the new stories, S93–S102 add MLB game data to `GameSnapshot` (not personal) and call MLB hosts (bdfed, data-graph, mlb.com) with a gamePk only, sending no user data. S99's fan pick is MLB's aggregate. S70's setting is covered by its existing note; S75 and S71 store nothing. None found.
+
+**Baseline (rule 17).** The Scoreboard row now records S68's checkpoints (it said "Still to build: S68"). The Videos row records S69's sort, fitting filters and drawer, and collapsible groups (it named only checkpoint 969916a). The As-of line was updated.
+
+**Questions for the owner (not blocking; the next startable is S47):**
+1. Should the video play links (S93, S94, S95, then S98) move ahead of the platform work, or stay after the Postgres switch (S51)? See the report.
+2. Is it right that S102 changes the Standings headings to MLB's own short names ("AL East") and deletes BT's hand-kept list?
+3. Carried from the parity review: should BT ingest the gameday config feed? It is mlb.com app settings, not game data.
