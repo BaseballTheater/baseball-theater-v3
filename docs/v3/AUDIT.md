@@ -11815,3 +11815,47 @@ functions build: Done
 **Answers and what was applied**
 
 Asked whether S103 (Baseball Savant's per-pitch game feed, added by the owner at 8c59368 and checked by the doc parity review at 421b80c) needs its own backlog review. Owner, 2026-10-30: "S103: no". No backlog review runs for it; the next scheduled or drift-triggered review still checks S103 (including the doc parity review's note that its terms-of-use check had no AC, which the owner's "Sure" the same day turns into an AC — logged with that change).
+
+---
+
+## 2026-10-30 — backlog review answers (2026-10-30)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-10-30 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-10-31T05:12:57Z` |
+| HEAD at capture | `b8e9cc2` (tree dirty) |
+| Applied in | `0fa2f7f` — Backlog: S104–S106 and the owner's answers (2026-10-30). Asked whether Savant's two game-context feeds should join More MLB game data, the owner: "1. Yes" — S104 ingests each game's pitchers' season averages per pitch type (fetched once per pitcher, not per pitch), S105 ballpark field drawings by MLB venue id (sanitized, served by BT, fetched once per venue). "Bring back win probability charts" — S106 builds the ratified Live chart (medium / desktop, Hide Scores state per A3 / A4) from S93's play metrics, at priority 94 right after S98; the scoreboard's pre-game Win Probability slot waits on the owner (no feed gives pre-game odds). Asked whether one story should check Savant's terms of use first, as a requirement on the first Savant story: "Sure" — S103 gains AC 7 (record the terms in docs/v3/SAVANT-DATA.md before any live Savant call; docs/v3/SAVANT-DATA.md added to its fence), and S104 / S105 depend on S103. "Just record the example URLS for the seasonal data and describe what they contain in a document we can use for future ideas" — new docs/v3/SAVANT-DATA.md. FEATURES' Live and More MLB game data rows record these in the owner's words; frames 00, 01 and 04 updated. S99–S103 move to 95–99 and S9 / S89–S92 to 102–106 to make room. Play links keep their place after S51 (owner: "whichever makes the work simpler"; S93–S95 are written for S48's ingest object). Also logs the owner's "S103: no" to a review of S103. |
+
+**Answers and what was applied**
+
+Owner answers, 2026-10-30, to the questions after 0fa2f7f (S104–S106 and S103 AC 7, owner-directed):
+1. Asked whether those changes need a backlog review before S47: "1. No". Logged here (backlog and parity); the next scheduled or drift-triggered review checks S104–S106 and S103 AC 7.
+2. Asked whether the scoreboard Win Probability slot should show something other than pre-game odds (no feed gives them): "It is actually least useful before the game. During and after is definitely useful." Applied: S107 (design amendment for the occupant on live and final rows, Hide Scores state) and S108 (build, reusing S106's winProbabilitySeries), priorities 95–96; FEATURES Settings row, frames 00 / 01 / 04 and VISUAL-DESIGN §5a updated. These two stories are themselves an owner-directed change, so the owner is asked again whether they need a review.
+3. Savant date feeds (leverage / drama index): "Skip but note it in the future ideas document". Applied: docs/v3/SAVANT-DATA.md.
+4. S102 (from the 2026-10-30 backlog review at 1dbfd80): Standings headings from MLB's nameShort, divisionName deleted: "Yea". S102 AC 3 already says so; no change.
+5. Japanese-language highlight reel: "Keep them where they are". No change.
+6. Videos room heading: "Use “Videos”". Applied at b8e9cc2.
+7. Correct VISUAL-DESIGN's "win probability is left out at launch" line: "Yes". Applied (§5a game-row slot row).
+
+---
+
+## 2026-10-30 — doc parity review answers (2026-10-30)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-10-30 doc parity review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-10-31T05:12:57Z` |
+| HEAD at capture | `b8e9cc2` (tree dirty) |
+| Applied in | `0fa2f7f` — Backlog: S104–S106 and the owner's answers (2026-10-30). Asked whether Savant's two game-context feeds should join More MLB game data, the owner: "1. Yes" — S104 ingests each game's pitchers' season averages per pitch type (fetched once per pitcher, not per pitch), S105 ballpark field drawings by MLB venue id (sanitized, served by BT, fetched once per venue). "Bring back win probability charts" — S106 builds the ratified Live chart (medium / desktop, Hide Scores state per A3 / A4) from S93's play metrics, at priority 94 right after S98; the scoreboard's pre-game Win Probability slot waits on the owner (no feed gives pre-game odds). Asked whether one story should check Savant's terms of use first, as a requirement on the first Savant story: "Sure" — S103 gains AC 7 (record the terms in docs/v3/SAVANT-DATA.md before any live Savant call; docs/v3/SAVANT-DATA.md added to its fence), and S104 / S105 depend on S103. "Just record the example URLS for the seasonal data and describe what they contain in a document we can use for future ideas" — new docs/v3/SAVANT-DATA.md. FEATURES' Live and More MLB game data rows record these in the owner's words; frames 00, 01 and 04 updated. S99–S103 move to 95–99 and S9 / S89–S92 to 102–106 to make room. Play links keep their place after S51 (owner: "whichever makes the work simpler"; S93–S95 are written for S48's ingest object). Also logs the owner's "S103: no" to a review of S103. |
+
+**Answers and what was applied**
+
+Owner answers, 2026-10-30, to the questions after 0fa2f7f (S104–S106 and S103 AC 7, owner-directed):
+1. Asked whether those changes need a backlog review before S47: "1. No". Logged here (backlog and parity); the next scheduled or drift-triggered review checks S104–S106 and S103 AC 7.
+2. Asked whether the scoreboard Win Probability slot should show something other than pre-game odds (no feed gives them): "It is actually least useful before the game. During and after is definitely useful." Applied: S107 (design amendment for the occupant on live and final rows, Hide Scores state) and S108 (build, reusing S106's winProbabilitySeries), priorities 95–96; FEATURES Settings row, frames 00 / 01 / 04 and VISUAL-DESIGN §5a updated. These two stories are themselves an owner-directed change, so the owner is asked again whether they need a review.
+3. Savant date feeds (leverage / drama index): "Skip but note it in the future ideas document". Applied: docs/v3/SAVANT-DATA.md.
+4. S102 (from the 2026-10-30 backlog review at 1dbfd80): Standings headings from MLB's nameShort, divisionName deleted: "Yea". S102 AC 3 already says so; no change.
+5. Japanese-language highlight reel: "Keep them where they are". No change.
+6. Videos room heading: "Use “Videos”". Applied at b8e9cc2.
+7. Correct VISUAL-DESIGN's "win probability is left out at launch" line: "Yes". Applied (§5a game-row slot row).

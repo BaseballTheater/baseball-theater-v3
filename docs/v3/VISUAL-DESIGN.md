@@ -394,7 +394,7 @@ Users will have settings that change **how the same views look**. There is no li
 
 | Setting | Group (site area) | What the view does |
 |---------|-------------------|--------------------|
-| **Game-row slot** | Game list | The right-hand block on each full scoreboard row shows the chosen occupant (status, room menu; win probability is left out at launch until the owner picks a data source — owner, 2026-10-19) |
+| **Game-row slot** | Game list | The right-hand block on each full scoreboard row shows the chosen occupant (status, room menu, win probability — left out at launch until the owner picked a data source, owner, 2026-10-19; back from MLB's play metrics, on live and final games, owner, 2026-10-30: "Bring back win probability charts", "It is actually least useful before the game. During and after is definitely useful."; S106–S108) |
 | **Collapse non-favorites** | Game list | Games that do not involve a favorite team render as a smaller bar by default |
 | **Favorite teams** | Game list | A dropdown; drives collapse non-favorites and favorite emphasis |
 | **Hide scores** | Game list | Structured score fields show `–` and records show `▒▒-▒▒` ([S34 design](./visual/standings-search-settings/DESIGN.md)) |

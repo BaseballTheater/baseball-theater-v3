@@ -20,12 +20,18 @@ _Not yet checked._
 | Game feed | `https://baseballsavant.mlb.com/gf?game_pk=823823` | Every pitch of a game keyed by the live feed's `playId`. Most of it repeats MLB's live feed; BT keeps only what MLB's feeds lack (xBA, barrels, spray position, home-run ballpark count, bat speed, swords, Savant's in-zone call, times through the order, the challenged pitch, the front-of-plate location) | S103 |
 | Pitcher yearly averages | `https://baseballsavant.mlb.com/gamefeed/pitcher-yearly-averages?pitchers=[668909,681870,…]` | Each listed pitcher's season averages per pitch type: usage, average and range of speed, spin, horizontal / vertical / induced break, spin axis and release point (397 fields a pitcher). Any number of pitchers in one call. Savant's game page uses it to set each pitch beside the pitcher's norm. The owner's sample listed 19 pitchers and returned 3 rows. | S104 |
 | Field drawing | `https://baseballsavant.mlb.com/site-core/images/fields/3313.svg` | A 250×250 SVG outline of a ballpark. The number is MLB's venue id: 3313 is Yankee Stadium, 4169 (loanDepot park, `gameData.venue.id` of 823823) returns that park. MLB-made artwork | S105 |
-| Date schedule | `https://baseballsavant.mlb.com/schedule?date=2026-10-15` | Every game on a date with its win probability after each at-bat (`wpa[].wpaValues`). The values match MLB's play metrics (S93) at-bat for at-bat (85 of 85 on 823823) | — (owner asked, 2026-10-30) |
-| Date scoreboard | `https://baseballsavant.mlb.com/scoreboard-data?date=2026-10-15` | The same win probabilities per game (`stats.wpa.gameWpa`), the top players by win probability added, and for the current play a **leverage index** and a **drama index**, which no MLB feed BT reads carries | — (owner asked, 2026-10-30) |
+| Date schedule | `https://baseballsavant.mlb.com/schedule?date=2026-10-15` | Every game on a date with its win probability after each at-bat (`wpa[].wpaValues`). The values match MLB's play metrics (S93) at-bat for at-bat (85 of 85 on 823823) | Not ingested: S93's play metrics already give the same values |
+| Date scoreboard | `https://baseballsavant.mlb.com/scoreboard-data?date=2026-10-15` | The same win probabilities per game (`stats.wpa.gameWpa`), the top players by win probability added, and for the current play a **leverage index** and a **drama index**, which no MLB feed BT reads carries | Not ingested; a future idea (below) |
 
 ## Player-season data (future ideas)
 
 All about a player over a season, not a game. BT has no place that shows a player yet (no player card, no comparison view). Ideas raised on 2026-10-30, none chosen: a player card opened from Live, Plays or Box; matchup context in Live (the batter's zones against the pitcher's locations); season context on a play ("his hardest-hit ball this year", "a top-5% sprint"). It changes at most once a day.
+
+### Leverage and drama index
+
+`https://baseballsavant.mlb.com/scoreboard-data?date=2026-10-15`
+
+Game data rather than player data, kept here as a future idea (owner, 2026-10-30, asked whether to ingest Savant's date feeds: _"Skip but note it in the future ideas document"_). For each game's current play, `games[].currentPlay` carries `leverageIndex` (how much the play's outcome can swing the game; 3.91 at one point in the sample) and `dramaIndex` (Savant's own measure; 164 in the sample). `stats.wpa.topWpaPlayers` lists the game's players by win probability added. One call covers every game on a date. Their win probabilities repeat S93's play metrics, so only these fields are new.
 
 ### Comparison tool
 
