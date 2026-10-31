@@ -11800,3 +11800,18 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-10-30 — backlog review answers (2026-10-30)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-10-30 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-10-31T04:56:18Z` |
+| HEAD at capture | `0ca54d9` (tree dirty) |
+| Applied in | `8c59368` — Backlog: S103 (Baseball Savant's per-pitch game feed) and the owner's answers on the gameday config (2026-10-30). The owner: "oh, I forgot, there's also this: https://baseballsavant.mlb.com/gf?game_pk=823823"; asked whether to ingest only what MLB's feeds lack, "Yes re: S103"; and "Something that needs to be accounted for is the potential difference in arrival time for the baseball savant details" — AC 5 pulls Savant on its own cadence inside S48's ingest object, merges each field per pitch as it arrives (empty until then, versioned), logs each field's first arrival beside the pitch's live-feed time, and bounds polling. FEATURES' "More MLB game data" row names Savant in the owner's words. S95 gains a note (the exact challenged pitch from S103). The gameday config is not ingested (owner: "Ok, agreed"); its player-of-the-game window (2024+, regular season and postseason) is a note on S99. |
+
+**Answers and what was applied**
+
+Asked whether S103 (Baseball Savant's per-pitch game feed, added by the owner at 8c59368 and checked by the doc parity review at 421b80c) needs its own backlog review. Owner, 2026-10-30: "S103: no". No backlog review runs for it; the next scheduled or drift-triggered review still checks S103 (including the doc parity review's note that its terms-of-use check had no AC, which the owner's "Sure" the same day turns into an AC — logged with that change).
