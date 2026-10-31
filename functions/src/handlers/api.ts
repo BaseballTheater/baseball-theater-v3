@@ -18,6 +18,7 @@ import {
 import type { IngestDeps } from "../services/ingest.js";
 import { getOrRefreshGame, getOrRefreshSchedule } from "../services/ingest.js";
 import { edgeCacheControl } from "./cache-control.js";
+import { liveUpgrade } from "./live.js";
 
 export type ApiContext = {
 	ingest: IngestDeps;
@@ -26,6 +27,11 @@ export type ApiContext = {
 	settings: SettingsRepository;
 	/** Personal data downloads and deletion (ADR-028, S77, S80). */
 	account: AccountDataDeps;
+	/**
+	 * Hands a live-route WebSocket upgrade to the game's hub (S18; the Worker forwards it to
+	 * the `game-hub` Durable Object). Absent where there are no hubs (the Node server).
+	 */
+	live?: (gamePk: number, request: Request) => Promise<Response>;
 };
 
 const CORS_HEADERS = {
@@ -124,9 +130,9 @@ function notFound(): Response
  * Routes that stream instead of returning one JSON body (S18's live-game hub
  * upgrades to a WebSocket, ADR-020). They have no response type, so they can't
  * be keys of `ApiRoutes`; the route-table check allows a dispatched route
- * outside `ApiRoutes` only if it is named here. Empty until S18 adds one.
+ * outside `ApiRoutes` only if it is named here.
  */
-export const STREAMING_ROUTE_EXCEPTIONS = [] as const satisfies readonly string[];
+export const STREAMING_ROUTE_EXCEPTIONS = ["GET /api/v1/games/:gamePk/live"] as const satisfies readonly string[];
 
 type StreamingRoute = (typeof STREAMING_ROUTE_EXCEPTIONS)[number];
 
@@ -182,6 +188,13 @@ export const API_ROUTER: readonly RouteEntry[] = [
 			}
 			return withCacheControl(sendJson(200, "GET /api/v1/games/:gamePk", toGameSnapshotResponse(game)), game, ctx);
 		},
+	},
+	{
+		route: "GET /api/v1/games/:gamePk/live",
+		params: {
+			gamePk: /^\d+$/,
+		},
+		handle: (_url, params, ctx, request) => liveUpgrade(Number(params.gamePk), request, ctx),
 	},
 	{
 		route: "GET /api/v1/me",

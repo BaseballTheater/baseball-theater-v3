@@ -132,6 +132,22 @@ revisions before capturing. Like the recorder it is network-touching and
 **never** run by `pnpm verify` or CI — those exercise only the offline fixture
 path (`fixtures/raw/diffpatch-823823.json`).
 
+## Live updates
+
+A game in its live window streams over a WebSocket: `GET /api/v1/games/:gamePk/live` (S18;
+ADR-020). The Worker hands the upgrade to the game's hub, the `game-hub:<gamePk>` Durable
+Object, which holds viewers' sockets through the Hibernation API and passes on what the game's
+ingest object (`game-ingest:<gamePk>`, S48) publishes after each write — newer versions only,
+with the full current state on connect for a viewer behind (`?since=<version>`). It is one-way:
+anything a viewer sends is ignored. A game out of its window gets a `409` pointing at
+`GET /api/v1/games/:gamePk`, its cached HTTP form.
+
+Streaming routes sit deliberately outside `ApiRoutes` and the OpenAPI spec: they have no JSON
+response type, so the route-table check lets them through only by name
+(`STREAMING_ROUTE_EXCEPTIONS` in `functions/src/handlers/api.ts`, S44). Short-poll of the cached
+GET remains the fallback wherever a socket can't be had, including the Node server
+(`local-server.ts`), which has no hubs and answers the live route with `501`.
+
 ## Edge cache
 
 Schedule and game responses carry a `Cache-Control` header from ADR-021's ladder (S47,

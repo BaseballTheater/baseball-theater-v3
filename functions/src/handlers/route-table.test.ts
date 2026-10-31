@@ -43,6 +43,7 @@ describe("route table", () =>
 		const router = [...API_ROUTER, {
 			route: "GET /api/v1/live",
 		}];
-		expect(routeTableMismatches(router, declared, ["GET /api/v1/live"])).toEqual([]);
+		expect(routeTableMismatches(router, declared, [...STREAMING_ROUTE_EXCEPTIONS, "GET /api/v1/live"])).toEqual([]);
+		expect(routeTableMismatches(router, declared, STREAMING_ROUTE_EXCEPTIONS)).not.toEqual([]);
 	});
 });

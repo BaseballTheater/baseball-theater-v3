@@ -12099,3 +12099,91 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-10-30 — S18 completed
+
+**Live hub object + one-way WebSocket**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-10-31T06:06:21Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `7febf78` (tree dirty) |
+| Grader | `scripts/verify-S18.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: a LiveGameHub port in packages/ports (publish; connect a viewer by gamePk) with an in-memory adapter (test)
+check 2 PASS: the game-hub Durable Object accepts sockets with acceptWebSocket and auto-answers pings with setWebSocketAutoResponse; client messages are ignored (test)
+check 3 PASS: GET /api/v1/games/:gamePk/live upgrades only in-window games; others get a 4xx pointing at GET /api/v1/games/:gamePk (tests); it is a named streaming exception
+check 4 PASS: workerd: publish v1, v1, v2 → a viewer receives exactly v1 and v2; ?since=1 after v2 receives v2; ?since=2 receives nothing
+check 5 PASS: a freshly started hub loads the latest state through the repository port and sends it on connect (test)
+check 6 PASS: the first viewer registers the hub with its game's ingest object; the last disconnect unregisters it (test with an ingest stub)
+check 7 PASS: README.md names the live route, says streaming routes sit outside ApiRoutes and the OpenAPI spec, and that short-poll of the cached GET is the fallback
+check 8 PASS: web/ contains no statsapi.mlb.com
+check 9 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**9/9 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S18 check results ---
+check 1 PASS: a LiveGameHub port in packages/ports (publish; connect a viewer by gamePk) with an in-memory adapter (test)
+check 2 PASS: the game-hub Durable Object accepts sockets with acceptWebSocket and auto-answers pings with setWebSocketAutoResponse; client messages are ignored (test)
+check 3 PASS: GET /api/v1/games/:gamePk/live upgrades only in-window games; others get a 4xx pointing at GET /api/v1/games/:gamePk (tests); it is a named streaming exception
+check 4 PASS: workerd: publish v1, v1, v2 → a viewer receives exactly v1 and v2; ?since=1 after v2 receives v2; ?since=2 receives nothing
+check 5 PASS: a freshly started hub loads the latest state through the repository port and sends it on connect (test)
+check 6 PASS: the first viewer registers the hub with its game's ingest object; the last disconnect unregisters it (test with an ingest stub)
+check 7 PASS: README.md names the live route, says streaming routes sit outside ApiRoutes and the OpenAPI spec, and that short-poll of the cached GET is the fallback
+check 8 PASS: web/ contains no statsapi.mlb.com
+check 9 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S18: 9/9 checks passed ---
+verify-S18: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+packages/ports build: Done
+web build: vite v6.4.3 building for production...
+web build: transforming...
+web build: ✓ 7095 modules transformed.
+web build: rendering chunks...
+web build: computing gzip size...
+web build: dist/index.html                     1.00 kB │ gzip:   0.53 kB
+web build: dist/assets/batter-J7FnW6ss.webp   74.81 kB
+web build: dist/assets/index-BEBfbMX0.css    201.84 kB │ gzip:  29.52 kB
+web build: dist/assets/index-DSbVPZSy.js     631.95 kB │ gzip: 199.55 kB
+web build: ✓ built in 1.73s
+web build: (!) Some chunks are larger than 500 kB after minification. Consider:
+web build: - Using dynamic import() to code-split the application
+web build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+web build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 199203,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

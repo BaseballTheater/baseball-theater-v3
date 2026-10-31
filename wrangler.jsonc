@@ -21,9 +21,16 @@
 		"crons": ["* * * * *"]
 	},
 	"durable_objects": {
-		"bindings": [{ "name": "GAME_INGEST", "class_name": "GameIngestObject" }]
+		// S18: game-hub:<gamePk> holds each game's viewers' WebSockets (ADR-020 layer 2).
+		"bindings": [
+			{ "name": "GAME_INGEST", "class_name": "GameIngestObject" },
+			{ "name": "GAME_HUB", "class_name": "GameHubObject" }
+		]
 	},
-	"migrations": [{ "tag": "v1", "new_sqlite_classes": ["GameIngestObject"] }],
+	"migrations": [
+		{ "tag": "v1", "new_sqlite_classes": ["GameIngestObject"] },
+		{ "tag": "v2", "new_sqlite_classes": ["GameHubObject"] }
+	],
 	// Workers Cache (S47, ADR-021; owner, 2026-10-30: "Workers cache"): Cloudflare checks
 	// its tiered edge cache before running the Worker and keeps schedule and game responses
 	// as long as their Cache-Control says. Every request is then billed at the Workers

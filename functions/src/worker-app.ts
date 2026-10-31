@@ -42,6 +42,8 @@ export type WorkerEnv = {
 	BT_INGEST_TICK?: string;
 	/** The per-game ingest objects (S48; `wrangler.jsonc` `durable_objects`); absent under Node. */
 	GAME_INGEST?: GameIngestNamespace;
+	/** The per-game live hubs (S18; `wrangler.jsonc` `durable_objects`); absent under Node. */
+	GAME_HUB?: GameIngestNamespace;
 };
 
 /** Everything a request or a cron tick needs: the handler's context plus the ingest loop's deps. */
@@ -91,9 +93,28 @@ export function createWorkerApp(env: WorkerEnv): WorkerApp
 			auth,
 			settings,
 			account,
+			...env.GAME_HUB && {
+				live: liveForwarder(env.GAME_HUB),
+			},
 		},
 		ingest,
 		ready: ingestScheduleDay(ingest, env.BT_SEED_DATE ?? "2024-07-04").then(() => undefined),
+	};
+}
+
+/**
+ * Hands a live upgrade to `game-hub:<gamePk>` (S18) as `/connect`, keeping the viewer's
+ * `since` so a viewer behind gets the full state first.
+ */
+export function liveForwarder(namespace: GameIngestNamespace): (gamePk: number, request: Request) => Promise<Response>
+{
+	return (gamePk, request) =>
+	{
+		const since = new URL(request.url).searchParams.get("since");
+		const target = `https://game-hub/connect?gamePk=${gamePk}${since === null ? "" : `&since=${encodeURIComponent(since)}`}`;
+		return namespace.get(namespace.idFromName(`game-hub:${gamePk}`) as never).fetch(target, {
+			headers: request.headers,
+		});
 	};
 }
 

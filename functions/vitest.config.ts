@@ -39,7 +39,8 @@ export default defineConfig({
 				// Raised 2026-10-29 by S87 (deletion cookie and cookie-law tests): branches 87.18.
 				// Raised 2026-10-30 by S67 (S45's Worker composition and S69's keyword mapping folded in): branches 89.62.
 				// Raised 2026-10-30 by S48 (the per-game ingest object, hub leases and their tests): branches 90.62.
-				branches: 90,
+				// Raised 2026-10-30 by S18 (the live hub, its route and their tests): branches 91.19.
+				branches: 91,
 				statements: 96,
 			},
 		},

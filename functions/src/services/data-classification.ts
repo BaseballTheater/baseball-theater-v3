@@ -122,6 +122,10 @@ export const DATA_CLASSIFICATION = {
 	 * a storage backend, and either sends or keeps personal data or doesn't.
 	 */
 	adapterDirectories: {
+		cloudflare: {
+			kind: "none",
+			why: "the Workers runtime's WebSocket pieces for the live hub (S18); sockets carry public game state, no user identity, and nothing is kept",
+		},
 		fixtures: {
 			kind: "none",
 			why: "committed MLB fixtures and the dev sign-in provider; stores nothing of its own",

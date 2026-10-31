@@ -39,6 +39,13 @@ explicitly where that's the case. For what's still ahead, see
 
 ## The backend runs the way it will in production
 
+- **Before, there was no way for the backend to tell a browser "this game you're watching just changed". Now
+  each live game has a hub that pushes every saved change to everyone watching it, sends a viewer who fell
+  behind the whole current state first, never sends the same update twice, and recovers on its own after a
+  restart.** Details: S18 — `GET /api/v1/games/:gamePk/live` (a WebSocket for in-window games, a `409`
+  pointing at the cached GET otherwise), the `game-hub:<gamePk>` Durable Object on the Hibernation API,
+  `LiveGameHub` port with an in-memory adapter; S48's ingest objects now publish to it. The app doesn't
+  open the socket yet (S19). _(2026-10-30)_
 - **Before, live games were only polled while a developer's laptop server was running. Now each game in
   progress gets its own always-recovering poller on Cloudflare: it checks MLB on the game's cadence, saves
   every change before telling anyone about it, and stops by itself once the game is over.** Details: S48 —

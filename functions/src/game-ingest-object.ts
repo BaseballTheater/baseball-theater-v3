@@ -7,6 +7,7 @@
  */
 import type { GameSnapshot } from "@bt/domain";
 import type { AlarmStore } from "./services/game-ingest.js";
+import { hubPublisher } from "./game-hub-object.js";
 import { GameIngest, gameIngestName } from "./services/game-ingest.js";
 import type { WorkerEnv } from "./worker-app.js";
 import { workerApp } from "./worker-app.js";
@@ -21,13 +22,13 @@ export type GameIngestNamespace = {
 };
 
 /**
- * Until S18 builds the hub objects there is nowhere to deliver to: registered hubs are
- * recorded and "published" to here, which keeps the write-then-publish order and the
- * lease bookkeeping real while the delivery itself is a no-op.
+ * Where there is no `GAME_HUB` binding (Node, tests) there is nowhere to deliver to:
+ * registered hubs are "published" to here, keeping the write-then-publish order and the
+ * lease bookkeeping real while delivery is a no-op. The Worker uses `hubPublisher` (S18).
  */
 export async function stubHubPublisher(_hubId: string, _snapshot: GameSnapshot): Promise<void>
 {
-	// S18 replaces this with a call to the hub object.
+	// No hubs to reach without the binding.
 }
 
 export class GameIngestObject
@@ -41,7 +42,7 @@ export class GameIngestObject
 	 */
 	constructor(state: GameIngestState, env: WorkerEnv)
 	{
-		this.ingest = new GameIngest(state.storage, workerApp(env).ingest, stubHubPublisher);
+		this.ingest = new GameIngest(state.storage, workerApp(env).ingest, env.GAME_HUB ? hubPublisher(env.GAME_HUB) : stubHubPublisher);
 	}
 
 	/**
