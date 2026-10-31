@@ -45,6 +45,13 @@ explicitly where that's the case. For what's still ahead, see
 
 ## The backend runs the way it will in production
 
+- **Before, a game in progress only changed on your screen when the page refetched it. Now the game page
+  follows it live: each new pitch arrives within moments, nothing you have open (an at-bat, a pitch, a video)
+  closes or jumps, and if the connection drops it reconnects by itself, falling back to checking every 15
+  seconds until it can.** Details: S19 — `useLiveGame` / `LiveGameStream` (`web/src/api/live.ts`,
+  `live-stream.ts`, loaded on demand) over S18's WebSocket; newer versions only through `writeGame`, a
+  refetch on a skipped version, backoff with jitter and `?since=`; design matched by the owner. Under
+  `pnpm dev` the Vite proxy doesn't carry WebSockets yet, so local runs poll. _(2026-10-31)_
 - **Before, there was no way for the backend to tell a browser "this game you're watching just changed". Now
   each live game has a hub that pushes every saved change to everyone watching it, sends a viewer who fell
   behind the whole current state first, never sends the same update twice, and recovers on its own after a

@@ -12281,3 +12281,105 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-10-31 — S19 completed
+
+**Web client auto-updates watched game**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-10-31T21:27:39Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `fc7b9b1` (tree dirty) |
+| Grader | `scripts/verify-S19.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: an in-progress game route opens a WebSocket to /api/v1/games/:gamePk/live (test); web/src has no EventSource
+check 2 PASS: two socket payloads: the Live status block shows the second's values without navigation, and the top bar shows no score before or after (test file exits 0 alone)
+check 3 PASS: payloads reach the cache only through writeGame and only when newer: v2, v2, v1 leaves v2, written once (test)
+check 4 PASS: on close it reconnects with backoff and jitter, passing ?since=<last version> (fake-timer test)
+check 5 PASS: a version gap (v2 then v4) refetches the game query (test)
+check 6 PASS: after repeated failures it falls back to polling GET /api/v1/games/:gamePk (fake-timer test)
+check 7 PASS: it reconnects on visibilitychange → visible and on online (test)
+check 8 PASS: unmounting or leaving the route closes the socket (test)
+check 9 PASS: an update keeps an open at-bat row, a selected pitch and a playing video (test)
+check 10 PASS: the Live panel's render count for one streamed update stays at its baseline (S54 helper)
+check 11 PASS: design match: e2e/design/S19.spec.ts names live-mobile and game-phase-live-mobile; docs/v3/design-checks/S19/ holds them at 390
+check 12 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**12/12 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with its ratified frame
+
+| Frame | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/game-shell/game-phase-live-mobile.png` | `91783698cef1d915ddd99077d4f82cfeea513960f5c67cdc8f31c1dc15dc8123` | `docs/v3/design-checks/S19/game-phase-live-mobile.png` | `d7d528d4f497d3ba11a4e3da1a156c3ecd6447a0b9a3c99747a58807bdd52246` |
+| `docs/v3/visual/game-rooms/live-mobile.png` | `184208e5c748b8f331bf438655da7717e5189debd47edac8452a0c2e272a0eaa` | `docs/v3/design-checks/S19/live-mobile.png` | `b53cbd815a24b0acca69d765f1352513837079aedf28dcdab51927de500bbed4` |
+Owner: "Owner, 2026-10-31: "S19 matches the design" (live-mobile, and game-phase-live-mobile recaptured on the Videos tab after "one of the comparisons is comparing the video tab to the live tab"). The owner also asked for a change to the Live status rows, to be drawn as a game-rooms amendment; it is not part of this match."
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S19 check results ---
+check 1 PASS: an in-progress game route opens a WebSocket to /api/v1/games/:gamePk/live (test); web/src has no EventSource
+check 2 PASS: two socket payloads: the Live status block shows the second's values without navigation, and the top bar shows no score before or after (test file exits 0 alone)
+check 3 PASS: payloads reach the cache only through writeGame and only when newer: v2, v2, v1 leaves v2, written once (test)
+check 4 PASS: on close it reconnects with backoff and jitter, passing ?since=<last version> (fake-timer test)
+check 5 PASS: a version gap (v2 then v4) refetches the game query (test)
+check 6 PASS: after repeated failures it falls back to polling GET /api/v1/games/:gamePk (fake-timer test)
+check 7 PASS: it reconnects on visibilitychange → visible and on online (test)
+check 8 PASS: unmounting or leaving the route closes the socket (test)
+check 9 PASS: an update keeps an open at-bat row, a selected pitch and a playing video (test)
+check 10 PASS: the Live panel's render count for one streamed update stays at its baseline (S54 helper)
+check 11 PASS: design match: e2e/design/S19.spec.ts names live-mobile and game-phase-live-mobile; docs/v3/design-checks/S19/ holds them at 390
+check 12 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S19: 12/12 checks passed ---
+verify-S19: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+web build: transforming...
+web build: ✓ 7098 modules transformed.
+web build: rendering chunks...
+web build: computing gzip size...
+web build: dist/index.html                         1.00 kB │ gzip:   0.53 kB
+web build: dist/assets/batter-J7FnW6ss.webp       74.81 kB
+web build: dist/assets/index-BEBfbMX0.css        201.84 kB │ gzip:  29.52 kB
+web build: dist/assets/PlayerDialog-DnWFw61C.js    1.05 kB │ gzip:   0.63 kB
+web build: dist/assets/live-stream-B7rsyy_4.js     2.43 kB │ gzip:   1.03 kB
+web build: dist/assets/index-Bh104ChP.js         633.31 kB │ gzip: 200.24 kB
+web build: ✓ built in 1.72s
+web build: (!) Some chunks are larger than 500 kB after minification. Consider:
+web build: - Using dynamic import() to code-split the application
+web build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+web build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 199901,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
