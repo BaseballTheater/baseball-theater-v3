@@ -11973,3 +11973,39 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-10-30 — doc parity review (`continue`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-10-31T05:50:31Z` |
+| HEAD at review | `b4735b2` (tree dirty) |
+| Trigger | docs/v3/ARCHITECTURE.md changed (S47, b4735b2: ADR-017 cost line records Workers Cache); owner-directed S104–S108, S103 AC 7 and SAVANT-DATA.md (0fa2f7f, ab5f90a) logged with the owner's No |
+| Stories `done` since last review | S47, S103, S104, S105, S106, S107, S108, S75, S71, S48 |
+| Verdict | `continue` |
+
+**Findings / amendments**
+
+**Verdict: continue.** Every citation checked holds and FEATURES / INTENT match the backlog and what shipped. No edits.
+
+**1. Citation honesty**
+
+- **S47** (done, b4735b2) cites *Daily scoreboard by date; Game → Live play / linescore context*. It sets the edge `Cache-Control` and refresh-on-read for exactly the schedule and game responses those two rows serve (the scoreboard row is "BT-backed (ADR-002)"). Its outcome is cost, which FEATURES carries only as the build-checklist line "Cloudflare + Neon serverless cost shape (G1)", not a feature row; the cited rows are what it caches, so the citation holds. Source line unchanged since its insertion.
+- **S103** cites *More MLB game data*: the row lists the Savant fields AC 4 keeps, quotes "Yes re: S103" and the arrival-time remark (AC 5), and records the terms-of-use check (*"Sure"*) that is S103 AC 7. Holds.
+- **S104 / S105** cite *More MLB game data*: the row's last sentence names "each pitcher's season averages per pitch type, and the ballpark's field drawing by venue id" with the owner's *"1. Yes"*, matching both Gaps. Holds. `docs/v3/SAVANT-DATA.md` agrees (S103–S105 as the ingested game data; player-season data and leverage / drama index as future ideas only, *"Skip but note it in the future ideas document"*).
+- **S106** cites *Game → Live play / linescore context*: the row names the win-probability chart and quotes *"Bring back win probability charts"*. Holds.
+- **S107 / S108** cite *Settings (favorites, hide scores, playback prefs)*: the row's game-row slot clause records that Win Probability shows a game's odds live and after it ends, not before, quoting *"It is actually least useful before the game. During and after is definitely useful."*. That is S107's draw and S108's build. Holds.
+- Next 3 `todo` by priority: **S75** (72) cites *Settings*, whose Hide Scores clause states each room's behavior S75 builds (Live hides the score, Plays the linescore, Box unchanged, "Recap", "Recap (score hidden)"). **S71** (73) cites *"Best of [date]" / league digest*, "Committed for launch on the scoreboard day, ranked by the existing per-game impact rule applied across the day" = S71's Gap. **S48** (76) cites *Daily scoreboard by date; Game → Live play / linescore context*: the per-game ingest object that keeps those rows live. All hold.
+- **Open:** none (`grep -l "Open:" docs/v3/backlog/stories/*.md` is empty). No pillar citations among the stories checked.
+
+**2. Doc reflects reality**
+
+- ADR-017's new cost line (Workers Cache; every request, static assets included, at the Workers rate; owner, 2026-10-30: "Workers cache") contradicts nothing in INTENT (Hosting row: Cloudflare Workers + Neon, ADR-017; "Cost-conscious" pillar, a choice the owner made) or FEATURES (neither speaks of edge caching).
+- VISUAL-DESIGN §5a (Game-row slot: win probability on live and final games, S106–S108) and §5's slot list agree with the FEATURES Settings row.
+- S70 (blocked, parked for design match) shipped the Video Player setting (Dialog default); the FEATURES Settings row already says "playback prefs include the Video Player choice, dialog by default".
+- No relic found: every item in the *More MLB game data* row has a story (S93 play metrics, S94 GraphQL content, S99 player of the game, S100 ABS rule settings, S101 uniforms, S102 division names, S103–S105 Savant).
+
+**For the next backlog review:** nothing new.
