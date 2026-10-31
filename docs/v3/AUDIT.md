@@ -11704,3 +11704,99 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-10-30 — S69 completed
+
+**Videos room grid / list / search**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-10-31T04:55:07Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `68975ea` (tree dirty) |
+| Grader | `scripts/verify-S69.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: MediaHighlight additively gains kind, date, teamIds and tags, mapped from fixtures/raw/content-823823.json (regeneration test; pnpm api:breaking exits 0)
+check 2 PASS: the grid has 2 / 3 / 4 columns at mobile / medium / desktop; List mode shows rows of the same VideoCard (RTL; one card component)
+check 3 PASS: search filters by title or blurb through filterHighlights in packages/domain; the quick filters use classifyHighlight there; impact order by default, and the sort reorders through sortHighlights; results show in Pre-game / Game highlights / Statcast / Post-game groups through groupHighlights, empty groups left out, each collapsible (tests)
+check 4 PASS: the quick filters show as many as fit, then a last Filters button opening a bottom drawer with every filter and Apply (RTL); the empty state reads "No videos yet." via ViewState
+check 5 PASS: a card is a button that calls onPlay(highlight) (test)
+check 6 PASS: files this story adds or edits have no team logo and no useMediaQuery / hiddenFrom / visibleFrom outside web/src/layout/
+check 7 PASS: design match: e2e/design/S69.spec.ts names game-videos-grid-mobile / -medium / -desktop and game-videos-list-mobile; docs/v3/design-checks/S69/ holds them at 390/768/1200/390
+check 8 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**8/8 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with its ratified frame
+
+| Frame | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/game-shell/game-videos-grid-desktop.png` | `3bde6d26cb05721bf4d59955309c754f892e9f5b0bd3195ff5490b4511c44835` | `docs/v3/design-checks/S69/game-videos-grid-desktop.png` | `6fefe45a313ae9ec5472486fdbe62a3994c757b3bce167c8b106e55c28d5914a` |
+| `docs/v3/visual/game-shell/game-videos-grid-medium.png` | `c8a1e536214c30a3c61613c1972cbccdba35227949c88d909b29251f4e32fe5a` | `docs/v3/design-checks/S69/game-videos-grid-medium.png` | `c72a4a2927b6650278daef2be9b63d02645b03d4e2f9e4cf161a309037315ba0` |
+| `docs/v3/visual/game-shell/game-videos-grid-mobile.png` | `d9de0092c3a856eec012184438b35788f569a7af2956aeb3bf00fdc56b421136` | `docs/v3/design-checks/S69/game-videos-grid-mobile.png` | `0807a71e284b4ee47aff609e361e7a445ab6ab8266df230396b92e1aa0e3cac3` |
+| `docs/v3/visual/game-shell/game-videos-list-mobile.png` | `7848120339d6f6a36a6dfc3ef4c70469d6204c15f8bfbb8ec11af5d5fc6b7388` | `docs/v3/design-checks/S69/game-videos-list-mobile.png` | `5e842e5516513ef5ad342a766f1b49460c3d6b6d150e53ab50521a0735088c88` |
+Owner: "Owner, 2026-10-30, asked "S68 and S69 design verdicts (do they match their designs?)": "S68 and 69: yes""
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S69 check results ---
+check 1 PASS: MediaHighlight additively gains kind, date, teamIds and tags, mapped from fixtures/raw/content-823823.json (regeneration test; pnpm api:breaking exits 0)
+check 2 PASS: the grid has 2 / 3 / 4 columns at mobile / medium / desktop; List mode shows rows of the same VideoCard (RTL; one card component)
+check 3 PASS: search filters by title or blurb through filterHighlights in packages/domain; the quick filters use classifyHighlight there; impact order by default, and the sort reorders through sortHighlights; results show in Pre-game / Game highlights / Statcast / Post-game groups through groupHighlights, empty groups left out, each collapsible (tests)
+check 4 PASS: the quick filters show as many as fit, then a last Filters button opening a bottom drawer with every filter and Apply (RTL); the empty state reads "No videos yet." via ViewState
+check 5 PASS: a card is a button that calls onPlay(highlight) (test)
+check 6 PASS: files this story adds or edits have no team logo and no useMediaQuery / hiddenFrom / visibleFrom outside web/src/layout/
+check 7 PASS: design match: e2e/design/S69.spec.ts names game-videos-grid-mobile / -medium / -desktop and game-videos-list-mobile; docs/v3/design-checks/S69/ holds them at 390/768/1200/390
+check 8 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S69: 8/8 checks passed ---
+verify-S69: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+packages/ports build: Done
+web build: vite v6.4.3 building for production...
+web build: transforming...
+web build: ✓ 7091 modules transformed.
+web build: rendering chunks...
+web build: computing gzip size...
+web build: dist/index.html                     1.00 kB │ gzip:   0.53 kB
+web build: dist/assets/batter-J7FnW6ss.webp   74.81 kB
+web build: dist/assets/index-BEBfbMX0.css    201.84 kB │ gzip:  29.52 kB
+web build: dist/assets/index-CHptAK5R.js     627.65 kB │ gzip: 198.25 kB
+web build: ✓ built in 1.69s
+web build: (!) Some chunks are larger than 500 kB after minification. Consider:
+web build: - Using dynamic import() to code-split the application
+web build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+web build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 197889,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

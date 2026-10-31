@@ -10,7 +10,9 @@
  * quick filters are rounded rectangles of one height and show as many as fit, then a
  * Filters button opening a bottom drawer — on mobile, Stat / viz then Filters; the videos
  * show in Pre-game / Game highlights / Statcast / Post-game groups, empty ones left out,
- * each heading (with its count) collapsing its group.
+ * each heading (with its count) collapsing its group. The Filters drawer has no ratified
+ * frame, so it is not captured here: the owner judged a capture of it at checkpoint
+ * 7ae10cc ("S68 and 69: yes"), and RTL holds its behavior (grader check 4).
  *
  * Expected differences, not judged (owner, 2026-10-28: "Judge only the story's own
  * parts"): the frames' sample game (NYY @ BOS, five clips) versus the fixture's 40, so
@@ -72,22 +74,3 @@ for (const { frame, list } of FRAMES)
 		await capture(page, testInfo, frame);
 	});
 }
-
-// The filter drawer (owner, 2026-10-30) has no ratified frame; captured so the owner can judge it.
-test("game-videos-filters-drawer-mobile", async ({ page }, testInfo) =>
-{
-	test.skip(testInfo.project.name !== "mobile", "drawn at mobile only");
-	await videos(page, false);
-	await page.getByRole("button", {
-		name: "Filters",
-	}).click();
-	await page.getByRole("button", {
-		name: "Apply",
-	}).waitFor();
-	await page.waitForTimeout(400);
-	// A full-page shot of a fixed drawer over a long page lands it mid-page; keep the shot to one phone screen.
-	await page.addStyleTag({
-		content: "html, body, #root { height: 844px !important; overflow: hidden !important; }",
-	});
-	await capture(page, testInfo, "game-videos-filters-drawer-mobile");
-});

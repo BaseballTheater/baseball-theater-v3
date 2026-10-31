@@ -14,6 +14,15 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## A game's videos are easy to browse
+
+- **Before, a game's highlights were a plain list of titles. Now they show as a grid of video stills (or a
+  list, if you prefer), grouped into Pre-game, Game highlights, Statcast and Post-game, each group folding
+  away with a tap. You can search them, sort by biggest moments or by time, and narrow them to one team's
+  clips or the stat-and-chart clips.** Details: S69 — `VideosRoom`, `VideoCard`, `QuickFilters` with a
+  Filters drawer; `filterHighlights`, `sortHighlights`, `groupHighlights` in `packages/domain`; video
+  kind, date, teams and tags mapped from MLB's content keywords; design matched by the owner. _(2026-10-30)_
+
 ## Each scoreboard game shows what you care about at a glance
 
 - **Before, every game on the scoreboard took the same space and every score was always visible. Now games
