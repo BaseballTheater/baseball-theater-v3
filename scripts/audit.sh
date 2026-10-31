@@ -83,7 +83,9 @@ read_arg() { # read_arg <value> — "-" means stdin
 source "$(dirname "$0")/lib/reverify.sh"
 
 # design_match_rows <ID> — one table row per capture in CHECKS_DIR/<ID>/, paired with the
-# one ratified frame of the same name under VISUAL_DIR; exits 2 if any pairing fails.
+# one ratified frame of the same name under VISUAL_DIR; exits 2 if any pairing fails. An
+# amendment that redraws a frame under its own name wins over the original, as in
+# `pnpm design:review` (e2e/design-review.ts), so the pair is the frame the owner judged.
 design_match_rows() {
   local id="$1" captures cap name frames count fsum csum
   captures="$(ls "${CHECKS_DIR}/${id}"/*.png 2>/dev/null || true)"
@@ -95,6 +97,10 @@ design_match_rows() {
     name="$(basename "$cap")"
     frames="$(find "$VISUAL_DIR" -type f -name "$name")"
     count="$(printf '%s' "$frames" | grep -c . || true)"
+    if [ "$count" -gt 1 ]; then
+      frames="$(printf '%s\n' "$frames" | grep '/amendments/' || true)"
+      count="$(printf '%s' "$frames" | grep -c . || true)"
+    fi
     if [ "$count" != "1" ]; then
       echo "audit: capture ${name} matches ${count} ratified frames under ${VISUAL_DIR}; need exactly one" >&2
       exit 2
