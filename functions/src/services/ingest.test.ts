@@ -163,3 +163,44 @@ describe("refresh-on-read cache lifetime (S47, ADR-021)", () =>
 		expect(await at(175)).toBe(6);
 	});
 });
+
+describe("which games ingest fetches (S48 AC 8, ADR-025)", () =>
+{
+	it("game-over: out of its window, a game-over (O) game is fetched like a final (F) one, and a scheduled (S) one is not", async () =>
+	{
+		const fetchedFor = async (codedGameState: string) =>
+		{
+			const real = new FixtureMlbStatsClient();
+			const mlb = new FixtureMlbStatsClient();
+			const day = await real.fetchSchedule("2024-07-04");
+			mlb.fetchSchedule = async () => ({
+				...day,
+				games: day.games.filter((g) => g.gamePk === 744834).map((g) => ({
+					...g,
+					status: {
+						...g.status,
+						codedGameState,
+					},
+				})),
+			});
+			const pks: number[] = [];
+			mlb.fetchGame = async (pk: number) =>
+			{
+				pks.push(pk);
+				return real.fetchGame(pk);
+			};
+			// Two years on, the day is far outside every window.
+			await ingestScheduleDay({
+				mlb,
+				schedules: new InMemoryScheduleRepository(),
+				games: new InMemoryGameRepository(),
+				projections: new InMemoryGameProjectionRepository(),
+				now: () => new Date("2026-10-30T12:00:00Z"),
+			}, "2024-07-04");
+			return pks;
+		};
+		expect(await fetchedFor("F")).toEqual([744834]);
+		expect(await fetchedFor("O")).toEqual([744834]);
+		expect(await fetchedFor("S")).toEqual([]);
+	});
+});

@@ -14,11 +14,16 @@
 		"not_found_handling": "single-page-application",
 		"run_worker_first": ["/api/*", "/health"]
 	},
-	// ADR-002's ingest tick, once a minute (the cron floor), until S48's ingest Durable
-	// Object owns cadence. In local dev it runs only with BT_INGEST_TICK=1.
+	// Once a minute (the cron floor) the cron ensures one game-ingest:<gamePk> object per
+	// in-window game (S48; ADR-020); each object's alarm owns that game's ADR-002 cadence.
+	// In local dev it runs only with BT_INGEST_TICK=1.
 	"triggers": {
 		"crons": ["* * * * *"]
 	},
+	"durable_objects": {
+		"bindings": [{ "name": "GAME_INGEST", "class_name": "GameIngestObject" }]
+	},
+	"migrations": [{ "tag": "v1", "new_sqlite_classes": ["GameIngestObject"] }],
 	// Workers Cache (S47, ADR-021; owner, 2026-10-30: "Workers cache"): Cloudflare checks
 	// its tiered edge cache before running the Worker and keeps schedule and game responses
 	// as long as their Cache-Control says. Every request is then billed at the Workers

@@ -1,15 +1,15 @@
 /**
  * S45: the Worker entry and its composition, exercised in Node (coverage lives here;
  * `worker.workerd.test.ts` runs the same Worker inside workerd). The fixture client is
- * the default and the live one opt-in; the cron tick runs deployed, and in local dev
- * only behind BT_INGEST_TICK.
+ * the default and the live one opt-in; the cron ensures per-game ingest objects (S48)
+ * deployed, and in local dev only behind BT_INGEST_TICK.
  */
 import {
 	describe, expect, it, vi,
 } from "vitest";
 import { FixtureClient } from "./adapters/fixtures/fixture-client.js";
 import { HttpMlbStatsClient } from "./adapters/http/mlb.js";
-import * as ingest from "./services/ingest.js";
+import * as gameIngest from "./services/game-ingest.js";
 import worker from "./worker.js";
 import {
 	createMlbClient, createWorkerApp, tickAllowed, workerApp,
@@ -68,22 +68,38 @@ describe("the Worker entry (S45)", () =>
 		expect((await res.json() as { gamePk: number }).gamePk).toBe(744834);
 	});
 
-	it("scheduled ticks ingest when allowed and skips in local dev without the gate", async () =>
+	it("scheduled ensures a game-ingest object for each in-window game when allowed and bound, and nothing in local dev without the gate", async () =>
 	{
-		const tick = vi.spyOn(ingest, "tickIngest").mockResolvedValue({
-			ingested: [],
-		} as never);
+		const ensure = vi.spyOn(gameIngest, "ensureIngestRunning");
+		const fetches: string[] = [];
+		const namespace = {
+			idFromName: (name: string) => name,
+			get: (id: never) => ({
+				fetch: async (input: string) =>
+				{
+					fetches.push(`${String(id)} ${input}`);
+					return Response.json({
+						armed: true,
+					});
+				},
+			}),
+		};
 		const waits: Promise<unknown>[] = [];
 		const ctx = {
 			waitUntil: (p: Promise<unknown>) => void waits.push(p),
 		};
 		await worker.scheduled(undefined, {
 			BT_LOCAL: "1",
+			GAME_INGEST: namespace,
 		}, ctx);
-		expect(tick).not.toHaveBeenCalled();
 		await worker.scheduled(undefined, {}, ctx);
-		expect(tick).toHaveBeenCalledTimes(1);
-		await Promise.all(waits);
-		tick.mockRestore();
+		expect(ensure).not.toHaveBeenCalled();
+		await worker.scheduled(undefined, {
+			GAME_INGEST: namespace,
+		}, ctx);
+		expect(ensure).toHaveBeenCalledTimes(1);
+		const ensured = await waits[0] as number[];
+		expect(fetches).toEqual(ensured.map((pk) => `game-ingest:${pk} https://game-ingest/ensure?gamePk=${pk}`));
+		ensure.mockRestore();
 	});
 });

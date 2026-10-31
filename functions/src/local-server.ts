@@ -1,105 +1,38 @@
-import { randomUUID } from "node:crypto";
+/**
+ * The API under Node (`pnpm --filter @bt/functions start`, `pnpm lighthouse:serve`): the
+ * same Fetch-standard handler the Worker runs, served through Node's http. It composes
+ * through `createWorkerApp` (ADR-025: one composition), so its MLB client, repositories,
+ * auth, settings and account data are the Worker's, built from the same `BT_*` variables
+ * (fixtures by default, `BT_USE_LIVE_MLB=1` for live statsapi.mlb.com).
+ */
 import { createServer } from "node:http";
 import { DEFAULT_CADENCE } from "@bt/domain";
-import type {
-	GameRepository, MlbStatsClient, ScheduleRepository,
-} from "@bt/ports";
-import {
-	createDevAccountData, createDevAuth, StaticSecretsProvider,
-} from "./adapters/fixtures/auth.js";
-import { FixtureMlbStatsClient } from "./adapters/fixtures/mlb.js";
-import { HttpMlbStatsClient } from "./adapters/http/mlb.js";
 import { toNodeListener } from "./adapters/node/http.js";
-import {
-	InMemoryGameProjectionRepository,
-	InMemoryGameRepository,
-	InMemoryScheduleRepository,
-	InMemorySettingsRepository,
-} from "./adapters/memory/repos.js";
 import { handleApiRequest } from "./handlers/api.js";
-import { APP_ORIGIN_SECRET } from "./services/data-downloads.js";
-import { ingestScheduleDay, tickIngest } from "./services/ingest.js";
-import { RefreshCoordinator } from "./services/refresh.js";
-import { SESSION_KEY_SECRET } from "./services/session.js";
+import { tickIngest } from "./services/ingest.js";
+import { createWorkerApp } from "./worker-app.js";
 
 const PORT = Number(process.env.BT_API_PORT ?? 8787);
 const DEFAULT_DATE = process.env.BT_SEED_DATE ?? "2024-07-04";
 
-/**
- * Fixtures are the default so local dev and CI never touch the network.
- * Set `BT_USE_LIVE_MLB=1` to hit the real Stats API instead.
- */
-function createMlbClient(): MlbStatsClient
-{
-	if (process.env.BT_USE_LIVE_MLB === "1")
-	{
-		console.log("[bt-api] BT_USE_LIVE_MLB=1 — using live statsapi.mlb.com");
-		return new HttpMlbStatsClient();
-	}
-	return new FixtureMlbStatsClient();
-}
-
-/**
- * In-memory repos so local dev and CI need no cloud. The durable store is
- * Postgres behind these same ports (ADR-018; S50 adds the adapter).
- */
-function createSnapshotRepos(): {
-	schedules: ScheduleRepository;
-	games: GameRepository;
-}
-{
-	return {
-		schedules: new InMemoryScheduleRepository(),
-		games: new InMemoryGameRepository(),
-	};
-}
-
 async function main(): Promise<void>
 {
-	const { schedules, games } = createSnapshotRepos();
-	const projections = new InMemoryGameProjectionRepository();
-	const mlb = createMlbClient();
-	// One coordinator for the process: out-of-window reads that go stale trigger a
-	// single-flighted, cooldown-gated refresh instead of one MLB pull per request.
-	const refresh = new RefreshCoordinator();
-	const ingest = {
-		mlb,
-		schedules,
-		games,
-		projections,
-		refresh,
-	};
-
-	await ingestScheduleDay(ingest, DEFAULT_DATE);
+	if (process.env.BT_USE_LIVE_MLB === "1") console.log("[bt-api] BT_USE_LIVE_MLB=1 — using live statsapi.mlb.com");
+	// Without BT_SESSION_KEY the key is random per process, so issued sessions stop verifying after a restart.
+	const app = createWorkerApp({
+		BT_USE_LIVE_MLB: process.env.BT_USE_LIVE_MLB,
+		BT_SEED_DATE: DEFAULT_DATE,
+		BT_SESSION_KEY: process.env.BT_SESSION_KEY,
+		BT_APP_ORIGIN: process.env.BT_APP_ORIGIN,
+	});
+	await app.ready;
 	console.log(`[bt-api] Seeded fixtures for ${DEFAULT_DATE}`);
 
-	// Local sign-in is `Authorization: Bearer dev:<uid>`. Without BT_SESSION_KEY the key is
-	// random per process, so issued sessions simply stop verifying after a restart.
-	// BT_APP_ORIGIN overrides where download emails link (default: the Vite dev server).
-	const secrets = new StaticSecretsProvider({
-		[SESSION_KEY_SECRET]: process.env[SESSION_KEY_SECRET] ?? randomUUID(),
-		...process.env[APP_ORIGIN_SECRET] && {
-			[APP_ORIGIN_SECRET]: process.env[APP_ORIGIN_SECRET],
-		},
-	});
-	const auth = createDevAuth(secrets);
-	// Downloads and deletion (ADR-028) over the same users, with in-memory downloads, the dev mailer and identity admin.
-	const settings = new InMemorySettingsRepository();
-	const account = createDevAccountData({
-		users: auth.users,
-		settings,
-	}, secrets);
+	const server = createServer(toNodeListener((request) => handleApiRequest(request, app.context)));
 
-	// The Fetch-standard handler the Worker will run (ADR-017), served through Node's http.
-	const server = createServer(toNodeListener((request) => handleApiRequest(request, {
-		ingest,
-		auth,
-		settings,
-		account,
-	})));
-
-	// ADR-002 cadence loop. Off by default: `pnpm dev` stays a single fixture seed
-	// unless BT_INGEST_TICK=1, so local work never spins an unattended poll.
+	// ADR-002 cadence loop. Off by default, so local work never spins an unattended poll.
+	// Node has no Durable Objects, so it keeps the whole-day tick the Worker's per-game
+	// ingest objects replaced (S48).
 	if (process.env.BT_INGEST_TICK === "1")
 	{
 		console.log(
@@ -107,7 +40,7 @@ async function main(): Promise<void>
 		);
 		setInterval(() =>
 		{
-			void tickIngest(ingest).then(
+			void tickIngest(app.ingest).then(
 				(r) =>
 				{
 					if (r.ingested.length > 0)

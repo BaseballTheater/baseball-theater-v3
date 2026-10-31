@@ -39,6 +39,12 @@ explicitly where that's the case. For what's still ahead, see
 
 ## The backend runs the way it will in production
 
+- **Before, live games were only polled while a developer's laptop server was running. Now each game in
+  progress gets its own always-recovering poller on Cloudflare: it checks MLB on the game's cadence, saves
+  every change before telling anyone about it, and stops by itself once the game is over.** Details: S48 —
+  `GameIngestObject` (`game-ingest:<gamePk>` Durable Object) over `GameIngest` and `HubLeases`, the cron
+  ensuring one per in-window game; a game-over game is now stored like a final one; the Node server shares
+  the Worker's composition. Hubs that deliver to viewers are S18. _(2026-10-30)_
 - **Before, every finished game was re-fetched from MLB every few minutes for as long as anyone looked at it.
   Now the longer a game goes unchanged, the longer Cloudflare's edge serves it straight from its cache (up to
   two days), and the backend asks MLB again less and less often — while a scoring change still resets it to

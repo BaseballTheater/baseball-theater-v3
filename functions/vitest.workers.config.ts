@@ -16,6 +16,9 @@ export default defineWorkersConfig({
 				// The real Worker (main, compatibility date and flags) as wrangler would run it.
 				main: "./src/worker.ts",
 				singleWorker: true,
+				// The per-game ingest object (S48) leaves its next alarm set, which the pool's
+				// per-test storage snapshots can't unwind; each test names its own object instead.
+				isolatedStorage: false,
 				wrangler: {
 					configPath: "../wrangler.jsonc",
 				},

@@ -2,7 +2,7 @@ import type {
 	CadenceParams, GameSnapshot, ScheduleDay, Unversioned,
 } from "@bt/domain";
 import {
-	cacheLifetimeMs, DEFAULT_CADENCE, isGameInActiveWindow, projectGame, stampVersion,
+	cacheLifetimeMs, DEFAULT_CADENCE, isFinalStatus, isGameInActiveWindow, normalizeStatusCode, projectGame, stampVersion,
 } from "@bt/domain";
 import type {
 	GameProjectionRepository, GameRepository, MlbStatsClient, ScheduleRepository,
@@ -65,6 +65,25 @@ async function storeSchedule(deps: IngestDeps, fetched: Unversioned<ScheduleDay>
 	return day;
 }
 
+/**
+ * Stores one fetched game the way every ingest path does (`storeGame`: stamped, written
+ * only when its content changed, ADR-022) and says whether it changed — the per-game
+ * ingest object (S48) publishes only then.
+ */
+export async function ingestGame(
+	deps: IngestDeps,
+	fetched: Unversioned<GameSnapshot>,
+): Promise<{ snapshot: GameSnapshot;
+	changed: boolean; }>
+{
+	const before = await deps.games.getByPk(fetched.gamePk);
+	const snapshot = await storeGame(deps, fetched);
+	return {
+		snapshot,
+		changed: before?.version !== snapshot.version,
+	};
+}
+
 export async function ingestScheduleDay(
 	deps: IngestDeps,
 	date: string,
@@ -81,7 +100,8 @@ export async function ingestScheduleDay(
 
 	for (const summary of day.games)
 	{
-		if (!isGameInActiveWindow(summary, now) && summary.status.codedGameState !== "F")
+		// A finished game (final, game over, completed early) is worth storing even out of its window (ADR-025: one decision).
+		if (!isGameInActiveWindow(summary, now) && !isFinalStatus(normalizeStatusCode(summary.status.codedGameState)))
 		{
 			continue;
 		}
@@ -186,6 +206,35 @@ export async function getOrRefreshGame(
 	return refreshed ?? existing ?? deps.games.getByPk(gamePk);
 }
 
+/**
+ * Reads today's schedule from MLB, stores it (`windowMode` active while any game is in
+ * its window), and splits its games by the ADR-002 window at `now`. The cron's two
+ * consumers share it: `tickIngest` fetches the active games itself, and the per-game
+ * ingest objects (S48) are ensured for them instead.
+ */
+export async function refreshTodaysWindow(
+	deps: IngestDeps,
+	now: Date,
+	params: CadenceParams = DEFAULT_CADENCE,
+): Promise<{ date: string;
+	active: ScheduleDay["games"];
+	skipped: number[]; }>
+{
+	const date = now.toISOString().slice(0, 10);
+	const fetched = await deps.mlb.fetchSchedule(date);
+	const active = fetched.games.filter((g) => isGameInActiveWindow(g, now, params));
+	await storeSchedule(deps, {
+		...fetched,
+		fetchedAt: now.toISOString(),
+		windowMode: active.length > 0 ? "active" : "cache",
+	});
+	return {
+		date,
+		active,
+		skipped: fetched.games.filter((g) => !active.includes(g)).map((g) => g.gamePk),
+	};
+}
+
 /** What one cadence tick touched. `skipped` are the games left unfetched. */
 export type TickResult = {
 	date: string;
@@ -207,21 +256,11 @@ export async function tickIngest(
 	params: CadenceParams = DEFAULT_CADENCE,
 ): Promise<TickResult>
 {
-	const date = now.toISOString().slice(0, 10);
+	const {
+		date, active, skipped,
+	} = await refreshTodaysWindow(deps, now, params);
 	const fetchedAt = now.toISOString();
-	const fetched = await deps.mlb.fetchSchedule(date);
-
-	const active = fetched.games.filter((g) => isGameInActiveWindow(g, now, params));
-	await storeSchedule(deps, {
-		...fetched,
-		fetchedAt,
-		windowMode: active.length > 0 ? "active" : "cache",
-	});
-
 	const ingested: number[] = [];
-	const skipped = fetched.games
-		.filter((g) => !isGameInActiveWindow(g, now, params))
-		.map((g) => g.gamePk);
 
 	for (const summary of active)
 	{

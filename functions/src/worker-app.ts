@@ -18,6 +18,7 @@ import {
 	InMemoryScheduleRepository,
 	InMemorySettingsRepository,
 } from "./adapters/memory/repos.js";
+import type { GameIngestNamespace } from "./game-ingest-object.js";
 import type { ApiContext } from "./handlers/api.js";
 import { APP_ORIGIN_SECRET } from "./services/data-downloads.js";
 import { ingestScheduleDay } from "./services/ingest.js";
@@ -39,6 +40,8 @@ export type WorkerEnv = {
 	BT_LOCAL?: string;
 	/** `"1"` lets the cron tick ingest in local dev (ADR-002 cadence; off by default, as `local-server.ts`). */
 	BT_INGEST_TICK?: string;
+	/** The per-game ingest objects (S48; `wrangler.jsonc` `durable_objects`); absent under Node. */
+	GAME_INGEST?: GameIngestNamespace;
 };
 
 /** Everything a request or a cron tick needs: the handler's context plus the ingest loop's deps. */

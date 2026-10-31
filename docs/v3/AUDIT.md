@@ -12009,3 +12009,93 @@ functions build: Done
 - No relic found: every item in the *More MLB game data* row has a story (S93 play metrics, S94 GraphQL content, S99 player of the game, S100 ABS rule settings, S101 uniforms, S102 division names, S103–S105 Savant).
 
 **For the next backlog review:** nothing new.
+
+---
+
+## 2026-10-30 — S48 completed
+
+**Ingest Durable Object + cron**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-10-31T05:58:59Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `6392604` (tree dirty) |
+| Grader | `scripts/verify-S48.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: scheduled() reads the schedule and calls an idempotent ensureRunning on game-ingest:<gamePk> only for in-window games; ensureRunning twice arms exactly one alarm (tests); wrangler.jsonc binds the class
+check 2 PASS: the alarm polls through MlbStatsClient (fixture 745001); an unchanged payload creates no new version (test)
+check 3 PASS: write before publish (test); with no registered hubs nothing is published (test)
+check 4 PASS: hub leases persist in Durable Object storage: register, renew, unregister; an expired lease is dropped; three failed publishes in a row drop a hub (tests)
+check 5 PASS: at the end of the window ingest publishes the final state and stops scheduling alarms (test)
+check 6 PASS: tickIngest stays exported; functions/src/services/tick-ingest.test.ts exits 0 run alone
+check 7 PASS: the Durable Object tests run in @cloudflare/vitest-pool-workers; each *.workerd.test.ts exits 0 run alone
+check 8 PASS: no codedGameState letter compared inline in functions/src outside tests; a game-over (O) game outside the window is fetched like a final (F) one (test)
+check 9 PASS: local-server.ts composes through createWorkerApp: no new InMemory, no createMlbClient of its own
+check 10 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**10/10 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S48 check results ---
+check 1 PASS: scheduled() reads the schedule and calls an idempotent ensureRunning on game-ingest:<gamePk> only for in-window games; ensureRunning twice arms exactly one alarm (tests); wrangler.jsonc binds the class
+check 2 PASS: the alarm polls through MlbStatsClient (fixture 745001); an unchanged payload creates no new version (test)
+check 3 PASS: write before publish (test); with no registered hubs nothing is published (test)
+check 4 PASS: hub leases persist in Durable Object storage: register, renew, unregister; an expired lease is dropped; three failed publishes in a row drop a hub (tests)
+check 5 PASS: at the end of the window ingest publishes the final state and stops scheduling alarms (test)
+check 6 PASS: tickIngest stays exported; functions/src/services/tick-ingest.test.ts exits 0 run alone
+check 7 PASS: the Durable Object tests run in @cloudflare/vitest-pool-workers; each *.workerd.test.ts exits 0 run alone
+check 8 PASS: no codedGameState letter compared inline in functions/src outside tests; a game-over (O) game outside the window is fetched like a final (F) one (test)
+check 9 PASS: local-server.ts composes through createWorkerApp: no new InMemory, no createMlbClient of its own
+check 10 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S48: 10/10 checks passed ---
+verify-S48: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+packages/ports build: Done
+web build: vite v6.4.3 building for production...
+web build: transforming...
+web build: ✓ 7095 modules transformed.
+web build: rendering chunks...
+web build: computing gzip size...
+web build: dist/index.html                     1.00 kB │ gzip:   0.53 kB
+web build: dist/assets/batter-J7FnW6ss.webp   74.81 kB
+web build: dist/assets/index-BEBfbMX0.css    201.84 kB │ gzip:  29.52 kB
+web build: dist/assets/index-E9yq21zh.js     631.95 kB │ gzip: 199.55 kB
+web build: (!) Some chunks are larger than 500 kB after minification. Consider:
+web build: - Using dynamic import() to code-split the application
+web build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+web build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+web build: ✓ built in 1.73s
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 199203,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
