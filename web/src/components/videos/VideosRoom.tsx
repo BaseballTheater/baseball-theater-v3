@@ -138,7 +138,8 @@ function FilterDrawer({
 
 /**
  * The Videos room (S69; game-shell `game-videos-*` frames, A1): the game's videos under
- * "Impact-sorted videos", a full-width search, then one row: the quick filters on the
+ * "Videos" (the frames' "Impact-sorted videos" stopped being true once the list could be
+ * sorted by time; owner, 2026-10-30: "Use “Videos”"), a full-width search, then one row: the quick filters on the
  * left (`QuickFilters`: as many as fit, then a Filters button opening `FilterDrawer`), and
  * on the right the sort (`sortHighlights`; impact first, the server's
  * `rankHighlightsByImpact` order) and the Grid / List icons (owner, 2026-10-30). The grid
@@ -203,7 +204,7 @@ export function VideosRoom({
 
 	return (
 		<Stack gap="md">
-			<Text size="xs" fw={700} tt="uppercase">Impact-sorted videos</Text>
+			<Text size="xs" fw={700} tt="uppercase">Videos</Text>
 			<TextInput
 				aria-label="Search videos"
 				placeholder="Search videos..."
