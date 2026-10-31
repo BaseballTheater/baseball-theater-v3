@@ -12187,3 +12187,97 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-10-31 — S70 completed
+
+**Video player (dialog / stage)**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-10-31T21:26:22Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `64613e6` (tree dirty) |
+| Grader | `scripts/verify-S70.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: one VideoPlayer holds the MLBAM disclaimer once (one file in web/src) and renders inside PlayerDialog (default) or PlayerStage
+check 2 PASS: the dialog closes on ✕ and Esc; Space toggles play (test)
+check 3 PASS: Settings → Game Detail → Video Player (Dialog / Stage) saves to the account and switches the host without reload; signed out uses Dialog (tests)
+check 4 PASS: PlayerDialog shows the game link when the clip carries its game and is not played from that game's page, absent in the game's Videos room (tests); one PlayerDialog, imported by the Videos room
+check 5 PASS: files this story adds or edits have no team logo and no useMediaQuery / hiddenFrom / visibleFrom outside web/src/layout/
+check 6 PASS: design match: e2e/design/S70.spec.ts names video-player-dialog-mobile / -medium and video-player-stage-mobile / -medium; docs/v3/design-checks/S70/ holds them at 390/768/390/768
+check 7 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**7/7 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with its ratified frame
+
+| Frame | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/game-shell/amendments/video-player-dialog-medium.png` | `0858032d263bef3b6fb059afa2228360cba496511c05505973451a052d7e010d` | `docs/v3/design-checks/S70/video-player-dialog-medium.png` | `7bce44deac718a0032587f9324618d71465a9ce371c9087d1bb0b9eb890187ce` |
+| `docs/v3/visual/game-shell/amendments/video-player-dialog-mobile.png` | `9126fd1b41930261778edecf8f2819f18d27ca778a92117940180f097478d3b2` | `docs/v3/design-checks/S70/video-player-dialog-mobile.png` | `49b2641de951782602f3093e6b118410c86be8cc255b4e61104b5bd3e70ef3a5` |
+| `docs/v3/visual/game-shell/video-player-stage-medium.png` | `183b62bb6b2d5410c48f32e30512900b580e35be504bea7804892135d592b219` | `docs/v3/design-checks/S70/video-player-stage-medium.png` | `0392504b20df2f6e261dd9a6ff2d6293547c7fc9a7dc2ce51db0296483fa83fe` |
+| `docs/v3/visual/game-shell/video-player-stage-mobile.png` | `9888ffa44aa3936c9f0bc3077dcd6d748845e2fa1ce3fe89610fb6c3f3e4e680` | `docs/v3/design-checks/S70/video-player-stage-mobile.png` | `25facb760f11f393d61443e96131edc9e3fe1d436fc9f761c3e7cee92a333bee` |
+Owner: "Owner, 2026-10-31: "S70 looks good." (the floating dialog rebuilt to game-shell A4, ratified the same day on "Yes, looks good, ratify"; the stage frames as captured)"
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S70 check results ---
+check 1 PASS: one VideoPlayer holds the MLBAM disclaimer once (one file in web/src) and renders inside PlayerDialog (default) or PlayerStage
+check 2 PASS: the dialog closes on ✕ and Esc; Space toggles play (test)
+check 3 PASS: Settings → Game Detail → Video Player (Dialog / Stage) saves to the account and switches the host without reload; signed out uses Dialog (tests)
+check 4 PASS: PlayerDialog shows the game link when the clip carries its game and is not played from that game's page, absent in the game's Videos room (tests); one PlayerDialog, imported by the Videos room
+check 5 PASS: files this story adds or edits have no team logo and no useMediaQuery / hiddenFrom / visibleFrom outside web/src/layout/
+check 6 PASS: design match: e2e/design/S70.spec.ts names video-player-dialog-mobile / -medium and video-player-stage-mobile / -medium; docs/v3/design-checks/S70/ holds them at 390/768/390/768
+check 7 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S70: 7/7 checks passed ---
+verify-S70: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+web build: transforming...
+web build: ✓ 7098 modules transformed.
+web build: rendering chunks...
+web build: computing gzip size...
+web build: dist/index.html                         1.00 kB │ gzip:   0.53 kB
+web build: dist/assets/batter-J7FnW6ss.webp       74.81 kB
+web build: dist/assets/index-BEBfbMX0.css        201.84 kB │ gzip:  29.52 kB
+web build: dist/assets/PlayerDialog-Bf6gD57O.js    1.05 kB │ gzip:   0.63 kB
+web build: dist/assets/live-stream-nTOy8iVY.js     2.43 kB │ gzip:   1.03 kB
+web build: dist/assets/index-DgJuv9Gp.js         633.31 kB │ gzip: 200.24 kB
+web build: ✓ built in 1.91s
+web build: (!) Some chunks are larger than 500 kB after minification. Consider:
+web build: - Using dynamic import() to code-split the application
+web build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+web build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 199901,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

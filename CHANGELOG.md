@@ -16,6 +16,12 @@ explicitly where that's the case. For what's still ahead, see
 
 ## A game's videos are easy to browse
 
+- **Before, a highlight couldn't be watched inside Baseball Theater. Now tapping a clip plays it right there,
+  floating over the dimmed page with a Close button (and, from Search, a link to its game). Or, if you prefer,
+  it plays in a fixed player above the clips. The required MLB notice always shows under it, and on iPhone it
+  stays in the page instead of jumping to fullscreen.** Details: S70 — `VideoPlayer`, `PlayerDialog`
+  (game-shell A4), `PlayerStage`, `PlayerHost`; Settings → Game Detail → Video Player; `clipClock` in
+  `packages/domain`; Space plays / pauses, Esc closes; design matched by the owner. _(2026-10-31)_
 - **Before, a game's highlights were a plain list of titles. Now they show as a grid of video stills (or a
   list, if you prefer), grouped into Pre-game, Game highlights, Statcast and Post-game, each group folding
   away with a tap. You can search them, sort by biggest moments or by time, and narrow them to one team's
