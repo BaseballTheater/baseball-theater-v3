@@ -69,6 +69,14 @@ describe("VideoPlayer", () =>
 		expect(screen.getByText("0:00 / 0:00")).toBeInTheDocument();
 	});
 
+	it("plays inline: iOS Safari keeps the clip in the page instead of taking it fullscreen", () =>
+	{
+		wrap(<VideoPlayer video={VIDEO} autoPlay />);
+		const video = screen.getByTestId("video-player").querySelector("video");
+		expect(video).toHaveAttribute("playsinline");
+		expect(video).toHaveAttribute("webkit-playsinline");
+	});
+
 	it("Space plays and pauses, but not while typing in a field", async () =>
 	{
 		const user = userEvent.setup();
@@ -147,6 +155,21 @@ describe("PlayerDialog", () =>
 		expect(onClose).toHaveBeenCalledTimes(1);
 		await user.keyboard("{Escape}");
 		expect(onClose).toHaveBeenCalledTimes(2);
+	});
+
+	it("floats with no card: Close is a labeled button in the overlay, and a press on the empty overlay closes, but not one on the player", async () =>
+	{
+		const user = userEvent.setup();
+		const onClose = vi.fn();
+		wrap(<PlayerDialog video={VIDEO} onClose={onClose} />);
+		const dialog = await screen.findByRole("dialog");
+		expect(within(dialog).getByRole("button", {
+			name: "Close video",
+		})).toHaveTextContent("Close");
+		await user.click(within(dialog).getByText(VIDEO.title));
+		expect(onClose).not.toHaveBeenCalled();
+		await user.click(within(dialog).getByTestId("player-backdrop"));
+		expect(onClose).toHaveBeenCalledTimes(1);
 	});
 
 	it("game link: shown when the clip carries its game and plays elsewhere (Search, the digest); absent from that game's own page or without a game", async () =>

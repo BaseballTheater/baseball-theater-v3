@@ -1,6 +1,7 @@
 /**
  * S70's design match (rule 22): the video player in the game-shell frames it builds —
- * `video-player-dialog-mobile` / `-medium` (the default Dialog, over the dimmed Videos
+ * `video-player-dialog-mobile` / `-medium` (the default Dialog as game-shell A4 amends it:
+ * floating with no card, "Close ✕" in the overlay, over the dimmed Videos
  * room) and `video-player-stage-mobile` / `-medium` (Stage chosen in Settings: the player
  * at the top of the Videos room) — on 823823 (CHC @ MIA). The dialog plays the room's
  * first clip as a reader would open it; the stage shows that clip waiting.

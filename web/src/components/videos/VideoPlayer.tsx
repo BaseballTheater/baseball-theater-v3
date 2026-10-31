@@ -67,7 +67,10 @@ export function VideoPlayer({ video, autoPlay = false }: { video: Video;
 				src={video.playbackUrl ?? undefined}
 				poster={video.imageUrl ?? undefined}
 				autoPlay={autoPlay}
+				// Without these iOS takes a playing clip fullscreen; the prefixed one is for
+				// older iOS and in-app web views that still read it.
 				playsInline
+				webkit-playsinline="true"
 				preload="metadata"
 				onClick={toggle}
 				onPlay={() => setPlaying(true)}
