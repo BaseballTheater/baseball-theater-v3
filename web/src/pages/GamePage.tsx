@@ -1,6 +1,7 @@
 import { Stack, Tabs } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
-import { useGame } from "../api/game.js";
+import { useCachedGame, useGame } from "../api/game.js";
+import { useLiveGame } from "../api/live.js";
 import { BoxRoom } from "../components/game/BoxRoom.js";
 import { GameTopBar } from "../components/game/GameTopBar.js";
 import { LiveRoom } from "../components/game/LiveRoom.js";
@@ -26,9 +27,11 @@ export function GamePage({ variant }: { variant: LayoutVariant })
 {
 	const { gamePk, tab } = useParams();
 	const navigate = useNavigate();
+	// A game in its window streams (S19); the stream then owns its freshness, so the query stops refetching.
+	const streaming = useLiveGame(Number(gamePk), useCachedGame(Number(gamePk))?.windowMode === "active");
 	const {
 		data: game, error, refetch,
-	} = useGame(Number(gamePk));
+	} = useGame(Number(gamePk), streaming);
 	// Signed out, the store holds the house defaults, so games open on the default room.
 	const { opensFirst } = useSettings();
 
