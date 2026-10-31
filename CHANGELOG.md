@@ -39,6 +39,13 @@ explicitly where that's the case. For what's still ahead, see
 
 ## The backend runs the way it will in production
 
+- **Before, every finished game was re-fetched from MLB every few minutes for as long as anyone looked at it.
+  Now the longer a game goes unchanged, the longer Cloudflare's edge serves it straight from its cache (up to
+  two days), and the backend asks MLB again less and less often — while a scoring change still resets it to
+  five minutes, and a late correction shows up within two days at most.** Details: S47 — `edgeCacheControl`
+  (`Cache-Control` from `cacheLifetimeMs`, `stale-while-revalidate`; `no-store` in the live window),
+  refresh-on-read on the same ladder, Workers Cache on in `wrangler.jsonc` (every request billed at the
+  Workers rate, ADR-017). _(2026-10-30)_
 - **Before, the API only ran as a laptop-style Node server, unlike anything it would be deployed on. Now
   `pnpm dev` runs it as the Cloudflare Worker it will ship as, on Cloudflare's own local runtime, still with one
   command and no cloud account — and the test suite checks it there too.** Details: S45 — `wrangler.jsonc`,

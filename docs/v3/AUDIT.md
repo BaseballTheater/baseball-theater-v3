@@ -11889,3 +11889,87 @@ Asked whether S107–S108 (the scoreboard Win Probability slot on live and final
 **Answers and what was applied**
 
 Asked whether S107–S108 (the scoreboard Win Probability slot on live and final games, added at ab5f90a by owner direction) need a backlog review before S47. Owner, 2026-10-30: "No". Logged for backlog and parity; the next scheduled or drift-triggered review checks them.
+
+---
+
+## 2026-10-30 — S47 completed
+
+**Graduated edge caching + refresh-on-read**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-10-31T05:48:19Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `bcddcb2` (tree dirty) |
+| Grader | `scripts/verify-S47.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: out-of-window GET /api/v1/schedule and /api/v1/games/:gamePk carry Cache-Control: public, s-maxage=<cacheLifetimeMs(now − lastChangedAt)/1000>, stale-while-revalidate=<n>; a game unchanged 3h gets s-maxage=36000 (test)
+check 2 PASS: in-window responses never carry an s-maxage above the floor (test)
+check 3 PASS: refresh-on-read decides staleness with cacheLifetimeMs; export const CACHE_TTL_MS stays as the floor; functions/src/services/refresh.test.ts exits 0 run alone
+check 4 PASS: a refresh that finds changed content resets the lifetime: the next response uses the floor (test)
+check 5 PASS: README.md documents the edge cache (Workers Cache, tiered, every request billed, purge intent); ADR-017 in docs/v3/ARCHITECTURE.md names Workers Cache
+check 6 PASS: wrangler.jsonc enables Workers Cache ("cache": { "enabled": true })
+check 7 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**7/7 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S47 check results ---
+check 1 PASS: out-of-window GET /api/v1/schedule and /api/v1/games/:gamePk carry Cache-Control: public, s-maxage=<cacheLifetimeMs(now − lastChangedAt)/1000>, stale-while-revalidate=<n>; a game unchanged 3h gets s-maxage=36000 (test)
+check 2 PASS: in-window responses never carry an s-maxage above the floor (test)
+check 3 PASS: refresh-on-read decides staleness with cacheLifetimeMs; export const CACHE_TTL_MS stays as the floor; functions/src/services/refresh.test.ts exits 0 run alone
+check 4 PASS: a refresh that finds changed content resets the lifetime: the next response uses the floor (test)
+check 5 PASS: README.md documents the edge cache (Workers Cache, tiered, every request billed, purge intent); ADR-017 in docs/v3/ARCHITECTURE.md names Workers Cache
+check 6 PASS: wrangler.jsonc enables Workers Cache ("cache": { "enabled": true })
+check 7 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S47: 7/7 checks passed ---
+verify-S47: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+packages/ports build: Done
+web build: vite v6.4.3 building for production...
+web build: transforming...
+web build: ✓ 7095 modules transformed.
+web build: rendering chunks...
+web build: computing gzip size...
+web build: dist/index.html                     1.00 kB │ gzip:   0.52 kB
+web build: dist/assets/batter-J7FnW6ss.webp   74.81 kB
+web build: dist/assets/index-BEBfbMX0.css    201.84 kB │ gzip:  29.52 kB
+web build: dist/assets/index-BJdKhwca.js     631.95 kB │ gzip: 199.55 kB
+web build: ✓ built in 1.71s
+web build: (!) Some chunks are larger than 500 kB after minification. Consider:
+web build: - Using dynamic import() to code-split the application
+web build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+web build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 199203,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

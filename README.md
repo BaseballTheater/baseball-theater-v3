@@ -132,6 +132,20 @@ revisions before capturing. Like the recorder it is network-touching and
 **never** run by `pnpm verify` or CI — those exercise only the offline fixture
 path (`fixtures/raw/diffpatch-823823.json`).
 
+## Edge cache
+
+Schedule and game responses carry a `Cache-Control` header from ADR-021's ladder (S47,
+`functions/src/handlers/cache-control.ts`): outside a game's live window the edge keeps a
+response for `cacheLifetimeMs(now − lastChangedAt)` — five minutes after a change, up to 48
+hours for a game long unchanged — with `stale-while-revalidate` so nobody waits on a refresh;
+inside the window, `no-store`. Refresh-on-read uses the same ladder before asking MLB again.
+
+The cache is **Workers Cache** (`"cache": { "enabled": true }` in `wrangler.jsonc`): Cloudflare
+answers from its edge cache, tiered by default, before the Worker runs. Every request, static
+assets included, is then billed at the Workers request rate (ADR-017). The 48-hour cap is the
+guarantee that a late MLB scoring correction shows up; the intent is also to purge a game from
+the cache when ingest knows it changed, which isn't built yet.
+
 ## Docs
 
 - [INTENT](./docs/v3/INTENT.md) · [FEATURES](./docs/v3/FEATURES.md) · [ARCHITECTURE](./docs/v3/ARCHITECTURE.md)

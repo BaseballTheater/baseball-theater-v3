@@ -13,11 +13,11 @@
  */
 
 /**
- * How long a `windowMode: "cache"` entity is served without re-checking
- * upstream. Older than this (or missing a `fetchedAt`) counts as stale and the
- * next read may refresh it. Five minutes: out-of-window games change slowly
- * (post-game stat revisions, a delayed final), so this trades a little
- * staleness for far less egress.
+ * The floor of refresh-on-read: how long a `windowMode: "cache"` entity is served
+ * without re-checking upstream when nothing says how long it has gone unchanged.
+ * Since S47 the lifetime grows with `cacheLifetimeMs(now − lastChangedAt)`
+ * (ADR-021) and this is only its bottom rung (`CACHE_LIFETIME_FLOOR_MS`, five
+ * minutes), kept as the documented floor and as `isStale`'s default.
  */
 export const CACHE_TTL_MS = 5 * 60 * 1000;
 

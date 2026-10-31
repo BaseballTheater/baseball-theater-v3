@@ -19,6 +19,13 @@
 	"triggers": {
 		"crons": ["* * * * *"]
 	},
+	// Workers Cache (S47, ADR-021; owner, 2026-10-30: "Workers cache"): Cloudflare checks
+	// its tiered edge cache before running the Worker and keeps schedule and game responses
+	// as long as their Cache-Control says. Every request is then billed at the Workers
+	// rate, static assets included (ADR-017's cost line).
+	"cache": {
+		"enabled": true
+	},
 	// No anonymous usage telemetry from local runs.
 	"send_metrics": false,
 	"observability": {

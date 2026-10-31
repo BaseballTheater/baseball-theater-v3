@@ -2,13 +2,13 @@ import type {
 	CadenceParams, GameSnapshot, ScheduleDay, Unversioned,
 } from "@bt/domain";
 import {
-	DEFAULT_CADENCE, isGameInActiveWindow, projectGame, stampVersion,
+	cacheLifetimeMs, DEFAULT_CADENCE, isGameInActiveWindow, projectGame, stampVersion,
 } from "@bt/domain";
 import type {
 	GameProjectionRepository, GameRepository, MlbStatsClient, ScheduleRepository,
 } from "@bt/ports";
 import type { RefreshCoordinator } from "./refresh.js";
-import { isStale } from "./refresh.js";
+import { CACHE_TTL_MS, isStale } from "./refresh.js";
 
 export type IngestDeps = {
 	mlb: MlbStatsClient;
@@ -106,7 +106,13 @@ export async function ingestScheduleDay(
 /**
  * A cached entity is served as-is unless the caller forces a refresh or it has
  * gone stale: missing, or `windowMode: "cache"` and last checked longer ago than
- * {@link isStale}'s TTL. An `active`-window entity is never treated as stale
+ * the lifetime that check earned, `cacheLifetimeMs(checkedAt − lastChangedAt)`
+ * (ADR-021, S47; the same ladder the edge's `s-maxage` uses), or {@link CACHE_TTL_MS},
+ * the floor, without the timestamps. The lifetime is fixed at the check, not at the
+ * read: measured from `now` it would always outgrow the time since the check, and
+ * nothing would be re-checked before the cap. So each check that finds nothing new
+ * lengthens the wait before the next, and one that finds new content resets
+ * `lastChangedAt` and drops it back to the floor. An `active`-window entity is never treated as stale
  * here — the cadence loop (S16) owns its freshness.
  *
  * "Last checked" is the later of the stored `fetchedAt` and the coordinator's
@@ -118,6 +124,7 @@ function needsRefresh(
 	deps: IngestDeps,
 	key: string,
 	entity: { fetchedAt?: string;
+		lastChangedAt?: string;
 		windowMode?: "active" | "cache" } | null,
 	now: Date,
 	force: boolean,
@@ -128,7 +135,10 @@ function needsRefresh(
 	const refreshedAt = deps.refresh?.lastRefreshedAt(key);
 	const fetchedAt = entity.fetchedAt ? Date.parse(entity.fetchedAt) : Number.NaN;
 	const checkedAt = refreshedAt !== undefined && !(fetchedAt >= refreshedAt) ? new Date(refreshedAt).toISOString() : entity.fetchedAt;
-	return isStale(checkedAt, now);
+	const changedAt = entity.lastChangedAt ? Date.parse(entity.lastChangedAt) : Number.NaN;
+	const checkedMs = checkedAt ? Date.parse(checkedAt) : Number.NaN;
+	const lifetime = Number.isNaN(changedAt) || Number.isNaN(checkedMs) ? CACHE_TTL_MS : cacheLifetimeMs(checkedMs - changedAt);
+	return isStale(checkedAt, now, lifetime);
 }
 
 export async function getOrRefreshSchedule(

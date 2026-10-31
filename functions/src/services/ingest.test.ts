@@ -8,6 +8,7 @@ import {
 	InMemoryScheduleRepository,
 } from "../adapters/memory/repos.js";
 import { getOrRefreshGame, ingestScheduleDay } from "./ingest.js";
+import { RefreshCoordinator } from "./refresh.js";
 
 describe("ingest with fixtures", () =>
 {
@@ -115,5 +116,50 @@ describe("ingest versioning (ADR-022)", () =>
 		}, "2024-07-04");
 		expect(again.version).toBe(1);
 		expect((await schedules.getByDate("2024-07-04"))?.version).toBe(1);
+	});
+});
+
+describe("refresh-on-read cache lifetime (S47, ADR-021)", () =>
+{
+	it("lifetime: each unchanged check earns a longer wait before MLB is asked again, up the ladder", async () =>
+	{
+		const MINUTE = 60_000;
+		const real = new FixtureMlbStatsClient();
+		let calls = 0;
+		const mlb = new FixtureMlbStatsClient();
+		mlb.fetchGame = async (pk: number) =>
+		{
+			calls += 1;
+			return real.fetchGame(pk);
+		};
+		let clock = new Date("2026-10-30T12:00:00Z");
+		const deps = {
+			mlb,
+			schedules: new InMemoryScheduleRepository(),
+			games: new InMemoryGameRepository(),
+			projections: new InMemoryGameProjectionRepository(),
+			refresh: new RefreshCoordinator(() => clock, 0),
+			now: () => clock,
+		};
+		const at = async (minutes: number) =>
+		{
+			clock = new Date(Date.parse("2026-10-30T12:00:00Z") + minutes * MINUTE);
+			await getOrRefreshGame(deps, 823823);
+			return calls;
+		};
+		// Stored at 0 (changed then): the floor, 5 minutes.
+		expect(await at(0)).toBe(1);
+		expect(await at(4)).toBe(1);
+		// Checked at 5 (5m unchanged: still the floor), then at 10 (10m unchanged: 15m earned).
+		expect(await at(5)).toBe(2);
+		expect(await at(10)).toBe(3);
+		expect(await at(24)).toBe(3);
+		// Checked at 25 (25m unchanged: 30m earned), so 54 is served from the store and 55 asks again.
+		expect(await at(25)).toBe(4);
+		expect(await at(54)).toBe(4);
+		expect(await at(55)).toBe(5);
+		// 55m unchanged earned 2h: nothing until 175.
+		expect(await at(174)).toBe(5);
+		expect(await at(175)).toBe(6);
 	});
 });

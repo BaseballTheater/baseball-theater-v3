@@ -1076,7 +1076,7 @@ The full path is: TS route table → JSON Schema → OpenAPI → generated TS cl
 
 **Why:**
 
-- **Cost shape:** Workers Paid is a $5 floor with no egress charge on MLB fetches (the largest Firebase line in §2). Durable Objects, Cron and Hyperdrive fit inside its included usage at BT scale.
+- **Cost shape:** Workers Paid is a $5 floor with no egress charge on MLB fetches (the largest Firebase line in §2). Durable Objects, Cron and Hyperdrive fit inside its included usage at BT scale. The edge cache is **Workers Cache** (owner, 2026-10-30: "Workers cache"; S47): with it on, every request counts at the Workers request rate, static assets included, in exchange for ADR-021's tiered edge cache answering before the Worker runs.
 - **Live UX:** a Durable Object is Cloudflare's native per-game state + WebSocket primitive; it is the BT-mediated hub CLAUDE.md asks for, without Firestore read amplification.
 - **Querying game data:** Postgres JSONB with GIN indexes answers ad-hoc questions across large game blobs; Firestore cannot.
 - **Auth:** Firebase Auth has no native passkeys, which already conflicted with ADR-004.

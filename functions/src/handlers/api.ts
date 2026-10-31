@@ -17,6 +17,7 @@ import {
 } from "../services/data-downloads.js";
 import type { IngestDeps } from "../services/ingest.js";
 import { getOrRefreshGame, getOrRefreshSchedule } from "../services/ingest.js";
+import { edgeCacheControl } from "./cache-control.js";
 
 export type ApiContext = {
 	ingest: IngestDeps;
@@ -64,6 +65,16 @@ export function sendJson<R extends ApiRoute>(
 function sendError(status: number, body: ApiErrorResponse): Response
 {
 	return json(status, body);
+}
+
+/**
+ * Sets a schedule or game response's edge-cache header (S47, ADR-021) from the stored
+ * entity's window and last change, judged at ingest's clock.
+ */
+function withCacheControl(response: Response, entity: Parameters<typeof edgeCacheControl>[0], ctx: ApiContext): Response
+{
+	response.headers.set("Cache-Control", edgeCacheControl(entity, ctx.ingest.now?.() ?? new Date()));
+	return response;
 }
 
 /** 401 means "signed out" to the web client (S49's API-layer note). */
@@ -150,7 +161,7 @@ export const API_ROUTER: readonly RouteEntry[] = [
 			const day = await getOrRefreshSchedule(ctx.ingest, date, {
 				force,
 			});
-			return sendJson(200, "GET /api/v1/schedule", toScheduleDayResponse(day));
+			return withCacheControl(sendJson(200, "GET /api/v1/schedule", toScheduleDayResponse(day)), day, ctx);
 		},
 	},
 	{
@@ -169,7 +180,7 @@ export const API_ROUTER: readonly RouteEntry[] = [
 			{
 				return notFound();
 			}
-			return sendJson(200, "GET /api/v1/games/:gamePk", toGameSnapshotResponse(game));
+			return withCacheControl(sendJson(200, "GET /api/v1/games/:gamePk", toGameSnapshotResponse(game)), game, ctx);
 		},
 	},
 	{
