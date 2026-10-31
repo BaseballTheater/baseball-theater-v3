@@ -11859,3 +11859,33 @@ Owner answers, 2026-10-30, to the questions after 0fa2f7f (S104–S106 and S103 
 5. Japanese-language highlight reel: "Keep them where they are". No change.
 6. Videos room heading: "Use “Videos”". Applied at b8e9cc2.
 7. Correct VISUAL-DESIGN's "win probability is left out at launch" line: "Yes". Applied (§5a game-row slot row).
+
+---
+
+## 2026-10-30 — backlog review answers (2026-10-30)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-10-30 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-10-31T05:32:20Z` |
+| HEAD at capture | `ab5f90a` (tree dirty) |
+| Applied in | `ab5f90a` — Backlog: S107–S108 and the owner's answers (2026-10-30). The scoreboard's Win Probability slot moves to live and final games (owner: "It is actually least useful before the game. During and after is definitely useful.") — S107 draws it as a shell-scoreboard amendment (live, final, scheduled and Hide Scores rows), S108 builds it, reusing S106's winProbabilitySeries; priorities 95–96, S99–S105 and S9 / S89–S92 shift by two. Savant's leverage and drama index are noted as a future idea in docs/v3/SAVANT-DATA.md ("Skip but note it in the future ideas document"). VISUAL-DESIGN §5a no longer says win probability is left out ("7. Yes"). FEATURES Settings row records the slot decision. Ledger: the owner's "1. No" to reviewing 0fa2f7f (backlog and parity), "Yea" to S102, "Keep them where they are" for the Japanese-language reel. |
+
+**Answers and what was applied**
+
+Asked whether S107–S108 (the scoreboard Win Probability slot on live and final games, added at ab5f90a by owner direction) need a backlog review before S47. Owner, 2026-10-30: "No". Logged for backlog and parity; the next scheduled or drift-triggered review checks them.
+
+---
+
+## 2026-10-30 — doc parity review answers (2026-10-30)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-10-30 doc parity review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-10-31T05:32:20Z` |
+| HEAD at capture | `ab5f90a` (tree dirty) |
+| Applied in | `ab5f90a` — Backlog: S107–S108 and the owner's answers (2026-10-30). The scoreboard's Win Probability slot moves to live and final games (owner: "It is actually least useful before the game. During and after is definitely useful.") — S107 draws it as a shell-scoreboard amendment (live, final, scheduled and Hide Scores rows), S108 builds it, reusing S106's winProbabilitySeries; priorities 95–96, S99–S105 and S9 / S89–S92 shift by two. Savant's leverage and drama index are noted as a future idea in docs/v3/SAVANT-DATA.md ("Skip but note it in the future ideas document"). VISUAL-DESIGN §5a no longer says win probability is left out ("7. Yes"). FEATURES Settings row records the slot decision. Ledger: the owner's "1. No" to reviewing 0fa2f7f (backlog and parity), "Yea" to S102, "Keep them where they are" for the Japanese-language reel. |
+
+**Answers and what was applied**
+
+Asked whether S107–S108 (the scoreboard Win Probability slot on live and final games, added at ab5f90a by owner direction) need a backlog review before S47. Owner, 2026-10-30: "No". Logged for backlog and parity; the next scheduled or drift-triggered review checks them.
