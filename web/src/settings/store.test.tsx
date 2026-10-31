@@ -23,7 +23,7 @@ import { jsonResponse } from "../test/jsonResponse.js";
 import { DEV_ACCOUNT } from "../test/meApi.js";
 import { SettingsSync } from "./SettingsSync.js";
 import {
-	hydrateSettings, resetSettings, setCollapseNonFavorites, setFavoriteTeams, setGameRowSlot, setHideScores, setOpensFirst, useSettings,
+	hydrateSettings, resetSettings, setCollapseNonFavorites, setFavoriteTeams, setGameRowSlot, setHideScores, setOpensFirst, setVideoPlayer, useSettings,
 } from "./store.js";
 
 /** Stubs the API: `/me` for the dev session, and settings as one stored document with apply-if-newer. */
@@ -81,15 +81,17 @@ describe("settings store", () =>
 		await act(() => setGameRowSlot("roomMenu"));
 		await act(() => setCollapseNonFavorites(true));
 		await act(() => setHideScores(true));
+		await act(() => setVideoPlayer("stage"));
 		expect(result.current).toEqual({
 			favoriteTeamIds: [147, 111],
 			opensFirst: "box",
 			gameRowSlot: "roomMenu",
 			collapseNonFavorites: true,
 			hideScores: true,
-			version: 5,
+			videoPlayer: "stage",
+			version: 6,
 		});
-		expect(api.puts.map((p) => p.version)).toEqual([1, 2, 3, 4, 5]);
+		expect(api.puts.map((p) => p.version)).toEqual([1, 2, 3, 4, 5, 6]);
 		expect(api.stored()).toEqual(result.current);
 	});
 
@@ -111,6 +113,7 @@ describe("settings store", () =>
 			gameRowSlot: "status" as const,
 			collapseNonFavorites: false,
 			hideScores: false,
+			videoPlayer: "dialog" as const,
 			version: 4,
 		};
 		stubAccountApi(saved);
@@ -160,6 +163,7 @@ describe("settings store", () =>
 			gameRowSlot: "status",
 			collapseNonFavorites: false,
 			hideScores: false,
+			videoPlayer: "dialog" as const,
 			version: 9,
 		});
 		await hydrateSettings();

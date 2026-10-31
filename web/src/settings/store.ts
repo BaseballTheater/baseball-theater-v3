@@ -11,7 +11,7 @@
  * stays the source of truth.
  */
 import type {
-	AccountSettings, GameRowSlot, OpensFirst,
+	AccountSettings, GameRowSlot, OpensFirst, VideoPlayerMode,
 } from "@bt/domain";
 import { applyIfNewer, DEFAULT_SETTINGS } from "@bt/domain";
 import { create } from "zustand";
@@ -110,6 +110,14 @@ export function setHideScores(on: boolean): Promise<void>
 {
 	return save({
 		hideScores: on,
+	});
+}
+
+/** Where videos play (S70): a dialog over the page, or a stage in the Videos room. */
+export function setVideoPlayer(mode: VideoPlayerMode): Promise<void>
+{
+	return save({
+		videoPlayer: mode,
 	});
 }
 

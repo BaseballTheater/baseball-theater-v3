@@ -85,8 +85,7 @@ export function GamePage({ variant }: { variant: LayoutVariant })
 				</Tabs.List>
 
 				<Tabs.Panel value="videos" pt="md">
-					{/* The player is S70's; until then choosing a video does nothing. */}
-					<VideosRoom game={game} variant={variant} onPlay={() => undefined} />
+					<VideosRoom game={game} variant={variant} />
 				</Tabs.Panel>
 
 				{rooms.includes("live") ? (

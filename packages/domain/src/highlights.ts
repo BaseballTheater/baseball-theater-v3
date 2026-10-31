@@ -122,6 +122,21 @@ export function groupHighlights(highlights: readonly MediaHighlight[]): { group:
 }
 
 /**
+ * Whole seconds as a clip clock: `0:12`, `3:06`, `1:02:05` past an hour. The video badge
+ * (`clipDuration`) and the player's elapsed / total time (S70) both print through it, so
+ * they read alike. Fractions are dropped (a playing video reports 12.7s as `0:12`);
+ * anything not a finite, non-negative number reads `0:00`.
+ */
+export function clipClock(seconds: number): string
+{
+	const whole = Number.isFinite(seconds) && seconds > 0 ? Math.floor(seconds) : 0;
+	const h = Math.floor(whole / 3600);
+	const m = Math.floor(whole / 60) % 60;
+	const s = whole % 60;
+	return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`;
+}
+
+/**
  * MLB's `HH:MM:SS` duration as the video badge prints it (game-shell frames): `0:29`,
  * `3:06`, `12:12`, and `1:02:05` past an hour. `null` for anything not a duration.
  */
@@ -130,5 +145,5 @@ export function clipDuration(duration: string | null | undefined): string | null
 	const match = /^(\d+):(\d{2}):(\d{2})$/.exec(duration ?? "");
 	if (!match) return null;
 	const [, h, m, s] = match.map(Number) as [number, number, number, number];
-	return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`;
+	return clipClock(h * 3600 + m * 60 + s);
 }

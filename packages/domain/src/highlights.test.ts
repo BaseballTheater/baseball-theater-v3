@@ -4,7 +4,7 @@ import {
 	describe, expect, it,
 } from "vitest";
 import {
-	classifyHighlight, clipDuration, filterHighlights, groupHighlights, highlightGroup, sortHighlights,
+	classifyHighlight, clipClock, clipDuration, filterHighlights, groupHighlights, highlightGroup, sortHighlights,
 } from "./highlights.js";
 import { rankHighlightsByImpact } from "./impact.js";
 import type { MediaHighlight } from "./types.js";
@@ -173,5 +173,18 @@ describe("groupHighlights (S69)", () =>
 		});
 		expect(groupHighlights(onlyHighlights).map((g) => g.group)).toEqual(["highlights"]);
 		expect(groupHighlights([])).toEqual([]);
+	});
+});
+
+describe("clipClock (S70)", () =>
+{
+	it("prints whole seconds as m:ss, h:mm:ss past an hour, and 0:00 for nothing", () =>
+	{
+		expect(clipClock(12.7)).toBe("0:12");
+		expect(clipClock(48)).toBe("0:48");
+		expect(clipClock(186)).toBe("3:06");
+		expect(clipClock(3725)).toBe("1:02:05");
+		expect(clipClock(Number.NaN)).toBe("0:00");
+		expect(clipClock(-3)).toBe("0:00");
 	});
 });

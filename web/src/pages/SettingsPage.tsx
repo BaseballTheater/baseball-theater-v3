@@ -1,6 +1,8 @@
-import type { GameRowSlot, OpensFirst } from "@bt/domain";
+import type {
+	GameRowSlot, OpensFirst, VideoPlayerMode,
+} from "@bt/domain";
 import {
-	GAME_ROW_SLOTS, MLB_TEAMS, OPENS_FIRST_ROOMS,
+	GAME_ROW_SLOTS, MLB_TEAMS, OPENS_FIRST_ROOMS, VIDEO_PLAYERS,
 } from "@bt/domain";
 import {
 	Anchor, Divider, MultiSelect, Radio, SimpleGrid, Stack, Switch, Text, Title,
@@ -11,7 +13,7 @@ import type { LayoutVariant } from "../layout/variant.js";
 import { useSession } from "../session/session.js";
 import { AccountData } from "./settings/AccountData.js";
 import {
-	setCollapseNonFavorites, setFavoriteTeams, setGameRowSlot, setHideScores, setOpensFirst, useSettings,
+	setCollapseNonFavorites, setFavoriteTeams, setGameRowSlot, setHideScores, setOpensFirst, setVideoPlayer, useSettings,
 } from "../settings/store.js";
 
 const TEAM_OPTIONS = MLB_TEAMS.map((team) => ({
@@ -23,6 +25,12 @@ const TEAM_OPTIONS = MLB_TEAMS.map((team) => ({
 const SLOT_LABELS: Readonly<Record<GameRowSlot, string>> = {
 	status: "Status",
 	roomMenu: "Room Menu",
+};
+
+/** The Video Player choices as the Settings frame labels them, Dialog first (S70). */
+const PLAYER_LABELS: Readonly<Record<VideoPlayerMode, string>> = {
+	dialog: "Dialog",
+	stage: "Stage",
 };
 
 /** One titled group of the ratified Settings frame (Game List · Game Detail · Account). */
@@ -40,7 +48,7 @@ function SettingsGroup({ title, children }: { title: string;
 /**
  * Settings, as the ratified frames draw it (standings-search-settings, A3):
  * Game List (Favorite Teams, Game-Row Slot, Collapse Non-Favorites, Hide Scores) on the
- * left, Game Detail (Opens First) and Account on the right; one column on mobile. Every
+ * left, Game Detail (Opens First, Video Player) and Account on the right; one column on mobile. Every
  * control is one this story can make work; the Video Player control arrives with
  * the screen that reads it (S70), and the Patreon rows with the
  * Patreon link. Signed-in only (the route guards it), so the session has an
@@ -108,6 +116,15 @@ export function SettingsPage({ variant }: { variant: LayoutVariant })
 						>
 							<Stack gap="xs" mt="xs">
 								{OPENS_FIRST_ROOMS.map((room) => <Radio key={room} value={room} label={roomLabel(room)} />)}
+							</Stack>
+						</Radio.Group>
+						<Radio.Group
+							label="Video Player"
+							value={settings.videoPlayer}
+							onChange={(mode) => void setVideoPlayer(mode as VideoPlayerMode)}
+						>
+							<Stack gap="xs" mt="xs">
+								{VIDEO_PLAYERS.map((mode) => <Radio key={mode} value={mode} label={PLAYER_LABELS[mode]} />)}
 							</Stack>
 						</Radio.Group>
 					</SettingsGroup>

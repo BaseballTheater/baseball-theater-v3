@@ -65,6 +65,7 @@ describe("personal data registry", () =>
 			gameRowSlot: "status" as const,
 			collapseNonFavorites: false,
 			hideScores: false,
+			videoPlayer: "dialog" as const,
 			version: 1,
 		};
 		await settings.upsert("uid-1", doc);

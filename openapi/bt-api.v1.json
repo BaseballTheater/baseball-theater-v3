@@ -14,7 +14,7 @@
 			},
 			"AccountSettings": {
 				"additionalProperties": false,
-				"description": "A user's settings, stored on their account (ADR-027) and synced to every device. Versioned like every BT document (ADR-022): a write applies only if its `version` is newer than the stored one, so a stale device can't undo a newer change. Controls that land later (collapse and Hide Scores S68, Video Player S70) add their fields with their reader.",
+				"description": "A user's settings, stored on their account (ADR-027) and synced to every device. Versioned like every BT document (ADR-022): a write applies only if its `version` is newer than the stored one, so a stale device can't undo a newer change. Each control adds its field with its reader (collapse and Hide Scores S68, Video Player S70).",
 				"properties": {
 					"collapseNonFavorites": {
 						"description": "Fold games without a favorite team into slim bars (S68).",
@@ -31,7 +31,11 @@
 						"type": "boolean"
 					},
 					"opensFirst": { "$ref": "#/components/schemas/OpensFirst" },
-					"version": { "type": "number" }
+					"version": { "type": "number" },
+					"videoPlayer": {
+						"$ref": "#/components/schemas/VideoPlayerMode",
+						"description": "Where videos play (S70): a dialog over the page, or a stage in the Videos room."
+					}
 				},
 				"required": [
 					"favoriteTeamIds",
@@ -39,6 +43,7 @@
 					"gameRowSlot",
 					"collapseNonFavorites",
 					"hideScores",
+					"videoPlayer",
 					"version"
 				],
 				"type": "object"
@@ -805,7 +810,7 @@
 			},
 			"SettingsRequest": {
 				"additionalProperties": false,
-				"description": "A settings write: the whole document with a bumped `version`; an older version is ignored (ADR-022). `gameRowSlot` (S67), `collapseNonFavorites` and `hideScores` (S68) may be left out — each reads as its default — so a page loaded before they shipped can still save.",
+				"description": "A settings write: the whole document with a bumped `version`; an older version is ignored (ADR-022). `gameRowSlot` (S67), `collapseNonFavorites` and `hideScores` (S68), `videoPlayer` (S70) may be left out — each reads as its default — so a page loaded before they shipped can still save.",
 				"properties": {
 					"collapseNonFavorites": {
 						"description": "Fold games without a favorite team into slim bars (S68).",
@@ -822,7 +827,11 @@
 						"type": "boolean"
 					},
 					"opensFirst": { "$ref": "#/components/schemas/OpensFirst" },
-					"version": { "type": "number" }
+					"version": { "type": "number" },
+					"videoPlayer": {
+						"$ref": "#/components/schemas/VideoPlayerMode",
+						"description": "Where videos play (S70): a dialog over the page, or a stage in the Videos room."
+					}
 				},
 				"required": ["favoriteTeamIds", "opensFirst", "version"],
 				"type": "object"
@@ -837,7 +846,8 @@
 				"properties": { "losses": { "type": "number" }, "wins": { "type": "number" } },
 				"required": ["wins", "losses"],
 				"type": "object"
-			}
+			},
+			"VideoPlayerMode": { "enum": ["dialog", "stage"], "type": "string" }
 		}
 	},
 	"info": {

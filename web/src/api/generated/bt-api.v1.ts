@@ -134,7 +134,7 @@ export interface components {
             name: string;
             teamName: string;
         };
-        /** @description A user's settings, stored on their account (ADR-027) and synced to every device. Versioned like every BT document (ADR-022): a write applies only if its `version` is newer than the stored one, so a stale device can't undo a newer change. Controls that land later (collapse and Hide Scores S68, Video Player S70) add their fields with their reader. */
+        /** @description A user's settings, stored on their account (ADR-027) and synced to every device. Versioned like every BT document (ADR-022): a write applies only if its `version` is newer than the stored one, so a stale device can't undo a newer change. Each control adds its field with its reader (collapse and Hide Scores S68, Video Player S70). */
         AccountSettings: {
             /** @description Fold games without a favorite team into slim bars (S68). */
             collapseNonFavorites: boolean;
@@ -145,6 +145,8 @@ export interface components {
             hideScores: boolean;
             opensFirst: components["schemas"]["OpensFirst"];
             version: number;
+            /** @description Where videos play (S70): a dialog over the page, or a stage in the Videos room. */
+            videoPlayer: components["schemas"]["VideoPlayerMode"];
         };
         /** @description The one error-body shape every 4xx path returns. */
         ApiErrorResponse: {
@@ -534,7 +536,7 @@ export interface components {
             record?: components["schemas"]["TeamRecord"] | null;
             teamName: string;
         };
-        /** @description A settings write: the whole document with a bumped `version`; an older version is ignored (ADR-022). `gameRowSlot` (S67), `collapseNonFavorites` and `hideScores` (S68) may be left out — each reads as its default — so a page loaded before they shipped can still save. */
+        /** @description A settings write: the whole document with a bumped `version`; an older version is ignored (ADR-022). `gameRowSlot` (S67), `collapseNonFavorites` and `hideScores` (S68), `videoPlayer` (S70) may be left out — each reads as its default — so a page loaded before they shipped can still save. */
         SettingsRequest: {
             /** @description Fold games without a favorite team into slim bars (S68). */
             collapseNonFavorites?: boolean;
@@ -545,6 +547,8 @@ export interface components {
             hideScores?: boolean;
             opensFirst: components["schemas"]["OpensFirst"];
             version: number;
+            /** @description Where videos play (S70): a dialog over the page, or a stage in the Videos room. */
+            videoPlayer?: components["schemas"]["VideoPlayerMode"];
         };
         /** @description The signed-in user's settings document (ADR-027); the house defaults until they first save. */
         SettingsResponse: components["schemas"]["AccountSettings"];
@@ -553,6 +557,8 @@ export interface components {
             losses: number;
             wins: number;
         };
+        /** @enum {string} */
+        VideoPlayerMode: "dialog" | "stage";
     };
     responses: never;
     parameters: never;

@@ -2,7 +2,7 @@ import {
 	describe, expect, it,
 } from "vitest";
 import {
-	DEFAULT_SETTINGS, GAME_ROW_SLOTS, OPENS_FIRST_ROOMS, parseAccountSettings,
+	DEFAULT_SETTINGS, GAME_ROW_SLOTS, OPENS_FIRST_ROOMS, parseAccountSettings, VIDEO_PLAYERS,
 } from "./settings.js";
 import { MLB_TEAMS } from "./teams.js";
 
@@ -34,6 +34,7 @@ describe("parseAccountSettings", () =>
 			gameRowSlot: "roomMenu",
 			collapseNonFavorites: false,
 			hideScores: false,
+			videoPlayer: "dialog",
 			version: 3,
 		});
 	});
@@ -52,6 +53,7 @@ describe("parseAccountSettings", () =>
 			gameRowSlot: "status",
 			collapseNonFavorites: false,
 			hideScores: false,
+			videoPlayer: "dialog",
 			version: 2,
 		});
 	});
@@ -77,6 +79,26 @@ describe("parseAccountSettings", () =>
 			opensFirst: "box",
 			hideScores: "yes",
 			version: 2,
+		})).toBeNull();
+	});
+
+	it("video player: Dialog is the default, a document saved before S70 reads as it, Stage is kept, anything else is rejected (S70)", () =>
+	{
+		expect(VIDEO_PLAYERS).toEqual(["dialog", "stage"]);
+		expect(DEFAULT_SETTINGS.videoPlayer).toBe("dialog");
+		const before = {
+			favoriteTeamIds: [],
+			opensFirst: "box",
+			version: 2,
+		};
+		expect(parseAccountSettings(before)?.videoPlayer).toBe("dialog");
+		expect(parseAccountSettings({
+			...before,
+			videoPlayer: "stage",
+		})?.videoPlayer).toBe("stage");
+		expect(parseAccountSettings({
+			...before,
+			videoPlayer: "popup",
 		})).toBeNull();
 	});
 

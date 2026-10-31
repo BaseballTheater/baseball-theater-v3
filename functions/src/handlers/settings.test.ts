@@ -84,6 +84,7 @@ const saved: AccountSettings = {
 	gameRowSlot: "status",
 	collapseNonFavorites: false,
 	hideScores: false,
+	videoPlayer: "dialog",
 	version: 2,
 };
 

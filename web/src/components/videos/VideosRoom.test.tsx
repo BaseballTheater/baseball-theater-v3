@@ -32,14 +32,13 @@ function game(highlights?: GamePayload["highlights"]): GamePayload
 	};
 }
 
-function renderRoom(variant: LayoutVariant = "mobile", g: GamePayload = game(), onPlay = vi.fn())
+function renderRoom(variant: LayoutVariant = "mobile", g: GamePayload = game())
 {
 	render(
 		<MantineProvider>
-			<VideosRoom game={g} variant={variant} onPlay={onPlay} />
+			<VideosRoom game={g} variant={variant} />
 		</MantineProvider>,
 	);
-	return onPlay;
 }
 
 /** Titles in the order the room shows them: by group, each group in the order given. */
@@ -289,16 +288,18 @@ describe("VideosRoom states and play (S69)", () =>
 		expect(cardTitles()).toEqual(grouped(sortHighlights(game().highlights, "oldest")));
 	});
 
-	it("onPlay: choosing a card calls onPlay with that video", async () =>
+	it("onPlay: choosing a card plays that video in the player dialog (S70), with no link back to this game", async () =>
 	{
 		const user = userEvent.setup();
-		const onPlay = renderRoom();
+		renderRoom();
 		const first = game().highlights[0]!;
 		await user.click(screen.getByRole("button", {
 			name: `Play ${first.title}`,
 		}));
-		expect(onPlay).toHaveBeenCalledWith(expect.objectContaining({
-			id: first.id,
-		}));
+		const dialog = await screen.findByRole("dialog");
+		expect(within(dialog).getByTestId("video-player")).toHaveTextContent(first.title);
+		expect(within(dialog).queryByRole("link", {
+			name: /Go to game/,
+		})).toBeNull();
 	});
 });

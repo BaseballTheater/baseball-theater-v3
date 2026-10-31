@@ -170,3 +170,35 @@ describe("SettingsPage Opens First", () =>
 		})).toBeChecked());
 	});
 });
+
+describe("SettingsPage Video Player (S70)", () =>
+{
+	it("Video Player offers Dialog then Stage, Dialog by default, and picking Stage saves it to the account", async () =>
+	{
+		const put = vi.fn();
+		stubAccountApi();
+		const stubbed = fetch;
+		vi.stubGlobal("fetch", vi.fn(async (request: Request) =>
+		{
+			if (request.method === "PUT") put(await request.clone().json());
+			return stubbed(request);
+		}));
+		renderSettings();
+		const group = within(screen.getByRole("radiogroup", {
+			name: "Video Player",
+		}));
+		expect(group.getAllByRole("radio").map((r) => r.getAttribute("value"))).toEqual(["dialog", "stage"]);
+		expect(group.getByRole("radio", {
+			name: "Dialog",
+		})).toBeChecked();
+		await userEvent.click(group.getByRole("radio", {
+			name: "Stage",
+		}));
+		await waitFor(() => expect(put).toHaveBeenCalledWith(expect.objectContaining({
+			videoPlayer: "stage",
+		})));
+		expect(group.getByRole("radio", {
+			name: "Stage",
+		})).toBeChecked();
+	});
+});

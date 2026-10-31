@@ -12,6 +12,7 @@ import type { HighlightGroup, HighlightSort } from "@bt/domain";
 import type { GamePayload } from "../../api/game.js";
 import type { LayoutVariant } from "../../layout/variant.js";
 import { ViewState } from "../ViewState.js";
+import { PlayerHost } from "./PlayerHost.js";
 import { FilterPill, QuickFilters } from "./QuickFilters.js";
 import { VideoCard } from "./VideoCard.js";
 import type { Video } from "./VideoCard.js";
@@ -150,13 +151,12 @@ function FilterDrawer({
  * out (owner, 2026-10-30). Each group's heading, with its count, is a button that folds
  * the group away and back (owner, 2026-10-30: "the groups should be collapsible"); all
  * start open.
- * Choosing a video calls `onPlay`; the player is S70's.
+ * Choosing a video plays it in `PlayerHost` (S70): a dialog by default, or the stage at
+ * the top of the room when the reader chose Stage. Played from the game's own room, the
+ * dialog carries no link back to it.
  */
-export function VideosRoom({
-	game, variant, onPlay,
-}: { game: GamePayload;
-	variant: LayoutVariant;
-	onPlay: (video: Video) => void; })
+export function VideosRoom({ game, variant }: { game: GamePayload;
+	variant: LayoutVariant; })
 {
 	const [query, setQuery] = useState("");
 	const [filters, setFilters] = useState<Filters>({
@@ -167,6 +167,7 @@ export function VideosRoom({
 	const [sort, setSort] = useState<HighlightSort>("impact");
 	const [collapsed, setCollapsed] = useState<ReadonlySet<HighlightGroup>>(new Set());
 	const [layout, setLayout] = useState<"grid" | "list">("grid");
+	const [playing, setPlaying] = useState<Video | null>(null);
 
 	if (game.highlights.length === 0)
 	{
@@ -204,6 +205,7 @@ export function VideosRoom({
 
 	return (
 		<Stack gap="md">
+			<PlayerHost video={playing} first={game.highlights[0]} onClose={() => setPlaying(null)} fromGamePk={game.gamePk} />
 			<Text size="xs" fw={700} tt="uppercase">Videos</Text>
 			<TextInput
 				aria-label="Search videos"
@@ -256,7 +258,7 @@ export function VideosRoom({
 			{videos.length === 0 ? <ViewState kind="empty" message="No videos match." /> : null}
 			{groupHighlights(videos).map(({ group, highlights }) =>
 			{
-				const cards = highlights.map((video) => <VideoCard key={video.id} video={video} layout={layout} onPlay={onPlay} />);
+				const cards = highlights.map((video) => <VideoCard key={video.id} video={video} layout={layout} onPlay={setPlaying} />);
 				const open = !collapsed.has(group);
 				const Chevron = open ? IconChevronDown : IconChevronRight;
 				return (
