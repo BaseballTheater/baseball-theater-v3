@@ -16,6 +16,12 @@ explicitly where that's the case. For what's still ahead, see
 
 ## Each scoreboard game shows what you care about at a glance
 
+- **Before, every game on the scoreboard took the same space and every score was always visible. Now games
+  without your favorite teams can fold into slim bars (`CHC ● 1–0 ● MIA`, the inning and count underneath) that
+  open with a tap, and one switch hides every score, record and pitcher of record for fans catching up later.**
+  Details: S68 — `scoreboardRows`, `collapsedBarState`, `shouldHideScores` in `packages/domain`;
+  `useScoresHidden`, `HiddenValue`, `CollapsedBar`; Settings → Game List switches; design matched by the
+  owner. _(2026-10-30)_
 - **Before, the right side of each game on the scoreboard was empty. Now it shows the winning and losing
   pitchers once a game ends, the bases, count and who's batting and pitching while it's live, and tonight's
   starters before first pitch — or, if you choose Room Menu in Settings, quick links straight into the game's

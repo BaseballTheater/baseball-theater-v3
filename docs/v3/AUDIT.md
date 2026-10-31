@@ -11605,3 +11605,102 @@ The platform band (S47 → S48 → S18 / S19 → S20, then S50 / S51) is launch 
 
 - **Savant ToS check has no owner.** S103's note asks for a terms-of-use check before the HTTP adapter calls `baseballsavant.mlb.com/gf` outside a recording, but no AC requires the check or a record of it. The backlog review should decide whether that needs an AC or stays a note.
 - **No view for Savant's extras**, like S99/S101/S102. The data is ingest-only by the owner's request. Flagged so the gap from ingested data to a view is visible.
+
+---
+
+## 2026-10-30 — S68 completed
+
+**Collapse non-favorites + Hide Scores**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-10-31T04:53:19Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `421b80c` (tree dirty) |
+| Grader | `scripts/verify-S68.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: scoreboardRows(games, favoriteTeamIds, collapseNonFavorites) in packages/domain marks non-favorite games collapsed; with no favorites nothing collapses (test)
+check 2 PASS: a collapsed bar is centered: abbreviations and round swatches (inside) either side of {away}–{home} (@ when hidden or before runs), the inning and count or Final or start time under it; it expands to the full module on click; at medium / desktop a favorite's module spans the row (RTL)
+check 3 PASS: Hide Scores on: R·H·E show –, records ▒▒-▒▒, pitchers of record masked while count, AB / P and probables stay; collapsed bars show the state only; same module structure (RTL); no "Scores hidden in settings" text; one HiddenValue component
+check 4 PASS: shouldHideScores(settings, game?) in packages/domain (tested on, off, with and without a game); one useScoresHidden(game?) hook in web/src/settings/; nothing else reads the Hide Scores setting
+check 5 PASS: Settings → Game List toggles for Collapse Non-Favorites and Hide Scores save to the account and update a mounted scoreboard without reload (test)
+check 6 PASS: files this story adds or edits have no team logo and no useMediaQuery / hiddenFrom / visibleFrom outside web/src/layout/
+check 7 PASS: design match: e2e/design/S68.spec.ts names the collapsed and scores-hidden frames it builds; docs/v3/design-checks/S68/ holds them at their pairing widths
+check 8 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**8/8 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with its ratified frame
+
+| Frame | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/shell-scoreboard/scoreboard-collapsed-desktop.png` | `32e756f104e11f87d5f31bf1dc5b98cc7a5acb7bddb037edd204e1b0009f6e21` | `docs/v3/design-checks/S68/scoreboard-collapsed-desktop.png` | `b321aec6428b77d822236d2c9b1cc5f60eb0343ddfeefc051d9b975ed6231597` |
+| `docs/v3/visual/shell-scoreboard/amendments/scoreboard-collapsed-hidden-nonotice-mobile.png` | `30a9913e41722085c5bf24017499ac28e52fd01b1673ba21604e65a7d2dc3392` | `docs/v3/design-checks/S68/scoreboard-collapsed-hidden-nonotice-mobile.png` | `56eb2ce3c558eda274ad94ab39a85e3b8027caac1bb3da9eea5d3b628534302f` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-collapsed-medium.png` | `5053f9126ae511297533f4716ca7fcc7c7d661847dc5fca79caebf9ef70ce31c` | `docs/v3/design-checks/S68/scoreboard-collapsed-medium.png` | `cfb36859abc9c5967626449851fc201fa18050a3913da0f193dff9cbd71afe2b` |
+| `docs/v3/visual/shell-scoreboard/amendments/scoreboard-collapsed-score-mobile.png` | `eca319b5ca4c29fed7d1774bd6ed68d49f8ba3a971c462b36b916096d47cc970` | `docs/v3/design-checks/S68/scoreboard-collapsed-score-mobile.png` | `434d80e1f9b2b3b8e423b9a9794829a89115fa681e0c08128b3a65936154924d` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-scores-hidden-desktop.png` | `12fd581e8e246d4e6cacc96b9250a9ef6fec412e9f6bbcfa580c4b3a55ef98f5` | `docs/v3/design-checks/S68/scoreboard-scores-hidden-desktop.png` | `a566a0b16f14d6e444b80e3aeaa2b779d24fc90b4e49f8b0e64e2894a97cd739` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-scores-hidden-medium.png` | `98bd357082ca5018a3b8fac9dc32eb7ab81e47995e3efd35cda558fb5c5290db` | `docs/v3/design-checks/S68/scoreboard-scores-hidden-medium.png` | `ea339042c42fc2c70192cbe550fb20a7af8aa24b76fea5c28c5fef4a1ce3769c` |
+| `docs/v3/visual/shell-scoreboard/amendments/scoreboard-slots-hidden-nonotice-mobile.png` | `b9fd88aef72c6e823fa17cf0d5c8a587cf876ea38b335e93a26bf4429670f27f` | `docs/v3/design-checks/S68/scoreboard-slots-hidden-nonotice-mobile.png` | `fdc56ded471b3e09332a1de9e60cbd9e47577c6ed8cd910ccfb4c5ef4f0fcd26` |
+Owner: "Owner, 2026-10-30, asked "S68 and S69 design verdicts (do they match their designs?)": "S68 and 69: yes""
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S68 check results ---
+check 1 PASS: scoreboardRows(games, favoriteTeamIds, collapseNonFavorites) in packages/domain marks non-favorite games collapsed; with no favorites nothing collapses (test)
+check 2 PASS: a collapsed bar is centered: abbreviations and round swatches (inside) either side of {away}–{home} (@ when hidden or before runs), the inning and count or Final or start time under it; it expands to the full module on click; at medium / desktop a favorite's module spans the row (RTL)
+check 3 PASS: Hide Scores on: R·H·E show –, records ▒▒-▒▒, pitchers of record masked while count, AB / P and probables stay; collapsed bars show the state only; same module structure (RTL); no "Scores hidden in settings" text; one HiddenValue component
+check 4 PASS: shouldHideScores(settings, game?) in packages/domain (tested on, off, with and without a game); one useScoresHidden(game?) hook in web/src/settings/; nothing else reads the Hide Scores setting
+check 5 PASS: Settings → Game List toggles for Collapse Non-Favorites and Hide Scores save to the account and update a mounted scoreboard without reload (test)
+check 6 PASS: files this story adds or edits have no team logo and no useMediaQuery / hiddenFrom / visibleFrom outside web/src/layout/
+check 7 PASS: design match: e2e/design/S68.spec.ts names the collapsed and scores-hidden frames it builds; docs/v3/design-checks/S68/ holds them at their pairing widths
+check 8 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S68: 8/8 checks passed ---
+verify-S68: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+packages/ports build: Done
+web build: vite v6.4.3 building for production...
+web build: transforming...
+web build: ✓ 7091 modules transformed.
+web build: rendering chunks...
+web build: computing gzip size...
+web build: dist/index.html                     1.00 kB │ gzip:   0.53 kB
+web build: dist/assets/batter-J7FnW6ss.webp   74.81 kB
+web build: dist/assets/index-BEBfbMX0.css    201.84 kB │ gzip:  29.52 kB
+web build: dist/assets/index-b2MaZEj6.js     627.65 kB │ gzip: 198.25 kB
+web build: ✓ built in 1.83s
+web build: (!) Some chunks are larger than 500 kB after minification. Consider:
+web build: - Using dynamic import() to code-split the application
+web build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+web build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 197889,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
