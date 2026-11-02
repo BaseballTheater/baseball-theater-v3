@@ -13108,3 +13108,42 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-11-02 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-02T23:25:33Z` |
+| HEAD at review | `7e2e080` (tree dirty) |
+| Trigger | 6 stories done since fcd3e62 (S110, S50, S109, S20, S71, S93); design intake 52039f0 flagged FEATURES install row vs A8; owner answer on highlight search (f983e40) |
+| Stories `done` since last review | S110, S50, S109, S20, S71, S93 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+**Citation honesty (parity:debt stories + next 3 eligible todo: S75, S5, S72; S4/S73/S28 blocked)**
+
+- **S110** — `Pillar: Dependable`. Checked by the last parity review (fcd3e62); since then only 9d10688 touched S110.md (`status: todo → done`), so the 2026-11-02 approval ("Lazy loading would be better, with chunked JS files." and "yes", AUDIT.md answers entry applied in 540447d) still covers it. Holds.
+- **S50** — `Pillar: Flexible`. Approval is the owner's 2026-10-18 Q1 answer (AUDIT.md:4725). `git diff fcd3e62 HEAD` on S50.md: priority/status and a notes heading only; Gap, Impact and ACs unchanged. No feature describes running on standard, swappable platform pieces. Holds.
+- **S109** — `Feature: Game → Live play / linescore context` (FEATURES.md:57: "BSO pips", the score "In a small status near the diamond status"). One row for inning/count/outs is exactly that. Holds.
+- **S20** — `Feature: Daily scoreboard by date` (FEATURES.md:54, "BT-backed (ADR-002)"). Live refresh keeps that scoreboard current. Holds. "Faster live refresh | Backer | interval TBD" (FEATURES.md:291) is a backer tier on top, not contradicted.
+- **S71** — `Feature: "Best of [date]" / league digest` (FEATURES.md:159, committed for launch, ranked by per-game impact across the day). Holds. Amended: the row now records the five-clip count the owner confirmed at S71's design match ("Yes", 639e572 ledger entry).
+- **S93** — `Feature: More MLB game data` (FEATURES.md:99 lists per-play metrics: win probability, key moments, lead changes, hard hits, ABS challenges). Holds.
+- **S75** — `Feature: Settings (… hide scores …)` (FEATURES.md:63 spells out Hide Scores in Live, Plays, Box, Recap). No Gap/Impact change since fcd3e62 (priority only). Holds.
+- **S5** — `Feature: Highlight search (free-text)`. Holds. Amended: the row now records the owner's 2026-11-02 answer, "MLB's own search on every query, for now. It can match the existing site (repo is called baseball-theater)." (f983e40, applied in 689a706).
+- **S72** — `Feature: Highlight search (date + tag)` (FEATURES.md:60). Holds.
+- **Open:** none among the stories checked; none is next up.
+
+**Doc reflects reality**
+
+- FEATURES.md:214 and :217 said an "Install app row in Settings"; ratified standings-search-settings A8 (owner, 2026-11-02) makes it a tip at the very top of Settings, outside the Settings and Account frames, dismissable in this browser. Amended both lines in the owner's words, citing A8. (Flagged by the 2026-11-02 design intake review, 52039f0.)
+- INTENT: no statement contradicted by the six done stories or the answers above.
+
+**For the next backlog review**
+
+1. ARCHITECTURE.md:1232 (ADR-023) still says "A quiet **Install app** row in Settings"; A8 makes it a dismissable tip at the top of Settings. ADR text is outside this review's write scope.
+2. Highlight search asking MLB on every query (owner, 2026-11-02) sits against ADR-002, which lists highlight search under "still open / later" (ARCHITECTURE.md:53) and says media/search needs its own ADR (ARCHITECTURE.md:553). The answers entry left recording it as an ADR to the owner; S5 should not ship without that decision written down or the gap acknowledged.
+3. No FEATURES item added this review; no new uncovered feature found.
