@@ -12573,3 +12573,43 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-11-02 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-02T22:22:48Z` |
+| HEAD at review | `e548a07` (tree dirty) |
+| Trigger | fence: S5 needs packages/ports (rule 10) |
+| Stories `done` since last review | S110 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context single reviewer. Trigger: `/run-stories` stopped S5 before work item 0 (`e548a07`): AC 1's `GET /api/v1/search/highlights` must find a highlight across games, and `packages/ports/` was outside its fence.
+
+**S5 (the fence).**
+- At HEAD, `GameRepository` (`packages/ports/src/repositories.ts`) has `getByPk`, `upsert`, `listByDate`; `MlbStatsClient.fetchGameContent` (`packages/ports/src/mlb.ts:20`) reads one game. No port lists or searches highlights; `functions/src/services/digest.ts` reads one day's games via `getOrRefreshGame`. Highlights live on `GameSnapshot.highlights` (`packages/domain/src/digest.ts:5`).
+- Every plausible answer puts the query on a port (ADR-012), so the fence fix is the review's: `packages/ports/` added to `scope_files`, the Scope files line, the Goal condition and the `/goal` line; cap 14 → 16 (port method, a contract case beside (d) `listByDate` in `functions/src/adapters/repository-contract.ts`, the memory adapter). ACs unchanged. The adapters, contract and manifest are already inside `functions/src/`.
+- **But what search covers is not decided.** ADR-002's scope table lists "Highlight search" under "Still open / later" (ARCHITECTURE.md:53) and says media/search needs its own ADR (:553); open question 3 (:1697) is "Historical highlight index (v2 ES) vs live MLB GraphQL search?" `grep -i search docs/v3/AUDIT.md` finds no owner decision on coverage. S5 stays `blocked` until the owner answers (owner question below); nothing else waits on it except S72.
+- Other S5 notes: seed fixture `744834` in the in-process test (the local stores start empty); the AC 9 link text "NYY @ BOS, Sep 21" is already built privately in `DayDigest.tsx:16` `gameLabel`: export it once (ADR-025); ADR-028: no new store, query not logged with a uid/session/IP. S50 interaction recorded on both stories.
+- Deps: S70, S61, S68, S81 done; design S34, S56 done; prefer-after S24, S25 done.
+
+**Check 2 (next 3 startable at HEAD; S109/S20/S71/S4 parked for design match, S75 waits on S109, S72 on S5, S74 on S73/S75).**
+- **S73** (86): deps S55, S60, S6, S81 done; design S55, S56 done. `web/src/layout/NoticeSlot.tsx` exports `NoticeBanner`/`NoticeSlot`; `web/src/pages/SettingsPage.tsx` exists (no App group yet: the story's work); `web/public/` holds only `favicon.svg`; `vite-plugin-pwa` not in `web/package.json` (the story adds it; `pnpm-lock.yaml` in fence). **Finding:** the 2026-11-02 Workers Cache note offers "config or workerd test", but workerd tests live in `functions/src/*.workerd.test.ts` and `wrangler.jsonc` is outside the fence (rule 10 trap). Amended: use `web/public/_headers` (assets come from `web/dist`, `wrangler.jsonc` `assets.directory`) with a `web/` config test. `.size-limit.json` (root, outside fence) budgets `web/dist/assets/index-*.js` only, so AC 6 needs no edit there. Cap 16 holds.
+- **S28** (87): deps S26, S25, S81 done; design S31 done. `packages/domain/src/api-routes.ts`, `functions/src/handlers/api.ts`, `openapi/bt-api.v1.json`, `web/src/api/client.ts` (one `openapi-fetch` client with `api.use({ onRequest })`, S59), `README.md` exist; `NoticeSlot`/`NoticeBanner` exist for AC 8. Note added: AC 4's per-version record is a log line, so no personal field (ADR-028 "Server and email logs"); the 426 check is an `onResponse` on the same client. Cap 16 holds.
+- **S50** (89): deps S45, S46, S76, S6 done. `functions/src/adapters/postgres/` absent (the story creates it); `wrangler.jsonc` in fence, no Hyperdrive binding yet. `repos.ts` now has 9 classes (lines 71–327); the deletion log (S77) is a Postgres table AC 1 doesn't list, and `RETAINED_ALLOWED` (`data-classification.ts`) names only `InMemoryDeletionLog`. Note added. Cap 20 holds.
+
+**Check 1 / 3.** No ADR accepted since the last review; no new package. Order argued: S73/S28/S50 are independent of S5 and of the parked design matches, so the order stands; S5 stays at 84 so it runs as soon as the owner answers. Newest parity entry (2026-11-02) queued nothing. Baseline As-of already reflects S110; no story flipped `done` since.
+
+**Duplication sweep.** `pnpm dup:check`: 0 clones. Read the code since `4e7ab35` (S110, S109, S20, S71, S4 checkpoints). `formatMonthDay` (`web/src/format/datetime.ts`) sits beside `formatDate` with its own Intl formatter, not a re-derivation. One near-hit: the game-link label exists only in `DayDigest.tsx:16`; S5 would write the second, so S5 now says to export it. Carried: `functions/src/services/live-hub.ts:43` version compare (deferred to the next story fencing `functions/src/services/`).
+
+**Personal-data sweep.** `git diff 4e7ab35..HEAD -- functions web/src packages` adds no `console.*`, `localStorage`, `sessionStorage`, `indexedDB` or `caches.` line; the digest and standings routes read MLB data only. Next 3: S73 (precache labeled `none` per its existing note), S28 (log-line note added), S50 (existing AC 6 + deletion-log note). S5 note added. None missed beyond those notes.
+
+**Owner question.**
+1. "What should highlight search look through at launch: only the games Baseball Theater has already saved (fast, and grows as the season is collected, but older seasons aren't searchable yet), or should it ask MLB's own search each time (covers everything, but every search becomes a request to MLB, which ADR-002 moved away from)? The architecture doc lists this as still open, so the Search page (S5) waits on your answer."
+
+Verdict `amended`: fence fixed, notes on S5, S73, S28, S50. S73, S28 and S50 can proceed; S5 stays `blocked` on the question and goes to `todo` when it is answered.

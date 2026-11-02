@@ -169,7 +169,14 @@ scripts/audit.sh review --trigger "…" --since "S23, S21, S13" --verdict amende
 
 This section keeps only the *forward-looking* scheduling state: what is due next, and the drift the next review has to weigh.
 
-**Last review:** 2026-10-30 at HEAD `e2855f0`, verdict **`amended`**. **Trigger: drift, by the owner's "Yes"** — the owner added S93–S102 (`372c3d5`) and amended S68 AC 2 (`dc1343e`) and S69 AC 3 (`6373fb0`, `87082d1`), and answered "1. Yes." to whether they need a review. Count: 1 of 6 since the last review (S67). Fresh-context subagent; see [AUDIT](./AUDIT.md).
+**Last review:** 2026-11-02 at HEAD `e548a07`, verdict **`amended`**. **Trigger: drift, rule 10** — `/run-stories` stopped S5 before work item 0: AC 1's search needs a port query, and `packages/ports/` was outside its fence. Count: 1 of 6 since the 2026-11-02 design intake (S110). Fresh-context subagent; see [AUDIT](./AUDIT.md).
+
+- **S5 re-fenced** (`packages/ports/`, cap 14 → 16) but **still `blocked`** on the owner: ADR-002 leaves highlight search open and ARCHITECTURE open question 3 asks stored index vs live MLB search, so what launch search covers is the owner's call. Notes on the contract case, seeding the in-process test, one game-link label with `DayDigest.tsx`, ADR-028. S72 waits on S5.
+- **Notes:** S50 (ports added since it was written; a Postgres deletion log needs `RETAINED_ALLOWED`; S5's search method), S73 (do the Workers Cache check with `web/public/_headers` and a `web/` config test, since workerd tests and `wrangler.jsonc` are outside its fence; `.size-limit.json` budgets the entry only), S28 (AC 4's log line carries no personal field; the 426 check is an `onResponse` on the one client).
+- **Next 3 startable:** S73, S28, S50 (S109, S20, S71, S4 wait on the owner's design match; S75 on S109; S5 on the owner; S72 on S5; S74 on S73 / S75).
+- **Weigh next time:** the owner's answer on search coverage (then S5 → `todo`, and S50 picks up the method if S5 lands first); the deferred version-compare duplicate in `functions/src/services/live-hub.ts:43`.
+
+**Earlier review:** 2026-10-30 at HEAD `e2855f0`, verdict **`amended`**. **Trigger: drift, by the owner's "Yes"** — the owner added S93–S102 (`372c3d5`) and amended S68 AC 2 (`dc1343e`) and S69 AC 3 (`6373fb0`, `87082d1`), and answered "1. Yes." to whether they need a review. Count: 1 of 6 since the last review (S67). Fresh-context subagent; see [AUDIT](./AUDIT.md).
 
 - **S70 before S75:** S75 AC 6 retitles the player dialog, which S70 builds; S75 now depends on S70 (S70 71, S75 72). S75 also gets a one-recap-rule note (`highlightKind` in `content.ts:37` already finds the recap).
 - **S102 after S4, fence widened:** `divisionName` (`team-colors.ts:129`) is the hand map AC 3's grep forbids, and S4 AC 8 builds on it; S102 now takes the headings onto the payload's `nameShort` (`web/src/pages/`, `web/src/components/` in the fence; AC 3 extended).

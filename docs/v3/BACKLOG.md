@@ -278,7 +278,14 @@ scripts/audit.sh review --trigger "…" --since "S23, S21, S13" --verdict amende
 
 This section keeps only the *forward-looking* scheduling state: what is due next, and the drift the next review has to weigh.
 
-**Last review:** 2026-10-30 at HEAD `e2855f0`, verdict **`amended`**. **Trigger: drift, by the owner's "Yes"** — the owner added S93–S102 (`372c3d5`) and amended S68 AC 2 (`dc1343e`) and S69 AC 3 (`6373fb0`, `87082d1`), and answered "1. Yes." to whether they need a review. Count: 1 of 6 since the last review (S67). Fresh-context subagent; see [AUDIT](./AUDIT.md).
+**Last review:** 2026-11-02 at HEAD `e548a07`, verdict **`amended`**. **Trigger: drift, rule 10** — `/run-stories` stopped S5 before work item 0: AC 1's search needs a port query, and `packages/ports/` was outside its fence. Count: 1 of 6 since the 2026-11-02 design intake (S110). Fresh-context subagent; see [AUDIT](./AUDIT.md).
+
+- **S5 re-fenced** (`packages/ports/`, cap 14 → 16) but **still `blocked`** on the owner: ADR-002 leaves highlight search open and ARCHITECTURE open question 3 asks stored index vs live MLB search, so what launch search covers is the owner's call. Notes on the contract case, seeding the in-process test, one game-link label with `DayDigest.tsx`, ADR-028. S72 waits on S5.
+- **Notes:** S50 (ports added since it was written; a Postgres deletion log needs `RETAINED_ALLOWED`; S5's search method), S73 (do the Workers Cache check with `web/public/_headers` and a `web/` config test, since workerd tests and `wrangler.jsonc` are outside its fence; `.size-limit.json` budgets the entry only), S28 (AC 4's log line carries no personal field; the 426 check is an `onResponse` on the one client).
+- **Next 3 startable:** S73, S28, S50 (S109, S20, S71, S4 wait on the owner's design match; S75 on S109; S5 on the owner; S72 on S5; S74 on S73 / S75).
+- **Weigh next time:** the owner's answer on search coverage (then S5 → `todo`, and S50 picks up the method if S5 lands first); the deferred version-compare duplicate in `functions/src/services/live-hub.ts:43`.
+
+**Earlier review:** 2026-10-30 at HEAD `e2855f0`, verdict **`amended`**. **Trigger: drift, by the owner's "Yes"** — the owner added S93–S102 (`372c3d5`) and amended S68 AC 2 (`dc1343e`) and S69 AC 3 (`6373fb0`, `87082d1`), and answered "1. Yes." to whether they need a review. Count: 1 of 6 since the last review (S67). Fresh-context subagent; see [AUDIT](./AUDIT.md).
 
 - **S70 before S75:** S75 AC 6 retitles the player dialog, which S70 builds; S75 now depends on S70 (S70 71, S75 72). S75 also gets a one-recap-rule note (`highlightKind` in `content.ts:37` already finds the recap).
 - **S102 after S4, fence widened:** `divisionName` (`team-colors.ts:129`) is the hand map AC 3's grep forbids, and S4 AC 8 builds on it; S102 now takes the headings onto the payload's `nameShort` (`web/src/pages/`, `web/src/components/` in the fence; AC 3 extended).
@@ -410,7 +417,7 @@ This section keeps only the *forward-looking* scheduling state: what is due next
 
 **Earlier reviews** (2026-10-20 at `1967ae3` — S54 fenced for `tools/`, S48 AC 8 (ingest's final check), S56 Search-title note; 2026-10-19 at `adf4f24` — ADR-023–027 and the first design intake: guardrail, design and UI stories S52–S74 inserted, rooms re-scoped, guardrails and design first; 2026-10-18 at `52a0d0f` — off Firebase onto Cloudflare/Postgres/Logto (ADR-017–022): S42–S51 inserted, S7/S9 superseded, S8/S18/S19 re-scoped; 2026-10-14 at `71526bf` — S39/S40/S41 inserted for ratified work, rooms re-scoped, `openapi/` fenced; 2026-10-09 at `77244af` — S9 re-scoped, then emulator-only `pnpm dev` on the owner's answer; 2026-10-04 at `5dd9404` — `blocked` on Q1–Q5, answered 2026-10-08 and applied in `5f370be`; 2026-09-16 at `2a357ad` — S29 split: guard kept, generated DAL deferred behind a trigger; 2026-09-14 at `f74767c` — rule-18 design gate, parking, S18 ahead of the gated UI band; 2026-09-13 at `5827d36` — the V3 fence amendment and the end-to-end walk of the notes process; 2026-09-13 at `38a52aa` — the S27/S29 counterfactual and the S25-before-S29 re-order; 2026-09-10 at `c98e435` and before): see [AUDIT](./AUDIT.md).
 
-**Review debt (generated from [AUDIT](./AUDIT.md)):** 1 of 6 stories `done` since the last backlog review (2026-11-02, verdict `amended`): S110. A drift event makes a review due regardless of this count.
+**Review debt (generated from [AUDIT](./AUDIT.md)):** 0 of 6 stories `done` since the last backlog review (2026-11-02, verdict `amended`). A drift event makes a review due regardless of this count.
 
 **Next review due:** by count after **6** stories land since the last review, or immediately on any drift event. In particular:
 - ~~**When S41 enters the next 3:** confirm S2 actually shipped the reusable boxed-linescore component and the `823823` fixture pair S41 binds to.~~ Confirmed 2026-10-29 (see S41's notes).
@@ -1888,7 +1895,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 **Prefer after:** **S24** and **S25** (search results are a cache resource with the query string as part of the key).
 
-**Scope files:** `fixtures/`, `packages/domain/`, `functions/src/`, `functions/vitest.config.ts`, `openapi/`, `web/src/`, `web/vitest.config.ts`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`, `e2e/design/`, `docs/v3/design-checks/`
+**Scope files:** `fixtures/`, `packages/domain/`, `packages/ports/`, `functions/src/`, `functions/vitest.config.ts`, `openapi/`, `web/src/`, `web/vitest.config.ts`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`, `e2e/design/`, `docs/v3/design-checks/`
 
 **API layer (2026-10-23 backlog review, after S49):** the web app calls the API only through the one `openapi-fetch` client in `web/src/api/client.ts` (`api.GET("/api/v1/search/highlights", …)`), with no hand-built URL and no second fetch helper. A new route also needs its pairing in S29's spec-fidelity gate, `web/src/api/generated.types.test.ts` (the `fidelity` entry, `SpecPathsCovered`, and the `toEqual` key list); `tsc` fails until it's there. Test stubs of `fetch` return real `Response` objects, using the shared helper S59 moves into `web/src/test/`.
 
@@ -1916,16 +1923,25 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 - Open the dialog through the shared lazy `PlayerDialog` wrapper S71 adds (see S71's notes), not a second `lazy(() => import(...PlayerDialog))`: `PlayerHost.tsx` already lazy-loads it to keep it out of the entry bundle (ADR-025, ADR-026).
 
+**Notes (2026-11-02 backlog review, after the rule 10 stop at `e548a07`):**
+
+- **Fence widened to `packages/ports/`, cap 14 → 16.** AC 1 has to find a highlight across games, and no port can: `GameRepository` (`packages/ports/src/repositories.ts`) has `getByPk`, `upsert` and `listByDate` only, and `MlbStatsClient.fetchGameContent` reads one game. Whatever the search reads, its query belongs on a port (ADR-012), so the memory and fixture adapters (`functions/src/adapters/`) and S50's Postgres adapter each answer it. The adapters, the shared contract (`functions/src/adapters/repository-contract.ts`, which gets a case for the new method beside (d) `listByDate`) and the classification manifest are already inside `functions/src/`. The +2 turns are the port method, its contract case and the memory adapter.
+- **Still `blocked` on an owner question.** ADR-002 lists highlight search under "Still open / later" and says media/search needs its own ADR (ARCHITECTURE.md:53, :553); open question 3 (ARCHITECTURE.md:1697) is "Historical highlight index (v2 ES) vs live MLB GraphQL search?" No decision says what free-text search covers at launch. Searching the games BT has stored (a game-repository query; S50's GIN index on the game JSONB serves it) finds only games BT ingested or was asked for. Asking MLB per search would be the per-viewer upstream call ADR-002 removed. Do not start S5 until the owner answers; then set `status: todo`.
+- **S50 interaction.** If S5 lands first with a method on `GameRepository`, S50's Postgres adapter implements it under the same contract case (AC 3: same case count, 0 skipped); S50's fence (`functions/`) holds it. If S50 lands first, S5 adds the Postgres implementation inside `functions/src/`.
+- **In-process test data.** The local stores start empty: the functions test seeds the game repository with fixture `744834` (or reads it through `getOrRefreshGame`) before searching, rather than relying on an earlier request.
+- **One game-link label (ADR-025).** `DayDigest.tsx:16` builds "NYY @ BOS, Sep 21" in a private `gameLabel`; AC 9's link is the same text. Export it once (beside `LazyPlayerDialog` in `web/src/components/videos/`) and use it from both, not a second copy.
+- **Personal data (ADR-028).** A search over game data adds no store. The query string is not stored, and is not written to a log line with a uid, session or IP ("Server and email logs: must not carry personal fields"). The TanStack cache entry keyed by the query is in-memory only, not `web/src/storage/`.
+
 **Reuse check**
 
 **Reuse check** (ADR-025): before writing code, search `packages/domain`, `web/src/components/`, `web/src/layout/` and `web/src/api/` for what this story needs; record what was reused, or why nothing fit, in the story's ledger notes.
 
-**Goal condition:** scripts/verify-S5.sh exits 0, pnpm verify exits 0, no files outside fixtures/, packages/domain/, functions/src/, functions/vitest.config.ts, openapi/, web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified, or stop after 14 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+**Goal condition:** scripts/verify-S5.sh exits 0, pnpm verify exits 0, no files outside fixtures/, packages/domain/, packages/ports/, functions/src/, functions/vitest.config.ts, openapi/, web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified, or stop after 16 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 
 **`/goal` command**
 
 ```text
-/goal docs/v3/BACKLOG.md S5. Work item 0 first: if scripts/verify-S5.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S5.sh exits 0, pnpm verify exits 0, no files outside fixtures/, packages/domain/, functions/src/, functions/vitest.config.ts, openapi/, web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S5.sh, or stop after 14 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+/goal docs/v3/BACKLOG.md S5. Work item 0 first: if scripts/verify-S5.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S5.sh exits 0, pnpm verify exits 0, no files outside fixtures/, packages/domain/, packages/ports/, functions/src/, functions/vitest.config.ts, openapi/, web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S5.sh, or stop after 16 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
 **Status:** `blocked`
@@ -2515,6 +2531,11 @@ This story changes the `pnpm verify` gate (test runner, possibly coverage provid
 Use Drizzle (owner, 2026-10-18): schema in TypeScript under `functions/src/adapters/postgres/`, migrations generated with `drizzle-kit` and committed. Drizzle stays inside the adapter (AC 4).
 
 **Reuse check** (ADR-025): before writing code, search `functions/src/adapters/repository-contract.ts` (the storage contract every adapter is held to), `functions/src/adapters/memory/repos.ts`, `functions/src/services/data-classification.ts` / `personal-data.ts` and `functions/src/worker-app.ts` (the one composition, after S48 AC 9) for what this story needs; record what was reused, or why nothing fit, in the story's ledger notes.
+
+**Notes (2026-11-02 backlog review):**
+
+- **Ports added since this story was written.** The memory adapter (`functions/src/adapters/memory/repos.ts`) now has nine classes: schedule, game, projection, replay artifact, user (with identity links), settings, deletion log (S77), export store and mailer. ADR-018's amendment puts data downloads in R2 and the mailer is Cloudflare Email, so neither is a Postgres table; the deletion log is, though AC 1's list doesn't name it. A Postgres deletion log is labeled `retained`, which `RETAINED_ALLOWED` (`functions/src/services/data-classification.ts`) allows only on `InMemoryDeletionLog` today; add the Postgres class there (inside `functions/`).
+- **S5 may add a search method to a port first** (see S5's 2026-11-02 notes, pending the owner's answer on what search covers). If it does, implement it here under its contract case; the GIN index AC 1 already asks for serves it.
 
 **Turn cap:** 20 — assumes one adapter per repository port, one initial migration, PGlite in tests, and no production database contact. (2026-10-23 backlog review: labeling and registering the personal tables reuses S76's manifest and registry and adds no new mechanism, so the cap holds. Backups: the deletion log and `reapplyDeletions` come from S77; running it after a Neon restore belongs to the deploy Later theme's runbook.)
 
@@ -4479,6 +4500,11 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 
 - **Workers Cache is on** (S47: `wrangler.jsonc` `"cache": {"enabled": true}`, ADR-017's cost line). Confirm the service worker script and `index.html` are served so the browser revalidates them (config or workerd test): if either is cached at the edge, a waiting worker is never found and the update notice never shows.
 
+**Notes (2026-11-02 backlog review):**
+
+- **Keep the Workers Cache check inside the fence.** The 2026-11-02 note offers "config or workerd test", but the workerd tests live in `functions/src/*.workerd.test.ts` and `wrangler.jsonc` is outside this fence: either would stop the run under rule 10. Static assets come from `web/dist` (`wrangler.jsonc` `assets.directory`), so set the revalidation header in `web/public/_headers` (Workers static assets read it), e.g. `Cache-Control: no-cache` on `/sw.js` and `/index.html`, and check it with a config test in `web/`.
+- **Bundle budget.** `.size-limit.json` (repo root, outside the fence) budgets the entry chunk; the registration code goes in the entry, the worker file does not. AC 6 needs the budget to pass as it stands, not a new entry.
+
 **Reuse check**
 
 **Reuse check** (ADR-025): before writing code, search `packages/domain`, `web/src/components/`, `web/src/layout/` and `web/src/api/` for what this story needs; record what was reused, or why nothing fit, in the story's ledger notes.
@@ -6396,6 +6422,11 @@ Wire changes (`version` / `lastChangedAt` on `GameSnapshot`) are S46; applying t
 - Whether 426 is preferable to 410 for a retired version. ADR-015 picks 426 because the client action is "upgrade," not "this resource is gone."
 
 **Goal condition:** scripts/verify-S28.sh exits 0, pnpm verify exits 0, no files outside packages/domain/, functions/src/, functions/vitest.config.ts, openapi/, web/src/, web/vitest.config.ts, README.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified, or stop after 16 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**Notes (2026-11-02 backlog review):**
+
+- **AC 4's record is a log line (ADR-028: "Server and email logs: must not carry personal fields").** It carries the requested version and the route only: no uid, session token, email or IP. The logger stays a port the test can read; nothing is stored.
+- **The ingress helper is the `openapi-fetch` client's middleware** (`web/src/api/client.ts`: `api.use({ onRequest })`, S59). The 426 check is an `onResponse` on that same client, not a wrapper around each `fetch*` call (AC 5).
 
 **Reuse check**
 
