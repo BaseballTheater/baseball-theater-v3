@@ -12971,3 +12971,21 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-11-02 — backlog review answers (2026-11-02)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-02 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-02T23:08:28Z` |
+| HEAD at capture | `689a706` (tree dirty) |
+| Applied in | `689a706` — Apply the owner's answer to the 2026-11-02 backlog review: highlight search asks MLB per query (S5 back to todo) |
+
+**Answers and what was applied**
+
+Owner answers to the 2026-11-02 backlog review (fence: S5 needs packages/ports), its one question:
+"What should highlight search look through at launch: only the games Baseball Theater has already saved …, or should it ask MLB's own search each time …?"
+Owner: "MLB's own search on every query, for now. It can match the existing site (repo is called baseball-theater)."
+Applied in the commit named above: S5's notes say MlbStatsClient gains a highlight-search method calling MLB's GraphQL Search operation (fastball-gateway, as ~/Repos/BaseballTheater does), the fixture client answers from a recorded response, AC 8 stops and reports if MLB's results lack gamePk/teams/date, S94 and S5 share one gateway client, and the review's repository-search notes are superseded. ACs, fence and turn cap unchanged; S5 back to todo. Recording the decision as an ADR is left to the owner.
