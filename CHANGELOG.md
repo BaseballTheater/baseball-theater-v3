@@ -96,6 +96,10 @@ explicitly where that's the case. For what's still ahead, see
 
 ## A scoreboard you can read at a glance
 
+- **Before, the scoreboard showed scores as of the moment the page loaded, so a game in progress looked frozen
+  until you refreshed. Now games in progress update on their own every 15 seconds, and refreshing pauses while
+  the tab is hidden, so it isn't wasted effort.** Details: S20 — `LIVE_REFRESH_MS` and `whileVisible` in
+  `web/src/api/freshness.ts`, applied by the schedule hook; design matched by the owner. _(2026-11-02)_
 - **Before, the scoreboard was a rough grid of score cards with the ballpark on every game and raw error
   text. Now each game is a clean card with its team colors down the edge and each team's record: finished and
   live games show runs, hits and errors, a live game shows a blinking dot with the inning, and a game that

@@ -12788,3 +12788,92 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-11-02 — S20 completed
+
+**Scoreboard live refresh for in-window games**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-02T23:05:02Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `92be404` (tree dirty) |
+| Grader | `scripts/verify-S20.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: the schedule hook refreshes on a named, documented interval constant and fetches BT's /api/v1/schedule only (grep)
+check 2 PASS: the refresh is visibility-aware in source, and a test shows a hidden tab does not fetch on the interval
+check 3 PASS: two schedule payloads in sequence: after the refresh the scores are the second's (test file exits 0 alone)
+check 4 PASS: design match: e2e/design/S20.spec.ts names scoreboard-mobile, -medium, -desktop; docs/v3/design-checks/S20/ holds them at 390 / 768 / 1200
+check 5 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**5/5 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with its ratified frame
+
+| Frame | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/shell-scoreboard/scoreboard-desktop.png` | `a03403e19954fe2aa50f9b7146aea260f759f17b463d334fcc12dbabe457414a` | `docs/v3/design-checks/S20/scoreboard-desktop.png` | `be94b03d3a4a9b532bad98ff6f576e97d8064b027ce52de2ae103835ad22c317` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-medium.png` | `7cfb63af52eb6a2a52d88dd13023083e1073d948901c61864239a5da7dbc958e` | `docs/v3/design-checks/S20/scoreboard-medium.png` | `fade9309f6911bdd7ea1927b77fca653b990625c944b807a956b7da44fa6c5ac` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-mobile.png` | `031a036814cbbf3e5bd33a2e7ca77ae6663d10af1a4ffd9bd250bfb95ff4a936` | `docs/v3/design-checks/S20/scoreboard-mobile.png` | `ea9f97ac6d7331a393b03b2b9a8f74c8422bcb887c612c8e043b3d92eb8cfeb1` |
+Owner: "Owner, 2026-11-02, on the S20 captures (scoreboard-mobile, scoreboard-medium, scoreboard-desktop after a refresh): "Yes""
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S20 check results ---
+check 1 PASS: the schedule hook refreshes on a named, documented interval constant and fetches BT's /api/v1/schedule only (grep)
+check 2 PASS: the refresh is visibility-aware in source, and a test shows a hidden tab does not fetch on the interval
+check 3 PASS: two schedule payloads in sequence: after the refresh the scores are the second's (test file exits 0 alone)
+check 4 PASS: design match: e2e/design/S20.spec.ts names scoreboard-mobile, -medium, -desktop; docs/v3/design-checks/S20/ holds them at 390 / 768 / 1200
+check 5 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S20: 5/5 checks passed ---
+verify-S20: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+web build: dist/assets/VideoPlayer-DPpXWw-u.js                2.94 kB │ gzip:   1.43 kB
+web build: dist/assets/Table-CBWjWyP1.js                      4.15 kB │ gzip:   1.63 kB
+web build: dist/assets/Modal-CACWaols.js                      4.82 kB │ gzip:   1.73 kB
+web build: dist/assets/workbox-window.prod.es5-BBnX5xw4.js    5.75 kB │ gzip:   2.36 kB
+web build: dist/assets/TextInput-B1pJk1N2.js                 28.11 kB │ gzip:   9.21 kB
+web build: dist/assets/SettingsPage-D3wnGc67.js              37.16 kB │ gzip:  11.92 kB
+web build: dist/assets/GamePage-CuDq0o_z.js                  86.60 kB │ gzip:  29.55 kB
+web build: dist/assets/index-DpXY5F93.js                    480.16 kB │ gzip: 154.17 kB
+web build: ✓ built in 2.06s
+web build: PWA v1.0.3
+web build: mode      generateSW
+web build: precache  22 entries (860.17 KiB)
+web build: files generated
+web build:   dist/sw.js
+web build:   dist/workbox-2fbc6a65.js
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 153916,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
