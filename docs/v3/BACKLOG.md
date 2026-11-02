@@ -232,7 +232,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 84 | [S5](#s5--search-page-queries-highlights-fixture) | Search page queries highlights fixture | `blocked` |
 | 85 | [S72](#s72--highlight-search-by-date-team-and-tag) | Search chips: date / team / tag | `todo` |
 | 86 | [S73](#s73--installable-app-manifest-service-worker-update-notice-install-row) | Installable PWA + update notice | `blocked` |
-| 87 | [S28](#s28--version-sunset-path-deprecation-headers--stale-client-upgrade) | Version sunset path + stale-client upgrade | `todo` |
+| 87 | [S28](#s28--version-sunset-path-deprecation-headers--stale-client-upgrade) | Version sunset path + stale-client upgrade | `blocked` |
 | 88 | [S74](#s74--offline-reading-stored-copies-age-marker-open-time-prefetch-background-refresh) | Offline reading + prefetch | `todo` |
 | 89 | [S50](#s50--postgres-adapter-neon-via-hyperdrive-held-to-the-storage-contract) | Postgres adapter, contract-held | `todo` |
 | 90 | [S51](#s51--representative-local-dev-pnpm-dev-on-postgres-in-docker) | `pnpm dev` on Postgres in Docker | `todo` |
@@ -6440,7 +6440,7 @@ Wire changes (`version` / `lastChangedAt` on `GameSnapshot`) are S46; applying t
 /goal docs/v3/BACKLOG.md S28. Work item 0 first: if scripts/verify-S28.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S28.sh exits 0, pnpm verify exits 0, no files outside packages/domain/, functions/src/, functions/vitest.config.ts, openapi/, web/src/, web/vitest.config.ts, README.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S28.sh, or stop after 16 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `todo`
+**Status:** `blocked`
 
 ---
 

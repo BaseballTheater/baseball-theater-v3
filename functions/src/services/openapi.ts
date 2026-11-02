@@ -307,6 +307,9 @@ function jsonResponse(description: string, schemaName: string): JsonSchema
 	};
 }
 
+/** What every route's 426 means (S28): the version in its path has been retired. */
+const VERSION_RETIRED = "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update.";
+
 /** Build the whole document from the route table plus pre-generated component schemas. */
 export function buildOpenApiSpec(components: Record<string, JsonSchema>): JsonSchema
 {
@@ -322,6 +325,8 @@ export function buildOpenApiSpec(components: Record<string, JsonSchema>): JsonSc
 		{
 			responses[status] = jsonResponse(text, ERROR_TYPE);
 		}
+		// Every route answers 426 once its version is retired (ADR-015, S28).
+		responses[426] = jsonResponse(VERSION_RETIRED, ERROR_TYPE);
 		const requestType = (ApiRequestBodies as Partial<Record<ApiRoute, keyof ApiRequestTypes>>)[route];
 		const openApiPath = toOpenApiPath(path);
 		paths[openApiPath] = {

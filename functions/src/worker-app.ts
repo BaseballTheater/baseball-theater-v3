@@ -22,6 +22,7 @@ import type { GameIngestNamespace } from "./game-ingest-object.js";
 import type { ApiContext } from "./handlers/api.js";
 import { APP_ORIGIN_SECRET } from "./services/data-downloads.js";
 import { ingestScheduleDay } from "./services/ingest.js";
+import { logApiUsage } from "./services/api-usage.js";
 import type { IngestDeps } from "./services/ingest.js";
 import { RefreshCoordinator } from "./services/refresh.js";
 import { SESSION_KEY_SECRET } from "./services/session.js";
@@ -93,6 +94,8 @@ export function createWorkerApp(env: WorkerEnv): WorkerApp
 			auth,
 			settings,
 			account,
+			// One log line per versioned request, for retiring versions on evidence (S28).
+			usage: logApiUsage,
 			...env.GAME_HUB && {
 				live: liveForwarder(env.GAME_HUB),
 			},

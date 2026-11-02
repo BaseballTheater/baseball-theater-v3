@@ -2,6 +2,7 @@ import type { AccountSettings } from "@bt/domain";
 import createClient from "openapi-fetch";
 import { getSessionToken } from "../session/token.js";
 import type { paths } from "./generated/bt-api.v1.js";
+import { markVersionUnsupported } from "./versionNotice.js";
 
 /**
  * The one way the app calls the BT API (ADR-016, S49): an `openapi-fetch`
@@ -22,7 +23,9 @@ export const api = createClient<paths>({
 /**
  * Every call carries the session, when there is one, through this one
  * middleware (S59), so later account calls (settings, S6) inherit it instead
- * of each adding a header.
+ * of each adding a header. Every answer passes back through it too: a 426 means
+ * the API version this app was built against is retired (S28, ADR-015), which
+ * raises the reload-to-update notice; the answer itself still reaches its caller.
  */
 api.use({
 	onRequest({ request })
@@ -30,6 +33,11 @@ api.use({
 		const token = getSessionToken();
 		if (token) request.headers.set("Authorization", `Bearer ${token}`);
 		return request;
+	},
+	onResponse({ response })
+	{
+		if (response.status === 426) markVersionUnsupported();
+		return response;
 	},
 });
 

@@ -692,6 +692,15 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponse"];
                 };
             };
+            /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
+            426: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
         };
     };
     getGame: {
@@ -727,6 +736,15 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponse"];
                 };
             };
+            /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
+            426: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
         };
     };
     getMe: {
@@ -749,6 +767,15 @@ export interface operations {
             };
             /** @description No session, or an invalid or expired one: the caller is signed out. `account_deleted` (once): the request carries the deletion cookie a successful `POST /api/v1/me/delete` set, so the account is gone; this response clears it, as does any `/me` response that sees it (S87). */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
+            426: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -807,6 +834,15 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponse"];
                 };
             };
+            /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
+            426: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
         };
     };
     getCurrentDownload: {
@@ -845,6 +881,15 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponse"];
                 };
             };
+            /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
+            426: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
         };
     };
     requestDownload: {
@@ -867,6 +912,15 @@ export interface operations {
             };
             /** @description No session, or the account no longer exists. */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
+            426: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -924,6 +978,15 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponse"];
                 };
             };
+            /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
+            426: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
         };
     };
     getSettings: {
@@ -946,6 +1009,15 @@ export interface operations {
             };
             /** @description No session, or the account no longer exists. */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
+            426: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -995,6 +1067,15 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponse"];
                 };
             };
+            /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
+            426: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
         };
     };
     getSchedule: {
@@ -1029,6 +1110,15 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponse"];
                 };
             };
+            /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
+            426: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
         };
     };
     getStandings: {
@@ -1054,6 +1144,15 @@ export interface operations {
             };
             /** @description `date` is not `YYYY-MM-DD`. */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
+            426: {
                 headers: {
                     [name: string]: unknown;
                 };

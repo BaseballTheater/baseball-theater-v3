@@ -1,9 +1,9 @@
 import type {
-	ApiErrorResponse, ApiResponseFor, ApiRoute, MeDeleteRequest,
+	ApiErrorResponse, ApiResponseFor, ApiRoute, ApiVersionTable, MeDeleteRequest,
 } from "@bt/domain";
 import type { SettingsRepository } from "@bt/ports";
 import {
-	DEFAULT_SETTINGS, parseAccountSettings, toGameSnapshotResponse, toMeResponse, toScheduleDayResponse,
+	API_VERSIONS, DEFAULT_SETTINGS, apiVersionOf, deprecationHeaders, parseAccountSettings, toGameSnapshotResponse, toMeResponse, toScheduleDayResponse,
 } from "@bt/domain";
 import type { AccountDataDeps } from "../services/account-deletion.js";
 import { deleteAccount } from "../services/account-deletion.js";
@@ -15,6 +15,7 @@ import {
 import {
 	currentDownload, downloadFile, requestDownload,
 } from "../services/data-downloads.js";
+import type { ApiUsageLog } from "../services/api-usage.js";
 import { getDayDigest } from "../services/digest.js";
 import type { IngestDeps } from "../services/ingest.js";
 import { getOrRefreshGame, getOrRefreshSchedule } from "../services/ingest.js";
@@ -33,6 +34,10 @@ export type ApiContext = {
 	 * the `game-hub` Durable Object). Absent where there are no hubs (the Node server).
 	 */
 	live?: (gamePk: number, request: Request) => Promise<Response>;
+	/** Records each versioned request's version and route (S28); absent, nothing is recorded. */
+	usage?: ApiUsageLog;
+	/** The version lifecycle to enforce; `API_VERSIONS` unless a test supplies its own (S28). */
+	versions?: ApiVersionTable;
 };
 
 const CORS_HEADERS = {
@@ -429,11 +434,42 @@ export async function handleApiRequest(
 		});
 	}
 
+	let match: { entry: RouteEntry;
+		params: Record<string, string>; } | null = null;
 	for (const entry of API_ROUTER)
 	{
 		const params = matchRoute(entry, request.method, pathname);
-		if (params) return entry.handle(url, params, ctx, request);
+		if (params)
+		{
+			match = {
+				entry,
+				params,
+			};
+			break;
+		}
 	}
 
-	return notFound();
+	// ADR-015's lifecycle (S28): record the version asked for; a retired version gets 426 and
+	// no data; a deprecated one is served with Deprecation and Sunset headers.
+	const version = apiVersionOf(pathname);
+	const state = version ? (ctx.versions ?? API_VERSIONS)[version] : undefined;
+	if (version) ctx.usage?.({
+		version,
+		route: match?.entry.route ?? "unmatched",
+	});
+	if (state?.status === "sunset")
+	{
+		return sendError(426, {
+			error: "version_unsupported",
+			hint: "This version of the app has been retired; reload to update.",
+		});
+	}
+	if (!match) return notFound();
+	const response = await match.entry.handle(url, match.params, ctx, request);
+	const headers = state ? deprecationHeaders(state) : {};
+	// A WebSocket upgrade (101) can't be re-wrapped; it carries no warning.
+	if (Object.keys(headers).length === 0 || response.status === 101) return response;
+	const warned = new Response(response.body, response);
+	for (const [name, value] of Object.entries(headers)) warned.headers.set(name, value);
+	return warned;
 }

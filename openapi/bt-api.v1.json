@@ -984,6 +984,12 @@
 							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
 						},
 						"description": "`date` is missing or not `YYYY-MM-DD`."
+					},
+					"426": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
 					}
 				},
 				"summary": "Best of one day: the top videos across its games, ranked by impact, the first marked to watch first."
@@ -1020,6 +1026,12 @@
 							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
 						},
 						"description": "No game with that id."
+					},
+					"426": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
 					}
 				},
 				"summary": "One game's snapshot, including plays."
@@ -1039,6 +1051,12 @@
 							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
 						},
 						"description": "No session, or an invalid or expired one: the caller is signed out. `account_deleted` (once): the request carries the deletion cookie a successful `POST /api/v1/me/delete` set, so the account is gone; this response clears it, as does any `/me` response that sees it (S87)."
+					},
+					"426": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
 					}
 				},
 				"summary": "The signed-in account. Send the BT session as `Authorization: Bearer <token>`."
@@ -1076,6 +1094,12 @@
 							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
 						},
 						"description": "`reauth_required`: the sign-in is older than 10 minutes."
+					},
+					"426": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
 					}
 				},
 				"summary": "Deletes the signed-in user's data from every store, stored downloads included, immediately. Needs a sign-in from the last 10 minutes and the exact confirmation phrase; no download is required."
@@ -1103,6 +1127,12 @@
 							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
 						},
 						"description": "No download, or the last one has aged out."
+					},
+					"426": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
 					}
 				},
 				"summary": "The signed-in user's newest download that hasn't aged out: its id and expiry."
@@ -1122,6 +1152,12 @@
 							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
 						},
 						"description": "No session, or the account no longer exists."
+					},
+					"426": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
 					},
 					"429": {
 						"content": {
@@ -1163,6 +1199,12 @@
 							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
 						},
 						"description": "No such download of this user's, or it has aged out."
+					},
+					"426": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
 					}
 				},
 				"summary": "One download's file: every registered store's export, keyed by store, as it was when the download was made. Its owner only."
@@ -1184,6 +1226,12 @@
 							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
 						},
 						"description": "No session, or the account no longer exists."
+					},
+					"426": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
 					}
 				},
 				"summary": "The signed-in user's settings; the house defaults (version 0) until they first save."
@@ -1213,6 +1261,12 @@
 							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
 						},
 						"description": "No session, or the account no longer exists."
+					},
+					"426": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
 					}
 				},
 				"summary": "Saves the whole settings document. Applies only if `version` is newer than the stored one (ADR-022); answers with what is stored either way."
@@ -1249,6 +1303,12 @@
 							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
 						},
 						"description": "`date` is missing or not `YYYY-MM-DD`."
+					},
+					"426": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
 					}
 				},
 				"summary": "Games scheduled on one day."
@@ -1278,6 +1338,12 @@
 							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
 						},
 						"description": "`date` is not `YYYY-MM-DD`."
+					},
+					"426": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
 					}
 				},
 				"summary": "The division standings as of one day: each division's teams in rank order, with wins, losses, winning percentage and games back (null for the leader)."

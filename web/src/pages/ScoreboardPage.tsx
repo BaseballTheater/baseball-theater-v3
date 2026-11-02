@@ -76,7 +76,9 @@ export function ScoreboardPage({ variant }: { variant: LayoutVariant })
 	} = useScheduleDay(date);
 
 	let body;
-	if (error)
+	// A failed background refetch keeps the day already shown (S28: a retired version's 426
+	// raises the update notice and leaves the screen readable); the error room is for no data.
+	if (error && !day)
 	{
 		body = <ViewState kind="error" title="Couldn't load games" onRetry={() => void refetch()} />;
 	}

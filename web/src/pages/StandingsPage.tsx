@@ -20,7 +20,8 @@ export function StandingsPage()
 	} = useStandings(params.get("date") ?? undefined);
 
 	let body;
-	if (error)
+	// As the scoreboard: a failed refetch keeps the tables already shown (S28).
+	if (error && !standings)
 	{
 		body = <ViewState kind="error" title="Couldn't load standings" onRetry={() => void refetch()} />;
 	}

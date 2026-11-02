@@ -115,6 +115,18 @@ review. Never automate that copy — a baseline that follows the generated spec 
 its own is a disabled gate. The gate checks shape only; a field whose _meaning_
 changes while its shape doesn't is invisible to it.
 
+## API versions
+
+Every API path carries its version (`/api/v1/…`, ADR-015), and each version's lifecycle lives in one table, `API_VERSIONS` in `packages/domain/src/api-versions.ts` (S28). A version is in one of three states:
+
+- **supported** — served normally. v1 is the only version and is supported.
+- **deprecated** — still served, but every answer carries `Deprecation` (when it was deprecated) and `Sunset` (when it will stop) headers, so clients and their logs see it coming.
+- **sunset** — retired: every request gets **426** with `{"error": "version_unsupported"}` and no data. The web app's API client turns a 426 into the "An update to Baseball Theater is ready." notice with Reload, and keeps whatever is already on screen readable behind it.
+
+The handler writes one log line per versioned request, `{"event":"api_usage","version":"v1","route":"GET /api/v1/schedule"}` (version and route only, never who asked; ADR-028). **Retire a version only once that usage log shows no traffic to it** for the length of the sunset window (the window itself is still open in ADR-015, to be set after a real deploy).
+
+None of this needs a network: `pnpm verify` and the tests drive the lifecycle with their own tables over the committed fixtures, and the usage log goes to the platform's own logs, not a telemetry service.
+
 ## Capturing a post-game replay
 
 ```bash

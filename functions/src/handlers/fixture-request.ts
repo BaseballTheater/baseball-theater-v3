@@ -11,10 +11,14 @@ import {
 	InMemoryScheduleRepository,
 	InMemorySettingsRepository,
 } from "../adapters/memory/repos.js";
+import type { ApiContext } from "./api.js";
 import { handleApiRequest } from "./api.js";
 
-/** `GET <path>` against fresh in-memory stores backed by `FixtureMlbStatsClient`. */
-export function fixtureGet(path: string): Promise<Response>
+/**
+ * `GET <path>` against fresh in-memory stores backed by `FixtureMlbStatsClient`. `extra`
+ * supplies a usage log or a version lifecycle of the test's own (S28).
+ */
+export function fixtureGet(path: string, extra: Pick<ApiContext, "usage" | "versions"> = {}): Promise<Response>
 {
 	const auth = createDevAuth();
 	const settings = new InMemorySettingsRepository();
@@ -31,5 +35,6 @@ export function fixtureGet(path: string): Promise<Response>
 			users: auth.users,
 			settings,
 		}),
+		...extra,
 	});
 }
