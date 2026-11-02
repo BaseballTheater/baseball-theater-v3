@@ -219,7 +219,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 70 | [S69](#s69--videos-room-impact-sorted-grid-list-search-quick-filters) | Videos room grid / list / search | `done` |
 | 71 | [S70](#s70--video-player-dialog-by-default-persistent-stage-by-setting) | Video player (dialog / stage) | `done` |
 | 72 | [S109](#s109--live-status-the-inning-count-and-outs-in-one-place) | Live status, one place | `blocked` |
-| 73 | [S20](#s20--scoreboard-live-refresh-for-in-window-games) | Scoreboard live refresh for in-window games | `todo` |
+| 73 | [S20](#s20--scoreboard-live-refresh-for-in-window-games) | Scoreboard live refresh for in-window games | `blocked` |
 | 74 | [S110](#s110--entry-bundle-headroom-pages-past-the-scoreboard-load-on-demand) | Entry bundle headroom | `todo` |
 | 75 | [S75](#s75--hide-scores-in-the-game-rooms-and-the-recap-video-title) | Hide Scores in the rooms | `todo` |
 | 76 | [S71](#s71--day-highlights-digest-best-of-date) | Day highlights digest | `todo` |
@@ -258,7 +258,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 110 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
 | 111 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
 
-**Next (generated):** **73 / S20** — the lowest **Priority** `todo` story not waiting on a design.
+**Next (generated):** **74 / S110** — the lowest **Priority** `todo` story not waiting on a design.
 
 **Before starting it:** confirm no [backlog review](#backlog-reviews) is due — the review-debt line in that section counts stories, but a drift event makes one due regardless.
 
@@ -6342,7 +6342,7 @@ Wire changes (`version` / `lastChangedAt` on `GameSnapshot`) are S46; applying t
 /goal docs/v3/BACKLOG.md S20. Work item 0 first: if scripts/verify-S20.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S20.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S20.sh, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `todo`
+**Status:** `blocked`
 
 ---
 

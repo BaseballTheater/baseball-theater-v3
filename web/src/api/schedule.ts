@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import type { QueryClient, UseQueryResult } from "@tanstack/react-query";
 import { fetchSchedule } from "./client.js";
-import { freshnessPolicy } from "./freshness.js";
+import { freshnessPolicy, whileVisible } from "./freshness.js";
 import type { components } from "./generated/bt-api.v1.js";
 
 export type ScheduleDayPayload = components["schemas"]["ScheduleDayResponse"];
@@ -24,7 +24,8 @@ export function scheduleQueryOptions(date: string)
 		queryKey: scheduleKey(date),
 		queryFn: (): Promise<ScheduleDayPayload> => fetchSchedule(date),
 		staleTime: (query) => freshnessPolicy(query.state.data?.windowMode).staleTime,
-		refetchInterval: (query) => freshnessPolicy(query.state.data?.windowMode).refetchInterval,
+		// Re-ask an in-window day on the live cadence while visible (S20); paused when hidden.
+		refetchInterval: (query) => whileVisible(freshnessPolicy(query.state.data?.windowMode).refetchInterval),
 	});
 }
 
@@ -33,7 +34,7 @@ export function useScheduleDay(date: string): UseQueryResult<ScheduleDayPayload,
 	return useQuery(scheduleQueryOptions(date));
 }
 
-/** Write a day into the cache in place — S20's scoreboard refresh calls this. */
+/** Write a day into the cache in place (a day fetched elsewhere, e.g. by a test or a prefetch). */
 export function writeScheduleDay(client: QueryClient, day: ScheduleDayPayload): void
 {
 	// The descriptor's key carries the payload type, so a wrong-typed write is a type error.

@@ -25,10 +25,17 @@ export interface Freshness
 
 const SECOND = 1000;
 
+/**
+ * How often an in-window payload is re-asked while a reader is on screen (S20): the
+ * scoreboard's in-progress games stay current without a reload. 15s follows ADR-002's
+ * ingest cadence closely enough to feel live without asking faster than BT can change.
+ */
+export const LIVE_REFRESH_MS = 15 * SECOND;
+
 /** In-window: the ingest cadence is writing; follow it closely enough to feel live. */
 const ACTIVE: Freshness = {
 	staleTime: 10 * SECOND,
-	refetchInterval: 15 * SECOND,
+	refetchInterval: LIVE_REFRESH_MS,
 };
 
 /** Out-of-window: the server is not refreshing, so re-asking cannot produce news. */
@@ -36,6 +43,16 @@ const CACHED: Freshness = {
 	staleTime: 5 * 60 * SECOND,
 	refetchInterval: false,
 };
+
+/**
+ * A refetch cadence that pauses while the tab is hidden (S20): a hidden page re-asks
+ * nothing, because nobody is looking. TanStack re-asks a stale query when the tab comes
+ * back (refetch on focus), and that fetch re-arms the interval.
+ */
+export function whileVisible(interval: number | false): number | false
+{
+	return typeof document !== "undefined" && document.hidden ? false : interval;
+}
 
 /** Nothing loaded yet — treat as cached; the first successful payload settles it. */
 export function freshnessPolicy(windowMode: WindowMode | undefined): Freshness
