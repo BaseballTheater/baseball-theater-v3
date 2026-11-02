@@ -12383,3 +12383,65 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-11-02 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-02T20:47:15Z` |
+| HEAD at review | `e80adde` (tree dirty) |
+| Trigger | design intake: game-rooms A5, game-shell A4, standings-search-settings A6; ARCHITECTURE.md (ADR-017 cost line); S109 inserted outside a review |
+| Stories `done` since last review | S47, S48, S18, S70, S19 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Two independent fresh-context reviewers (A, B) reported without editing; merged here. Figma not consulted by either (optional); all 8 amendment PNGs read.
+
+**Inventory.**
+- game-rooms A5, 5 frames (`live-mobile/-medium/-desktop`, `live-hidden-status-mobile/-medium`): the inning alone (`Bot 7th`) beside the score, diamond and B/S/O pips; no `Count:`/outs line on mobile. The hidden frames supersede A4's `live-hidden-nonotice-*`. No new data: `inningLabel`, `BsoPips` exist.
+- game-shell A4, 2 frames (`video-player-dialog-mobile/-medium`): floating player, opaque scrim, Close ✕ top right, game link top left; iOS plays inline.
+- standings-search-settings A6, 1 frame (`search-playing-floating-mobile`), superseding A2's `search-playing-mobile`.
+- ARCHITECTURE diff since cc78bb0 is ADR-017's cost line only (Workers Cache, S47): not a frontend rule change; it adds one check to S73.
+
+**Ownership.** A4: built by S70 (done, owner-matched; `PlayerDialog.tsx:44,66-74`, `VideoPlayer.tsx:72` `playsInline`). A5 visible frames: S109 (unbuilt at HEAD: `LiveStatus.tsx:24`, `LiveRoom.tsx:76`, `format.ts:41`). A5 hidden frames were claimed twice: S109 (no score mask; `useScoresHidden`/`HiddenValue` appear in no Live file) and S75 (under the superseded names, with "outs, count … unchanged", which A5 repeals). Re-scoped: S109, S75, S106, S5. Unowned: entry-bundle headroom (A only), now S110.
+
+**Amendments applied.**
+- S75: dropped S93 and S102 from `depends_on`. They came from the Depends-on line's aside "after S93–S102", which `scripts/backlog-vault/parse.ts` reads as IDs (both reviewers). `/run-stories` would have skipped S75. Added S109 as a dependency. AC 1 now cites A5's `live-hidden-status-*` with no outs/Count text. Fence widened to `functions/src/mappers/` and `functions/vitest.config.ts`, because the 2026-10-30 "One recap rule" note has `content.ts` call `isGameRecapHighlight` and the old fence would have stopped the run under rule 10. Added a bundle note.
+- S109: priority 109 → 72. AC 3 keeps the hidden-state text removal; the score mask and the `live-hidden-status-*` captures go to S75. AC 5 frames are `live-mobile/-medium/-desktop`.
+- S106 AC 7: `live-hidden-nonotice-medium` → `live-hidden-status-medium`.
+- S5: re-scope line and AC 9 cite A6's `search-playing-floating-mobile` and "Close ✕". Note to reuse S71's lazy dialog wrapper.
+- S71: note to lift `PlayerHost.tsx`'s private `lazy()` into one exported wrapper that S5 reuses (ADR-025), plus a bundle note.
+- S20: stale S67 note fixed (S67 done; S71 and S108 regions are expected differences).
+- S96: note updated to S70's built A4 overlay row.
+- S73: Workers Cache note (the service worker and `index.html` must revalidate).
+- S74: note on S19's `LiveGameStream` offline behaviour, and the version-compare duplication.
+- **New S110** (priority 74, `Open:` Source): route-level code splitting. Entry chunk 199,901 / 200,000 bytes (size-limit, S19 ledger entry, AUDIT.md:12373+), up from 197,889 at S68/S69; `routes.tsx:5-9` imports every page eagerly.
+- Order: S109 72, S20 73, S110 74, S75 75, S71 76; everything at 74 or above +3.
+
+**Disagreements and resolution.**
+- S20: B kept it at 79; A moved it up because it mostly proves existing behaviour (`freshness.ts:30-31`) and adds no bundle weight. Took A, so visible work continues while the owner answers S110.
+- S75's recap mapper: B made it an owner question; A widened the fence. Widened, because it keeps the existing ADR-025 note intact and is a fence fix before the run, not mid-run. The owner may reverse it.
+- Bundle (A only): checked `routes.tsx` and the ledger and confirmed it.
+
+**Check 2 (next 3 at HEAD).**
+- S109: deps S3/S19/S81/S33 done; `LiveStatus.tsx:24`, `LiveRoom.tsx:76`, `format.ts:41`, `e2e/design/S19.spec.ts` exist; fence holds; cap 8 holds.
+- S20: deps S16/S25/S81 done, prefer-after S47 done, design S31 done; `freshness.ts` (15s inline; the named constant is AC 1's own work), `schedule.ts`, `client.ts`, `ScoreboardPage.tsx`, `e2e/design/helpers.ts` exist; in-window schedule is `no-store` (S47); fence `web/src/` holds; cap 8.
+- S110: no deps; `routes.tsx`, `ViewState.tsx`, `PlayerHost.tsx` exist; `pnpm size` exists; Source is Open, so it can't start until the owner answers.
+- S75 (4th): deps all done after the fix; paths `useScoresHidden.ts`, `HiddenValue.tsx`, `Linescore.tsx`, `pitch/utils.ts`, `svgPoints` ×2 (`PitchTrajectoryView.tsx:83`, `StrikeZoneChart.tsx:91`), `highlightKind` (`content.ts:37`) exist; `pnpm design:capture` exists.
+
+**Sweeps.**
+- Duplication: `pnpm dup:check` 0 clones. Two version comparisons re-derive `packages/domain/src/versioning.ts`: `web/src/api/live-stream.ts:129` (noted on S74) and `functions/src/services/live-hub.ts:43` (deferred to the next story fencing `functions/src/services/`).
+- ADR-028: since cc78bb0, only `AccountSettings.videoPlayer` (in the settings record), the Cloudflare websocket module (labelled `none`), and hub leases (game ids). No personal-data log lines. S109/S20/S110/S75 add no store. None found.
+- The newest parity entry (AUDIT.md:11979) queued nothing for this review.
+
+**For the parity review.** S110's Source is `Open:`. Optional: FEATURES:61 "plays in a dialog" still fits A4/A6 (modal, no card).
+
+**Owner questions.**
+1. "The app's first download is 99 bytes under its 200 KB limit. Should the game, standings, search and settings pages load on demand (new story S110), or should the budget be raised?"
+2. "If S110 goes ahead, may its Source cite the Dependable pillar, as the other budget stories (S54, S62) do?"
+
+S109 and S20 can proceed meanwhile; S110 waits on the answers, and S75 and S71 sit behind it.
