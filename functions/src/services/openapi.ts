@@ -120,6 +120,25 @@ export const ROUTE_DESCRIPTIONS: Record<ApiRoute, RouteDescription> = {
 			400: "`date` is missing or not `YYYY-MM-DD`.",
 		},
 	},
+	"GET /api/v1/standings": {
+		operationId: "getStandings",
+		summary: "The division standings as of one day: each division's teams in rank order, with wins, losses, winning percentage and games back (null for the leader).",
+		parameters: [
+			{
+				name: "date",
+				in: "query",
+				required: false,
+				description: "Day the standings stand as of, as `YYYY-MM-DD`; today (UTC) when absent.",
+				schema: {
+					type: "string",
+					pattern: "^\\d{4}-\\d{2}-\\d{2}$",
+				},
+			},
+		],
+		errors: {
+			400: "`date` is not `YYYY-MM-DD`.",
+		},
+	},
 	"GET /api/v1/me": {
 		operationId: "getMe",
 		summary: "The signed-in account. Send the BT session as `Authorization: Bearer <token>`.",

@@ -878,6 +878,71 @@
 				"$ref": "#/components/schemas/AccountSettings",
 				"description": "The signed-in user's settings document (ADR-027); the house defaults until they first save."
 			},
+			"StandingsDivision": {
+				"additionalProperties": false,
+				"properties": {
+					"divisionId": { "type": ["number", "null"] },
+					"leagueId": { "type": ["number", "null"] },
+					"name": { "type": ["string", "null"] },
+					"teams": { "items": { "$ref": "#/components/schemas/StandingsTeamRecord" }, "type": "array" }
+				},
+				"required": ["divisionId", "name", "leagueId", "teams"],
+				"type": "object"
+			},
+			"StandingsResponse": {
+				"$ref": "#/components/schemas/StandingsSnapshot",
+				"description": "The division standings as of one day (S4): MLB's tables, projected to BT's shape."
+			},
+			"StandingsSnapshot": {
+				"additionalProperties": false,
+				"properties": {
+					"date": { "type": "string" },
+					"divisions": { "items": { "$ref": "#/components/schemas/StandingsDivision" }, "type": "array" },
+					"fetchedAt": { "type": "string" },
+					"windowMode": { "enum": ["active", "cache"], "type": "string" }
+				},
+				"required": ["date", "divisions", "fetchedAt", "windowMode"],
+				"type": "object"
+			},
+			"StandingsTeamRecord": {
+				"additionalProperties": false,
+				"description": "One team's row in a standings table.\n\nMLB reports games-back and the elimination figures as strings, using `\"-\"` for \"not applicable\". The mapper normalizes that sentinel to `null` so the UI never has to special-case a dash.",
+				"properties": {
+					"abbreviation": { "type": ["string", "null"] },
+					"clinched": { "type": "boolean" },
+					"divisionLeader": { "type": "boolean" },
+					"divisionRank": { "type": ["number", "null"] },
+					"eliminationNumber": { "type": ["string", "null"] },
+					"gamesBack": { "type": ["string", "null"] },
+					"losses": { "type": "number" },
+					"name": { "type": "string" },
+					"pct": { "type": ["string", "null"] },
+					"runDifferential": { "type": ["number", "null"] },
+					"runsAllowed": { "type": ["number", "null"] },
+					"runsScored": { "type": ["number", "null"] },
+					"streak": { "type": ["string", "null"] },
+					"teamId": { "type": "number" },
+					"wins": { "type": "number" }
+				},
+				"required": [
+					"teamId",
+					"name",
+					"abbreviation",
+					"wins",
+					"losses",
+					"pct",
+					"gamesBack",
+					"divisionRank",
+					"streak",
+					"runsScored",
+					"runsAllowed",
+					"runDifferential",
+					"divisionLeader",
+					"clinched",
+					"eliminationNumber"
+				],
+				"type": "object"
+			},
 			"TeamRecord": {
 				"additionalProperties": false,
 				"description": "A team's season record (S65; the scoreboard module's `81-62`).",
@@ -1187,6 +1252,35 @@
 					}
 				},
 				"summary": "Games scheduled on one day."
+			}
+		},
+		"/api/v1/standings": {
+			"get": {
+				"operationId": "getStandings",
+				"parameters": [
+					{
+						"description": "Day the standings stand as of, as `YYYY-MM-DD`; today (UTC) when absent.",
+						"in": "query",
+						"name": "date",
+						"required": false,
+						"schema": { "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/StandingsResponse" } }
+						},
+						"description": "OK"
+					},
+					"400": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`date` is not `YYYY-MM-DD`."
+					}
+				},
+				"summary": "The division standings as of one day: each division's teams in rank order, with wins, losses, winning percentage and games back (null for the leader)."
 			}
 		}
 	}

@@ -59,6 +59,18 @@ export async function fetchSchedule(date: string)
 	}));
 }
 
+/** The division standings as of `date` (S4); the server's today when it is absent. */
+export async function fetchStandings(date?: string)
+{
+	return unwrap(await api.GET("/api/v1/standings", {
+		params: {
+			query: date ? {
+				date,
+			} : {},
+		},
+	}));
+}
+
 /** "Best of <date>" (S71): the day's top videos across its games. */
 export async function fetchDigest(date: string)
 {

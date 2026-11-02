@@ -1,4 +1,4 @@
-import type { DayDigestResponse } from "@bt/domain";
+import type { DayDigestResponse, StandingsResponse } from "@bt/domain";
 import { createServer } from "node:http";
 import {
 	describe, expect, it,
@@ -74,6 +74,35 @@ describe("handleApiRequest", () =>
 				plays: unknown[] };
 			expect(body.gamePk).toBe(744834);
 			expect(body.plays.length).toBe(61);
+		});
+	});
+
+	it("serves the standings (S4): the 2026-09-05 recording's six divisions, each team with a name and its record", async () =>
+	{
+		await withServer(async (base) =>
+		{
+			const response = await fetch(`${base}/api/v1/standings?date=2026-09-05`);
+			expect(response.status).toBe(200);
+			const standings = (await response.json()) as StandingsResponse;
+			expect(standings.date).toBe("2026-09-05");
+			expect(standings.divisions.length).toBeGreaterThanOrEqual(2);
+			for (const division of standings.divisions)
+			{
+				expect(division.divisionId ?? division.name).not.toBeNull();
+				expect(division.teams.length).toBeGreaterThan(0);
+				for (const team of division.teams)
+				{
+					expect(typeof team.name).toBe("string");
+					expect(typeof team.wins).toBe("number");
+					expect(typeof team.losses).toBe("number");
+				}
+			}
+			expect(standings.divisions[0]!.teams[0]).toMatchObject({
+				name: "Tampa Bay Rays",
+				gamesBack: null,
+			});
+
+			expect((await fetch(`${base}/api/v1/standings?date=July`)).status).toBe(400);
 		});
 	});
 

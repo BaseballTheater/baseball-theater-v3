@@ -51,7 +51,7 @@ const CACHED: Freshness = {
  */
 export function whileVisible(interval: number | false): number | false
 {
-	return typeof document !== "undefined" && document.hidden ? false : interval;
+	return document.hidden ? false : interval;
 }
 
 /** Nothing loaded yet — treat as cached; the first successful payload settles it. */

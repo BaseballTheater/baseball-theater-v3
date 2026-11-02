@@ -141,6 +141,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/standings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The division standings as of one day: each division's teams in rank order, with wins, losses, winning percentage and games back (null for the leader). */
+        get: operations["getStandings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -592,6 +609,43 @@ export interface components {
         };
         /** @description The signed-in user's settings document (ADR-027); the house defaults until they first save. */
         SettingsResponse: components["schemas"]["AccountSettings"];
+        StandingsDivision: {
+            divisionId: number | null;
+            leagueId: number | null;
+            name: string | null;
+            teams: components["schemas"]["StandingsTeamRecord"][];
+        };
+        /** @description The division standings as of one day (S4): MLB's tables, projected to BT's shape. */
+        StandingsResponse: components["schemas"]["StandingsSnapshot"];
+        StandingsSnapshot: {
+            date: string;
+            divisions: components["schemas"]["StandingsDivision"][];
+            fetchedAt: string;
+            /** @enum {string} */
+            windowMode: "active" | "cache";
+        };
+        /**
+         * @description One team's row in a standings table.
+         *
+         *     MLB reports games-back and the elimination figures as strings, using `"-"` for "not applicable". The mapper normalizes that sentinel to `null` so the UI never has to special-case a dash.
+         */
+        StandingsTeamRecord: {
+            abbreviation: string | null;
+            clinched: boolean;
+            divisionLeader: boolean;
+            divisionRank: number | null;
+            eliminationNumber: string | null;
+            gamesBack: string | null;
+            losses: number;
+            name: string;
+            pct: string | null;
+            runDifferential: number | null;
+            runsAllowed: number | null;
+            runsScored: number | null;
+            streak: string | null;
+            teamId: number;
+            wins: number;
+        };
         /** @description A team's season record (S65; the scoreboard module's `81-62`). */
         TeamRecord: {
             losses: number;
@@ -967,6 +1021,38 @@ export interface operations {
                 };
             };
             /** @description `date` is missing or not `YYYY-MM-DD`. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    getStandings: {
+        parameters: {
+            query?: {
+                /** @description Day the standings stand as of, as `YYYY-MM-DD`; today (UTC) when absent. */
+                date?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StandingsResponse"];
+                };
+            };
+            /** @description `date` is not `YYYY-MM-DD`. */
             400: {
                 headers: {
                     [name: string]: unknown;

@@ -150,6 +150,25 @@ describe("the day digest (S71)", () =>
 		expect(within(hidden).getAllByTestId("watch-first")).toHaveLength(1);
 	});
 
+	it("a clip MLB gives no duration shows its title alone", async () =>
+	{
+		const [top, ...rest] = DIGEST.items;
+		vi.stubGlobal("fetch", vi.fn((request: Request) => Promise.resolve(jsonResponse(new URL(request.url).pathname === "/api/v1/digest" ? {
+			...DIGEST,
+			items: [{
+				...top!,
+				highlight: {
+					...top!.highlight,
+					duration: null,
+				},
+			}, ...rest],
+		} : SCHEDULE))));
+		const digest = await renderScoreboard();
+		const [first] = within(digest).getAllByTestId("digest-item");
+		expect(within(first!).queryByTestId("digest-duration")).toBeNull();
+		expect(within(first!).getByTestId("watch-first")).toBeInTheDocument();
+	});
+
 	it("at medium the clips sit two to a row; a day with no clips shows no digest", async () =>
 	{
 		const digest = await renderScoreboard("medium");

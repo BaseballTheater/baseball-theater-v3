@@ -20,11 +20,14 @@
 import type { DigestItem } from "./digest.js";
 import type { AccountSettings } from "./settings.js";
 import type {
-	Entitlements, GameSnapshot, Role, ScheduleDay, UserProfile,
+	Entitlements, GameSnapshot, Role, ScheduleDay, StandingsSnapshot, UserProfile,
 } from "./types.js";
 
 export type ScheduleDayResponse = ScheduleDay;
 export type GameSnapshotResponse = GameSnapshot;
+
+/** The division standings as of one day (S4): MLB's tables, projected to BT's shape. */
+export type StandingsResponse = StandingsSnapshot;
 
 /** "Best of <date>" (S71): the day's top clips across its games, ranked by `dayDigest`. */
 export interface DayDigestResponse {
@@ -134,6 +137,7 @@ export interface ApiResponseTypes {
 	ScheduleDayResponse: ScheduleDayResponse;
 	GameSnapshotResponse: GameSnapshotResponse;
 	DayDigestResponse: DayDigestResponse;
+	StandingsResponse: StandingsResponse;
 	MeResponse: MeResponse;
 	MeDownloadResponse: MeDownloadResponse;
 	MeDownloadFileResponse: MeDownloadFileResponse;
@@ -151,6 +155,7 @@ export const ApiRoutes = {
 	"GET /api/v1/schedule": "ScheduleDayResponse",
 	"GET /api/v1/games/:gamePk": "GameSnapshotResponse",
 	"GET /api/v1/digest": "DayDigestResponse",
+	"GET /api/v1/standings": "StandingsResponse",
 	"GET /api/v1/me": "MeResponse",
 	"POST /api/v1/me/download": "MeDownloadResponse",
 	"GET /api/v1/me/download": "MeDownloadResponse",
