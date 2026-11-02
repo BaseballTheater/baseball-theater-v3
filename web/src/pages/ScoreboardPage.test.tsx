@@ -83,9 +83,18 @@ function renderScoreboard(variant: LayoutVariant = "mobile", client: QueryClient
 	);
 }
 
+/** The day digest (S71) is asked beside the schedule; these tests answer it with none. */
+function orDigest(request: Request, body: unknown): Response
+{
+	return new URL(request.url).pathname === "/api/v1/digest" ? jsonResponse({
+		date: "2026-09-05",
+		items: [],
+	}) : jsonResponse(body);
+}
+
 function serve(body: ScheduleDayPayload = day())
 {
-	const fetchMock = vi.fn(() => Promise.resolve(jsonResponse(body)));
+	const fetchMock = vi.fn((request: Request) => Promise.resolve(orDigest(request, body)));
 	vi.stubGlobal("fetch", fetchMock);
 	return fetchMock;
 }
@@ -240,7 +249,7 @@ describe("ScoreboardPage states (S66, ViewState)", () =>
 
 	it("error: Couldn't load games, the hint, and Retry refetches", async () =>
 	{
-		const fetchMock = vi.fn(() => Promise.resolve(jsonResponse({
+		const fetchMock = vi.fn((_request: Request) => Promise.resolve(jsonResponse({
 			error: "unavailable",
 		}, 503)));
 		vi.stubGlobal("fetch", fetchMock);
@@ -250,7 +259,7 @@ describe("ScoreboardPage states (S66, ViewState)", () =>
 		expect(within(alert).getByText("Couldn't load games")).toBeInTheDocument();
 		expect(within(alert).getByText("Check your connection and try again")).toBeInTheDocument();
 		const calls = fetchMock.mock.calls.length;
-		fetchMock.mockImplementation(() => Promise.resolve(jsonResponse(day())));
+		fetchMock.mockImplementation((request: Request) => Promise.resolve(orDigest(request, day())));
 		await user.click(within(alert).getByRole("button", {
 			name: "Retry",
 		}));
@@ -268,6 +277,8 @@ describe("ScoreboardPage render count (S66, ADR-026)", () =>
 		const counter = createRenderCounter("scoreboard");
 		renderScoreboard("mobile", client, (node) => <counter.Counted>{node}</counter.Counted>);
 		await modules();
+		// Let the day digest's own answer (S71) land before counting.
+		await act(async () => new Promise((resolve) => setTimeout(resolve, 50)));
 		counter.reset();
 		const next = day();
 		await act(async () =>

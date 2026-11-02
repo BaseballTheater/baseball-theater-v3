@@ -101,6 +101,25 @@ export const ROUTE_DESCRIPTIONS: Record<ApiRoute, RouteDescription> = {
 			404: "No game with that id.",
 		},
 	},
+	"GET /api/v1/digest": {
+		operationId: "getDayDigest",
+		summary: "Best of one day: the top videos across its games, ranked by impact, the first marked to watch first.",
+		parameters: [
+			{
+				name: "date",
+				in: "query",
+				required: true,
+				description: "Day to rank, as `YYYY-MM-DD`.",
+				schema: {
+					type: "string",
+					pattern: "^\\d{4}-\\d{2}-\\d{2}$",
+				},
+			},
+		],
+		errors: {
+			400: "`date` is missing or not `YYYY-MM-DD`.",
+		},
+	},
 	"GET /api/v1/me": {
 		operationId: "getMe",
 		summary: "The signed-in account. Send the BT session as `Authorization: Bearer <token>`.",

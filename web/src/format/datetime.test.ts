@@ -1,7 +1,9 @@
 import {
 	describe, expect, it,
 } from "vitest";
-import { formatDate, formatTime } from "./datetime.js";
+import {
+	formatDate, formatMonthDay, formatTime,
+} from "./datetime.js";
 
 describe("datetime formatting (S79)", () =>
 {
@@ -27,5 +29,13 @@ describe("datetime formatting (S79)", () =>
 	it("writes a time with hours and minutes, AM/PM", () =>
 	{
 		expect(formatTime("2026-10-28T15:15:00.000Z")).toMatch(/^\d{1,2}:15\s?[AP]M$/);
+	});
+
+	it("writes a calendar date without its year, as that day anywhere (S71); anything else as it is", () =>
+	{
+		expect(formatMonthDay("2026-09-21")).toBe("Sep 21");
+		expect(formatMonthDay("2024-07-04")).toBe("Jul 4");
+		expect(formatMonthDay("2026-02-30")).toBe("2026-02-30");
+		expect(formatMonthDay("not a date")).toBe("not a date");
 	});
 });

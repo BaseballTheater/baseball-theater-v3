@@ -3,6 +3,23 @@
 // Regenerate after `pnpm api:spec`; src/api/codegen.test.ts fails while this file is stale.
 
 export interface paths {
+    "/api/v1/digest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Best of one day: the top videos across its games, ranked by impact, the first marked to watch first. */
+        get: operations["getDayDigest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/games/{gamePk}": {
         parameters: {
             query?: never;
@@ -214,6 +231,29 @@ export interface components {
         BoxscoreInfoLine: {
             label: string;
             value: string;
+        };
+        /** @description "Best of <date>" (S71): the day's top clips across its games, ranked by `dayDigest`. */
+        DayDigestResponse: {
+            /** @description The day, `YYYY-MM-DD`. */
+            date: string;
+            /** @description Best first; empty on a day with no videos yet. */
+            items: components["schemas"]["DigestItem"][];
+        };
+        /** @description The game a digest clip comes from, enough for the player's "Go to game: NYY @ BOS, Sep 21" link. */
+        DigestClipGame: {
+            away: string;
+            gamePk: number;
+            home: string;
+            officialDate: string;
+        };
+        /** @description One clip in the day digest: its place, whether to watch it first, the clip and its game. */
+        DigestItem: {
+            game: components["schemas"]["DigestClipGame"];
+            highlight: components["schemas"]["MediaHighlight"];
+            /** @description 1 for the top clip. */
+            rank: number;
+            /** @description Only the top clip (the frames' `WATCH FIRST`). */
+            watchFirst: boolean;
         };
         Entitlements: {
             cloudSyncedSettings: boolean;
@@ -568,6 +608,38 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getDayDigest: {
+        parameters: {
+            query: {
+                /** @description Day to rank, as `YYYY-MM-DD`. */
+                date: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DayDigestResponse"];
+                };
+            };
+            /** @description `date` is missing or not `YYYY-MM-DD`. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
     getGame: {
         parameters: {
             query?: {

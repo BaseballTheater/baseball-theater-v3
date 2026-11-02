@@ -22,6 +22,12 @@ const CALENDAR = new Intl.DateTimeFormat("en-US", {
 	timeZone: "UTC",
 });
 
+const MONTH_DAY = new Intl.DateTimeFormat("en-US", {
+	month: "short",
+	day: "numeric",
+	timeZone: "UTC",
+});
+
 const TIME = new Intl.DateTimeFormat("en-US", {
 	hour: "numeric",
 	minute: "2-digit",
@@ -39,6 +45,18 @@ export function formatDate(value: string): string
 	const date = new Date(calendar ? `${value}T00:00:00Z` : value);
 	if (Number.isNaN(date.getTime()) || (calendar && date.toISOString().slice(0, 10) !== value)) return value;
 	return (calendar ? CALENDAR : DATE).format(date);
+}
+
+/**
+ * "Sep 21", a calendar date (`2026-09-21`) without its year, written as that same day
+ * wherever the reader is (S71: the digest's "Best of Sep 21" and the player's game link).
+ * Anything that is not a calendar date comes back as it is.
+ */
+export function formatMonthDay(value: string): string
+{
+	const date = new Date(`${value}T00:00:00Z`);
+	if (!CALENDAR_DATE.test(value) || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) return value;
+	return MONTH_DAY.format(date);
 }
 
 /** "3:15 PM" (A4's download refusal). */

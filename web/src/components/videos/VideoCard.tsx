@@ -20,11 +20,18 @@ const KIND_LABELS: Readonly<Record<HighlightKind, string>> = {
 /** Light on Dark at 50% over the still (owner, 2026-10-14: "Light on Dark 50%"). */
 const OVERLAY = "rgb(16 16 15 / 50%)";
 
-/** The 16:9 still with the play mark centered and the duration at the bottom right. */
-function Still({ video, width }: { video: Video;
-	width: number | "100%"; })
+/**
+ * A clip's 16:9 still (6px radius), with the play mark centered and the duration at the
+ * bottom right. `bare` drops both marks, for a row that writes the duration beside the
+ * still instead (the day digest, S71).
+ */
+export function VideoStill({
+	video, width, bare = false,
+}: { video: Video;
+	width: number | "100%";
+	bare?: boolean; })
 {
-	const duration = clipDuration(video.duration);
+	const duration = bare ? null : clipDuration(video.duration);
 	return (
 		<Box pos="relative" w={width} style={{
 			flexShrink: 0,
@@ -35,7 +42,7 @@ function Still({ video, width }: { video: Video;
 		}}
 		>
 			{video.imageUrl ? <Image src={video.imageUrl} alt="" h="100%" w="100%" fit="cover" loading="lazy" /> : null}
-			<Box
+			{bare ? null : <Box
 				pos="absolute"
 				top="50%"
 				left="50%"
@@ -53,7 +60,7 @@ function Still({ video, width }: { video: Video;
 				}}
 			>
 				<IconPlayerPlay size={width === "100%" ? 20 : 16} />
-			</Box>
+			</Box>}
 			{duration ? (
 				<Text
 					pos="absolute"
@@ -114,12 +121,12 @@ export function VideoCard({
 		>
 			{layout === "grid" ? (
 				<Stack gap={8}>
-					<Still video={video} width="100%" />
+					<VideoStill video={video} width="100%" />
 					{text}
 				</Stack>
 			) : (
 				<Group gap={12} wrap="nowrap" align="center">
-					<Still video={video} width={112} />
+					<VideoStill video={video} width={112} />
 					{text}
 				</Group>
 			)}

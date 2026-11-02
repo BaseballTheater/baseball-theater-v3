@@ -8,6 +8,7 @@ import { useScheduleDay } from "../api/schedule.js";
 import type { ScheduleDayPayload } from "../api/schedule.js";
 import { ViewState } from "../components/ViewState.js";
 import { CollapsedBar } from "../components/scoreboard/CollapsedBar.js";
+import { DayDigest } from "../components/scoreboard/DayDigest.js";
 import { DateControl } from "../components/scoreboard/DateControl.js";
 import { ScoreboardModule } from "../components/scoreboard/ScoreboardModule.js";
 import { formatDate } from "../format/datetime.js";
@@ -63,7 +64,8 @@ function Games({ day, variant }: { day: ScheduleDayPayload;
 /**
  * The scoreboard (S31 frames; S66): the date control, then the day's games as
  * `ScoreboardModule`s — one column on mobile, two on medium and desktop, from the
- * host's `variant` — or the loading, empty or error state from `ViewState`. The
+ * host's `variant` — and the day digest under them (S71), or the loading, empty or
+ * error state from `ViewState`. The
  * date control stays through every state so the reader can always move to another day.
  */
 export function ScoreboardPage({ variant }: { variant: LayoutVariant })
@@ -87,6 +89,7 @@ export function ScoreboardPage({ variant }: { variant: LayoutVariant })
 		body = (
 			<>
 				<Games day={day} variant={variant} />
+				<DayDigest date={day.date} variant={variant} />
 				<FooterMeta fetchedAt={day.fetchedAt} />
 			</>
 		);

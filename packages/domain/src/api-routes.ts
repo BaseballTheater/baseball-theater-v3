@@ -17,6 +17,7 @@
  * divergence lives in the matching `to<DomainType>Response` mapping function
  * (still a passthrough today), not in a rewrite of the route table.
  */
+import type { DigestItem } from "./digest.js";
 import type { AccountSettings } from "./settings.js";
 import type {
 	Entitlements, GameSnapshot, Role, ScheduleDay, UserProfile,
@@ -24,6 +25,14 @@ import type {
 
 export type ScheduleDayResponse = ScheduleDay;
 export type GameSnapshotResponse = GameSnapshot;
+
+/** "Best of <date>" (S71): the day's top clips across its games, ranked by `dayDigest`. */
+export interface DayDigestResponse {
+	/** The day, `YYYY-MM-DD`. */
+	date: string;
+	/** Best first; empty on a day with no videos yet. */
+	items: DigestItem[];
+}
 
 /**
  * The signed-in account, for Settings' "Signed in as {email}" (standings-search-settings
@@ -124,6 +133,7 @@ export function toMeResponse(user: UserProfile): MeResponse
 export interface ApiResponseTypes {
 	ScheduleDayResponse: ScheduleDayResponse;
 	GameSnapshotResponse: GameSnapshotResponse;
+	DayDigestResponse: DayDigestResponse;
 	MeResponse: MeResponse;
 	MeDownloadResponse: MeDownloadResponse;
 	MeDownloadFileResponse: MeDownloadFileResponse;
@@ -140,6 +150,7 @@ export interface ApiResponseTypes {
 export const ApiRoutes = {
 	"GET /api/v1/schedule": "ScheduleDayResponse",
 	"GET /api/v1/games/:gamePk": "GameSnapshotResponse",
+	"GET /api/v1/digest": "DayDigestResponse",
 	"GET /api/v1/me": "MeResponse",
 	"POST /api/v1/me/download": "MeDownloadResponse",
 	"GET /api/v1/me/download": "MeDownloadResponse",

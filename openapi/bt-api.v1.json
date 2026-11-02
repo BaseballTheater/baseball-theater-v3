@@ -177,6 +177,44 @@
 				"required": ["label", "value"],
 				"type": "object"
 			},
+			"DayDigestResponse": {
+				"additionalProperties": false,
+				"description": "\"Best of <date>\" (S71): the day's top clips across its games, ranked by `dayDigest`.",
+				"properties": {
+					"date": { "description": "The day, `YYYY-MM-DD`.", "type": "string" },
+					"items": {
+						"description": "Best first; empty on a day with no videos yet.",
+						"items": { "$ref": "#/components/schemas/DigestItem" },
+						"type": "array"
+					}
+				},
+				"required": ["date", "items"],
+				"type": "object"
+			},
+			"DigestClipGame": {
+				"additionalProperties": false,
+				"description": "The game a digest clip comes from, enough for the player's \"Go to game: NYY @ BOS, Sep 21\" link.",
+				"properties": {
+					"away": { "type": "string" },
+					"gamePk": { "type": "number" },
+					"home": { "type": "string" },
+					"officialDate": { "type": "string" }
+				},
+				"required": ["gamePk", "officialDate", "away", "home"],
+				"type": "object"
+			},
+			"DigestItem": {
+				"additionalProperties": false,
+				"description": "One clip in the day digest: its place, whether to watch it first, the clip and its game.",
+				"properties": {
+					"game": { "$ref": "#/components/schemas/DigestClipGame" },
+					"highlight": { "$ref": "#/components/schemas/MediaHighlight" },
+					"rank": { "description": "1 for the top clip.", "type": "number" },
+					"watchFirst": { "description": "Only the top clip (the frames' `WATCH FIRST`).", "type": "boolean" }
+				},
+				"required": ["rank", "watchFirst", "highlight", "game"],
+				"type": "object"
+			},
 			"Entitlements": {
 				"additionalProperties": false,
 				"properties": {
@@ -857,6 +895,35 @@
 	},
 	"openapi": "3.1.0",
 	"paths": {
+		"/api/v1/digest": {
+			"get": {
+				"operationId": "getDayDigest",
+				"parameters": [
+					{
+						"description": "Day to rank, as `YYYY-MM-DD`.",
+						"in": "query",
+						"name": "date",
+						"required": true,
+						"schema": { "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/DayDigestResponse" } }
+						},
+						"description": "OK"
+					},
+					"400": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`date` is missing or not `YYYY-MM-DD`."
+					}
+				},
+				"summary": "Best of one day: the top videos across its games, ranked by impact, the first marked to watch first."
+			}
+		},
 		"/api/v1/games/{gamePk}": {
 			"get": {
 				"operationId": "getGame",

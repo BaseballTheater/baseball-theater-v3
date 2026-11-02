@@ -136,6 +136,11 @@ describe("Game-Row Slot setting (S67)", () =>
 			if (pathname.startsWith("/api/v1/me/download")) return jsonResponse({
 				error: "not_found",
 			}, 404);
+			// The day digest (S71) is asked beside the schedule; these tests answer it with none.
+			if (pathname === "/api/v1/digest") return jsonResponse({
+				date: "2026-09-05",
+				items: [],
+			});
 			if (pathname === "/api/v1/schedule") return jsonResponse({
 				...SCHEDULE,
 				games: [GAMES.final],

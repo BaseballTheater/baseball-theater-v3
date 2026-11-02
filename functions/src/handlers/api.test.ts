@@ -1,3 +1,4 @@
+import type { DayDigestResponse } from "@bt/domain";
 import { createServer } from "node:http";
 import {
 	describe, expect, it,
@@ -73,6 +74,29 @@ describe("handleApiRequest", () =>
 				plays: unknown[] };
 			expect(body.gamePk).toBe(744834);
 			expect(body.plays.length).toBe(61);
+		});
+	});
+
+	it("serves the day digest (S71): every game's videos ranked together, the first to watch first", async () =>
+	{
+		await withServer(async (base) =>
+		{
+			const response = await fetch(`${base}/api/v1/digest?date=2024-07-04`);
+			expect(response.status).toBe(200);
+			const digest = (await response.json()) as DayDigestResponse;
+			expect(digest.date).toBe("2024-07-04");
+			// 744834 (NYM @ WSH) has three videos and 745001 (NYY @ BOS) one, so the digest holds four.
+			expect(digest.items).toHaveLength(4);
+			expect(digest.items.map((i) => i.rank)).toEqual([1, 2, 3, 4]);
+			expect(digest.items.filter((i) => i.watchFirst)).toEqual([digest.items[0]]);
+			expect(new Set(digest.items.map((i) => i.game.gamePk))).toEqual(new Set([744834, 745001]));
+			expect(digest.items.find((i) => i.game.gamePk === 745001)!.game).toMatchObject({
+				away: "NYY",
+				home: "BOS",
+			});
+
+			expect((await fetch(`${base}/api/v1/digest`)).status).toBe(400);
+			expect((await fetch(`${base}/api/v1/digest?date=July`)).status).toBe(400);
 		});
 	});
 });

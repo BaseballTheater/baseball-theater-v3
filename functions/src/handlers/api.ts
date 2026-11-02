@@ -15,6 +15,7 @@ import {
 import {
 	currentDownload, downloadFile, requestDownload,
 } from "../services/data-downloads.js";
+import { getDayDigest } from "../services/digest.js";
 import type { IngestDeps } from "../services/ingest.js";
 import { getOrRefreshGame, getOrRefreshSchedule } from "../services/ingest.js";
 import { edgeCacheControl } from "./cache-control.js";
@@ -168,6 +169,23 @@ export const API_ROUTER: readonly RouteEntry[] = [
 				force,
 			});
 			return withCacheControl(sendJson(200, "GET /api/v1/schedule", toScheduleDayResponse(day)), day, ctx);
+		},
+	},
+	{
+		route: "GET /api/v1/digest",
+		handle: async (url, _params, ctx) =>
+		{
+			const date = url.searchParams.get("date");
+			if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date))
+			{
+				return sendError(400, {
+					error: "date_required",
+					hint: "YYYY-MM-DD",
+				});
+			}
+			const { day, digest } = await getDayDigest(ctx.ingest, date);
+			// The digest is cached as long as its day (S71): live while the day is in its window.
+			return withCacheControl(sendJson(200, "GET /api/v1/digest", digest), day, ctx);
 		},
 	},
 	{

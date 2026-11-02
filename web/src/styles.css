@@ -10,6 +10,16 @@
 	--bt-hairline: rgb(255 242 211 / 12%);
 	--bt-accent: #f5ad1d;
 	--bt-accent-2: #72d991;
+	/* The day digest's dull gold (shell-scoreboard DESIGN: base #3A2A0E, two soft highlights at about 30°, darkest #2E220B). */
+	--bt-digest-gold: linear-gradient(
+		30deg,
+		#2e220b 0%,
+		#3a2a0e 28%,
+		#56401a 42%,
+		#3a2a0e 58%,
+		#4e3916 74%,
+		#2e220b 100%
+	);
 
 	/* Pitch-outcome roles (S31): ball = Accent 2, strike = Primary Light. */
 	--bt-pitch-ball: #72d991;

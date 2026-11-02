@@ -59,6 +59,18 @@ export async function fetchSchedule(date: string)
 	}));
 }
 
+/** "Best of <date>" (S71): the day's top videos across its games. */
+export async function fetchDigest(date: string)
+{
+	return unwrap(await api.GET("/api/v1/digest", {
+		params: {
+			query: {
+				date,
+			},
+		},
+	}));
+}
+
 export async function fetchGame(gamePk: number)
 {
 	return unwrap(await api.GET("/api/v1/games/{gamePk}", {

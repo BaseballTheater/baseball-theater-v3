@@ -10,6 +10,7 @@ export * from "./catcher-view.js";
 export * from "./window.js";
 export * from "./entitlements.js";
 export * from "./impact.js";
+export * from "./digest.js";
 export * from "./versioning.js";
 export * from "./cache-lifetime.js";
 export * from "./downloads.js";
