@@ -12697,3 +12697,94 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-11-02 — S109 completed
+
+**Live status, one place**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-02T23:03:55Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `e812119` (tree dirty) |
+| Grader | `scripts/verify-S109.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: the status row and card read the inning alone, with score, diamond and pips, at every variant (RTL, 823823)
+check 2 PASS: on mobile the matchup line has no Count: or outs text; the result line stays (RTL)
+check 3 PASS: with Hide Scores on, the status still reads the inning alone and the matchup line has no Count: or outs text (RTL)
+check 4 PASS: files this story adds or edits reference no team logo and read no viewport outside web/src/layout/
+check 5 PASS: design match: e2e/design/S109.spec.ts names live-mobile, live-medium, live-desktop; docs/v3/design-checks/S109/ holds them at 390 / 768 / 1200
+check 6 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**6/6 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with its ratified frame
+
+| Frame | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/game-rooms/amendments/live-desktop.png` | `9db6af041bb2684daed79b9c94ff34c840dba679700fa2645eb96769c1778c90` | `docs/v3/design-checks/S109/live-desktop.png` | `575b9774e1641c08be47b325d4adc96dc56045bd1fc90f5ff9dccbe22b0b33ae` |
+| `docs/v3/visual/game-rooms/amendments/live-medium.png` | `6f3df37d78320d74d0a1f954c761c79a3a617a6231d259d9847cf839e388d41f` | `docs/v3/design-checks/S109/live-medium.png` | `ba88d13ce069838a72c026540ba47e5d00755ccb9baad0324310d87e7b84df3f` |
+| `docs/v3/visual/game-rooms/amendments/live-mobile.png` | `32a91159bb3af59187c5fb5882ca4c25bff7dd4d20d5c6c75a6a0fb8c7e7016d` | `docs/v3/design-checks/S109/live-mobile.png` | `4c8186cb9113b019cb926c4ccd2ebe38d3063c41e4e368ebb7b28a0baff9fd96` |
+Owner: "Owner, 2026-11-02, on the S109 captures (live-mobile, live-medium, live-desktop beside game-rooms A5): "Yes""
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S109 check results ---
+check 1 PASS: the status row and card read the inning alone, with score, diamond and pips, at every variant (RTL, 823823)
+check 2 PASS: on mobile the matchup line has no Count: or outs text; the result line stays (RTL)
+check 3 PASS: with Hide Scores on, the status still reads the inning alone and the matchup line has no Count: or outs text (RTL)
+check 4 PASS: files this story adds or edits reference no team logo and read no viewport outside web/src/layout/
+check 5 PASS: design match: e2e/design/S109.spec.ts names live-mobile, live-medium, live-desktop; docs/v3/design-checks/S109/ holds them at 390 / 768 / 1200
+check 6 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S109: 6/6 checks passed ---
+verify-S109: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+web build: dist/assets/VideoPlayer-DIDxnkFU.js                2.94 kB │ gzip:   1.43 kB
+web build: dist/assets/Table-Bpt75yti.js                      4.15 kB │ gzip:   1.63 kB
+web build: dist/assets/Modal-DyEjsAhU.js                      4.82 kB │ gzip:   1.73 kB
+web build: dist/assets/workbox-window.prod.es5-BBnX5xw4.js    5.75 kB │ gzip:   2.36 kB
+web build: dist/assets/TextInput-D-m9zh9C.js                 28.11 kB │ gzip:   9.21 kB
+web build: dist/assets/SettingsPage-DVLcxXaM.js              37.16 kB │ gzip:  11.92 kB
+web build: dist/assets/GamePage-BtfEe1dm.js                  86.60 kB │ gzip:  29.54 kB
+web build: dist/assets/index-D66H4P-2.js                    480.16 kB │ gzip: 154.17 kB
+web build: ✓ built in 1.91s
+web build: PWA v1.0.3
+web build: mode      generateSW
+web build: precache  22 entries (860.17 KiB)
+web build: files generated
+web build:   dist/sw.js
+web build:   dist/workbox-2fbc6a65.js
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 153915,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

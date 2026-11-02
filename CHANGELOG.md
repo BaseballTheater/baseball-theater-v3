@@ -115,6 +115,11 @@ explicitly where that's the case. For what's still ahead, see
 
 ## Watching a game live, pitch by pitch
 
+- **Before, the Live page said the outs three times and the count twice: in words beside the dots that already
+  showed them, and again on a line underneath. Now the inning shows once, as "Top 3rd", and the count and outs
+  show only as the dots, so there is less to read.** Details: S109 — `LiveStatus` reads `inningLabel` alone;
+  the mobile matchup line drops `Count: … · … Out`; `outsLabel` removed (game-rooms A5); design matched by the
+  owner. _(2026-11-02)_
 - **Before, the Live room showed only the score, count and inning. Now it shows the matchup — who's pitching
   and batting, with their lines so far — the bases, every pitch of the at-bat newest first, and a catcher's-eye
   view where each pitch flies in at its real speed along its real path, into the batter's own strike zone.**
