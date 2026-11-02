@@ -96,6 +96,11 @@ explicitly where that's the case. For what's still ahead, see
 
 ## A scoreboard you can read at a glance
 
+- **Before, finding the day's best moments meant opening each game. Now the scoreboard ends with "Best of"
+  the day: the top five clips across every game, ranked, with the one to watch first marked, each playable right
+  there with a link to its game.** Details: S71 — `dayDigest` in `packages/domain` (the per-game impact rule
+  across the day), `GET /api/v1/digest`, `DayDigest` on the scoreboard, one shared lazy `PlayerDialog`; design
+  matched by the owner, five clips confirmed. _(2026-11-02)_
 - **Before, the scoreboard showed scores as of the moment the page loaded, so a game in progress looked frozen
   until you refreshed. Now games in progress update on their own every 15 seconds, and refreshing pauses while
   the tab is hidden, so it isn't wasted effort.** Details: S20 — `LIVE_REFRESH_MS` and `whileVisible` in

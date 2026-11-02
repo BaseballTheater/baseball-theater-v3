@@ -12877,3 +12877,97 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-11-02 — S71 completed
+
+**Day highlights digest**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-02T23:06:05Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `35aea60` (tree dirty) |
+| Grader | `scripts/verify-S71.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: dayDigest in packages/domain ranks a day's highlights with rankHighlightsByImpact and flags the first watch-first (test)
+check 2 PASS: GET /api/v1/digest is in ApiRoutes, dispatched and in the generated spec; the route serves the digest (test); pnpm api:breaking exits 0
+check 3 PASS: the scoreboard shows rank, still, title, duration and one WATCH FIRST; a click opens PlayerDialog with the clip's game link (RTL)
+check 4 PASS: with Hide Scores on (through useScoresHidden) the digest renders the same, titles as MLB writes them (RTL)
+check 5 PASS: files this story adds or edits reference no team logo and read no viewport outside web/src/layout/
+check 6 PASS: design match: e2e/design/S71.spec.ts names scoreboard-mobile/-medium/-desktop and scoreboard-digest-hidden-nonotice-mobile; docs/v3/design-checks/S71/ holds them at their widths
+check 7 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**7/7 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with its ratified frame
+
+| Frame | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/shell-scoreboard/scoreboard-desktop.png` | `a03403e19954fe2aa50f9b7146aea260f759f17b463d334fcc12dbabe457414a` | `docs/v3/design-checks/S71/scoreboard-desktop.png` | `ae90691c61645d69f1a5681a26d58d10a094bdf24173c14074f5e1c3fff03d58` |
+| `docs/v3/visual/shell-scoreboard/amendments/scoreboard-digest-hidden-nonotice-mobile.png` | `d8be9652843b090c5b57058ae39db7ec7a64596ff4f753976afa0aaad0ceee08` | `docs/v3/design-checks/S71/scoreboard-digest-hidden-nonotice-mobile.png` | `83176850efaca289956abf9b686d262a65b6f72c740f7252f0c5bcc26861a1a0` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-medium.png` | `7cfb63af52eb6a2a52d88dd13023083e1073d948901c61864239a5da7dbc958e` | `docs/v3/design-checks/S71/scoreboard-medium.png` | `85c750698732e1aac050cebb806c406e3f637e169482bcf01d17c09e7539a163` |
+| `docs/v3/visual/shell-scoreboard/scoreboard-mobile.png` | `031a036814cbbf3e5bd33a2e7ca77ae6663d10af1a4ffd9bd250bfb95ff4a936` | `docs/v3/design-checks/S71/scoreboard-mobile.png` | `e0e17b7532a623b2bed1b777e209b4b4f5a90ef077efe983af5fc72b7ed5806d` |
+Owner: "Owner, 2026-11-02, on the S71 captures (scoreboard-mobile, -medium, -desktop and scoreboard-digest-hidden-nonotice-mobile), asked whether they match and whether the digest should show 5 clips: "Yes""
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S71 check results ---
+check 1 PASS: dayDigest in packages/domain ranks a day's highlights with rankHighlightsByImpact and flags the first watch-first (test)
+check 2 PASS: GET /api/v1/digest is in ApiRoutes, dispatched and in the generated spec; the route serves the digest (test); pnpm api:breaking exits 0
+check 3 PASS: the scoreboard shows rank, still, title, duration and one WATCH FIRST; a click opens PlayerDialog with the clip's game link (RTL)
+check 4 PASS: with Hide Scores on (through useScoresHidden) the digest renders the same, titles as MLB writes them (RTL)
+check 5 PASS: files this story adds or edits reference no team logo and read no viewport outside web/src/layout/
+check 6 PASS: design match: e2e/design/S71.spec.ts names scoreboard-mobile/-medium/-desktop and scoreboard-digest-hidden-nonotice-mobile; docs/v3/design-checks/S71/ holds them at their widths
+check 7 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S71: 7/7 checks passed ---
+verify-S71: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+web build: dist/assets/VideoPlayer-rul7uHir.js                2.94 kB │ gzip:   1.43 kB
+web build: dist/assets/Table-PqMXyY2J.js                      4.15 kB │ gzip:   1.63 kB
+web build: dist/assets/Modal-CyF0eBPu.js                      4.82 kB │ gzip:   1.73 kB
+web build: dist/assets/workbox-window.prod.es5-BBnX5xw4.js    5.75 kB │ gzip:   2.36 kB
+web build: dist/assets/TextInput-BxAjRAgi.js                 28.11 kB │ gzip:   9.21 kB
+web build: dist/assets/SettingsPage-0gH9O2JH.js              37.16 kB │ gzip:  11.92 kB
+web build: dist/assets/GamePage-p0QDG6MM.js                  86.60 kB │ gzip:  29.55 kB
+web build: dist/assets/index-CNPKnGuu.js                    480.16 kB │ gzip: 154.17 kB
+web build: ✓ built in 1.95s
+web build: PWA v1.0.3
+web build: mode      generateSW
+web build: precache  22 entries (860.17 KiB)
+web build: files generated
+web build:   dist/sw.js
+web build:   dist/workbox-2fbc6a65.js
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 153917,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

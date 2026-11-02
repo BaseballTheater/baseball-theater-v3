@@ -24,8 +24,8 @@ export type DigestItem = {
 
 /**
  * How many clips the digest shows. The ratified frames draw two items on a three-game day
- * and no decision states a count; five is the agent's choice (S71), to be confirmed by the
- * owner's design match.
+ * and no decision states a count; five was proposed at S71's design match and the owner
+ * confirmed it (2026-11-02: "Yes").
  */
 export const DIGEST_SIZE = 5;
 
