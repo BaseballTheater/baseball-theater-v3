@@ -12445,3 +12445,21 @@ Two independent fresh-context reviewers (A, B) reported without editing; merged 
 2. "If S110 goes ahead, may its Source cite the Dependable pillar, as the other budget stories (S54, S62) do?"
 
 S109 and S20 can proceed meanwhile; S110 waits on the answers, and S75 and S71 sit behind it.
+
+---
+
+## 2026-11-02 — backlog review answers (2026-11-02)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-02 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-02T20:58:40Z` |
+| HEAD at capture | `540447d` (tree clean) |
+| Applied in | `540447d` — Apply the owner's answers to the 2026-11-02 design intake review: S110 loads pages on demand and cites Dependable |
+
+**Answers and what was applied**
+
+Owner answers to the 2026-11-02 design intake review's two questions:
+1. "The app's first download is 99 bytes under its 200 KB limit. Should the game, standings, search and settings pages load on demand (new story S110), or should the budget be raised?" Owner: "Lazy loading would be better, with chunked JS files." S110 stands as written (route-level `React.lazy`, so each page is its own chunk); the budget is unchanged.
+2. "If S110 goes ahead, may its Source cite the Dependable pillar, as the other budget stories (S54, S62) do?" Owner: "yes". S110's Source changes from `Open:` to `Pillar: Dependable … Approved by owner 2026-11-02`, and its frontmatter `source` from open to pillar.
+Applied in the commit named above. Nothing beyond the answers changed.
