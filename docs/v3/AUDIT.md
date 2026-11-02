@@ -12463,3 +12463,32 @@ Owner answers to the 2026-11-02 design intake review's two questions:
 1. "The app's first download is 99 bytes under its 200 KB limit. Should the game, standings, search and settings pages load on demand (new story S110), or should the budget be raised?" Owner: "Lazy loading would be better, with chunked JS files." S110 stands as written (route-level `React.lazy`, so each page is its own chunk); the budget is unchanged.
 2. "If S110 goes ahead, may its Source cite the Dependable pillar, as the other budget stories (S54, S62) do?" Owner: "yes". S110's Source changes from `Open:` to `Pillar: Dependable … Approved by owner 2026-11-02`, and its frontmatter `source` from open to pillar.
 Applied in the commit named above. Nothing beyond the answers changed.
+
+---
+
+## 2026-11-02 — doc parity review (`continue`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-02T20:59:29Z` |
+| HEAD at review | `4e7ab35` (tree clean) |
+| Trigger | S109 added; S110 added |
+| Stories `done` since last review | S109, S110, S20 |
+| Verdict | `continue` |
+
+**Findings / amendments**
+
+**Check 1, citation honesty** (S109, S110 named by `pnpm parity:debt`; next 3 todo by priority: S109 72, S20 73, S110 74).
+- **S109** — `Feature: Game → Live play / linescore context` (FEATURES.md:57). The row names the BSO pips and "a small status near the diamond status" (owner, 2026-10-14). S109's Gap/Impact remove the words that repeat the outs and count beside those pips, leaving one status row (game-rooms A5, owner "Signed off"). The row describes exactly the surface S109 changes. Holds.
+- **S20** — `Feature: Daily scoreboard by date` (FEATURES.md:54, "BT-backed (ADR-002)"). Gap "Scoreboard is static after first load"; Impact keeps in-progress games current. Same feature, not a nearby theme. The Backer row "Faster live refresh … interval TBD" (FEATURES.md:291) is a supporter tier on top, not what S20 delivers. Holds.
+- **S110** — `Pillar: Dependable` (INTENT.md:16). Approval is real: AUDIT.md's 2026-11-02 backlog review answers entry (applied in 540447d) quotes the owner, "Lazy loading would be better, with chunked JS files." and "yes" to citing Dependable as S54/S62 do. `git log` on S110.md shows only 7fb4ffe (insert) and 540447d (the answers), so no re-scope after the approval. Feature check: the nearest feature is PWA "installable, fast shell" (FEATURES.md:70, :213), but S110's purpose is keeping the entry chunk under ADR-026's budget, the same gate S54 and S62 cite Dependable for (owner, 2026-10-19 "Yes"); the owner chose the pillar for this story knowing that precedent. Holds.
+- `Open:` stories: none (`grep -l "^source: open" docs/v3/backlog/stories/*.md` is empty).
+
+**Check 2, doc reflects reality.**
+- Design intake review's optional item: FEATURES.md:61 says a search result "plays in a dialog over the results page, with a link to its game" and cites A2. standings-search-settings A6 (ratified 2026-10-31, "Yes, looks good, ratify") keeps that: one modal player over the fully dimmed results, game link top left, Close top right; it repeals only A2's card. The Videos row (FEATURES.md:60, "dialog overlay" default) likewise matches game-shell A4's modal player. "Dialog" still describes a modal overlay; no contradiction, no edit.
+- FEATURES.md:57's "Live has no line score" and BSO pips agree with A5 and S109. No relic found among the rows S109/S20/S110 touch.
+
+**Check 3, coverage.** No features added this review. Nothing new for the next backlog review.
+
+No edits; no owner questions.
