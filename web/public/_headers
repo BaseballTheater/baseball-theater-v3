@@ -1,0 +1,11 @@
+# Served by Workers static assets (S73). Workers Cache is on (S47), so the files that decide
+# which version runs are always revalidated: a cached sw.js would hide a waiting worker, and
+# the update notice would never show.
+/sw.js
+  Cache-Control: no-cache
+/index.html
+  Cache-Control: no-cache
+/
+  Cache-Control: no-cache
+/manifest.webmanifest
+  Cache-Control: no-cache

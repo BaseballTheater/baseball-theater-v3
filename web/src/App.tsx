@@ -2,6 +2,7 @@ import { MantineProvider, createTheme } from "@mantine/core";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { createQueryClient } from "./api/queryClient.js";
+import { useUpdateNotice } from "./pwa/updates.js";
 import { AppShellLayout } from "./layout/AppShellLayout.js";
 import { AppRoutes } from "./routes.js";
 import { SessionProvider } from "./session/SessionProvider.js";
@@ -89,13 +90,15 @@ const queryClient = createQueryClient();
 
 export function App()
 {
+	// The one notice the app raises today: a new version is ready (S73); the offline marker joins it in S74.
+	const notice = useUpdateNotice();
 	return (
 		<MantineProvider theme={theme} forceColorScheme="dark">
 			<QueryClientProvider client={queryClient}>
 				<SessionProvider>
 					<SettingsSync />
 					<BrowserRouter>
-						<AppShellLayout>
+						<AppShellLayout notice={notice}>
 							{(variant) => <AppRoutes variant={variant} />}
 						</AppShellLayout>
 					</BrowserRouter>

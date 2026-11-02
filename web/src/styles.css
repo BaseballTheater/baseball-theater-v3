@@ -48,3 +48,16 @@ a {
 		opacity: 0.25;
 	}
 }
+
+/*
+ * Installed (ADR-023; S55 shell-scoreboard A1 `scoreboard-standalone-mobile`): the status bar
+ * sits on the app background, content starts below the top safe area and ends above the home
+ * indicator. `viewport-fit=cover` in index.html lets the page reach under both.
+ */
+@media (display-mode: standalone) {
+	body {
+		padding-top: env(safe-area-inset-top);
+		padding-bottom: env(safe-area-inset-bottom);
+		background: var(--bt-dark);
+	}
+}

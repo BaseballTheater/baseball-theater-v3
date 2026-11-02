@@ -10,8 +10,10 @@ import {
 import type { ReactNode } from "react";
 import { roomLabel } from "../components/game/format.js";
 import type { LayoutVariant } from "../layout/variant.js";
+import { useInstallOffer } from "../pwa/install.js";
 import { useSession } from "../session/session.js";
 import { AccountData } from "./settings/AccountData.js";
+import { InstallApp } from "./settings/InstallApp.js";
 import {
 	setCollapseNonFavorites, setFavoriteTeams, setGameRowSlot, setHideScores, setOpensFirst, setVideoPlayer, useSettings,
 } from "../settings/store.js";
@@ -33,7 +35,7 @@ const PLAYER_LABELS: Readonly<Record<VideoPlayerMode, string>> = {
 	stage: "Stage",
 };
 
-/** One titled group of the ratified Settings frame (Game List · Game Detail · Account). */
+/** One titled group of the ratified Settings frame (Game List · Game Detail · App · Account). */
 function SettingsGroup({ title, children }: { title: string;
 	children: ReactNode })
 {
@@ -52,12 +54,15 @@ function SettingsGroup({ title, children }: { title: string;
  * control is one this story can make work; the Video Player control arrives with
  * the screen that reads it (S70), and the Patreon rows with the
  * Patreon link. Signed-in only (the route guards it), so the session has an
- * account. Download and delete your data sit at the end of Account (A4, S79).
+ * account. Download and delete your data sit at the end of Account (A4, S79). The App group
+ * (install, S73) sits above Account when the browser can install or on iPhone/iPad.
  */
 export function SettingsPage({ variant }: { variant: LayoutVariant })
 {
 	const settings = useSettings();
 	const session = useSession();
+	// Settings → App sits above Account only while there is an install offer (S55 A1, S73).
+	const install = useInstallOffer();
 	const columns = variant === "mobile" ? 1 : 2;
 
 	return (
@@ -128,6 +133,11 @@ export function SettingsPage({ variant }: { variant: LayoutVariant })
 							</Stack>
 						</Radio.Group>
 					</SettingsGroup>
+					{install ? (
+						<SettingsGroup title="App">
+							<InstallApp offer={install} />
+						</SettingsGroup>
+					) : null}
 					<SettingsGroup title="Account">
 						{session.status === "signedIn" && <Text>Signed in as {session.account.email}</Text>}
 						{/* A text link, not a button (A3, owner 2026-10-22: "Text link"). */}

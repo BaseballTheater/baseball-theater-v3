@@ -231,7 +231,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 83 | [S4](#s4--standings-fixture-api--page) | Standings fixture API + page | `blocked` |
 | 84 | [S5](#s5--search-page-queries-highlights-fixture) | Search page queries highlights fixture | `blocked` |
 | 85 | [S72](#s72--highlight-search-by-date-team-and-tag) | Search chips: date / team / tag | `todo` |
-| 86 | [S73](#s73--installable-app-manifest-service-worker-update-notice-install-row) | Installable PWA + update notice | `todo` |
+| 86 | [S73](#s73--installable-app-manifest-service-worker-update-notice-install-row) | Installable PWA + update notice | `blocked` |
 | 87 | [S28](#s28--version-sunset-path-deprecation-headers--stale-client-upgrade) | Version sunset path + stale-client upgrade | `todo` |
 | 88 | [S74](#s74--offline-reading-stored-copies-age-marker-open-time-prefetch-background-refresh) | Offline reading + prefetch | `todo` |
 | 89 | [S50](#s50--postgres-adapter-neon-via-hyperdrive-held-to-the-storage-contract) | Postgres adapter, contract-held | `todo` |
@@ -4525,7 +4525,7 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 
 - **Cross-origin fonts aren't in the precache.** `web/index.html` loads IBM Plex Sans from Google Fonts and, after S83, the wordmark's `clarendon-urw` from Adobe Fonts (`use.typekit.net`). AC 2 precaches same-origin shell files only, so offline the text falls back to the fallback fonts. Whether to runtime-cache those font responses (Cache Storage only through `web/src/storage/`, labeled `none`) is a choice this story makes and records; check the Adobe Fonts terms before caching its files.
 
-**Status:** `todo`
+**Status:** `blocked`
 
 ---
 

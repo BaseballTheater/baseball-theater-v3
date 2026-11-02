@@ -1,6 +1,8 @@
 import { execSync } from "node:child_process";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { VitePWA } from "vite-plugin-pwa";
+import { PWA_OPTIONS } from "./src/pwa/options.js";
 
 /**
  * The commit this build is from: Actions names it, a local build asks git, and
@@ -22,7 +24,8 @@ function buildCommit(): string
 }
 
 export default defineConfig({
-	plugins: [react()],
+	// The installed app (ADR-023, S73): manifest, icons and the service worker, from src/pwa/options.ts.
+	plugins: [react(), VitePWA(PWA_OPTIONS)],
 	// The rail's version line (S60, `src/layout/version.ts`): the Actions run
 	// number counts up on every GitHub Actions build without touching
 	// package.json (owner, 2026-10-21); any other build says "dev".
