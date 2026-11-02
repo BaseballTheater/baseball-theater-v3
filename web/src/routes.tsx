@@ -1,12 +1,10 @@
 import type { ReactNode } from "react";
+import { lazy, Suspense } from "react";
 import {
 	Navigate, Route, Routes,
 } from "react-router-dom";
-import { GamePage } from "./pages/GamePage.js";
+import { ViewState } from "./components/ViewState.js";
 import { ScoreboardPage } from "./pages/ScoreboardPage.js";
-import { SearchPage } from "./pages/SearchPage.js";
-import { SettingsPage } from "./pages/SettingsPage.js";
-import { StandingsPage } from "./pages/StandingsPage.js";
 import type { LayoutVariant } from "./layout/variant.js";
 import { useAccountDeleted } from "./api/accountDeleted.js";
 import { DeletedAccountPage } from "./pages/settings/DeletedAccountPage.js";
@@ -38,19 +36,44 @@ function SignedInOnly({ children }: { children: ReactNode })
 	return children;
 }
 
-/** The routes, each page given the pairing the layout host settled (S60). */
+/*
+ * Every page past the scoreboard loads on demand, as its own JS chunk (S110; owner,
+ * 2026-11-02: "Lazy loading would be better, with chunked JS files."): the first download
+ * holds the shell and the scoreboard, the landing page, and stays inside ADR-026's entry
+ * budget as the other pages grow. The pages keep named exports; `lazy` takes a default.
+ */
+const GamePage = lazy(() => import("./pages/GamePage.js").then((m) => ({
+	default: m.GamePage,
+})));
+const StandingsPage = lazy(() => import("./pages/StandingsPage.js").then((m) => ({
+	default: m.StandingsPage,
+})));
+const SearchPage = lazy(() => import("./pages/SearchPage.js").then((m) => ({
+	default: m.SearchPage,
+})));
+const SettingsPage = lazy(() => import("./pages/SettingsPage.js").then((m) => ({
+	default: m.SettingsPage,
+})));
+
+/**
+ * The routes, each page given the pairing the layout host settled (S60). While a page's
+ * chunk arrives, the page area shows ViewState's loading treatment (S110), the one every
+ * page uses while its data loads, so there is no extra screen.
+ */
 export function AppRoutes({ variant }: { variant: LayoutVariant })
 {
 	return (
-		<Routes>
-			<Route path="/" element={<Navigate to="/games/2024-07-04" replace />} />
-			<Route path="/games" element={<Navigate to="/games/2024-07-04" replace />} />
-			<Route path="/games/:date" element={<ScoreboardPage variant={variant} />} />
-			<Route path="/game/:gamePk" element={<GamePage variant={variant} />} />
-			<Route path="/game/:gamePk/:tab" element={<GamePage variant={variant} />} />
-			<Route path="/standings" element={<StandingsPage />} />
-			<Route path="/search" element={<SearchPage />} />
-			<Route path="/settings" element={<SignedInOnly><SettingsPage variant={variant} /></SignedInOnly>} />
-		</Routes>
+		<Suspense fallback={<ViewState kind="loading" />}>
+			<Routes>
+				<Route path="/" element={<Navigate to="/games/2024-07-04" replace />} />
+				<Route path="/games" element={<Navigate to="/games/2024-07-04" replace />} />
+				<Route path="/games/:date" element={<ScoreboardPage variant={variant} />} />
+				<Route path="/game/:gamePk" element={<GamePage variant={variant} />} />
+				<Route path="/game/:gamePk/:tab" element={<GamePage variant={variant} />} />
+				<Route path="/standings" element={<StandingsPage />} />
+				<Route path="/search" element={<SearchPage />} />
+				<Route path="/settings" element={<SignedInOnly><SettingsPage variant={variant} /></SignedInOnly>} />
+			</Routes>
+		</Suspense>
 	);
 }

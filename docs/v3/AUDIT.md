@@ -12492,3 +12492,84 @@ Applied in the commit named above. Nothing beyond the answers changed.
 **Check 3, coverage.** No features added this review. Nothing new for the next backlog review.
 
 No edits; no owner questions.
+
+---
+
+## 2026-11-02 — S110 completed
+
+**Entry bundle headroom**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-02T22:01:48Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `ef5e6ed` (tree dirty) |
+| Grader | `scripts/verify-S110.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: routes.tsx loads GamePage, StandingsPage, SearchPage and SettingsPage with React.lazy; ScoreboardPage stays eager (grep); the routes tests pass
+check 2 PASS: while a lazy page loads, the fallback is ViewState's loading treatment (RTL with a deferred import)
+check 3 PASS: the built entry chunk (web/dist/assets/index-*.js, gzip) is at least 15,000 bytes under the 200 KB limit
+check 4 PASS: files this story adds or edits reference no team logo and read no viewport outside web/src/layout/
+check 5 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**5/5 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+  entry chunk: 150405 bytes gzipped, 49595 under 200000
+
+--- verify-S110 check results ---
+check 1 PASS: routes.tsx loads GamePage, StandingsPage, SearchPage and SettingsPage with React.lazy; ScoreboardPage stays eager (grep); the routes tests pass
+check 2 PASS: while a lazy page loads, the fallback is ViewState's loading treatment (RTL with a deferred import)
+check 3 PASS: the built entry chunk (web/dist/assets/index-*.js, gzip) is at least 15,000 bytes under the 200 KB limit
+check 4 PASS: files this story adds or edits reference no team logo and read no viewport outside web/src/layout/
+check 5 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S110: 5/5 checks passed ---
+verify-S110: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+web build: rendering chunks...
+web build: computing gzip size...
+web build: dist/index.html                          1.00 kB │ gzip:   0.53 kB
+web build: dist/assets/batter-J7FnW6ss.webp        74.81 kB
+web build: dist/assets/index-BEBfbMX0.css         201.84 kB │ gzip:  29.52 kB
+web build: dist/assets/SearchPage-CO9exgHd.js       0.25 kB │ gzip:   0.21 kB
+web build: dist/assets/StandingsPage-BC839wxc.js    0.26 kB │ gzip:   0.21 kB
+web build: dist/assets/PlayerDialog-u2O8zg2m.js     1.15 kB │ gzip:   0.69 kB
+web build: dist/assets/live-stream-rHvmtDdF.js      2.51 kB │ gzip:   1.08 kB
+web build: dist/assets/Modal-BCS1QYHw.js            4.81 kB │ gzip:   1.73 kB
+web build: dist/assets/TextInput-BjL97RUw.js       28.11 kB │ gzip:   9.22 kB
+web build: dist/assets/SettingsPage-Pg4Tcwil.js    35.13 kB │ gzip:  11.34 kB
+web build: dist/assets/GamePage-DHpcX_3a.js        99.30 kB │ gzip:  33.41 kB
+web build: dist/assets/index-CHkdn-F-.js          469.04 kB │ gzip: 150.66 kB
+web build: ✓ built in 1.96s
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 150405,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

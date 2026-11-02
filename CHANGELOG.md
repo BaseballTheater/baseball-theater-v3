@@ -14,6 +14,16 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## The app opens faster, and has room to grow
+
+- **Before, everything in Baseball Theater downloaded up front, even pages you might never open, and the first
+  download had reached its size limit, so the next feature would have failed the size check. Now the
+  scoreboard loads first, and the game, standings, search and settings pages download only when you open
+  them, each as its own file. The first download shrinks by about a quarter, from 199.9 KB to 150.4 KB, and
+  while a page arrives you see the usual loading spinner.** Details: S110 — `React.lazy` routes in
+  `web/src/routes.tsx` behind `ViewState`'s loader; entry chunk 150,405 / 200,000 bytes gzipped (ADR-026).
+  _(2026-11-02)_
+
 ## A game's videos are easy to browse
 
 - **Before, a highlight couldn't be watched inside Baseball Theater. Now tapping a clip plays it right there,

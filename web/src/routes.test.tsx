@@ -87,7 +87,8 @@ describe("Settings gating", () =>
 			name: "Settings",
 		})).toBeInTheDocument();
 		expect(screen.getByLabelText("path")).toHaveTextContent(/^\/settings$/);
-		expect(screen.getByRole("heading", {
+		// The settings page is its own chunk (S110), so its heading arrives once it loads.
+		expect(await screen.findByRole("heading", {
 			name: /settings/i,
 		})).toBeInTheDocument();
 	});
