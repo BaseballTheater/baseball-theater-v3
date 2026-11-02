@@ -8,7 +8,6 @@ import type { LayoutVariant } from "../../layout/variant.js";
 import { MatchupCards } from "../pitch/MatchupCards.js";
 import { PitchSequence } from "../pitch/PitchSequence.js";
 import { PitchTheater } from "../pitch/PitchTheater.js";
-import { outsLabel } from "./format.js";
 import { LiveStatus } from "./LiveStatus.js";
 
 /** The pitcher's and batter's surnames: "Gusto vs Bregman". */
@@ -70,12 +69,7 @@ export function LiveRoom({ game, variant }: { game: GamePayload;
 			<Stack gap={16}>
 				{status}
 				<Box data-testid="matchup-line">
-					<Group justify="space-between">
-						<Text fz={15} fw={700}>{matchupTitle(atBat)}</Text>
-						<Text fz={13} c="var(--bt-accent)">
-							Count: {atBat.count.balls}-{atBat.count.strikes} · {outsLabel(atBat.count.outs)}
-						</Text>
-					</Group>
+					<Text fz={15} fw={700}>{matchupTitle(atBat)}</Text>
 					{atBat.result.description ? <Text fz={13}>Result: {atBat.result.description}</Text> : null}
 				</Box>
 				{cards}

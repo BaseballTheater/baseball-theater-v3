@@ -1,7 +1,8 @@
 /**
  * The Live room's status (S3) on the committed 745001 fixture (NYY @ BOS, In
  * Progress, Top 6, 1 out, 2–1, NYY 4 · BOS 3), rendered through the game page so
- * every assertion is made inside the Live tab panel.
+ * every assertion is made inside the Live tab panel. The inning reads alone; the outs
+ * show only as pips (game-rooms A5, S109).
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -76,7 +77,8 @@ describe("the Live status (S3)", () =>
 		const status = within(panel).getByRole("status", {
 			name: "Live status",
 		});
-		expect(status).toHaveTextContent("Top 6th · 1 Out");
+		expect(status.textContent).toMatch(/Top 6th$/);
+		expect(status).not.toHaveTextContent(/\bOuts?\b/);
 		expect(within(status).getByRole("img", {
 			name: /Balls/,
 		})).toHaveAccessibleName("Balls: 2 of 3");
@@ -152,7 +154,7 @@ describe("the Live status (S3)", () =>
 			expect(within(card).getAllByRole("img", {
 				name: /^(Balls|Strikes|Outs):/,
 			})).toHaveLength(3);
-			expect(card).toHaveTextContent("Top 6th · 1 Out");
+			expect(card.textContent).toMatch(/Top 6th$/);
 		});
 	}
 });

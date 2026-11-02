@@ -18,11 +18,13 @@ import {
 import {
 	afterEach, describe, expect, it, vi,
 } from "vitest";
+import { DEFAULT_SETTINGS, inningLabel } from "@bt/domain";
 import type { GamePayload } from "../../api/game.js";
 import { writeGame } from "../../api/game.js";
 import { createQueryClient } from "../../api/queryClient.js";
 import type { LayoutVariant } from "../../layout/variant.js";
 import { GamePage } from "../../pages/GamePage.js";
+import { hydrateSettings, resetSettings } from "../../settings/store.js";
 import { jsonResponse } from "../../test/jsonResponse.js";
 import { createRenderCounter } from "../../test/renderCount.js";
 
@@ -342,5 +344,94 @@ describe("the Live pitch theater (S64)", () =>
 		await waitFor(() => expect(counter.count()).toBeGreaterThan(0));
 		await act(async () => new Promise((resolve) => setTimeout(resolve, 50)));
 		expect(counter.count()).toBe(2);
+	});
+});
+
+/**
+ * game-rooms A5 (S109): the inning, count and outs show in one place. The status row and
+ * card read the inning alone, beside the score, base diamond and B / S / O pips, and the
+ * mobile matchup line has no `Count: … · … Out` text (owner, 2026-10-31).
+ */
+describe("one status row (S109):", () =>
+{
+	/** Renders `/game/823823/live` at a pairing with `game` served, and returns the Live tab panel. */
+	async function panelFor(variant: LayoutVariant, game: GamePayload): Promise<HTMLElement>
+	{
+		vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(jsonResponse(game))));
+		render(
+			<MantineProvider>
+				<QueryClientProvider client={createQueryClient()}>
+					<MemoryRouter initialEntries={["/game/823823/live"]}>
+						<Routes>
+							<Route path="/game/:gamePk/:tab" element={<GamePage variant={variant} />} />
+						</Routes>
+					</MemoryRouter>
+				</QueryClientProvider>
+			</MantineProvider>,
+		);
+		await screen.findByTestId("live-status");
+		return screen.getByRole("tabpanel");
+	}
+
+	/** The status reads the score, the diamond, three pip groups and the inning alone, last. */
+	function expectOneRow(panel: HTMLElement, variant: LayoutVariant): void
+	{
+		const status = within(panel).getByTestId("live-status");
+		expect(status).toHaveAttribute("data-variant", variant);
+		expect(status).toHaveTextContent("CHC 1 · MIA 0");
+		expect(within(status).getByTestId("base-diamond")).toBeInTheDocument();
+		expect(within(status).getAllByRole("img", {
+			name: /^(Balls|Strikes|Outs):/,
+		})).toHaveLength(3);
+		const inning = inningLabel(fixture().linescore);
+		expect(inning).toBe("Top 3rd");
+		expect(status.textContent).toMatch(new RegExp(`${inning}$`));
+		expect(status).not.toHaveTextContent(/\bOuts?\b/);
+		expect(panel).not.toHaveTextContent(/Count:/);
+	}
+
+	afterEach(() => resetSettings());
+
+	for (const variant of ["mobile", "medium", "desktop"] as const)
+	{
+		it(`${variant}: the status reads the inning alone beside the score, diamond and pips`, async () =>
+		{
+			expectOneRow(await panelFor(variant, fixture()), variant);
+		});
+	}
+
+	it("matchup line: the matchup title with no count or outs; a finished at-bat keeps its result line", async () =>
+	{
+		const game = fixture();
+		const line = within(await panelFor("mobile", game)).getByTestId("matchup-line");
+		expect(line).toHaveTextContent(/^Gusto vs Bregman$/);
+		expect(line).not.toHaveTextContent(/Count:|\bOuts?\b/);
+		cleanup();
+
+		const finished = within(await panelFor("mobile", {
+			...game,
+			plays: game.plays.slice(0, -1),
+		})).getByTestId("matchup-line");
+		expect(finished).toHaveTextContent(/^Gusto vs Busch\s*Result: /);
+		expect(finished).not.toHaveTextContent(/Count:|\bOuts?\b/);
+	});
+
+	it("hidden: with Hide Scores on, the status still reads the inning alone and the matchup line has no count or outs", async () =>
+	{
+		vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(jsonResponse({
+			...DEFAULT_SETTINGS,
+			hideScores: true,
+			version: 1,
+		}))));
+		await hydrateSettings();
+		for (const variant of ["mobile", "medium"] as const)
+		{
+			const panel = await panelFor(variant, fixture());
+			const status = within(panel).getByTestId("live-status");
+			expect(status.textContent).toMatch(/Top 3rd$/);
+			expect(status).not.toHaveTextContent(/\bOuts?\b/);
+			expect(panel).not.toHaveTextContent(/Count:/);
+			cleanup();
+		}
 	});
 });

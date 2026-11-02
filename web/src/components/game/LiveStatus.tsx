@@ -6,11 +6,13 @@ import type { GamePayload } from "../../api/game.js";
 import type { LayoutVariant } from "../../layout/variant.js";
 import { BaseDiamond } from "./BaseDiamond.js";
 import { BsoPips } from "./BsoPips.js";
-import { outsLabel } from "./format.js";
 
 /**
  * The Live room's compact status (S3; game-rooms `live-mobile` / `live-medium` /
  * `live-desktop`): the score `NYY 4 · BOS 3`, ball / strike / out pips and the inning.
+ * The inning reads alone (`Bot 7th`): the count and outs show only as the pips, here and
+ * nowhere else on Live (game-rooms A5, S109; owner, 2026-10-31: "one representation for
+ * the inning and the count and the outs").
  * The score lives here, never in the game header (owner, 2026-10-14). On mobile it
  * is a row under the tabs; at medium and desktop it is the status card at the top of
  * the right-hand column, 320px as drawn — `variant` comes from the layout host. The inning text is
@@ -21,7 +23,7 @@ export function LiveStatus({ game, variant }: { game: GamePayload;
 {
 	const { linescore, teams } = game;
 	const score = `${teams.away.abbreviation} ${linescore?.teams.away.runs ?? 0} · ${teams.home.abbreviation} ${linescore?.teams.home.runs ?? 0}`;
-	const inning = [inningLabel(linescore), outsLabel(linescore?.outs ?? null)].filter(Boolean).join(" · ");
+	const inning = inningLabel(linescore);
 	const pips = <BsoPips balls={linescore?.balls ?? null} strikes={linescore?.strikes ?? null} outs={linescore?.outs ?? null} />;
 
 	if (variant === "mobile")

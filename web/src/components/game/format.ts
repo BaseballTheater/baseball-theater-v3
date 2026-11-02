@@ -36,10 +36,3 @@ export function gameInfoLines(info: readonly { label: string;
 		}] : [];
 	});
 }
-
-/** `1` → `1 Out`, `2` → `2 Outs` (the Live status, S3); `null` before there is a count. */
-export function outsLabel(outs: number | null): string | null
-{
-	if (outs === null) return null;
-	return `${outs} ${outs === 1 ? "Out" : "Outs"}`;
-}
