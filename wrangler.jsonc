@@ -38,6 +38,17 @@
 	"cache": {
 		"enabled": true
 	},
+	// Postgres through Hyperdrive (ADR-018, S50). `id` names the Hyperdrive config, created when
+	// the owner sets up Neon for the deploy; this placeholder is not a real one. Locally,
+	// `wrangler dev` and the Workers tests connect to `localConnectionString` instead: a local
+	// Postgres (S51's Docker), never a hosted database. No credential for one is committed.
+	"hyperdrive": [
+		{
+			"binding": "HYPERDRIVE",
+			"id": "00000000000000000000000000000000",
+			"localConnectionString": "postgres://bt:bt@localhost:5432/bt"
+		}
+	],
 	// No anonymous usage telemetry from local runs.
 	"send_metrics": false,
 	"observability": {

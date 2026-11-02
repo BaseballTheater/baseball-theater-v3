@@ -32,8 +32,8 @@ type RetainedLabel = {
 	why: string;
 };
 
-/** The one thing ADR-028 keeps after a deletion: the log of deleted uids. */
-export const RETAINED_ALLOWED: readonly string[] = ["InMemoryDeletionLog"];
+/** The one thing ADR-028 keeps after a deletion: the log of deleted uids, in each store that holds it (S50: Postgres). */
+export const RETAINED_ALLOWED: readonly string[] = ["InMemoryDeletionLog", "PostgresDeletionLog", "deletion_log"];
 
 /**
  * The data classification manifest (ADR-028). Every repository class, every
@@ -80,6 +80,77 @@ export const DATA_CLASSIFICATION = {
 		InMemoryMailer: {
 			kind: "personal",
 			deletedBy: MAIL_STORE,
+		},
+		// The Postgres adapter (S50) backs the same ports under the same registered stores.
+		PostgresScheduleRepository: {
+			kind: "none",
+			why: "MLB schedules; no user data",
+		},
+		PostgresGameRepository: {
+			kind: "none",
+			why: "MLB game snapshots; no user data",
+		},
+		PostgresGameProjectionRepository: {
+			kind: "none",
+			why: "projections of MLB games; no user data",
+		},
+		PostgresReplayArtifactRepository: {
+			kind: "none",
+			why: "MLB live-feed replay patches; no user data",
+		},
+		PostgresUserRepository: {
+			kind: "personal",
+			deletedBy: USERS_STORE,
+		},
+		PostgresSettingsRepository: {
+			kind: "personal",
+			deletedBy: SETTINGS_STORE,
+		},
+		PostgresDeletionLog: {
+			kind: "retained",
+			why: "deleted uids and times only, re-applied after a backup restore (ADR-028)",
+		},
+	},
+	/**
+	 * Every table the Postgres migrations create (S50), read from the committed SQL by the
+	 * manifest test, so a new table can't land unlabeled.
+	 */
+	postgresTables: {
+		schedule_days: {
+			kind: "none",
+			why: "MLB schedules; no user data",
+		},
+		games: {
+			kind: "none",
+			why: "MLB game snapshots; no user data",
+		},
+		game_projections: {
+			kind: "none",
+			why: "projections of MLB games; no user data",
+		},
+		replay_artifacts: {
+			kind: "none",
+			why: "MLB live-feed replay patches; no user data",
+		},
+		users: {
+			kind: "personal",
+			deletedBy: USERS_STORE,
+		},
+		entitlements: {
+			kind: "personal",
+			deletedBy: USERS_STORE,
+		},
+		identity_links: {
+			kind: "personal",
+			deletedBy: USERS_STORE,
+		},
+		account_settings: {
+			kind: "personal",
+			deletedBy: SETTINGS_STORE,
+		},
+		deletion_log: {
+			kind: "retained",
+			why: "deleted uids and times only, re-applied after a backup restore (ADR-028)",
 		},
 	},
 	/** Typed as every key of `UserProfile`, so adding a field without a label doesn't compile either. */
@@ -141,6 +212,10 @@ export const DATA_CLASSIFICATION = {
 		node: {
 			kind: "none",
 			why: "serves HTTP from Node; keeps nothing",
+		},
+		postgres: {
+			kind: "personal",
+			deletedBy: USERS_STORE,
 		},
 	},
 } satisfies Record<string, Record<string, DataLabel>>;

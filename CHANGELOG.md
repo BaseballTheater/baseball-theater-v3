@@ -55,6 +55,12 @@ explicitly where that's the case. For what's still ahead, see
 
 ## The backend runs the way it will in production
 
+- **Before, Baseball Theater could only keep its data in memory, which empties whenever the server restarts.
+  Now it has a real Postgres database layer, checked against exactly the same rules as the test stores: an
+  older update can never overwrite a newer one, and deleting your account removes your rows. It isn't
+  switched on yet; the next step runs local development on it.** Details: S50 — Drizzle schema and migration
+  in `functions/src/adapters/postgres/`; the shared storage contract on PGlite; Hyperdrive binding declared
+  (ADR-018). _(2026-11-02)_
 - **Before, a game in progress only changed on your screen when the page refetched it. Now the game page
   follows it live: each new pitch arrives within moments, nothing you have open (an at-bat, a pitch, a video)
   closes or jumps, and if the connection drops it reconnects by itself, falling back to checking every 15

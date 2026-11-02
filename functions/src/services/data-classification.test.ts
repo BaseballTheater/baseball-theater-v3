@@ -25,7 +25,13 @@ const storeNames = personalDataStores({
 
 /** Everything the manifest must label, read from source rather than listed by hand. */
 const discovered: Record<DataSection, () => string[]> = {
-	repositoryClasses: () => [...readFileSync(join(src, "adapters/memory/repos.ts"), "utf8").matchAll(/^export class (\w+)/gm)].map((m) => m[1]!),
+	repositoryClasses: () => ["memory", "postgres"].flatMap((adapter) => [...readFileSync(join(src, `adapters/${adapter}/repos.ts`), "utf8").matchAll(/^export class (\w+)/gm)].map((m) => m[1]!)),
+	postgresTables: () =>
+	{
+		const migrations = join(src, "adapters/postgres/migrations");
+		return readdirSync(migrations).filter((f) => f.endsWith(".sql"))
+			.flatMap((f) => [...readFileSync(join(migrations, f), "utf8").matchAll(/^CREATE TABLE (?:IF NOT EXISTS )?"(\w+)"/gm)].map((m) => m[1]!));
+	},
 	userProfileFields: () =>
 	{
 		const types = readFileSync(join(src, "../../packages/domain/src/types.ts"), "utf8");

@@ -12613,3 +12613,87 @@ Fresh-context single reviewer. Trigger: `/run-stories` stopped S5 before work it
 1. "What should highlight search look through at launch: only the games Baseball Theater has already saved (fast, and grows as the season is collected, but older seasons aren't searchable yet), or should it ask MLB's own search each time (covers everything, but every search becomes a request to MLB, which ADR-002 moved away from)? The architecture doc lists this as still open, so the Search page (S5) waits on your answer."
 
 Verdict `amended`: fence fixed, notes on S5, S73, S28, S50. S73, S28 and S50 can proceed; S5 stays `blocked` on the question and goes to `todo` when it is answered.
+
+---
+
+## 2026-11-02 — S50 completed
+
+**Postgres adapter, contract-held**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-02T22:48:55Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `ebebeef` (tree dirty) |
+| Grader | `scripts/verify-S50.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: Drizzle migrations create schedule_days, games, game_projections, replay_artifacts, users, identity_links, entitlements, account_settings (+ deletion_log), JSONB documents, a GIN index on games
+check 2 PASS: the game upsert is ON CONFLICT … DO UPDATE … WHERE excluded.version > games.version; a stale write changes 0 rows (test)
+check 3 PASS: the S46 contract runs against the Postgres adapter on PGlite with as many cases as the in-memory run for the same stores, 0 skipped
+check 4 PASS: no pg / postgres / pglite / Drizzle import outside functions/src/adapters/postgres/
+check 5 PASS: wrangler.jsonc declares a Hyperdrive binding with a localConnectionString; no non-local connection string is committed
+check 6 PASS: every migrated table is labeled in the classification manifest; the Postgres user and settings stores run the registry's deletion case under the in-memory stores' names
+check 7 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**7/7 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S50 check results ---
+check 1 PASS: Drizzle migrations create schedule_days, games, game_projections, replay_artifacts, users, identity_links, entitlements, account_settings (+ deletion_log), JSONB documents, a GIN index on games
+check 2 PASS: the game upsert is ON CONFLICT … DO UPDATE … WHERE excluded.version > games.version; a stale write changes 0 rows (test)
+check 3 PASS: the S46 contract runs against the Postgres adapter on PGlite with as many cases as the in-memory run for the same stores, 0 skipped
+check 4 PASS: no pg / postgres / pglite / Drizzle import outside functions/src/adapters/postgres/
+check 5 PASS: wrangler.jsonc declares a Hyperdrive binding with a localConnectionString; no non-local connection string is committed
+check 6 PASS: every migrated table is labeled in the classification manifest; the Postgres user and settings stores run the registry's deletion case under the in-memory stores' names
+check 7 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S50: 7/7 checks passed ---
+verify-S50: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+web build: dist/assets/VideoPlayer-4KcvoZtb.js                2.94 kB │ gzip:   1.43 kB
+web build: dist/assets/Table-DEIvUAg7.js                      4.15 kB │ gzip:   1.63 kB
+web build: dist/assets/Modal-B2_K3VpH.js                      4.82 kB │ gzip:   1.73 kB
+web build: dist/assets/workbox-window.prod.es5-BBnX5xw4.js    5.75 kB │ gzip:   2.36 kB
+web build: dist/assets/TextInput-C37fAm2u.js                 28.11 kB │ gzip:   9.21 kB
+web build: dist/assets/SettingsPage-nvm-tYbS.js              37.16 kB │ gzip:  11.92 kB
+web build: dist/assets/GamePage-DZomHB8h.js                  86.60 kB │ gzip:  29.54 kB
+web build: dist/assets/index-C2J1xtze.js                    480.16 kB │ gzip: 154.17 kB
+web build: ✓ built in 2.02s
+web build: PWA v1.0.3
+web build: mode      generateSW
+web build: precache  22 entries (860.17 KiB)
+web build: files generated
+web build:   dist/sw.js
+web build:   dist/workbox-2fbc6a65.js
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 153912,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
