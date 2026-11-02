@@ -1,4 +1,5 @@
 import type {
+	GamePlayMetrics,
 	GameSnapshot,
 	MediaHighlight,
 	PlayerProfile,
@@ -9,8 +10,11 @@ import type {
 } from "@bt/domain";
 import { rankHighlightsByImpact } from "@bt/domain";
 import type { GameDiffPatchResponse, ReplayPatchEntry } from "@bt/mlb-api";
-import { parseGameTimestamps, parseRecordedReplayWalk } from "@bt/mlb-api";
+import {
+	parseGameTimestamps, parsePlayMetricsResponse, parseRecordedReplayWalk,
+} from "@bt/mlb-api";
 import type { MlbStatsClient } from "@bt/ports";
+import { mapPlayMetrics } from "../../mappers/play-metrics.js";
 
 type ScheduleFixture = {
 	date: string;
@@ -81,11 +85,15 @@ export class FixtureClient implements MlbStatsClient
 		const file = `game-${gamePk}.json`;
 		const data = await this.readJson<GameFixture>(file);
 		const plays = await this.loadPlays(gamePk);
+		const playMetrics = await this.fetchPlayMetrics(gamePk);
 		const now = new Date().toISOString();
 		return {
 			...data,
 			plays,
 			highlights: rankHighlightsByImpact(data.highlights ?? []),
+			...playMetrics && {
+				playMetrics,
+			},
 			fetchedAt: now,
 			windowMode: "cache",
 		};
@@ -158,6 +166,22 @@ export class FixtureClient implements MlbStatsClient
 			),
 		);
 		return loaded.flat();
+	}
+
+	/**
+	 * The recorded play-metrics feed, `fixtures/raw/playmetrics-<gamePk>.json` (S93), mapped;
+	 * null for a game with no recording, as the HTTP client answers when the feed fails.
+	 */
+	async fetchPlayMetrics(gamePk: number): Promise<GamePlayMetrics | null>
+	{
+		try
+		{
+			return mapPlayMetrics(parsePlayMetricsResponse(await this.readJson(`raw/playmetrics-${gamePk}.json`)));
+		}
+		catch
+		{
+			return null;
+		}
 	}
 
 	/** Recorded timecode list from `fixtures/raw/timestamps-<gamePk>.json`. */

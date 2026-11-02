@@ -1,7 +1,9 @@
 /**
  * `pnpm --filter @bt/functions record-fixtures -- --date=… --game=…`
  *
- * Re-records the committed fixture corpus from live MLB. This is the one
+ * Re-records the committed fixture corpus from live MLB: the Stats API payloads
+ * and MLB's play-metrics feed (`raw/playmetrics-<gamePk>.json`, from
+ * `bdfed.stitch.mlbinfra.com`, S93), all through `rawEndpoints`. This is the one
  * network-touching entrypoint in the repo and is **never** run by CI or
  * `pnpm verify` — both stay on `FixtureMlbStatsClient`. Review the diff before
  * committing re-recorded payloads (see README).

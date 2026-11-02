@@ -1467,5 +1467,1709 @@
   "recap": {
     "headline": "Zeferjahn records 1st Cubs save, Conforto notches club's 200th HR in win over Marlins",
     "text": "MIAMI – Between the eighth and ninth innings of Chicago’s 6-5 win over the Marlins on Saturday, reliever Ryan Zeferjahn kept getting up and moving around in the visiting dugout at loanDepot park to keep himself warm. That is what allowed him to control the adrenaline and record his first save as a Cub.\n\n“I try to stay calm and under control, and work my game,” Zeferjahn said. “I got the best defense behind me, and I let them work, and it came up huge.”\n\nHe recorded five outs after both bullpens struggled to put up zeros in the game.\n\n“He had a great outing,” manager Craig Counsell said. “That's a tough outing and that's a big-time performance. Those are tough ones to get, and he bailed us out tonight.”\n\nThe Cubs hold a half-game lead over Philadelphia for the top NL Wild Card spot.\n\nHere are three takeaways from Saturday’s win:\n\n1. Zeferjahn comes through in big spot\n\nZeferjahn came on in relief in the eighth with one out and Esteury Ruiz on second. He completed 1 2/3 innings on 19 pitches, striking out one and giving up a walk.\n\n“We need him to be successful,” Counsell said. “He's had a couple outings that didn't go his way. He's bounced back really good. The last couple I think have been very good, and he showed us tonight what he's capable of.”\n\nThe new Cubs reliever who shares leaderboards with Miz and Miller\n\nAfter the Angels traded the right-hander to the Cubs, things had not gone his way, as he posted a 7.20 ERA in 10 innings pitched over his first 11 appearances. But his process was still there.\n\n“Everything was working, just sometimes results weren't there,” Zeferjahn said. “So we stayed on course with that and we're gonna keep doing that. Keep hammering that home and hopefully stay on this roll.”\n\nPart of that is continuing to let his defense work behind him and not chasing strikeouts. That strategy was effective in the ninth when he recorded a first-pitch out to begin the half inning. To him, that was the best way to start it off.\n\nThe outing was also important for him because the Cubs’ bullpen has been a trouble area of late, with seven relievers on the injured list this season.\n\n“We're the hungriest,” Zeferjahn said. “Everyone's gonna pick each other up. … I picked them up tonight, and I think everyone down there just knows that we're a close group, and that when you don't have it, someone's gonna have to come in there and pick you up. Then we're gonna keep rolling. So that's gonna make us good and have a good run at this.”\n\n2. Cubs reach 200 home runs\n\nThe Cubs became the first team in 2026 to hit 200 home runs. They finished with 223 last season after hitting 170 in 2024.\n\nPete Crow-Armstrong (39), Alex Bregman (24) and Seiya Suzuki (24) lead the way.\n\nMichael Conforto helped the Cubs reach the 200-homer mark with his 14th home run of the year. Leading off the third inning, Conforto took a 94.4 mph four-seamer off Ryan Gusto a Statcast-projected 411 feet to center field. The Cubs have hit 36 homers over their last 15 games.\n\n“That's a big part of [this] park, when you're playing here, you don't expect to see balls go out there,” said Counsell of Conforto, who finished 2-for-3. “But he obviously put a charge into that one, and playing with the lead is always important and always helpful. And Michael's been doing a heck of a job.”\n\n3. Assad’s walks add up\n\nAfter Javier Assad pitched 4 2/3 innings, allowing three runs on three hits while striking out three and walking five, he had set a new season-high in free passes.\n\n“I thought Javier's stuff was excellent,” Counsell said. “The walks were just a little bit too much. That ran the pitch count up pretty good and that was a little uncharacteristic, especially this year. He's been very good with throwing strikes. That's as a kind of indicator of how many hits they had. I thought that part was good.”\n\nAssad said he wasn’t very fine, as he is accustomed to, but he kept battling in every pitch and against every batter. What he liked the most was that after he came out of the game, he was able to leave his team with the lead.\n\n“Giving up walks is the last thing I want to do with the great infield that I have,” Assad said in Spanish. “It is part of the game. Sometimes it’s going to happen. It hasn’t happened to me this year, but I had to find ways to fight.”"
+  },
+  "playMetrics": {
+    "atBats": [
+      {
+        "atBatIndex": 0,
+        "homeWinProbability": 46.400000000000006,
+        "awayWinProbability": 53.599999999999994,
+        "homeWinProbabilityAdded": -3.5999999999999943,
+        "awayWinProbabilityAdded": 3.5999999999999943,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 1,
+        "homeWinProbability": 41,
+        "awayWinProbability": 59,
+        "homeWinProbabilityAdded": -5.400000000000006,
+        "awayWinProbabilityAdded": 5.400000000000006,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 94.2,
+          "launchAngle": 16,
+          "totalDistance": 267
+        }
+      },
+      {
+        "atBatIndex": 2,
+        "homeWinProbability": 46,
+        "awayWinProbability": 54,
+        "homeWinProbabilityAdded": 5,
+        "awayWinProbabilityAdded": -5,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 3,
+        "homeWinProbability": 54.800000000000004,
+        "awayWinProbability": 45.199999999999996,
+        "homeWinProbabilityAdded": 8.800000000000004,
+        "awayWinProbabilityAdded": -8.800000000000004,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 89.9,
+          "launchAngle": -6,
+          "totalDistance": 22
+        }
+      },
+      {
+        "atBatIndex": 4,
+        "homeWinProbability": 58.3,
+        "awayWinProbability": 41.7,
+        "homeWinProbabilityAdded": 3.499999999999993,
+        "awayWinProbabilityAdded": -3.499999999999993,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 5,
+        "homeWinProbability": 55.1,
+        "awayWinProbability": 44.9,
+        "homeWinProbabilityAdded": -3.1999999999999957,
+        "awayWinProbabilityAdded": 3.1999999999999957,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 64.3,
+          "launchAngle": 56,
+          "totalDistance": 155
+        }
+      },
+      {
+        "atBatIndex": 6,
+        "homeWinProbability": 58.699999999999996,
+        "awayWinProbability": 41.300000000000004,
+        "homeWinProbabilityAdded": 3.5999999999999943,
+        "awayWinProbabilityAdded": -3.5999999999999943,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 7,
+        "homeWinProbability": 50,
+        "awayWinProbability": 50,
+        "homeWinProbabilityAdded": -8.699999999999996,
+        "awayWinProbabilityAdded": 8.699999999999996,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 104.8,
+          "launchAngle": -13,
+          "totalDistance": 13
+        }
+      },
+      {
+        "atBatIndex": 8,
+        "homeWinProbability": 46.2,
+        "awayWinProbability": 53.8,
+        "homeWinProbabilityAdded": -3.799999999999997,
+        "awayWinProbabilityAdded": 3.799999999999997,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 104.7,
+          "launchAngle": 6,
+          "totalDistance": 119
+        }
+      },
+      {
+        "atBatIndex": 9,
+        "homeWinProbability": 48,
+        "awayWinProbability": 52,
+        "homeWinProbabilityAdded": 1.7999999999999972,
+        "awayWinProbabilityAdded": -1.7999999999999972,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 90.3,
+          "launchAngle": 15,
+          "totalDistance": 268
+        }
+      },
+      {
+        "atBatIndex": 10,
+        "homeWinProbability": 51.7,
+        "awayWinProbability": 48.3,
+        "homeWinProbabilityAdded": 3.700000000000003,
+        "awayWinProbabilityAdded": -3.700000000000003,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 52.5,
+          "launchAngle": 56,
+          "totalDistance": 120
+        }
+      },
+      {
+        "atBatIndex": 11,
+        "homeWinProbability": 55.1,
+        "awayWinProbability": 44.9,
+        "homeWinProbabilityAdded": 3.3999999999999986,
+        "awayWinProbabilityAdded": -3.3999999999999986,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 12,
+        "homeWinProbability": 52.800000000000004,
+        "awayWinProbability": 47.199999999999996,
+        "homeWinProbabilityAdded": -2.299999999999997,
+        "awayWinProbabilityAdded": 2.299999999999997,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 96.8,
+          "launchAngle": 17,
+          "totalDistance": 258
+        }
+      },
+      {
+        "atBatIndex": 13,
+        "homeWinProbability": 51.1,
+        "awayWinProbability": 48.9,
+        "homeWinProbabilityAdded": -1.7000000000000028,
+        "awayWinProbabilityAdded": 1.7000000000000028,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 14,
+        "homeWinProbability": 50,
+        "awayWinProbability": 50,
+        "homeWinProbabilityAdded": -1.1000000000000014,
+        "awayWinProbabilityAdded": 1.1000000000000014,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 100.9,
+          "launchAngle": 6,
+          "totalDistance": 123
+        }
+      },
+      {
+        "atBatIndex": 15,
+        "homeWinProbability": 38.800000000000004,
+        "awayWinProbability": 61.199999999999996,
+        "homeWinProbabilityAdded": -11.199999999999996,
+        "awayWinProbabilityAdded": 11.199999999999996,
+        "keyMoment": true,
+        "leadChange": true,
+        "scoring": true,
+        "homeRun": true,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 103.2,
+          "launchAngle": 27,
+          "totalDistance": 411
+        }
+      },
+      {
+        "atBatIndex": 16,
+        "homeWinProbability": 35.3,
+        "awayWinProbability": 64.7,
+        "homeWinProbabilityAdded": -3.500000000000007,
+        "awayWinProbabilityAdded": 3.500000000000007,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 96.7,
+          "launchAngle": -7,
+          "totalDistance": 17
+        }
+      },
+      {
+        "atBatIndex": 17,
+        "homeWinProbability": 38.6,
+        "awayWinProbability": 61.4,
+        "homeWinProbabilityAdded": 3.3000000000000043,
+        "awayWinProbabilityAdded": -3.3000000000000043,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 18,
+        "homeWinProbability": 35,
+        "awayWinProbability": 65,
+        "homeWinProbabilityAdded": -3.6000000000000014,
+        "awayWinProbabilityAdded": 3.6000000000000014,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 19,
+        "homeWinProbability": 39.4,
+        "awayWinProbability": 60.6,
+        "homeWinProbabilityAdded": 4.399999999999999,
+        "awayWinProbabilityAdded": -4.399999999999999,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 89.1,
+          "launchAngle": 45,
+          "totalDistance": 286
+        }
+      },
+      {
+        "atBatIndex": 20,
+        "homeWinProbability": 36.5,
+        "awayWinProbability": 63.5,
+        "homeWinProbabilityAdded": -2.8999999999999986,
+        "awayWinProbabilityAdded": 2.8999999999999986,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 21,
+        "homeWinProbability": 20.599999999999998,
+        "awayWinProbability": 79.4,
+        "homeWinProbabilityAdded": -15.900000000000002,
+        "awayWinProbabilityAdded": 15.900000000000002,
+        "keyMoment": true,
+        "leadChange": false,
+        "scoring": true,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": true,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 109.7,
+          "launchAngle": 14,
+          "totalDistance": 277
+        }
+      },
+      {
+        "atBatIndex": 22,
+        "homeWinProbability": 23.599999999999998,
+        "awayWinProbability": 76.4,
+        "homeWinProbabilityAdded": 3,
+        "awayWinProbabilityAdded": -3,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 98.4,
+          "launchAngle": -13,
+          "totalDistance": 7
+        }
+      },
+      {
+        "atBatIndex": 23,
+        "homeWinProbability": 27.6,
+        "awayWinProbability": 72.4,
+        "homeWinProbabilityAdded": 4.0000000000000036,
+        "awayWinProbabilityAdded": -4.0000000000000036,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 24,
+        "homeWinProbability": 19.6,
+        "awayWinProbability": 80.4,
+        "homeWinProbabilityAdded": -8,
+        "awayWinProbabilityAdded": 8,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 84.7,
+          "launchAngle": -35,
+          "totalDistance": 3
+        }
+      },
+      {
+        "atBatIndex": 25,
+        "homeWinProbability": 20.8,
+        "awayWinProbability": 79.2,
+        "homeWinProbabilityAdded": 1.1999999999999993,
+        "awayWinProbabilityAdded": -1.1999999999999993,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 73.6,
+          "launchAngle": -43,
+          "totalDistance": 3
+        }
+      },
+      {
+        "atBatIndex": 26,
+        "homeWinProbability": 18.6,
+        "awayWinProbability": 81.4,
+        "homeWinProbabilityAdded": -2.1999999999999993,
+        "awayWinProbabilityAdded": 2.1999999999999993,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 27,
+        "homeWinProbability": 19.900000000000002,
+        "awayWinProbability": 80.1,
+        "homeWinProbabilityAdded": 1.3000000000000007,
+        "awayWinProbabilityAdded": -1.3000000000000007,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 79.5,
+          "launchAngle": 29,
+          "totalDistance": 266
+        }
+      },
+      {
+        "atBatIndex": 28,
+        "homeWinProbability": 20.9,
+        "awayWinProbability": 79.1,
+        "homeWinProbabilityAdded": 0.9999999999999964,
+        "awayWinProbabilityAdded": -0.9999999999999964,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 29,
+        "homeWinProbability": 19.5,
+        "awayWinProbability": 80.5,
+        "homeWinProbabilityAdded": -1.3999999999999986,
+        "awayWinProbabilityAdded": 1.3999999999999986,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 85,
+          "launchAngle": 26,
+          "totalDistance": 287
+        }
+      },
+      {
+        "atBatIndex": 30,
+        "homeWinProbability": 12.9,
+        "awayWinProbability": 87.1,
+        "homeWinProbabilityAdded": -6.6,
+        "awayWinProbabilityAdded": 6.6,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": true,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 111.5,
+          "launchAngle": 14,
+          "totalDistance": 286
+        }
+      },
+      {
+        "atBatIndex": 31,
+        "homeWinProbability": 14.399999999999999,
+        "awayWinProbability": 85.6,
+        "homeWinProbabilityAdded": 1.4999999999999982,
+        "awayWinProbabilityAdded": -1.4999999999999982,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 32,
+        "homeWinProbability": 17.9,
+        "awayWinProbability": 82.1,
+        "homeWinProbabilityAdded": 3.5,
+        "awayWinProbabilityAdded": -3.5,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 33,
+        "homeWinProbability": 27.400000000000002,
+        "awayWinProbability": 72.6,
+        "homeWinProbabilityAdded": 9.500000000000004,
+        "awayWinProbabilityAdded": -9.500000000000004,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 107.4,
+          "launchAngle": 10,
+          "totalDistance": 232
+        }
+      },
+      {
+        "atBatIndex": 34,
+        "homeWinProbability": 31.6,
+        "awayWinProbability": 68.4,
+        "homeWinProbabilityAdded": 4.199999999999999,
+        "awayWinProbabilityAdded": -4.199999999999999,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": true,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 35,
+        "homeWinProbability": 28.799999999999997,
+        "awayWinProbability": 71.2,
+        "homeWinProbabilityAdded": -2.8000000000000043,
+        "awayWinProbabilityAdded": 2.8000000000000043,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": true,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": true,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 96.9,
+          "launchAngle": -15,
+          "totalDistance": 11
+        }
+      },
+      {
+        "atBatIndex": 36,
+        "homeWinProbability": 27.700000000000003,
+        "awayWinProbability": 72.3,
+        "homeWinProbabilityAdded": -1.0999999999999943,
+        "awayWinProbabilityAdded": 1.0999999999999943,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": true,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": true,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 88.9,
+          "launchAngle": 19,
+          "totalDistance": 277
+        }
+      },
+      {
+        "atBatIndex": 37,
+        "homeWinProbability": 24.9,
+        "awayWinProbability": 75.1,
+        "homeWinProbabilityAdded": -2.8000000000000043,
+        "awayWinProbabilityAdded": 2.8000000000000043,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 73.2,
+          "launchAngle": -15,
+          "totalDistance": 6
+        }
+      },
+      {
+        "atBatIndex": 38,
+        "homeWinProbability": 20.1,
+        "awayWinProbability": 79.9,
+        "homeWinProbabilityAdded": -4.799999999999997,
+        "awayWinProbabilityAdded": 4.799999999999997,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 103.2,
+          "launchAngle": 6,
+          "totalDistance": 108
+        }
+      },
+      {
+        "atBatIndex": 39,
+        "homeWinProbability": 23.3,
+        "awayWinProbability": 76.7,
+        "homeWinProbabilityAdded": 3.1999999999999993,
+        "awayWinProbabilityAdded": -3.1999999999999993,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": true,
+        "hitData": {
+          "launchSpeed": 54.1,
+          "launchAngle": -26,
+          "totalDistance": 5
+        }
+      },
+      {
+        "atBatIndex": 40,
+        "homeWinProbability": 26.1,
+        "awayWinProbability": 73.9,
+        "homeWinProbabilityAdded": 2.8000000000000007,
+        "awayWinProbabilityAdded": -2.8000000000000007,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 41,
+        "homeWinProbability": 17.9,
+        "awayWinProbability": 82.1,
+        "homeWinProbabilityAdded": -8.200000000000003,
+        "awayWinProbabilityAdded": 8.200000000000003,
+        "keyMoment": true,
+        "leadChange": false,
+        "scoring": true,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 66.6,
+          "launchAngle": 24,
+          "totalDistance": 189
+        }
+      },
+      {
+        "atBatIndex": 42,
+        "homeWinProbability": 19.2,
+        "awayWinProbability": 80.8,
+        "homeWinProbabilityAdded": 1.3000000000000007,
+        "awayWinProbabilityAdded": -1.3000000000000007,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 94.4,
+          "launchAngle": 39,
+          "totalDistance": 334
+        }
+      },
+      {
+        "atBatIndex": 43,
+        "homeWinProbability": 23.7,
+        "awayWinProbability": 76.3,
+        "homeWinProbabilityAdded": 4.5,
+        "awayWinProbabilityAdded": -4.5,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 101.9,
+          "launchAngle": 3,
+          "totalDistance": 77
+        }
+      },
+      {
+        "atBatIndex": 44,
+        "homeWinProbability": 19.5,
+        "awayWinProbability": 80.5,
+        "homeWinProbabilityAdded": -4.199999999999999,
+        "awayWinProbabilityAdded": 4.199999999999999,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 45,
+        "homeWinProbability": 16.1,
+        "awayWinProbability": 83.9,
+        "homeWinProbabilityAdded": -3.3999999999999986,
+        "awayWinProbabilityAdded": 3.3999999999999986,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 61,
+          "launchAngle": 26,
+          "totalDistance": 173
+        }
+      },
+      {
+        "atBatIndex": 46,
+        "homeWinProbability": 35.699999999999996,
+        "awayWinProbability": 64.30000000000001,
+        "homeWinProbabilityAdded": 19.599999999999994,
+        "awayWinProbabilityAdded": -19.599999999999994,
+        "keyMoment": true,
+        "leadChange": false,
+        "scoring": true,
+        "homeRun": true,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 110.7,
+          "launchAngle": 32,
+          "totalDistance": 430
+        }
+      },
+      {
+        "atBatIndex": 47,
+        "homeWinProbability": 37.5,
+        "awayWinProbability": 62.5,
+        "homeWinProbabilityAdded": 1.8000000000000043,
+        "awayWinProbabilityAdded": -1.8000000000000043,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 48,
+        "homeWinProbability": 34,
+        "awayWinProbability": 66,
+        "homeWinProbabilityAdded": -3.5,
+        "awayWinProbabilityAdded": 3.5,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 98.8,
+          "launchAngle": 23,
+          "totalDistance": 378
+        }
+      },
+      {
+        "atBatIndex": 49,
+        "homeWinProbability": 30.2,
+        "awayWinProbability": 69.8,
+        "homeWinProbabilityAdded": -3.8000000000000007,
+        "awayWinProbabilityAdded": 3.8000000000000007,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 86,
+          "launchAngle": 14,
+          "totalDistance": 202
+        }
+      },
+      {
+        "atBatIndex": 50,
+        "homeWinProbability": 31.7,
+        "awayWinProbability": 68.3,
+        "homeWinProbabilityAdded": 1.5,
+        "awayWinProbabilityAdded": -1.5,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 25.6,
+          "launchAngle": -12,
+          "totalDistance": 9
+        }
+      },
+      {
+        "atBatIndex": 51,
+        "homeWinProbability": 35.099999999999994,
+        "awayWinProbability": 64.9,
+        "homeWinProbabilityAdded": 3.399999999999995,
+        "awayWinProbabilityAdded": -3.399999999999995,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 109.8,
+          "launchAngle": 0,
+          "totalDistance": 48
+        }
+      },
+      {
+        "atBatIndex": 52,
+        "homeWinProbability": 34,
+        "awayWinProbability": 66,
+        "homeWinProbabilityAdded": -1.0999999999999943,
+        "awayWinProbabilityAdded": 1.0999999999999943,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 53,
+        "homeWinProbability": 22.1,
+        "awayWinProbability": 77.9,
+        "homeWinProbabilityAdded": -11.899999999999999,
+        "awayWinProbabilityAdded": 11.899999999999999,
+        "keyMoment": true,
+        "leadChange": false,
+        "scoring": true,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": true,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 62.5,
+          "launchAngle": 23,
+          "totalDistance": 165
+        }
+      },
+      {
+        "atBatIndex": 54,
+        "homeWinProbability": 26,
+        "awayWinProbability": 74,
+        "homeWinProbabilityAdded": 3.8999999999999986,
+        "awayWinProbabilityAdded": -3.8999999999999986,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 55,
+        "homeWinProbability": 22.5,
+        "awayWinProbability": 77.5,
+        "homeWinProbabilityAdded": -3.5,
+        "awayWinProbabilityAdded": 3.5,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 81.6,
+          "launchAngle": 77,
+          "totalDistance": 76
+        }
+      },
+      {
+        "atBatIndex": 56,
+        "homeWinProbability": 20,
+        "awayWinProbability": 80,
+        "homeWinProbabilityAdded": -2.5,
+        "awayWinProbabilityAdded": 2.5,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 57,
+        "homeWinProbability": 18.5,
+        "awayWinProbability": 81.5,
+        "homeWinProbabilityAdded": -1.5,
+        "awayWinProbabilityAdded": 1.5,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 58,
+        "homeWinProbability": 20.1,
+        "awayWinProbability": 79.9,
+        "homeWinProbabilityAdded": 1.6000000000000014,
+        "awayWinProbabilityAdded": -1.6000000000000014,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 71,
+          "launchAngle": -49,
+          "totalDistance": 2
+        }
+      },
+      {
+        "atBatIndex": 59,
+        "homeWinProbability": 18.4,
+        "awayWinProbability": 81.6,
+        "homeWinProbabilityAdded": -1.7000000000000028,
+        "awayWinProbabilityAdded": 1.7000000000000028,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 98.4,
+          "launchAngle": 3,
+          "totalDistance": 85
+        }
+      },
+      {
+        "atBatIndex": 60,
+        "homeWinProbability": 20.4,
+        "awayWinProbability": 79.6,
+        "homeWinProbabilityAdded": 2,
+        "awayWinProbabilityAdded": -2,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 87.3,
+          "launchAngle": 29,
+          "totalDistance": 302
+        }
+      },
+      {
+        "atBatIndex": 61,
+        "homeWinProbability": 19,
+        "awayWinProbability": 81,
+        "homeWinProbabilityAdded": -1.3999999999999986,
+        "awayWinProbabilityAdded": 1.3999999999999986,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 62,
+        "homeWinProbability": 22.1,
+        "awayWinProbability": 77.9,
+        "homeWinProbabilityAdded": 3.1000000000000014,
+        "awayWinProbabilityAdded": -3.1000000000000014,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 91.4,
+          "launchAngle": -17,
+          "totalDistance": 7
+        }
+      },
+      {
+        "atBatIndex": 63,
+        "homeWinProbability": 18.099999999999998,
+        "awayWinProbability": 81.9,
+        "homeWinProbabilityAdded": -4.0000000000000036,
+        "awayWinProbabilityAdded": 4.0000000000000036,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 99.8,
+          "launchAngle": -13,
+          "totalDistance": 11
+        }
+      },
+      {
+        "atBatIndex": 64,
+        "homeWinProbability": 31.6,
+        "awayWinProbability": 68.4,
+        "homeWinProbabilityAdded": 13.500000000000004,
+        "awayWinProbabilityAdded": -13.500000000000004,
+        "keyMoment": true,
+        "leadChange": false,
+        "scoring": true,
+        "homeRun": true,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 109.4,
+          "launchAngle": 32,
+          "totalDistance": 442
+        }
+      },
+      {
+        "atBatIndex": 65,
+        "homeWinProbability": 37,
+        "awayWinProbability": 63,
+        "homeWinProbabilityAdded": 5.399999999999999,
+        "awayWinProbabilityAdded": -5.399999999999999,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 66,
+        "homeWinProbability": 30.7,
+        "awayWinProbability": 69.3,
+        "homeWinProbabilityAdded": -6.300000000000001,
+        "awayWinProbabilityAdded": 6.300000000000001,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": true,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 91.5,
+          "launchAngle": 45,
+          "totalDistance": 285
+        }
+      },
+      {
+        "atBatIndex": 67,
+        "homeWinProbability": 35.199999999999996,
+        "awayWinProbability": 64.80000000000001,
+        "homeWinProbabilityAdded": 4.4999999999999964,
+        "awayWinProbabilityAdded": -4.4999999999999964,
+        "keyMoment": true,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": true,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 68,
+        "homeWinProbability": 25.5,
+        "awayWinProbability": 74.5,
+        "homeWinProbabilityAdded": -9.699999999999996,
+        "awayWinProbabilityAdded": 9.699999999999996,
+        "keyMoment": true,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": true,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 77,
+          "launchAngle": -11,
+          "totalDistance": 13
+        }
+      },
+      {
+        "atBatIndex": 69,
+        "homeWinProbability": 27.800000000000004,
+        "awayWinProbability": 72.19999999999999,
+        "homeWinProbabilityAdded": 2.3000000000000043,
+        "awayWinProbabilityAdded": -2.3000000000000043,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": false,
+        "absChallenge": true,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 70,
+        "homeWinProbability": 29.599999999999998,
+        "awayWinProbability": 70.4,
+        "homeWinProbabilityAdded": 1.7999999999999936,
+        "awayWinProbabilityAdded": -1.7999999999999936,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 69.6,
+          "launchAngle": -39,
+          "totalDistance": 3
+        }
+      },
+      {
+        "atBatIndex": 71,
+        "homeWinProbability": 30.8,
+        "awayWinProbability": 69.2,
+        "homeWinProbabilityAdded": 1.2000000000000028,
+        "awayWinProbabilityAdded": -1.2000000000000028,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 99.1,
+          "launchAngle": 18,
+          "totalDistance": 335
+        }
+      },
+      {
+        "atBatIndex": 72,
+        "homeWinProbability": 24.5,
+        "awayWinProbability": 75.5,
+        "homeWinProbabilityAdded": -6.300000000000001,
+        "awayWinProbabilityAdded": 6.300000000000001,
+        "keyMoment": true,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": true,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 73,
+        "homeWinProbability": 36.8,
+        "awayWinProbability": 63.2,
+        "homeWinProbabilityAdded": 12.299999999999997,
+        "awayWinProbabilityAdded": -12.299999999999997,
+        "keyMoment": true,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 100.7,
+          "launchAngle": 33,
+          "totalDistance": 391
+        }
+      },
+      {
+        "atBatIndex": 74,
+        "homeWinProbability": 28.1,
+        "awayWinProbability": 71.9,
+        "homeWinProbabilityAdded": -8.699999999999996,
+        "awayWinProbabilityAdded": 8.699999999999996,
+        "keyMoment": true,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": true,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 92.2,
+          "launchAngle": -19,
+          "totalDistance": 6
+        }
+      },
+      {
+        "atBatIndex": 75,
+        "homeWinProbability": 16.5,
+        "awayWinProbability": 83.5,
+        "homeWinProbabilityAdded": -11.600000000000001,
+        "awayWinProbabilityAdded": 11.600000000000001,
+        "keyMoment": true,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": true,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 106.5,
+          "launchAngle": -19,
+          "totalDistance": 5
+        }
+      },
+      {
+        "atBatIndex": 76,
+        "homeWinProbability": 14.099999999999998,
+        "awayWinProbability": 85.9,
+        "homeWinProbabilityAdded": -2.400000000000002,
+        "awayWinProbabilityAdded": 2.400000000000002,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 77,
+        "homeWinProbability": 10.7,
+        "awayWinProbability": 89.3,
+        "homeWinProbabilityAdded": -3.3999999999999986,
+        "awayWinProbabilityAdded": 3.3999999999999986,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 78,
+        "homeWinProbability": 13.900000000000002,
+        "awayWinProbability": 86.1,
+        "homeWinProbabilityAdded": 3.200000000000003,
+        "awayWinProbabilityAdded": -3.200000000000003,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 79,
+        "homeWinProbability": 17,
+        "awayWinProbability": 83,
+        "homeWinProbabilityAdded": 3.099999999999998,
+        "awayWinProbabilityAdded": -3.099999999999998,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 80,
+        "homeWinProbability": 20.4,
+        "awayWinProbability": 79.6,
+        "homeWinProbabilityAdded": 3.3999999999999986,
+        "awayWinProbabilityAdded": -3.3999999999999986,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 95.8,
+          "launchAngle": 36,
+          "totalDistance": 358
+        }
+      },
+      {
+        "atBatIndex": 81,
+        "homeWinProbability": 11.5,
+        "awayWinProbability": 88.5,
+        "homeWinProbabilityAdded": -8.899999999999999,
+        "awayWinProbabilityAdded": 8.899999999999999,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": true,
+        "strikeout": false,
+        "highLeverage": true,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 104.1,
+          "launchAngle": -4,
+          "totalDistance": 26
+        }
+      },
+      {
+        "atBatIndex": 82,
+        "homeWinProbability": 4.7,
+        "awayWinProbability": 95.3,
+        "homeWinProbabilityAdded": -6.8,
+        "awayWinProbabilityAdded": 6.8,
+        "keyMoment": true,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": true,
+        "highLeverage": true,
+        "absChallenge": true,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 83,
+        "homeWinProbability": 9.9,
+        "awayWinProbability": 90.1,
+        "homeWinProbabilityAdded": 5.2,
+        "awayWinProbabilityAdded": -5.2,
+        "keyMoment": false,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": false,
+        "absChallenge": true,
+        "hitData": {
+          "launchSpeed": null,
+          "launchAngle": null,
+          "totalDistance": null
+        }
+      },
+      {
+        "atBatIndex": 84,
+        "homeWinProbability": 0,
+        "awayWinProbability": 100,
+        "homeWinProbabilityAdded": -9.9,
+        "awayWinProbabilityAdded": 9.9,
+        "keyMoment": true,
+        "leadChange": false,
+        "scoring": false,
+        "homeRun": false,
+        "hardHit": false,
+        "strikeout": false,
+        "highLeverage": true,
+        "absChallenge": false,
+        "hitData": {
+          "launchSpeed": 82.3,
+          "launchAngle": 51,
+          "totalDistance": 233
+        }
+      }
+    ]
   }
 }

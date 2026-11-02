@@ -83,6 +83,7 @@ describe("formatDriftReport", () =>
 			findings: [],
 		};
 		expect(formatDriftReport(clean)).toContain("no drift");
+		expect(formatDriftReport(clean)).toContain("  a.json");
 	});
 
 	it("lists each unmodeled path under its fixture", () =>

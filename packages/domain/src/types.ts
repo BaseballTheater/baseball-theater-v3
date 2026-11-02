@@ -130,6 +130,38 @@ export type MediaHighlight = {
 
 import type { AtBat } from "./plays.js";
 
+/**
+ * What one at-bat meant, by MLB's own measure (S93; the play-metrics feed): the chance each
+ * team wins after it (percent, 0–100), how much it moved that chance, and MLB's flags.
+ * Keyed by the live feed's `atBatIndex`, so it joins `GameSnapshot.plays`.
+ */
+export type AtBatMetrics = {
+	atBatIndex: number;
+	homeWinProbability: number | null;
+	awayWinProbability: number | null;
+	/** Percentage points the at-bat added to the home team's chance (negative when it took some away). */
+	homeWinProbabilityAdded: number | null;
+	awayWinProbabilityAdded: number | null;
+	keyMoment: boolean;
+	/** The at-bat tied the game or changed the lead. */
+	leadChange: boolean;
+	scoring: boolean;
+	homeRun: boolean;
+	hardHit: boolean;
+	strikeout: boolean;
+	highLeverage: boolean;
+	absChallenge: boolean;
+	/** Statcast contact on the at-bat's ball in play; each figure null when nothing was measured. */
+	hitData: { launchSpeed: number | null;
+		launchAngle: number | null;
+		totalDistance: number | null };
+};
+
+/** A game's play metrics (S93): every at-bat MLB measured, in game order. */
+export type GamePlayMetrics = {
+	atBats: AtBatMetrics[];
+};
+
 export type GameSnapshot = {
 	gamePk: number;
 	gameDate: string; // YYYY-MM-DD (schedule date)
@@ -152,6 +184,11 @@ export type GameSnapshot = {
 	boxscore?: GameBoxscore;
 	/** MLB's editorial recap (S10); absent until MLB publishes one. */
 	recap?: GameRecap;
+	/**
+	 * MLB's per-at-bat win probability and key-moment flags (S93). Absent when the feed
+	 * (an internal mlb.com source) failed or had nothing: the game is served as before.
+	 */
+	playMetrics?: GamePlayMetrics;
 	/** Who is on base and who is batting and pitching (S63); `null` unless in progress, absent on older recordings. */
 	live?: GameLive | null;
 	fetchedAt: string; // ISO

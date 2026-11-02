@@ -6,6 +6,7 @@ import {
 import {
 	parseGameContentResponse,
 	parseLiveFeedResponse,
+	parsePlayMetricsResponse,
 	parseScheduleResponse,
 } from "./parse.js";
 
@@ -118,5 +119,30 @@ describe("parseGameContentResponse", () =>
 				},
 			}),
 		).toThrow();
+	});
+});
+
+describe("parsePlayMetricsResponse (S93)", () =>
+{
+	it("play metrics: parses the recorded 823823 feed, its index lists and every at-bat", () =>
+	{
+		const parsed = parsePlayMetricsResponse(readRaw("playmetrics-823823.json"));
+		expect(parsed.keyMoments).toEqual([15, 21, 41, 46, 53, 64, 67, 68, 72, 73, 74, 75, 82, 84]);
+		expect(parsed.absChallenge).toEqual([34, 39, 69, 82, 83]);
+		expect(parsed.allPlayMetrics).toHaveLength(85);
+		const ab82 = parsed.allPlayMetrics![82]!;
+		expect(ab82.atBatIndex).toBe(82);
+		expect(ab82.isAbsChallenge).toBe(true);
+		expect(ab82.homeTeamWinProbability).toBe(4.7);
+		expect(ab82.playEvents!.length).toBeGreaterThan(0);
+	});
+
+	it("play metrics: an at-bat without its index is rejected", () =>
+	{
+		expect(() => parsePlayMetricsResponse({
+			allPlayMetrics: [{
+				when: "top 1",
+			}],
+		})).toThrow();
 	});
 });

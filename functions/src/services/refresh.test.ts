@@ -40,6 +40,7 @@ function spyClient(): {
 		fetchSchedule: (d: string) => real.fetchSchedule(d),
 		fetchGame,
 		fetchGameContent: (pk: number) => real.fetchGameContent(pk),
+		fetchPlayMetrics: (pk: number) => real.fetchPlayMetrics(pk),
 		fetchStandings: (d: string) => real.fetchStandings(d),
 		fetchPlayers: (ids: number[]) => real.fetchPlayers(ids),
 		fetchGameTimestamps: (pk: number) => real.fetchGameTimestamps(pk),

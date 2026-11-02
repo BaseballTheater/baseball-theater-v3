@@ -13026,3 +13026,85 @@ Two independent fresh-context reviewers (A, B), merged. Both read A6/A7/A8 in fu
 **For the parity review.** FEATURES.md:214 and ADR-023:15 say "Install app row in Settings"; A8 makes it a dismissable tip at the top of Settings, still the owner's "quiet prompt in Settings".
 
 **Owner question (optional, not blocking).** "May S73's grader check 3 be edited to match A6 (its label and `-t \"Reload\"` filter becoming Update Now / Snooze), though rule 8 forbids editing a grader after it's written? Default: keep it, name the test truthfully, and note the stale label in the ledger."
+
+---
+
+## 2026-11-02 — S93 completed
+
+**Ingest play metrics**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-02T23:22:55Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `52039f0` (tree dirty) |
+| Grader | `scripts/verify-S93.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: fixtures/raw/playmetrics-823823.json is MLB's recorded bdfed play-metrics response; the recorder fetches it; local dev and tests read the fixture, never the network
+check 2 PASS: packages/mlb-api types the payload as named interfaces split by purpose, parses it with zod (test on the recording), the coverage gate and pnpm mlb:scan-drift cover it with no drift
+check 3 PASS: MlbStatsClient.fetchPlayMetrics, in the fixture and HTTP adapters (tests); no web code fetches the feed
+check 4 PASS: a functions mapper projects GameSnapshot.playMetrics per at-bat: win probability, WPA, the flags and hit data; 823823's ABS challenges 34/39/69/82/83 and 14 key moments (test); spec additive, api:breaking 0
+check 5 PASS: the feed is optional: when it fails or is empty, playMetrics is absent and the game is served as before (test)
+check 6 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**6/6 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S93 check results ---
+check 1 PASS: fixtures/raw/playmetrics-823823.json is MLB's recorded bdfed play-metrics response; the recorder fetches it; local dev and tests read the fixture, never the network
+check 2 PASS: packages/mlb-api types the payload as named interfaces split by purpose, parses it with zod (test on the recording), the coverage gate and pnpm mlb:scan-drift cover it with no drift
+check 3 PASS: MlbStatsClient.fetchPlayMetrics, in the fixture and HTTP adapters (tests); no web code fetches the feed
+check 4 PASS: a functions mapper projects GameSnapshot.playMetrics per at-bat: win probability, WPA, the flags and hit data; 823823's ABS challenges 34/39/69/82/83 and 14 key moments (test); spec additive, api:breaking 0
+check 5 PASS: the feed is optional: when it fails or is empty, playMetrics is absent and the game is served as before (test)
+check 6 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S93: 6/6 checks passed ---
+verify-S93: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+web build: dist/assets/VideoPlayer-BWugZ3uT.js                2.94 kB │ gzip:   1.43 kB
+web build: dist/assets/Table-vkF-AfYl.js                      4.15 kB │ gzip:   1.63 kB
+web build: dist/assets/Modal-DsWM-dBj.js                      4.82 kB │ gzip:   1.73 kB
+web build: dist/assets/workbox-window.prod.es5-BBnX5xw4.js    5.75 kB │ gzip:   2.36 kB
+web build: dist/assets/TextInput-BRExla4n.js                 28.11 kB │ gzip:   9.21 kB
+web build: dist/assets/SettingsPage-MYaC6kki.js              37.16 kB │ gzip:  11.92 kB
+web build: dist/assets/GamePage-BhGJbi_C.js                  86.60 kB │ gzip:  29.54 kB
+web build: dist/assets/index-dUaz85vt.js                    480.16 kB │ gzip: 154.18 kB
+web build: ✓ built in 2.06s
+web build: PWA v1.0.3
+web build: mode      generateSW
+web build: precache  22 entries (860.17 KiB)
+web build: files generated
+web build:   dist/sw.js
+web build:   dist/workbox-2fbc6a65.js
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 153917,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

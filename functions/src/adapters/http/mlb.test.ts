@@ -21,6 +21,7 @@ const BY_PATH: [RegExp, string][] = [
 	[/\/api\/v1\/standings$/, "standings-2026-09-05.json"],
 	[/\/api\/v1\/people$/, "people-823823.json"],
 	[/\/api\/v1\/schedule$/, "schedule-2026-09-05.json"],
+	[/\/bdfed\/playMetrics\/823823$/, "playmetrics-823823.json"],
 ];
 
 function client(): { mlb: HttpMlbStatsClient;
@@ -81,5 +82,14 @@ describe("HttpMlbStatsClient (S2)", () =>
 		const { mlb } = client();
 		expect(await mlb.fetchGameContent(823823)).toEqual([]);
 		await expect(mlb.fetchGame(823823)).rejects.toThrow(/MLB Stats API 404 for .*\/feed\/live/);
+	});
+
+	it("fetchPlayMetrics asks MLB's bdfed feed with every category and maps the recording (S93)", async () =>
+	{
+		const { mlb, urls } = client();
+		const metrics = await mlb.fetchPlayMetrics(823823);
+		expect(urls).toEqual(["https://bdfed.stitch.mlbinfra.com/bdfed/playMetrics/823823?keyMoments=true&scoringPlays=true&homeRuns=true&strikeouts=true&hardHits=true&highLeverage=false&leadChange=true&winProb=true&absChallenge=true"]);
+		expect(metrics?.atBats).toHaveLength(85);
+		expect(await mlb.fetchPlayMetrics(1)).toBeNull();
 	});
 });

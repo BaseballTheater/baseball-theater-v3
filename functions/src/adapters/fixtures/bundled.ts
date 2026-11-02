@@ -13,6 +13,7 @@ import game823823 from "../../../../fixtures/game-823823.json" with { type: "jso
 import players823823 from "../../../../fixtures/players-823823.json" with { type: "json" };
 import plays744834 from "../../../../fixtures/plays-744834.json" with { type: "json" };
 import plays823823 from "../../../../fixtures/plays-823823.json" with { type: "json" };
+import playMetrics823823 from "../../../../fixtures/raw/playmetrics-823823.json" with { type: "json" };
 import schedule20240704 from "../../../../fixtures/schedule-2024-07-04.json" with { type: "json" };
 import schedule20260905 from "../../../../fixtures/schedule-2026-09-05.json" with { type: "json" };
 import standings20260905 from "../../../../fixtures/standings-2026-09-05.json" with { type: "json" };
@@ -27,6 +28,8 @@ export const BUNDLED_FIXTURES: Readonly<Record<string, unknown>> = {
 	"players-823823.json": players823823,
 	"plays-744834.json": plays744834,
 	"plays-823823.json": plays823823,
+	// The recorded play-metrics feed (S93): pnpm dev reads only bundled fixtures.
+	"raw/playmetrics-823823.json": playMetrics823823,
 	"schedule-2024-07-04.json": schedule20240704,
 	"schedule-2026-09-05.json": schedule20260905,
 	"standings-2026-09-05.json": standings20260905,

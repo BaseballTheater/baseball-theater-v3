@@ -130,6 +130,56 @@
 				"required": ["about", "result", "matchup", "count", "pitches"],
 				"type": "object"
 			},
+			"AtBatMetrics": {
+				"additionalProperties": false,
+				"description": "What one at-bat meant, by MLB's own measure (S93; the play-metrics feed): the chance each team wins after it (percent, 0–100), how much it moved that chance, and MLB's flags. Keyed by the live feed's `atBatIndex`, so it joins `GameSnapshot.plays`.",
+				"properties": {
+					"absChallenge": { "type": "boolean" },
+					"atBatIndex": { "type": "number" },
+					"awayWinProbability": { "type": ["number", "null"] },
+					"awayWinProbabilityAdded": { "type": ["number", "null"] },
+					"hardHit": { "type": "boolean" },
+					"highLeverage": { "type": "boolean" },
+					"hitData": {
+						"additionalProperties": false,
+						"description": "Statcast contact on the at-bat's ball in play; each figure null when nothing was measured.",
+						"properties": {
+							"launchAngle": { "type": ["number", "null"] },
+							"launchSpeed": { "type": ["number", "null"] },
+							"totalDistance": { "type": ["number", "null"] }
+						},
+						"required": ["launchSpeed", "launchAngle", "totalDistance"],
+						"type": "object"
+					},
+					"homeRun": { "type": "boolean" },
+					"homeWinProbability": { "type": ["number", "null"] },
+					"homeWinProbabilityAdded": {
+						"description": "Percentage points the at-bat added to the home team's chance (negative when it took some away).",
+						"type": ["number", "null"]
+					},
+					"keyMoment": { "type": "boolean" },
+					"leadChange": { "description": "The at-bat tied the game or changed the lead.", "type": "boolean" },
+					"scoring": { "type": "boolean" },
+					"strikeout": { "type": "boolean" }
+				},
+				"required": [
+					"atBatIndex",
+					"homeWinProbability",
+					"awayWinProbability",
+					"homeWinProbabilityAdded",
+					"awayWinProbabilityAdded",
+					"keyMoment",
+					"leadChange",
+					"scoring",
+					"homeRun",
+					"hardHit",
+					"strikeout",
+					"highLeverage",
+					"absChallenge",
+					"hitData"
+				],
+				"type": "object"
+			},
 			"BoxscoreBatter": {
 				"additionalProperties": false,
 				"description": "One batter's line in the box score (S2; the ratified Box frames' columns).",
@@ -295,6 +345,15 @@
 				"required": ["runners", "batterId", "pitcherId"],
 				"type": "object"
 			},
+			"GamePlayMetrics": {
+				"additionalProperties": false,
+				"description": "A game's play metrics (S93): every at-bat MLB measured, in game order.",
+				"properties": {
+					"atBats": { "items": { "$ref": "#/components/schemas/AtBatMetrics" }, "type": "array" }
+				},
+				"required": ["atBats"],
+				"type": "object"
+			},
 			"GameRecap": {
 				"additionalProperties": false,
 				"description": "MLB's editorial recap as plain text (S10): the headline and the article's paragraphs, separated by blank lines. Markup, embedded players and links are stripped at ingest, so views never render outside HTML.",
@@ -324,6 +383,10 @@
 						"description": "Who is on base and who is batting and pitching (S63); `null` unless in progress, absent on older recordings."
 					},
 					"officialDate": { "type": "string" },
+					"playMetrics": {
+						"$ref": "#/components/schemas/GamePlayMetrics",
+						"description": "MLB's per-at-bat win probability and key-moment flags (S93). Absent when the feed (an internal mlb.com source) failed or had nothing: the game is served as before."
+					},
 					"plays": { "items": { "$ref": "#/components/schemas/AtBat" }, "type": "array" },
 					"recap": {
 						"$ref": "#/components/schemas/GameRecap",

@@ -80,6 +80,11 @@ class FakeMlbStatsClient implements MlbStatsClient
 		return [];
 	}
 
+	async fetchPlayMetrics(): Promise<null>
+	{
+		return null;
+	}
+
 	async fetchStandings(date: string): Promise<StandingsSnapshot>
 	{
 		const table = await readFixture<StandingsSnapshot>("standings-2026-09-05.json");
@@ -137,17 +142,18 @@ describe("fixture recorder", () =>
 			},
 		);
 
-		// The six names packages/mlb-api/src/coverage.test.ts consumes.
+		// The seven names packages/mlb-api/src/coverage.test.ts consumes (play metrics since S93).
 		expect(written).toEqual([
 			`schedule-${DATE}.json`,
 			`live-${GAME_PK}.json`,
 			`content-${GAME_PK}.json`,
 			`timestamps-${GAME_PK}.json`,
+			`playmetrics-${GAME_PK}.json`,
 			`standings-${DATE}.json`,
 			`people-${GAME_PK}.json`,
 		]);
-		expect(seen).toHaveLength(6);
-		expect(await readdir(path.join(out, "raw"))).toHaveLength(6);
+		expect(seen).toHaveLength(7);
+		expect(await readdir(path.join(out, "raw"))).toHaveLength(7);
 
 		// Byte-exact: not re-stringified through JSON.parse.
 		const onDisk = await readFile(path.join(out, "raw", `live-${GAME_PK}.json`), "utf8");
@@ -167,6 +173,7 @@ describe("fixture recorder", () =>
 		expect(names).toContain(`live-${GAME_PK}`);
 		expect(names).toContain(`content-${GAME_PK}`);
 		expect(names).toContain(`timestamps-${GAME_PK}`);
+		expect(names).toContain(`playmetrics-${GAME_PK}`);
 		expect(names).toContain(`standings-${DATE}`);
 		expect(names).toContain(`people-${GAME_PK}`);
 	});

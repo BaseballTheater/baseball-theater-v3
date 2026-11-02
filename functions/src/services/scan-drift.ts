@@ -20,6 +20,7 @@ import {
 	parseGameTimestamps,
 	parseLiveFeedResponse,
 	parsePeopleResponse,
+	parsePlayMetricsResponse,
 	parseRecordedReplayWalk,
 	parseScheduleResponse,
 	parseStandingsResponse,
@@ -52,6 +53,7 @@ const PARSERS: ReadonlyArray<readonly [RegExp, Parser]> = [
 	[/^live-\d+-base\.json$/, parseLiveFeedResponse],
 	[/^live-\d+\.json$/, parseLiveFeedResponse],
 	[/^content-.*\.json$/, parseGameContentResponse],
+	[/^playmetrics-.*\.json$/, parsePlayMetricsResponse],
 	[/^timestamps-.*\.json$/, parseGameTimestamps],
 	[/^standings-.*\.json$/, parseStandingsResponse],
 	[/^people-.*\.json$/, parsePeopleResponse],
@@ -99,13 +101,14 @@ export async function scanRawDir(rawDir: string): Promise<DriftReport>
 	};
 }
 
-/** Human-readable triage output. */
+/** Human-readable triage output: the count, then each fixture scanned by name, so a new recording visibly joins the scan. */
 export function formatDriftReport(report: DriftReport): string
 {
 	const lines: string[] = [];
 	lines.push(
 		`scanned ${report.scanned.length} fixture(s), skipped ${report.skipped.length}`,
 	);
+	for (const name of report.scanned) lines.push(`  ${name}`);
 
 	if (report.findings.length === 0)
 	{

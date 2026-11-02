@@ -58,6 +58,11 @@ class CountingMlbClient implements MlbStatsClient
 		return [];
 	}
 
+	async fetchPlayMetrics(): Promise<null>
+	{
+		return null;
+	}
+
 	async fetchStandings(): Promise<StandingsSnapshot>
 	{
 		return {

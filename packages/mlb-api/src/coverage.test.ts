@@ -10,6 +10,7 @@ import {
 	parseGameTimestamps,
 	parseLiveFeedResponse,
 	parsePeopleResponse,
+	parsePlayMetricsResponse,
 	parseScheduleResponse,
 	parseStandingsResponse,
 } from "./parse.js";
@@ -33,6 +34,7 @@ const fixtures: ReadonlyArray<[string, (input: unknown) => unknown]> = [
 	["live-823823.json", parseLiveFeedResponse],
 	["live-823823-base.json", parseLiveFeedResponse],
 	["content-823823.json", parseGameContentResponse],
+	["playmetrics-823823.json", parsePlayMetricsResponse],
 	["timestamps-823823.json", parseGameTimestamps],
 	["standings-2026-09-05.json", parseStandingsResponse],
 	["people-823823.json", parsePeopleResponse],

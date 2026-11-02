@@ -6,6 +6,7 @@ export * from "./standings.js";
 export * from "./people.js";
 export * from "./live.js";
 export * from "./content.js";
+export * from "./playmetrics.js";
 export * from "./parse.js";
 export * from "./replay.js";
 export * from "./coverage.js";

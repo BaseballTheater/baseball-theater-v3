@@ -11,6 +11,7 @@ import { z } from "zod";
 import type { GameContentResponse } from "./content.js";
 import type { LiveFeedResponse } from "./live.js";
 import type { PeopleResponse } from "./people.js";
+import type { PlayMetricsResponse } from "./playmetrics.js";
 import type { ScheduleResponse } from "./schedule.js";
 import type { StandingsResponse } from "./standings.js";
 
@@ -1338,6 +1339,99 @@ export function parseGameContentResponse(input: unknown): GameContentResponse
 export function parseStandingsResponse(input: unknown): StandingsResponse
 {
 	return standingsResponseSchema.parse(input);
+}
+
+const playMetricsCountSchema = z.object({
+	balls: z.number().optional(),
+	strikes: z.number().optional(),
+	outs: z.number().optional(),
+});
+
+const playMetricsHitDataSchema = z.object({
+	launchSpeed: z.number().nullable().optional(),
+	launchAngle: z.number().nullable().optional(),
+	totalDistance: z.number().nullable().optional(),
+});
+
+const playMetricsRunnerSchema = z.object({
+	id: z.number().optional(),
+});
+
+const playMetricsEventSchema = z.object({
+	playIndex: z.number().optional(),
+	details: z
+		.object({
+			eventType: z.string().optional(),
+			awayScore: z.number().optional(),
+			homeScore: z.number().optional(),
+			isScoringPlay: z.boolean().optional(),
+		})
+		.optional(),
+	preCount: playMetricsCountSchema.optional(),
+	hitData: playMetricsHitDataSchema.optional(),
+	offense: z
+		.object({
+			first: playMetricsRunnerSchema.optional(),
+			second: playMetricsRunnerSchema.optional(),
+			third: playMetricsRunnerSchema.optional(),
+		})
+		.optional(),
+	reviewDetails: z
+		.object({
+			reviewType: z.string().optional(),
+		})
+		.optional(),
+});
+
+const atBatPlayMetricsSchema = z.object({
+	atBatIndex: z.number(),
+	when: z.string().optional(),
+	halfInning: z.string().optional(),
+	preCount: playMetricsCountSchema.optional(),
+	playEvents: z.array(playMetricsEventSchema).optional(),
+	homeTeamWinProbability: z.number().optional(),
+	awayTeamWinProbability: z.number().optional(),
+	homeTeamWinProbabilityAdded: z.number().optional(),
+	awayTeamWinProbabilityAdded: z.number().optional(),
+	isTieOrLeadChangePlay: z.boolean().optional(),
+	atBatIsTieOrLeadChange: z.boolean().optional(),
+	hasTieOrLeadChangePlay: z.boolean().optional(),
+	isScoringPlay: z.boolean().optional(),
+	isScoringAtBat: z.boolean().optional(),
+	isHomeRun: z.boolean().optional(),
+	isHardHit: z.boolean().optional(),
+	isStrikeout: z.boolean().optional(),
+	isHighLeverage: z.boolean().optional(),
+	hasLargeWinProbChange: z.boolean().optional(),
+	isKeyMoment: z.boolean().optional(),
+	atBatHasLargeWinProbChange: z.boolean().optional(),
+	atBatIsKeyMoment: z.boolean().optional(),
+	hasPlayWithLargeWinProbChange: z.boolean().optional(),
+	hasPlayWithLargeKMWinProbChange: z.boolean().optional(),
+	playsKMWpaThreshold: z.number().nullable().optional(),
+	playsWpaThreshold: z.number().nullable().optional(),
+	scoringPlayEvents: z.array(z.number()).nullable().optional(),
+	leadChangePlayEvents: z.array(z.number()).nullable().optional(),
+	isAbsChallenge: z.boolean().optional(),
+	hitData: playMetricsHitDataSchema.optional(),
+});
+
+const playMetricsResponseSchema = z.object({
+	scoringPlays: z.array(z.number()).optional(),
+	homeRuns: z.array(z.number()).optional(),
+	hardHits: z.array(z.number()).optional(),
+	strikeouts: z.array(z.number()).optional(),
+	leadChange: z.array(z.number()).optional(),
+	winProb: z.array(z.number()).optional(),
+	keyMoments: z.array(z.number()).optional(),
+	absChallenge: z.array(z.number()).optional(),
+	allPlayMetrics: z.array(atBatPlayMetricsSchema).optional(),
+});
+
+/** `GET bdfed.stitch.mlbinfra.com/bdfed/playMetrics/{gamePk}` (S93; an internal mlb.com feed). */
+export function parsePlayMetricsResponse(input: unknown): PlayMetricsResponse
+{
+	return playMetricsResponseSchema.parse(input);
 }
 
 /** `GET /api/v1/people` */

@@ -9,6 +9,7 @@
  * the live feed hydrate carries no playback URLs.
  */
 import type {
+	GamePlayMetrics,
 	GameSnapshot,
 	PlayerProfile,
 	ScheduleDay,
@@ -23,6 +24,7 @@ import {
 	parseGameTimestamps,
 	parseLiveFeedResponse,
 	parsePeopleResponse,
+	parsePlayMetricsResponse,
 	parseScheduleResponse,
 	parseStandingsResponse,
 } from "@bt/mlb-api";
@@ -31,9 +33,20 @@ import { mapContentHighlights, mapRecap } from "../../mappers/content.js";
 import { mapPeople } from "../../mappers/players.js";
 import { mapStandings } from "../../mappers/standings.js";
 import { mapLiveFeed } from "../../mappers/live.js";
+import { mapPlayMetrics } from "../../mappers/play-metrics.js";
 import { mapScheduleResponse } from "../../mappers/schedule.js";
 
 const DEFAULT_BASE_URL = "https://statsapi.mlb.com";
+
+/**
+ * MLB's play-metrics feed (S93): an internal mlb.com source on its own host, not the Stats
+ * API, asked for every category. `highLeverage=false` only empties the top-level list; each
+ * at-bat still says `isHighLeverage`. The recorder (S14) records the same URL.
+ */
+export function playMetricsUrl(gamePk: number): string
+{
+	return `https://bdfed.stitch.mlbinfra.com/bdfed/playMetrics/${gamePk}?keyMoments=true&scoringPlays=true&homeRuns=true&strikeouts=true&hardHits=true&highLeverage=false&leadChange=true&winProb=true&absChallenge=true`;
+}
 
 const SCHEDULE_HYDRATE =
 	"team,linescore(matchup,runners),flags,liveLookin,review,decisions,person,probablePitcher,stats,game(content(media(featured,epg),summary))";
@@ -70,11 +83,14 @@ export class HttpMlbStatsClient implements MlbStatsClient
 		const feedUrl = `${this.baseUrl}/api/v1.1/game/${gamePk}/feed/live`;
 		const feed = parseLiveFeedResponse(await this.getJson(feedUrl));
 		const snapshot = mapLiveFeed(feed, this.now().toISOString(), "active");
-		const content = await this.fetchContent(gamePk);
+		const [content, playMetrics] = await Promise.all([this.fetchContent(gamePk), this.fetchPlayMetrics(gamePk)]);
 		return {
 			...snapshot,
 			highlights: content ? rankHighlightsByImpact(mapContentHighlights(content)) : [],
 			recap: content ? mapRecap(content) : undefined,
+			...playMetrics && {
+				playMetrics,
+			},
 		};
 	}
 
@@ -125,6 +141,19 @@ export class HttpMlbStatsClient implements MlbStatsClient
 	 * `undefined` when it can't be had — content is best-effort, never a reason a
 	 * game fails to load.
 	 */
+	/** The play-metrics feed, mapped; null when it fails, can't be parsed or has no at-bats (S93 AC 5). */
+	async fetchPlayMetrics(gamePk: number): Promise<GamePlayMetrics | null>
+	{
+		try
+		{
+			return mapPlayMetrics(parsePlayMetricsResponse(await this.getJson(playMetricsUrl(gamePk))));
+		}
+		catch
+		{
+			return null;
+		}
+	}
+
 	private async fetchContent(gamePk: number): Promise<GameContentResponse | undefined>
 	{
 		const url = `${this.baseUrl}/api/v1/game/${gamePk}/content?language=en`;

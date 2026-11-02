@@ -55,6 +55,12 @@ explicitly where that's the case. For what's still ahead, see
 
 ## The backend runs the way it will in production
 
+- **Before, Baseball Theater could only guess which plays mattered from the words in a clip's title. Now it
+  keeps MLB's own measure of every at-bat: how much it swung each team's chance of winning, and whether MLB counts
+  it as a key moment, a lead change, a home run, a hard hit, a high-leverage spot or an ABS challenge. Nothing on
+  screen uses it yet; the win-probability chart and better video ranking build on it.** Details: S93 — MLB's
+  play-metrics feed recorded for 823823, typed and parsed in `packages/mlb-api`, `MlbStatsClient.fetchPlayMetrics`,
+  `GameSnapshot.playMetrics` (optional: absent when the feed fails). _(2026-11-02)_
 - **Before, Baseball Theater could only keep its data in memory, which empties whenever the server restarts.
   Now it has a real Postgres database layer, checked against exactly the same rules as the test stores: an
   older update can never overwrite a newer one, and deleting your account removes your rows. It isn't

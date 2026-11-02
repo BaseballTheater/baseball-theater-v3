@@ -23,6 +23,7 @@ import type {
 	Unversioned,
 } from "@bt/domain";
 import type { MlbStatsClient } from "@bt/ports";
+import { playMetricsUrl } from "../adapters/http/mlb.js";
 
 const DEFAULT_BASE_URL = "https://statsapi.mlb.com";
 
@@ -76,6 +77,11 @@ export function rawEndpoints(
 		{
 			name: `timestamps-${gamePk}`,
 			url: `${baseUrl}/api/v1.1/game/${gamePk}/feed/live/timestamps`,
+		},
+		{
+			// MLB's play-metrics feed (S93), on its own host: the URL the HTTP client asks.
+			name: `playmetrics-${gamePk}`,
+			url: playMetricsUrl(gamePk),
 		},
 		{
 			name: `standings-${date}`,

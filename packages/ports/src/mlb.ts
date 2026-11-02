@@ -1,4 +1,5 @@
 import type {
+	GamePlayMetrics,
 	GameSnapshot,
 	MediaHighlight,
 	PlayerProfile,
@@ -18,6 +19,12 @@ export interface MlbStatsClient {
 	fetchGame(gamePk: number): Promise<Unversioned<GameSnapshot>>;
 	/** Highlights + editorial for one game; the only payload with playback URLs. */
 	fetchGameContent(gamePk: number): Promise<MediaHighlight[]>;
+	/**
+	 * MLB's per-at-bat win probability and key-moment flags (S93), from an internal mlb.com
+	 * feed: null when it fails or has nothing, never a throw, so a game is served without it.
+	 * Ingest calls it (ADR-002); `fetchGame` attaches it as `playMetrics`.
+	 */
+	fetchPlayMetrics(gamePk: number): Promise<GamePlayMetrics | null>;
 	fetchStandings(date: string): Promise<StandingsSnapshot>;
 	/** Identity + season lines for the given player ids, in the order returned. */
 	fetchPlayers(ids: number[]): Promise<PlayerProfile[]>;

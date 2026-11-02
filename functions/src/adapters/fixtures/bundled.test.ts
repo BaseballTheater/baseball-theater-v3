@@ -13,14 +13,18 @@ import { BUNDLED_FIXTURES, bundledFixtureFiles } from "./bundled.js";
 
 const FIXTURES = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../../fixtures");
 
-/** What `FixtureClient` reads by name: `schedule-<date>`, `game-<pk>`, `plays-<pk>`, `standings-<date>`, `players-*`. */
-const SERVED = /^(schedule-\d{4}-\d{2}-\d{2}|game-\d+|plays-\d+|standings-\d{4}-\d{2}-\d{2}|players-.+)\.json$/;
+/**
+ * What `FixtureClient` reads by name: `schedule-<date>`, `game-<pk>`, `plays-<pk>`, `standings-<date>`,
+ * `players-*`, and from `raw/` the play-metrics recordings (S93).
+ */
+const SERVED = /^(schedule-\d{4}-\d{2}-\d{2}|game-\d+|plays-\d+|standings-\d{4}-\d{2}-\d{2}|players-.+|raw\/playmetrics-\d+)\.json$/;
 
 describe("bundled fixtures (S45)", () =>
 {
 	it("bundles exactly the committed fixtures the client serves, unchanged", () =>
 	{
-		const committed = readdirSync(FIXTURES).filter((name) => SERVED.test(name)).sort();
+		const committed = [...readdirSync(FIXTURES), ...readdirSync(path.join(FIXTURES, "raw")).map((name) => `raw/${name}`)]
+			.filter((name) => SERVED.test(name)).sort();
 		expect(Object.keys(BUNDLED_FIXTURES).sort()).toEqual(committed);
 		for (const name of committed)
 		{
