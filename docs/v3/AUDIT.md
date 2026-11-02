@@ -12989,3 +12989,40 @@ Owner answers to the 2026-11-02 backlog review (fence: S5 needs packages/ports),
 "What should highlight search look through at launch: only the games Baseball Theater has already saved …, or should it ask MLB's own search each time …?"
 Owner: "MLB's own search on every query, for now. It can match the existing site (repo is called baseball-theater)."
 Applied in the commit named above: S5's notes say MlbStatsClient gains a highlight-search method calling MLB's GraphQL Search operation (fastball-gateway, as ~/Repos/BaseballTheater does), the fixture client answers from a recorded response, AC 8 stops and reports if MLB's results lack gamePk/teams/date, S94 and S5 share one gateway client, and the review's repository-search notes are superseded. ACs, fence and turn cap unchanged; S5 back to todo. Recording the decision as an ADR is left to the owner.
+
+---
+
+## 2026-11-02 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-02T23:15:57Z` |
+| HEAD at review | `f88d665` (tree dirty) |
+| Trigger | design intake: shell-scoreboard A6, standings-search-settings A7 and A8 (written amendments, owner-ratified 2026-11-02); owner-directed reorder S93 before S51 |
+| Stories `done` since last review | S109, S20, S71 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Two independent fresh-context reviewers (A, B), merged. Both read A6/A7/A8 in full and the S4 / S73 / S28 checkpoint code (09c1cd4, 69d45e5, ebebeef).
+
+**Inventory.** A7 (S4): division tables as wide as their content, scrolling in their own box; mobile abbreviations, no abbreviation column. A8 (S73): Settings in two bordered frames (Settings: Game List / Game Detail; Account); the install / iOS tip at the very top with a tip mark, dismissable in this browser. A6 (S28, S73): the reload-to-update notice floats fixed at the bottom; Snooze (one hour) and Update Now, right-aligned under the message; the offline marker (S74) stays under the header. No new data; no ADR or VISUAL-DESIGN conflict (VISUAL-DESIGN:374 Settings grouping, :101 / :195 name / abbr fit).
+
+**Ownership.** All three amendments map to their blocked stories; no new story. S73 builds the one floating notice (ADR-025) and S28 reuses it, so S28 now depends on S73 (code already does: `api/versionNotice.ts` imports S73's `UPDATE_MESSAGE`). Notes added to S4, S73, S28 and S74; turn caps S4 16 → 18, S73 16 → 20, S28 16 → 18 for the rework.
+
+**Grader traps (rule 8: graders stay as written).** S73 check 3 runs `-t "Reload"` (case-sensitive) and its label says "Reload and ✕", which A6 replaced; S73 check 4 needs "install row" / "iOS" / "installed" titles; S28 check 8 counts one `export function NoticeBanner` and rejects a `role="status"` file outside `NoticeSlot.tsx` containing "Reload"; S4 check 4 greps "New York Yankees", check 7 bans viewport hooks in standings files (so `routes.tsx` passes `variant`). All satisfiable; written into the notes.
+
+**Disagreement and resolution.** B asked the owner to allow editing S73 check 3's label and filter; A kept the grader and named tests truthfully. Resolved for A: rule 8 holds, the test title keeps the word truthfully ("Update Now, A6's replacement for Reload …"), and S73's ledger entry will say the label predates A6. Raised to the owner as an optional question rather than blocking.
+
+**B only, adopted:** Update Now after a 426 must not only reload (with `registerType: "prompt"` and `navigateFallback`, the old precached shell answers and 426 loops) — use the worker's update path; one "keep what's on screen" rule, which `GamePage.tsx` (`if (error)`) breaks while Scoreboard and Standings repeat it — S28 note. **A only, adopted:** S5's "one gateway client" note was wrong (S5 fastball-gateway vs S94 data-graph): one GraphQL POST helper taking the host; fold `useUpdateNotice` and `useVersionNotice` into one source; add a `settings-install-medium` capture.
+
+**Priorities.** Owner, 2026-11-02, after the agent recommended S93 before S51 and S51 after the design rework settles: "Ok, agreed on your assessment for 8. Do that." S93 → 75 (runs next, as agreed), every story at 75–90 +1 (S75 76, S4 84, S5 85, S73 87, S28 88, S51 91), so S51 follows the rework.
+
+**Check 2 (next 3 eligible at HEAD).** S93 (75): no deps / design; `fixtures/raw/` exists, `playmetrics-823823.json` absent (red-first), `functions/src/adapters/http/mlb.ts` one `baseUrl`, `mlb:scan-drift` and `api:breaking` exist. S75 (76): all 12 deps done (S109 included); `HiddenValue.tsx`, `useScoresHidden.ts`, `PlayerDialog.tsx`, `pitch/utils.ts`, `content.ts` `highlightKind` exist; `svgPoints` still duplicated (noted); new functions absent (its own). S5 (85): 8 deps done; `functions/src/scripts/record-fixtures.ts` exists; no `fixtures/search-*` and no gateway code yet (its own); gateway note corrected.
+
+**Sweeps.** `pnpm dup:check` 0 clones (182 files); same-meaning duplicates: the two notice hooks, the error-vs-data rule (both into notes). ADR-028: two new browser keys (`bt.updateSnoozedUntil`, `bt.installTipDismissed`), `personal: false`, in `STORAGE_KEYS` only; nothing reads browser storage outside `web/src/storage/`.
+
+**For the parity review.** FEATURES.md:214 and ADR-023:15 say "Install app row in Settings"; A8 makes it a dismissable tip at the top of Settings, still the owner's "quiet prompt in Settings".
+
+**Owner question (optional, not blocking).** "May S73's grader check 3 be edited to match A6 (its label and `-t \"Reload\"` filter becoming Update Now / Snooze), though rule 8 forbids editing a grader after it's written? Default: keep it, name the test truthfully, and note the stale label in the ledger."
