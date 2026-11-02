@@ -229,7 +229,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 80 | [S18](#s18--live-hub-durable-object--livegamehub-port--one-way-websocket) | Live hub object + one-way WebSocket | `done` |
 | 81 | [S19](#s19--web-client-auto-updates-watched-game) | Web client auto-updates watched game | `done` |
 | 83 | [S4](#s4--standings-fixture-api--page) | Standings fixture API + page | `blocked` |
-| 84 | [S5](#s5--search-page-queries-highlights-fixture) | Search page queries highlights fixture | `blocked` |
+| 84 | [S5](#s5--search-page-queries-highlights-fixture) | Search page queries highlights fixture | `todo` |
 | 85 | [S72](#s72--highlight-search-by-date-team-and-tag) | Search chips: date / team / tag | `todo` |
 | 86 | [S73](#s73--installable-app-manifest-service-worker-update-notice-install-row) | Installable PWA + update notice | `blocked` |
 | 87 | [S28](#s28--version-sunset-path-deprecation-headers--stale-client-upgrade) | Version sunset path + stale-client upgrade | `blocked` |
@@ -1932,6 +1932,15 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 - **One game-link label (ADR-025).** `DayDigest.tsx:16` builds "NYY @ BOS, Sep 21" in a private `gameLabel`; AC 9's link is the same text. Export it once (beside `LazyPlayerDialog` in `web/src/components/videos/`) and use it from both, not a second copy.
 - **Personal data (ADR-028).** A search over game data adds no store. The query string is not stored, and is not written to a log line with a uid, session or IP ("Server and email logs: must not carry personal fields"). The TanStack cache entry keyed by the query is in-memory only, not `web/src/storage/`.
 
+**Owner's answer (2026-11-02), applied:** asked what highlight search should look through at launch, the owner said: *"MLB's own search on every query, for now. It can match the existing site (repo is called baseball-theater)."* So:
+
+- **Search asks MLB per query, server-side.** `MlbStatsClient` (`packages/ports`) gains a highlight-search method that calls MLB's GraphQL `Search` operation on `https://fastball-gateway.mlb.com/graphql`, as the existing site does (`~/Repos/BaseballTheater`, `baseball-theater-engine/engine/mlbdataserver.ts`: `operationName=Search`, a `… Order By Timestamp` query, `limit` / `page`, `languagePreference: "EN"`). Match its behavior; don't copy v2 sources (CLAUDE.md). `GET /api/v1/search/highlights` calls it; the browser still reads only BT (ADR-002).
+- **Offline locally and in CI.** `FixtureMlbStatsClient` answers from a recorded response (`fixtures/search-*.json`, recorded with S14's recorder, never typed), so AC 1 / AC 2's "walk-off" query runs without network.
+- **AC 8's matchup.** If MLB's search result doesn't carry each clip's `gamePk`, teams and date, stop and report (rule 10) rather than guessing them.
+- **One gateway client (ADR-025).** S94 ingests game content from the same GraphQL gateway; whichever of S5 and S94 lands first builds the gateway call in `functions/src/adapters/http/`, and the other reuses it.
+- **Superseded:** the 2026-11-02 backlog review's repository-search notes above (a `GameRepository` method, its S50 contract case, seeding 744834 into the stores). No repository method is added; `packages/ports/` stays in the fence for the `MlbStatsClient` method.
+- **ADR.** ARCHITECTURE lists highlight search as still open and wanting its own ADR (ARCHITECTURE.md:53, :553); recording this decision as one is the owner's call, not this story's.
+
 **Reuse check**
 
 **Reuse check** (ADR-025): before writing code, search `packages/domain`, `web/src/components/`, `web/src/layout/` and `web/src/api/` for what this story needs; record what was reused, or why nothing fit, in the story's ledger notes.
@@ -1944,7 +1953,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 /goal docs/v3/BACKLOG.md S5. Work item 0 first: if scripts/verify-S5.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S5.sh exits 0, pnpm verify exits 0, no files outside fixtures/, packages/domain/, packages/ports/, functions/src/, functions/vitest.config.ts, openapi/, web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S5.sh, or stop after 16 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `blocked`
+**Status:** `todo`
 
 ---
 
