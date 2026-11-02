@@ -44,3 +44,6 @@ e2e/playwright-report/
 
 # Design-match pairs laid out for the owner (pnpm design:review); delete a story's folder after the verdict
 .designreview/
+
+# Obsidian window/pane layout for the docs/v3 vault: changes every time the vault is opened
+docs/v3/.obsidian/workspace.json
