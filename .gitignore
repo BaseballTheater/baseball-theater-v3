@@ -47,3 +47,5 @@ e2e/playwright-report/
 
 # Obsidian window/pane layout for the docs/v3 vault: changes every time the vault is opened
 docs/v3/.obsidian/workspace.json
+# The Obsidian Bases view of the backlog: Obsidian rewrites it on open; `pnpm backlog:build` seeds a default when it is missing
+docs/v3/backlog/Backlog.base
