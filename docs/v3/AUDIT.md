@@ -13147,3 +13147,33 @@ functions build: Done
 1. ARCHITECTURE.md:1232 (ADR-023) still says "A quiet **Install app** row in Settings"; A8 makes it a dismissable tip at the top of Settings. ADR text is outside this review's write scope.
 2. Highlight search asking MLB on every query (owner, 2026-11-02) sits against ADR-002, which lists highlight search under "still open / later" (ARCHITECTURE.md:53) and says media/search needs its own ADR (ARCHITECTURE.md:553). The answers entry left recording it as an ADR to the owner; S5 should not ship without that decision written down or the gap acknowledged.
 3. No FEATURES item added this review; no new uncovered feature found.
+
+---
+
+## 2026-11-02 — backlog review answers (2026-11-02)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-02 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-03T00:04:59Z` |
+| HEAD at capture | `ca843cb` (tree dirty) |
+| Applied in | `7828fd9` — ADR-029 accepted: highlight search asks MLB on every query, for now |
+
+**Answers and what was applied**
+
+Owner-directed change: ADR-029 accepted (highlight search asks MLB on every query, for now), commit 7828fd9; owner, 2026-11-02: "Yes" to recording it as an ADR. Asked whether it needs the design intake / backlog and doc parity reviews, the owner said: "no reviedw needed". It records a decision already applied to S5 (689a706, answers f983e40) and FEATURES (1593751). The next scheduled or drift-triggered review still checks it.
+
+---
+
+## 2026-11-02 — doc parity review answers (2026-11-02)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-02 doc parity review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-03T00:04:59Z` |
+| HEAD at capture | `ca843cb` (tree dirty) |
+| Applied in | `7828fd9` — ADR-029 accepted: highlight search asks MLB on every query, for now |
+
+**Answers and what was applied**
+
+Owner-directed change: ADR-029 accepted (highlight search asks MLB on every query, for now), commit 7828fd9; owner, 2026-11-02: "Yes" to recording it as an ADR. Asked whether it needs the design intake / backlog and doc parity reviews, the owner said: "no reviedw needed". It records a decision already applied to S5 (689a706, answers f983e40) and FEATURES (1593751). The next scheduled or drift-triggered review still checks it.
