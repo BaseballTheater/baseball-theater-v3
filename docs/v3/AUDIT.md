@@ -13177,3 +13177,33 @@ Owner-directed change: ADR-029 accepted (highlight search asks MLB on every quer
 **Answers and what was applied**
 
 Owner-directed change: ADR-029 accepted (highlight search asks MLB on every query, for now), commit 7828fd9; owner, 2026-11-02: "Yes" to recording it as an ADR. Asked whether it needs the design intake / backlog and doc parity reviews, the owner said: "no reviedw needed". It records a decision already applied to S5 (689a706, answers f983e40) and FEATURES (1593751). The next scheduled or drift-triggered review still checks it.
+
+---
+
+## 2026-11-02 — backlog review answers (2026-11-02)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-02 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-03T00:33:46Z` |
+| HEAD at capture | `86de706` (tree clean) |
+| Applied in | `86de706` — S112 cites Delightful, S113 and S114 Dependable (owner-approved) |
+
+**Answers and what was applied**
+
+Owner-directed backlog change: S111 (default scoreboard date, top priority), S112 (dev seed), S113 (production database), S114 (Cloudflare deploy) added and the order set to S111, S51, S112, S113, S114 ahead of S75 and the S4 / S73 / S28 rework, with everything at priority 75+ moved +5 (commit 1e63c09); FEATURES' Daily scoreboard row records the default-date rule in the owner's words; S112 / S113 / S114 cite Delightful / Dependable / Dependable (owner: "yes those are good pillars to use", commit 86de706). Asked whether it needs the backlog and doc parity reviews, the owner said: "no review needed, as these are all bundled together and should not affect the rest of the featureset". The next scheduled or drift-triggered review still checks it.
+
+---
+
+## 2026-11-02 — doc parity review answers (2026-11-02)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-02 doc parity review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-03T00:33:46Z` |
+| HEAD at capture | `86de706` (tree dirty) |
+| Applied in | `86de706` — S112 cites Delightful, S113 and S114 Dependable (owner-approved) |
+
+**Answers and what was applied**
+
+Owner-directed backlog change: S111 (default scoreboard date, top priority), S112 (dev seed), S113 (production database), S114 (Cloudflare deploy) added and the order set to S111, S51, S112, S113, S114 ahead of S75 and the S4 / S73 / S28 rework, with everything at priority 75+ moved +5 (commit 1e63c09); FEATURES' Daily scoreboard row records the default-date rule in the owner's words; S112 / S113 / S114 cite Delightful / Dependable / Dependable (owner: "yes those are good pillars to use", commit 86de706). Asked whether it needs the backlog and doc parity reviews, the owner said: "no review needed, as these are all bundled together and should not affect the rest of the featureset". The next scheduled or drift-triggered review still checks it.
