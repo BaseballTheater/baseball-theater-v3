@@ -90,9 +90,9 @@ describe("pitchCallLabel (S75)", () =>
 		expect(pitchCallLabel(scored, true)).toBe("IN PLAY");
 	});
 
-	it("reads IN PLAY for every in-play pitch with scores hidden, so the label can't tell a run scored", () =>
+	it("leaves an in-play pitch that didn't score as MLB words it with scores hidden (owner, 2026-11-03)", () =>
 	{
-		expect(pitchCallLabel(out, true)).toBe("IN PLAY");
+		expect(pitchCallLabel(out, true)).toBe("In play, out(s)");
 	});
 
 	it("is MLB's full call with scores shown", () =>

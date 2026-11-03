@@ -35,15 +35,19 @@ export function isSwingingStrike(pitch: Pick<PitchEvent, "details">): boolean
 	return pitchOutcome(pitch) === "strike" && SWINGING_STRIKE_CALLS.has(pitch.details.call ?? "");
 }
 
+/** MLB's call code for a ball in play that scored a run ("In play, run(s)"). */
+const IN_PLAY_SCORED = "E";
+
 /**
  * A pitch's call as the pitch views print it (S75; game-rooms A3 frames). MLB words a ball
- * in play by what it did to the score ("In play, run(s)"), so with Hide Scores on every
- * in-play pitch reads "IN PLAY": masking only the scoring ones would let "IN PLAY" itself
- * say a run came in. Everything else, and every call with scores shown, is MLB's own words.
- * The pitch sequence and the zone both print through this, so no view words a call itself.
+ * in play by what it did to the score ("In play, run(s)"), so with Hide Scores on that call
+ * reads "IN PLAY". Every other call — outs and no-outs in play included — is MLB's own words,
+ * unchanged from how it normally shows (owner, 2026-11-03: "They should be unchanged from how
+ * they normally show"). The pitch sequence and the zone both print through this, so no view
+ * words a call itself.
  */
 export function pitchCallLabel(pitch: Pick<PitchEvent, "details">, scoresHidden: boolean): string
 {
-	if (scoresHidden && pitchOutcome(pitch) === "inPlay") return "IN PLAY";
+	if (scoresHidden && pitchOutcome(pitch) === "inPlay" && pitch.details.call === IN_PLAY_SCORED) return "IN PLAY";
 	return pitch.details.callDescription ?? pitch.details.call ?? "";
 }
