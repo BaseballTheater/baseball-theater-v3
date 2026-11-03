@@ -242,7 +242,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 94 | [S74](#s74--offline-reading-stored-copies-age-marker-open-time-prefetch-background-refresh) | Offline reading + prefetch | `todo` |
 | 95 | [S50](#s50--postgres-adapter-neon-via-hyperdrive-held-to-the-storage-contract) | Postgres adapter, contract-held | `done` |
 | 97 | [S94](#s94--ingest-mlb-graphql-game-content-video-play-links-articles) | Ingest GraphQL game content | `done` |
-| 98 | [S95](#s95--link-each-video-to-the-play-it-shows-mlb-links--abs-challenges) | Video → play association | `todo` |
+| 98 | [S95](#s95--link-each-video-to-the-play-it-shows-mlb-links--abs-challenges) | Video → play association | `blocked` |
 | 99 | [S96](#s96--design-a-videos-play-link-and-the-play-it-opens) | Design: video play link | `todo` |
 | 100 | [S97](#s97--video-cards-link-to-their-play-in-the-plays-room) | Video → play link (UI) | `todo` |
 | 101 | [S98](#s98--rank-videos-by-how-much-their-play-changed-the-odds-of-winning) | Impact rank from win probability | `todo` |
@@ -4908,7 +4908,7 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 /goal docs/v3/BACKLOG.md S95. Work item 0 first: if scripts/verify-S95.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S95.sh exits 0, pnpm verify exits 0, no files outside packages/domain/src/, functions/src/, openapi/, web/src/api/generated/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S95.sh, or stop after 10 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `todo`
+**Status:** `blocked`
 
 ### S96 — Design: a video's play link and the play it opens
 
