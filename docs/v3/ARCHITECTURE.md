@@ -1355,8 +1355,6 @@ Owner, 2026-10-23: *"I need tools to allow a user to delete all of their data, a
 
 ### ADR-029 — Highlight search asks MLB on every query, for now (accepted 2026-11-02)
 
-> **Amended 2026-11-03 — superseded by searching BT's own stored highlights.** Probing MLB's `Search` operation (read-only, `342f95c`) showed it takes only Film Room's structured filters (`Description = [...]`, `HitResult = [...]`, `Season = [n]`), not free text; the existing site's search box never used it. Asked what search should look through instead, the owner answered: *"Use the prior repo to see what to do."* The prior site (`~/Repos/BaseballTheater`, `server/Local/search.ts`, `/api/search`) searched **its own index of every highlight it had ingested**: a free-text match over title (weighted ×2), blurb, description and every keyword, optionally limited to given games, newest game first, 20 per page. So: `GET /api/v1/search/highlights` searches the highlights of the games BT has stored, through a query on a port in `packages/ports` that each repository adapter answers (Postgres: the `games` JSONB and its GIN index, S50); no per-query MLB call, so ADR-002's pattern holds for search too. The decision below stands only as history.
-
 Owner, 2026-11-02, asked what highlight search should look through at launch (only the games BT has already saved, or MLB's own search each time): *"MLB's own search on every query, for now. It can match the existing site (repo is called baseball-theater)."* Asked whether to record it as an ADR: *"Yes"*. This is the separate ADR that [ADR-002](#adr-002--data-access-topology-for-schedule--game-details-accepted) asked media and search to have.
 
 **Decision:**
@@ -1711,7 +1709,7 @@ _None of these block scaffolding. Defaults are fine until tuned._
 
 1. Concrete **lead / trail / interval** values (and whether they vary by status)? Out-of-window TTL follows [ADR-021](#adr-021--graduated-cache-freshness-accepted-2026-10-18); its ladder values are tunable.
 2. ~~Client sync: **poll the BT API**, **Firestore listeners**, or hybrid?~~ → **Narrowed** by [ADR-014](#adr-014--client-state-management-accepted): clients read BT over HTTP, and **BT-mediated push and poll both write the one server read cache** — never direct Firestore listeners on hot game docs. Transport **decided** by [ADR-020](#adr-020--live-delivery--cadence-durable-objects-accepted-2026-10-18): WebSocket from the game's Durable Object, one-way, in-window games only. Cadence values still open.
-3. ~~Historical highlight index (v2 ES) vs live MLB GraphQL search?~~ → **Decided** by [ADR-029](#adr-029--highlight-search-asks-mlb-on-every-query-for-now-accepted-2026-11-02), as amended 2026-11-03: BT searches the highlights of the games it has stored, as the prior site searched its own index (owner: *"Use the prior repo to see what to do."*).
+3. ~~Historical highlight index (v2 ES) vs live MLB GraphQL search?~~ → **Decided** by [ADR-029](#adr-029--highlight-search-asks-mlb-on-every-query-for-now-accepted-2026-11-02): live MLB GraphQL search, server-side, for now.
 4. **Patreon** OAuth link + webhook/refresh + patron migration UX (auth: Logto email sign-in at launch, no passkeys at launch — ADR-019; Patreon ≠ login)
 5. AI provider(s) when enrichment ships; heuristic vs model for first impact-sort
 6. Crosswalk seed + refresh when Phase 1 deep links ship
