@@ -132,7 +132,7 @@
   "highlights": [
     {
       "id": "an-animated-look-at-griffin-conine-s-home-run-x7803",
-      "playId": "d5ccc75e-d96a-4836-a054-6590de884ea7",
+      "playId": null,
       "title": "An animated look at Griffin Conine's home run",
       "blurb": "An animated look at Griffin Conine's home run",
       "duration": "00:00:11",
@@ -151,7 +151,7 @@
     },
     {
       "id": "breaking-down-kyle-stowers-home-run-x7115",
-      "playId": "62333902-27eb-48f6-83d8-2373636f7c1c",
+      "playId": null,
       "title": "Breaking down Kyle Stowers' home run",
       "blurb": "Breaking down Kyle Stowers' home run",
       "duration": "00:00:13",
@@ -170,7 +170,7 @@
     },
     {
       "id": "griffin-conine-homers-15-on-a-fly-ball-to-right-field-javier-sanoja-scores",
-      "playId": "14a4ae76-3a25da95-de37775b-csvm-diamondgcp-asset",
+      "playId": "874c613e-e449-38dd-8eb6-9659ad89a049",
       "title": "Griffin Conine's two-run home run (15)",
       "blurb": "Griffin Conine's two-run home run (15)",
       "duration": "00:00:29",
@@ -200,11 +200,12 @@
         "international-feed",
         "fan-duel",
         "apple-news"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "griffin-conine-s-430-foot-home-run-vs-cubs",
-      "playId": "e881e7a7-854c82f6-e9878c21-csvm-diamondgcp-asset",
+      "playId": null,
       "title": "Griffin Conine's 430-foot home run vs. Cubs",
       "blurb": "Griffin Conine's 430-foot home run vs. Cubs",
       "duration": "00:00:33",
@@ -224,7 +225,7 @@
     },
     {
       "id": "kyle-stowers-442-foot-home-run",
-      "playId": "48cc2661-f7393f99-24224f59-csvm-diamondgcp-asset",
+      "playId": null,
       "title": "Kyle Stowers' 442-foot home run",
       "blurb": "Kyle Stowers' 442-foot home run",
       "duration": "00:00:33",
@@ -244,7 +245,7 @@
     },
     {
       "id": "kyle-stowers-home-run-through-bat-tracking-data-x1113",
-      "playId": "a821212d-3353-4c11-96e4-a88e57a649f9",
+      "playId": null,
       "title": "Kyle Stowers' home run through bat tracking data",
       "blurb": "Kyle Stowers' home run through bat tracking data",
       "duration": "00:00:11",
@@ -263,7 +264,7 @@
     },
     {
       "id": "kyle-stowers-homers-19-on-a-fly-ball-to-center-field",
-      "playId": "412bb432-93b39d88-e0196755-csvm-diamondgcp-asset",
+      "playId": "3b6cb4d8-c8ed-3b22-8b70-653d6f8c05d2",
       "title": "Kyle Stowers' solo home run (19)",
       "blurb": "Kyle Stowers' solo home run (19)",
       "duration": "00:00:30",
@@ -290,11 +291,12 @@
         "international-feed",
         "fan-duel",
         "apple-news"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "measuring-the-stats-on-michael-conforto-s-home-run-x6434",
-      "playId": "2673c4e0-4591-4719-8100-397e3349afd9",
+      "playId": null,
       "title": "Measuring the stats on Michael Conforto's home run",
       "blurb": "Measuring the stats on Michael Conforto's home run",
       "duration": "00:00:11",
@@ -313,7 +315,7 @@
     },
     {
       "id": "ryan-gusto-in-play-run-s-to-michael-conforto",
-      "playId": "c4b45d7f-8dc5270e-34ecddd7-csvm-diamondgcp-asset",
+      "playId": "c515390e-a3e3-3a91-8df6-8185dc0fc29f",
       "title": "Michael Conforto hits Cubs' 200th home run (14)",
       "blurb": "Michael Conforto hits Cubs' 200th home run (14)",
       "duration": "00:00:29",
@@ -342,11 +344,12 @@
         "bet-mgm",
         "international-feed",
         "apple-news"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "the-distance-behind-griffin-conine-s-home-run-x9673",
-      "playId": "81b0962e-73ed-4578-a7c1-3ada0e117e8b",
+      "playId": null,
       "title": "The distance behind Griffin Conine's home run",
       "blurb": "The distance behind Griffin Conine's home run",
       "duration": "00:00:13",
@@ -365,7 +368,7 @@
     },
     {
       "id": "anibal-sanchez-joins-the-broadcast",
-      "playId": "423b2ea7-ede569ca-d7917231-csvm-diamondgcp-asset",
+      "playId": null,
       "title": "Aníbal Sánchez joins the broadcast",
       "blurb": "Aníbal Sánchez joins the broadcast",
       "duration": "00:02:25",
@@ -386,7 +389,7 @@
     },
     {
       "id": "ball-1-overturned-after-abs-challenge-ce1ab5",
-      "playId": "fdf931b3-cfca-4f46-aa50-e662c7f0f7be",
+      "playId": "cfd77df5-7eb6-3c4c-9877-b62cd847cd29",
       "title": "Ball 1 overturned after ABS challenge",
       "blurb": "Ball 1 overturned after ABS challenge",
       "duration": "00:00:25",
@@ -406,11 +409,12 @@
         "international-feed",
         "bet-mgm",
         "eclat-feed"
-      ]
+      ],
+      "playLink": "challenge"
     },
     {
       "id": "bench-availability-for-chicago-september-5-vs-marlins",
-      "playId": "b037c8e9-37d8-4578-9244-5f4dd836f886",
+      "playId": null,
       "title": "Bench availability for Chicago, September 5 vs Marlins",
       "blurb": "Bench availability for Chicago, September 5 vs Marlins",
       "duration": "00:00:08",
@@ -425,7 +429,7 @@
     },
     {
       "id": "bench-availability-for-miami-september-5-vs-cubs",
-      "playId": "9c4f38d3-515f-41fa-9a6a-5dca07b12893",
+      "playId": null,
       "title": "Bench availability for Miami, September 5 vs Cubs",
       "blurb": "Bench availability for Miami, September 5 vs Cubs",
       "duration": "00:00:08",
@@ -440,7 +444,7 @@
     },
     {
       "id": "breaking-down-javier-assad-s-pitches-x7260",
-      "playId": "19976f28-f4cf-4827-89db-c801b6bd3240",
+      "playId": null,
       "title": "Breaking down Javier Assad's pitches",
       "blurb": "Breaking down Javier Assad's pitches",
       "duration": "00:00:04",
@@ -459,7 +463,7 @@
     },
     {
       "id": "breaking-down-ryan-gusto-s-pitches-x2340",
-      "playId": "62b16a16-2800-41fc-839d-9715ee1c2450",
+      "playId": null,
       "title": "Breaking down Ryan Gusto's pitches",
       "blurb": "Breaking down Ryan Gusto's pitches",
       "duration": "00:00:04",
@@ -478,7 +482,7 @@
     },
     {
       "id": "bullpen-availability-for-chicago-september-5-vs-marlins",
-      "playId": "1a09c8ee-2b63-4c3d-b953-1a25d9d25b07",
+      "playId": null,
       "title": "Bullpen availability for Chicago, September 5 vs Marlins",
       "blurb": "Bullpen availability for Chicago, September 5 vs Marlins",
       "duration": "00:00:09",
@@ -496,7 +500,7 @@
     },
     {
       "id": "calvin-faucher-in-play-run-s-to-michael-busch",
-      "playId": "584b60a5-6c74-46eb-ac7c-e74312369698",
+      "playId": "32396d8e-df7f-32d0-a9d5-10769321d039",
       "title": "Michael Busch's RBI single",
       "blurb": "Michael Busch's RBI single",
       "duration": "00:00:19",
@@ -520,11 +524,12 @@
         "eclat-feed",
         "imagen-feed",
         "fan-duel"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "clayton-mccullough-discusses-loss-to-cubs",
-      "playId": "51b8e4f7-780c421f-de79e53b-csvm-diamondgcp-asset",
+      "playId": null,
       "title": "Clayton McCullough discusses loss to Cubs",
       "blurb": "Clayton McCullough discusses loss to Cubs",
       "duration": "00:02:32",
@@ -544,7 +549,7 @@
     },
     {
       "id": "condensed-game-chc-mia-9-5-26",
-      "playId": "3b796004-a5f5f400-9117045e-csvm-diamondgcp-asset",
+      "playId": null,
       "title": "Condensed Game: CHC@MIA - 9/5/26",
       "blurb": "Condensed Game: CHC@MIA - 9/5/26",
       "duration": "00:12:12",
@@ -568,7 +573,7 @@
     },
     {
       "id": "conforto-clubs-cubs-200th-homer-in-close-win",
-      "playId": "68e1ef46-6669f6b0-5b1ac736-csvm-diamondgcp-asset",
+      "playId": null,
       "title": "Conforto clubs Cubs' 200th homer in close win",
       "blurb": "Conforto clubs Cubs' 200th homer in close win",
       "duration": "00:03:06",
@@ -593,7 +598,7 @@
     },
     {
       "id": "cubs-challenged-pitch-result-call-on-the-field-was-confirmed-jakob-marsee-walks",
-      "playId": "e141e5b6-209e-41d0-b373-415b26f79bc3",
+      "playId": "c6d6b471-8e0d-3517-aa38-670fd25ab9a0",
       "title": "Walk confirmed after ABS challenge",
       "blurb": "Walk confirmed after ABS challenge",
       "duration": "00:00:26",
@@ -618,11 +623,12 @@
         "international-feed",
         "eclat-feed",
         "fan-duel"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "dax-fulton-ball-to-pete-crow-armstrong-capture-review",
-      "playId": "2beefbd7-fd2f-4d66-8955-06942b231cbb",
+      "playId": "ffda5d34-3931-36c7-8466-d2c367f7788b",
       "title": "Pete Crow-Armstrong strikes out after ABS challenge",
       "blurb": "Pete Crow-Armstrong strikes out after ABS challenge",
       "duration": "00:00:28",
@@ -647,11 +653,12 @@
         "imagen-feed",
         "fan-duel",
         "eclat-feed"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "fielding-alignment-for-chicago-september-5-vs-marlins",
-      "playId": "feee414d-596c-41ae-9315-fc87b91245ec",
+      "playId": null,
       "title": "Fielding alignment for Chicago, September 5 vs Marlins",
       "blurb": "Fielding alignment for Chicago, September 5 vs Marlins",
       "duration": "00:00:11",
@@ -669,7 +676,7 @@
     },
     {
       "id": "fielding-alignment-for-miami-september-5-vs-cubs",
-      "playId": "686c909b-37af-4efc-9fb8-70f028cb25f0",
+      "playId": null,
       "title": "Fielding alignment for Miami, September 5 vs Cubs",
       "blurb": "Fielding alignment for Miami, September 5 vs Cubs",
       "duration": "00:00:11",
@@ -687,7 +694,7 @@
     },
     {
       "id": "ian-happ-singles-on-a-sharp-line-drive-to-right-fielder-owen-caissie-migu",
-      "playId": "4b03089e-85b8-45bb-b5bd-940b0201ade3",
+      "playId": "b0d941ef-d2eb-3512-a952-dd8c84965ee5",
       "title": "Ian Happ's two-run single",
       "blurb": "Ian Happ's two-run single",
       "duration": "00:00:12",
@@ -716,11 +723,12 @@
         "fan-duel",
         "eclat-feed",
         "apple-news"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "jakob-marsee-lines-out-to-left-fielder-ian-happ",
-      "playId": "9eb2907e-6f26a65e-45502e4a-csvm-diamondgcp-asset",
+      "playId": "11245839-9bc6-3f01-ba50-4c61e34359f5",
       "title": "Ian Happ's stupendous diving catch",
       "blurb": "Ian Happ's stupendous diving catch",
       "duration": "00:00:28",
@@ -743,11 +751,12 @@
         "imagen-feed",
         "fan-duel",
         "eclat-feed"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "japanese-highlights-cubs-marlins-x0558",
-      "playId": "667617a6-7720cd87-24ec5135-csvm-diamondgcp-asset",
+      "playId": null,
       "title": "Japanese Highlights: Cubs-Marlins",
       "blurb": "Japanese Highlights: Cubs-Marlins",
       "duration": "00:08:53",
@@ -766,7 +775,7 @@
     },
     {
       "id": "javier-assad-foul-tip-to-kyle-stowers",
-      "playId": "97c6a7d0-2629-48de-9777-d9a2240c59c3",
+      "playId": "8f99d69b-a7f8-32f0-961c-b7c8e427df2b",
       "title": "Javier Assad strikes out Kyle Stowers",
       "blurb": "Javier Assad strikes out Kyle Stowers",
       "duration": "00:00:06",
@@ -788,11 +797,12 @@
         "bet-mgm",
         "imagen-feed",
         "eclat-feed"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "javier-assad-in-play-run-s-to-joe-mack",
-      "playId": "9dad9c49-33023ec2-6c2c8b49-csvm-diamondgcp-asset",
+      "playId": "8a77ac86-05da-3e79-bc71-e36e9868bf94",
       "title": "Otto Lopez scores on a forceout",
       "blurb": "Otto Lopez scores on a forceout",
       "duration": "00:01:12",
@@ -820,11 +830,12 @@
         "eclat-feed",
         "international-feed",
         "bet-mgm"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "javier-assad-in-play-run-s-to-owen-caissie",
-      "playId": "7d7932ad-574b-4148-9e33-49f98e0ea177",
+      "playId": "f8ddcc0b-a7ed-3140-8c08-39cde28037c0",
       "title": "Griffin Conine scores on a groundout",
       "blurb": "Griffin Conine scores on a groundout",
       "duration": "00:00:10",
@@ -848,11 +859,12 @@
         "bet-mgm",
         "international-feed",
         "eclat-feed"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "marlins-challenged-pitch-result-griffin-conine-called-out-on-strikes-capture-rev",
-      "playId": "438a9c3f-ebba-402c-8ad9-670f34797c3a",
+      "playId": "684f1229-12fe-362a-a242-563e313b2ea4",
       "title": "Griffin Conine walks after ABS challenge",
       "blurb": "Griffin Conine walks after ABS challenge",
       "duration": "00:00:26",
@@ -877,11 +889,12 @@
         "imagen-feed",
         "fan-duel",
         "bet-mgm"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "michael-conforto-called-out-on-strikes-ju6lir",
-      "playId": "e1bda4a9-f1d8-4e54-89d4-e99e10753416",
+      "playId": "5d5d4113-edff-3b77-ad96-a0f4661b63ac",
       "title": "Ryan Gusto strikes out Michael Conforto",
       "blurb": "Ryan Gusto strikes out Michael Conforto",
       "duration": "00:00:07",
@@ -904,11 +917,12 @@
         "fan-duel",
         "international-feed",
         "bet-mgm"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "pete-crow-armstrong-grounds-out-second-baseman-javier-sanoja-to-first-bas",
-      "playId": "576be238-c131e043-a2737d9f-csvm-diamondgcp-asset",
+      "playId": "b410abe5-5105-314e-adc7-f76a3bf6b406",
       "title": "Javier Sanoja's spinning stop",
       "blurb": "Javier Sanoja's spinning stop",
       "duration": "00:00:20",
@@ -930,11 +944,12 @@
         "bet-mgm",
         "imagen-feed",
         "international-feed"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "ryan-gusto-in-play-no-out-to-nico-hoerner",
-      "playId": "b33bd4bf-c9d34bf7-2295d91a-csvm-diamondgcp-asset",
+      "playId": "58fe0c70-2309-348b-9fb4-1a2accbae042",
       "title": "Jakob Marsee throws out Ian Happ at third",
       "blurb": "Jakob Marsee throws out Ian Happ at third",
       "duration": "00:00:33",
@@ -959,11 +974,12 @@
         "eclat-feed",
         "bet-mgm",
         "international-feed"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "ryan-gusto-in-play-run-s-to-nico-hoerner",
-      "playId": "0ecdc549-4bf6-4660-9784-438012af90e7",
+      "playId": "74bcfa90-f3f3-393f-8619-2a08f86e2855",
       "title": "Nico Hoerner's RBI single",
       "blurb": "Nico Hoerner's RBI single",
       "duration": "00:00:19",
@@ -987,11 +1003,12 @@
         "imagen-feed",
         "eclat-feed",
         "fan-duel"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "ryan-gusto-in-play-run-s-to-pete-crow-armstrong",
-      "playId": "4790f739-cc62-492d-b26a-360c426d94b9",
+      "playId": "f6b1845b-c0db-31ac-be6a-5b2b33a6416b",
       "title": "Pete Crow-Armstrong's RBI single",
       "blurb": "Pete Crow-Armstrong's RBI single",
       "duration": "00:00:15",
@@ -1016,11 +1033,12 @@
         "international-feed",
         "fan-duel",
         "imagen-feed"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "ryan-zeferjahn-in-play-out-s-to-otto-lopez",
-      "playId": "bfb955df-4d39-4ce9-b386-f8a134dcf2ca",
+      "playId": "383e2af4-becb-30ea-8feb-e3956f5199c3",
       "title": "Ryan Zeferjahn secures the save",
       "blurb": "Ryan Zeferjahn secures the save",
       "duration": "00:00:19",
@@ -1045,11 +1063,12 @@
         "fan-duel",
         "bet-mgm",
         "player-of-the-game"
-      ]
+      ],
+      "playLink": "mlb"
     },
     {
       "id": "starting-lineups-for-cubs-at-marlins-september-5-2026",
-      "playId": "cce44eb4-c802-4c4d-8e6a-1e79a3e41f11",
+      "playId": null,
       "title": "Starting lineups for Cubs at Marlins - September 5, 2026",
       "blurb": "Starting lineups for Cubs at Marlins - September 5, 2026",
       "duration": "00:00:10",
@@ -1068,7 +1087,7 @@
     },
     {
       "id": "strike-1-confirmed-after-abs-challenge-x3644",
-      "playId": "336b09a7-41e40ccd-3fb43962-csvm-diamondgcp-asset",
+      "playId": "63a80bfb-2640-3ba0-9376-aae7bb40f179",
       "title": "Strike 1 confirmed after ABS challenge",
       "blurb": "Strike 1 confirmed after ABS challenge",
       "duration": "00:00:25",
@@ -1091,7 +1110,8 @@
         "international-feed",
         "fan-duel",
         "eclat-feed"
-      ]
+      ],
+      "playLink": "challenge"
     }
   ],
   "boxscore": {

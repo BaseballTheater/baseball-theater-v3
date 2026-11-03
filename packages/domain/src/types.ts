@@ -112,7 +112,10 @@ export type HighlightKind = "highlight" | "recap" | "condensed" | "video";
 
 export type MediaHighlight = {
 	id: string;
+	/** The pitch the video shows (S95): MLB's link, or a matched ABS challenge (`playLink`); null when it shows no single play. */
 	playId: string | null;
+	/** How `playId` was found (S95): MLB linked it (`guid` / `playIdRef`), or BT matched an ABS challenge clip to its challenge. */
+	playLink?: "mlb" | "challenge";
 	title: string;
 	blurb: string | null;
 	duration: string | null;

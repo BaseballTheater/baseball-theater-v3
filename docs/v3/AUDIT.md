@@ -13395,3 +13395,83 @@ Fresh-context subagent (did not write these stories). Read 929282c, efb09aa (S94
 **Personal-data sweep (ADR-028).** S94 adds MLB game content only (video ids, article slugs/headlines); no table, personal field, outside service or browser key; its only log lines are the pre-existing `functions/src/scripts/record-fixtures.ts:38,55` (file names and errors). S95, S96, S106 add none. None found.
 
 **Verdict: `amended`.** S95 → `todo` with `fixtures/` and cap 12; S98 and S108 widened the same way; notes on S95's challenge data and the one assembly point; frame (last review, pending drift) and baseline As of updated. Not `blocked`: no new owner question; the pending ones (S5's search source; S111 and S75 design matches; S51's `pnpm dev` check) gate only stories already parked.
+
+---
+
+## 2026-11-03 — S95 completed
+
+**Video → play association**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-03T08:09:03Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `4c9ae8f` (tree dirty) |
+| Grader | `scripts/verify-S95.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: the content mapper takes a video's play from guid, not mediaPlaybackId; on 823823 15 videos get a playId, each a pitch playId in the live feed (test)
+check 2 PASS: videoPlayLinks(videos, plays, playRefs, playMetrics) in packages/domain links by guid, then playIdRef, then the one unclaimed matching ABS challenge (unit tests, two challenges that both fit included); applied in one place both adapters share
+check 3 PASS: on 823823, 20 of 40 videos link: the 15 guid clips and all 5 ABS clips (#34, #39, #69, #82, #83); graphics, recap, condensed game and pre-game link to none (test)
+check 4 PASS: the game payload carries playId and playLink: "mlb" | "challenge" on each video, additively (api:breaking 0)
+check 5 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**5/5 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S95 check results ---
+check 1 PASS: the content mapper takes a video's play from guid, not mediaPlaybackId; on 823823 15 videos get a playId, each a pitch playId in the live feed (test)
+check 2 PASS: videoPlayLinks(videos, plays, playRefs, playMetrics) in packages/domain links by guid, then playIdRef, then the one unclaimed matching ABS challenge (unit tests, two challenges that both fit included); applied in one place both adapters share
+check 3 PASS: on 823823, 20 of 40 videos link: the 15 guid clips and all 5 ABS clips (#34, #39, #69, #82, #83); graphics, recap, condensed game and pre-game link to none (test)
+check 4 PASS: the game payload carries playId and playLink: "mlb" | "challenge" on each video, additively (api:breaking 0)
+check 5 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S95: 5/5 checks passed ---
+verify-S95: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+web build: dist/assets/VideoPlayer-C8nX-eJr.js                2.95 kB │ gzip:   1.43 kB
+web build: dist/assets/Table-CJ00n_jD.js                      4.15 kB │ gzip:   1.63 kB
+web build: dist/assets/Modal-C9w3YU_m.js                      4.82 kB │ gzip:   1.73 kB
+web build: dist/assets/workbox-window.prod.es5-BBnX5xw4.js    5.75 kB │ gzip:   2.36 kB
+web build: dist/assets/TextInput-i4azvX4I.js                 28.11 kB │ gzip:   9.21 kB
+web build: dist/assets/SettingsPage-DKvKxSLZ.js              37.16 kB │ gzip:  11.92 kB
+web build: dist/assets/GamePage-Ggr6i8Op.js                  87.10 kB │ gzip:  29.77 kB
+web build: dist/assets/index-C0rxGL3A.js                    481.25 kB │ gzip: 154.56 kB
+web build: ✓ built in 1.83s
+web build: PWA v1.0.3
+web build: mode      generateSW
+web build: precache  22 entries (861.76 KiB)
+web build: files generated
+web build:   dist/sw.js
+web build:   dist/workbox-2fbc6a65.js
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154293,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

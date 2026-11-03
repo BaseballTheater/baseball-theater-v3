@@ -7,6 +7,7 @@
  */
 import type {
 	AtBat,
+	AtBatChallenge,
 	BoxscoreBatter,
 	GameBoxscore,
 	GameLive,
@@ -107,8 +108,26 @@ export function mapPitchEvent(event: LiveGamePlayEvent): PitchEvent
 	};
 }
 
+/**
+ * The at-bat's challenge (S95), from `reviewDetails` on the play itself or on one of its events
+ * (823823: the play for at-bats 34, 69, 83; a pitch for 39 and 82). Only a review MLB credits to
+ * a challenging team counts.
+ */
+function mapChallenge(play: LiveGamePlay): AtBatChallenge | undefined
+{
+	const onEvent = play.playEvents.find((event) => event.reviewDetails?.challengeTeamId !== undefined);
+	const review = play.reviewDetails?.challengeTeamId !== undefined ? play.reviewDetails : onEvent?.reviewDetails;
+	if (review?.challengeTeamId === undefined) return undefined;
+	return {
+		teamId: review.challengeTeamId,
+		overturned: review.isOverturned ?? false,
+		playId: review === onEvent?.reviewDetails && onEvent.isPitch && onEvent.playId ? onEvent.playId : null,
+	};
+}
+
 export function mapAtBat(play: LiveGamePlay): AtBat
 {
+	const challenge = mapChallenge(play);
 	return {
 		about: {
 			atBatIndex: play.about.atBatIndex,
@@ -144,6 +163,9 @@ export function mapAtBat(play: LiveGamePlay): AtBat
 			outs: play.count?.outs ?? 0,
 		},
 		pitches: play.playEvents.filter((event) => event.isPitch).map(mapPitchEvent),
+		...challenge && {
+			challenge,
+		},
 	};
 }
 

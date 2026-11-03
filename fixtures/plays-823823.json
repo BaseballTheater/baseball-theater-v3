@@ -9116,7 +9116,12 @@
         },
         "hitData": null
       }
-    ]
+    ],
+    "challenge": {
+      "teamId": 112,
+      "overturned": false,
+      "playId": null
+    }
   },
   {
     "about": {
@@ -10230,7 +10235,12 @@
           }
         }
       }
-    ]
+    ],
+    "challenge": {
+      "teamId": 146,
+      "overturned": true,
+      "playId": "cfd77df5-7eb6-3c4c-9877-b62cd847cd29"
+    }
   },
   {
     "about": {
@@ -17699,7 +17709,12 @@
         },
         "hitData": null
       }
-    ]
+    ],
+    "challenge": {
+      "teamId": 146,
+      "overturned": true,
+      "playId": null
+    }
   },
   {
     "about": {
@@ -20687,7 +20702,12 @@
         },
         "hitData": null
       }
-    ]
+    ],
+    "challenge": {
+      "teamId": 146,
+      "overturned": false,
+      "playId": "63a80bfb-2640-3ba0-9376-aae7bb40f179"
+    }
   },
   {
     "about": {
@@ -21036,7 +21056,12 @@
         },
         "hitData": null
       }
-    ]
+    ],
+    "challenge": {
+      "teamId": 146,
+      "overturned": true,
+      "playId": null
+    }
   },
   {
     "about": {

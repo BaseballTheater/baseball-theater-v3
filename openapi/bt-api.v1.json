@@ -77,6 +77,10 @@
 						"required": ["atBatIndex", "halfInning", "inning", "isComplete", "isScoringPlay"],
 						"type": "object"
 					},
+					"challenge": {
+						"$ref": "#/components/schemas/AtBatChallenge",
+						"description": "The challenge made during the at-bat (S95); absent when there was none, and on older recordings."
+					},
 					"count": {
 						"additionalProperties": false,
 						"properties": {
@@ -128,6 +132,17 @@
 					}
 				},
 				"required": ["about", "result", "matchup", "count", "pitches"],
+				"type": "object"
+			},
+			"AtBatChallenge": {
+				"additionalProperties": false,
+				"description": "A call challenged during the at-bat (S95; the live feed's `reviewDetails`, on the play or on one of its events): who challenged it, whether it was overturned, and the challenged pitch's `playId` when the review sits on a pitch (null when it sits on the play as a whole).",
+				"properties": {
+					"overturned": { "type": "boolean" },
+					"playId": { "type": ["string", "null"] },
+					"teamId": { "type": "number" }
+				},
+				"required": ["teamId", "overturned", "playId"],
 				"type": "object"
 			},
 			"AtBatMetrics": {
@@ -626,7 +641,15 @@
 						"$ref": "#/components/schemas/HighlightKind",
 						"description": "S69: what the video is; absent on older recordings."
 					},
-					"playId": { "type": ["string", "null"] },
+					"playId": {
+						"description": "The pitch the video shows (S95): MLB's link, or a matched ABS challenge (`playLink`); null when it shows no single play.",
+						"type": ["string", "null"]
+					},
+					"playLink": {
+						"description": "How `playId` was found (S95): MLB linked it (`guid` / `playIdRef`), or BT matched an ABS challenge clip to its challenge.",
+						"enum": ["mlb", "challenge"],
+						"type": "string"
+					},
 					"playbackUrl": { "type": ["string", "null"] },
 					"tags": {
 						"description": "S69: MLB's taxonomy tags (`data-visualization`, `home-run`, …); absent on older recordings.",

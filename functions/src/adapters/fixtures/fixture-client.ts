@@ -16,6 +16,7 @@ import {
 	parseGameTimestamps, parseGraphContentResponse, parsePlayMetricsResponse, parseRecordedReplayWalk, parseScheduleResponse, parseSeasonsResponse,
 } from "@bt/mlb-api";
 import type { MlbStatsClient } from "@bt/ports";
+import { withGameExtras } from "../../mappers/game-extras.js";
 import { mapGraphContent } from "../../mappers/graph-content.js";
 import { mapPlayMetrics } from "../../mappers/play-metrics.js";
 import { mapSeasonCalendar } from "../../mappers/season-calendar.js";
@@ -92,22 +93,13 @@ export class FixtureClient implements MlbStatsClient
 		const playMetrics = await this.fetchPlayMetrics(gamePk);
 		const graph = await this.fetchGameGraphContent(gamePk);
 		const now = new Date().toISOString();
-		return {
+		return withGameExtras({
 			...data,
 			plays,
-			highlights: rankHighlightsByImpact(data.highlights ?? []),
-			...playMetrics && {
-				playMetrics,
-			},
-			...graph?.videoPlayRefs.length && {
-				videoPlayRefs: graph.videoPlayRefs,
-			},
-			...graph?.relatedArticles.length && {
-				relatedArticles: graph.relatedArticles,
-			},
+			highlights: data.highlights ?? [],
 			fetchedAt: now,
-			windowMode: "cache",
-		};
+			windowMode: "cache" as const,
+		}, playMetrics, graph);
 	}
 
 	/** Highlights are already ranked onto the committed game fixture. */

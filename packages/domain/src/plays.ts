@@ -66,6 +66,17 @@ export type PitchEvent = {
 	hitData: HitData | null;
 };
 
+/**
+ * A call challenged during the at-bat (S95; the live feed's `reviewDetails`, on the play or on
+ * one of its events): who challenged it, whether it was overturned, and the challenged pitch's
+ * `playId` when the review sits on a pitch (null when it sits on the play as a whole).
+ */
+export type AtBatChallenge = {
+	teamId: number;
+	overturned: boolean;
+	playId: string | null;
+};
+
 export type AtBat = {
 	about: {
 		atBatIndex: number;
@@ -96,4 +107,6 @@ export type AtBat = {
 		strikes: number;
 		outs: number };
 	pitches: PitchEvent[];
+	/** The challenge made during the at-bat (S95); absent when there was none, and on older recordings. */
+	challenge?: AtBatChallenge;
 };

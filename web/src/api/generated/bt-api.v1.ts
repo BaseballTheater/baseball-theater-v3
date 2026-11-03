@@ -215,6 +215,8 @@ export interface components {
                 isComplete: boolean;
                 isScoringPlay: boolean;
             };
+            /** @description The challenge made during the at-bat (S95); absent when there was none, and on older recordings. */
+            challenge?: components["schemas"]["AtBatChallenge"];
             count: {
                 balls: number;
                 outs: number;
@@ -243,6 +245,12 @@ export interface components {
                 isOut: boolean;
                 rbi: number;
             };
+        };
+        /** @description A call challenged during the at-bat (S95; the live feed's `reviewDetails`, on the play or on one of its events): who challenged it, whether it was overturned, and the challenged pitch's `playId` when the review sits on a pitch (null when it sits on the play as a whole). */
+        AtBatChallenge: {
+            overturned: boolean;
+            playId: string | null;
+            teamId: number;
         };
         /** @description What one at-bat meant, by MLB's own measure (S93; the play-metrics feed): the chance each team wins after it (percent, 0–100), how much it moved that chance, and MLB's flags. Keyed by the live feed's `atBatIndex`, so it joins `GameSnapshot.plays`. */
         AtBatMetrics: {
@@ -492,7 +500,13 @@ export interface components {
             imageUrl: string | null;
             /** @description S69: what the video is; absent on older recordings. */
             kind?: components["schemas"]["HighlightKind"];
+            /** @description The pitch the video shows (S95): MLB's link, or a matched ABS challenge (`playLink`); null when it shows no single play. */
             playId: string | null;
+            /**
+             * @description How `playId` was found (S95): MLB linked it (`guid` / `playIdRef`), or BT matched an ABS challenge clip to its challenge.
+             * @enum {string}
+             */
+            playLink?: "mlb" | "challenge";
             playbackUrl: string | null;
             /** @description S69: MLB's taxonomy tags (`data-visualization`, `home-run`, …); absent on older recordings. */
             tags?: string[];

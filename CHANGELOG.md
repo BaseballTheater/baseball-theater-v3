@@ -68,6 +68,14 @@ explicitly where that's the case. For what's still ahead, see
   game content (`data-graph.mlb.com`, persisted query `getGamesByGamePks`) recorded for 823823, typed and parsed in
   `packages/mlb-api`, `MlbStatsClient.fetchGameGraphContent`, `GameSnapshot.videoPlayRefs` / `relatedArticles`
   (optional: absent when MLB's call fails). _(2026-11-02)_
+- **Before, Baseball Theater didn't know which play a video shows: every video carried the id of its video file,
+  which matches no play. Now every video of a single play knows its play — 20 of the sample game's 40, including
+  all five ABS challenge clips, two of which MLB links to nothing and BT matches to the one challenge that fits.
+  Graphics, the recap and the condensed game stay unlinked rather than guessed. Nothing on screen uses it yet; the
+  video-to-play link in the app builds on it.** Details: S95 — the content mapper reads MLB's `guid`;
+  `videoPlayLinks` in `packages/domain` adds S94's `playIdRef` and matches ABS clips to S93's challenges by team
+  and outcome (from the live feed's `reviewDetails`, now `AtBat.challenge`); each video carries `playId` and
+  `playLink: "mlb" | "challenge"`. _(2026-11-03)_
 - **Before, Baseball Theater could only keep its data in memory, which empties whenever the server restarts.
   Now it has a real Postgres database layer, checked against exactly the same rules as the test stores: an
   older update can never overwrite a newer one, and deleting your account removes your rows. It isn't

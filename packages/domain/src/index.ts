@@ -20,6 +20,7 @@ export * from "./content-hash.js";
 export * from "./game-phase.js";
 export * from "./pitch-outcome.js";
 export * from "./recap.js";
+export * from "./video-play-links.js";
 export * from "./teams.js";
 export * from "./team-colors.js";
 export * from "./linescore.js";

@@ -34,6 +34,7 @@ import {
 } from "@bt/mlb-api";
 import type { MlbStatsClient } from "@bt/ports";
 import { mapContentHighlights, mapRecap } from "../../mappers/content.js";
+import { withGameExtras } from "../../mappers/game-extras.js";
 import { mapGraphContent } from "../../mappers/graph-content.js";
 import { mapPeople } from "../../mappers/players.js";
 import { mapStandings } from "../../mappers/standings.js";
@@ -146,20 +147,11 @@ export class HttpMlbStatsClient implements MlbStatsClient
 		const feed = parseLiveFeedResponse(await this.getJson(feedUrl));
 		const snapshot = mapLiveFeed(feed, this.now().toISOString(), "active");
 		const [content, playMetrics, graph] = await Promise.all([this.fetchContent(gamePk), this.fetchPlayMetrics(gamePk), this.fetchGameGraphContent(gamePk)]);
-		return {
+		return withGameExtras({
 			...snapshot,
-			highlights: content ? rankHighlightsByImpact(mapContentHighlights(content)) : [],
+			highlights: content ? mapContentHighlights(content) : [],
 			recap: content ? mapRecap(content) : undefined,
-			...playMetrics && {
-				playMetrics,
-			},
-			...graph?.videoPlayRefs.length && {
-				videoPlayRefs: graph.videoPlayRefs,
-			},
-			...graph?.relatedArticles.length && {
-				relatedArticles: graph.relatedArticles,
-			},
-		};
+		}, playMetrics, graph);
 	}
 
 	async fetchStandings(date: string): Promise<StandingsSnapshot>

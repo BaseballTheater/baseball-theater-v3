@@ -51,7 +51,8 @@ export function mapHighlightItem(item: ContentHighlightItem): MediaHighlight
 	const teamIds = [...new Set(keywords.filter((k) => k.type === "team_id").map((k) => Number(k.value)))].filter(Number.isInteger);
 	return {
 		id: item.id ?? item.slug ?? item.title,
-		playId: item.mediaPlaybackId ?? null,
+		// MLB's own link to the pitch the clip shows (S95); `videoPlayLinks` checks it names one.
+		playId: item.guid ?? null,
 		title: item.title,
 		blurb: item.blurb || item.description || null,
 		duration: item.duration ?? null,
