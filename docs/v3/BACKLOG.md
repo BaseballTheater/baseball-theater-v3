@@ -225,7 +225,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 76 | [S51](#s51--representative-local-dev-pnpm-dev-on-postgres-in-docker) | `pnpm dev` on Postgres in Docker | `todo` |
 | 77 | [S112](#s112--dev-seed-the-last-month-of-the-season-and-the-postseason-refreshable-by-date-range) | Dev seed (season end + postseason) | `todo` |
 | 78 | [S113](#s113--production-database-neon-through-hyperdrive-migrated-composed-into-the-worker) | Production database (Neon) | `todo` |
-| 79 | [S114](#s114--cloudflare-deploy-preview-and-production-through-github-actions) | Cloudflare deploy | `todo` |
+| 79 | [S114](#s114--cloudflare-deploy-preview-staging-and-production-through-github-actions) | Cloudflare deploy | `todo` |
 | 80 | [S93](#s93--ingest-mlb-play-metrics-win-probability-key-moments-abs-challenges) | Ingest play metrics | `done` |
 | 81 | [S75](#s75--hide-scores-in-the-game-rooms-and-the-recap-video-title) | Hide Scores in the rooms | `todo` |
 | 82 | [S71](#s71--day-highlights-digest-best-of-date) | Day highlights digest | `done` |
@@ -5689,6 +5689,7 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 **Notes:**
 
 - **Human-judged:** creating the Neon project and Hyperdrive config, and migrating them, are the owner's actions (CLAUDE.md: never touch production Neon branches); the story ships the commands, config shape and runbook, and records the owner's confirmation in the commit.
+- **Owner-provided setup (2026-11-02):** Neon project `old-sun-72319473` (Postgres 18, AWS us-east-2), database `neondb`, role `neondb_owner`; production Hyperdrive config `bt-production`, id `db27b03ce9734c3f928241ce8ee855f6`. The connection string lives only in Cloudflare.
 
 **Reuse check**
 
@@ -5706,11 +5707,11 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 
 **Status:** `todo`
 
-### S114 — Cloudflare deploy: preview and production through GitHub Actions
+### S114 — Cloudflare deploy: preview, staging and production through GitHub Actions
 
-**Gap:** Nothing deploys Baseball Theater. ADR-017 targets Cloudflare Workers; the *Cloudflare deploy* Later theme has waited on the owner (2026-10-18: "Unassigned until the owner is ready to deploy"). The owner, 2026-11-02: *"The Cloudflare deploy should be the top priority after we establish the production database."* Sliced from that Later theme; it follows S113.
+**Gap:** Nothing deploys Baseball Theater. ADR-017 targets Cloudflare Workers; the *Cloudflare deploy* Later theme has waited on the owner (2026-10-18: "Unassigned until the owner is ready to deploy"). The owner, 2026-11-02: *"The Cloudflare deploy should be the top priority after we establish the production database."* Sliced from that Later theme; it follows S113. The owner, 2026-11-02, on a staging target (asked whether every merge to `main` should deploy to `stage.baseball.theater` on a long-lived `staging` copy of the database, with production at `baseball.theater` held behind approval): *"Yes, agreed."* (earlier: *"baseball.theater (though we will first ship to stage.baseball.theater)"*).
 
-**Impact:** Before S114, the app ran only on a developer's machine. After it, every change can be previewed at its own address against a copy of the database, and the owner can release to production with one approved step.
+**Impact:** Before S114, the app ran only on a developer's machine. After it, every change can be previewed at its own address against a copy of the database, every merge goes live at `stage.baseball.theater` for a final look, and the owner can release to production with one approved step.
 
 **Source:** Pillar: Dependable — reviewed previews, release only with the owner's approval and a one-step rollback keep the live app trustworthy. Asked whether S112 may cite Delightful, and S113 and S114 Dependable. Approved by owner 2026-11-02: "yes those are good pillars to use"
 
@@ -5725,29 +5726,31 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 **Acceptance criteria** (checks `scripts/verify-S114.sh` performs)
 
 1. A GitHub Actions workflow builds and runs `pnpm verify`, then deploys a preview Worker per pull request against a Neon branch (not production), and posts its address (workflow file; a dry run with `wrangler deploy --dry-run` in CI).
-2. Production deploys only from `main`, behind a GitHub environment that requires the owner's approval; the workflow never deploys production without it (workflow file check).
-3. Secrets (Cloudflare API token, Neon credentials) come from GitHub secrets, never the repo (grep).
-4. Before the first production deploy the workflow runs `pnpm db:migrate` against the target database (S113).
-5. `README.md` documents previews, releasing, rolling back (`wrangler rollback`), and the launch checklist the Later theme carries (legal check of ageing-out copies, `support@baseball.theater` routing, the R2 `ExportStore` and Cloudflare Email `Mailer` adapters) as items still to finish before a public launch.
-6. This file's S114 **Status** (story heading and top table) is `done`.
+2. Every push to `main` deploys a staging Worker to `stage.baseball.theater` against a long-lived Neon `staging` branch (not production), with `pnpm db:migrate` run against that branch first (workflow file check).
+3. Production deploys only from `main`, to `baseball.theater`, behind the GitHub environment `production` that requires the owner's approval; the workflow never deploys production without it (workflow file check).
+4. Secrets (Cloudflare API token, Neon credentials) come from GitHub secrets, never the repo (grep).
+5. Before the first production deploy the workflow runs `pnpm db:migrate` against the target database (S113).
+6. `README.md` documents previews, staging, releasing, rolling back (`wrangler rollback`), and the launch checklist the Later theme carries (legal check of ageing-out copies, `support@baseball.theater` routing, the R2 `ExportStore` and Cloudflare Email `Mailer` adapters) as items still to finish before a public launch.
+7. This file's S114 **Status** (story heading and top table) is `done`.
 
 **Notes:**
 
 - **Changing CI and deploy workflows needs the owner's go-ahead** (CLAUDE.md): this story is that go-ahead for the workflows it names, nothing more. Agents never run a production deploy themselves.
+- **Owner-provided setup (2026-11-02):** Cloudflare account `b2854b217ff2a0f38e8863600a82fb63`; `baseball.theater` DNS is on Cloudflare; GitHub secrets `CLOUDFLARE_API_TOKEN`, `NEON_API_KEY`, variables `CLOUDFLARE_ACCOUNT_ID`, `NEON_PROJECT_ID` (`old-sun-72319473`) and environment `production` exist. Production Hyperdrive config: S113.
 - The Later theme's other launch items (legal check, support mailbox, R2 and Email adapters, the Worker log settings) stay in the theme; this story lists them in the README checklist rather than building them.
 
 **Reuse check**
 
 **Reuse check** (ADR-025): before writing code, search `.github/workflows/ci.yml`, `wrangler.jsonc`, S113's migrate command for what this story needs; record what was reused, or why nothing fit, in the story's ledger notes.
 
-**Turn cap:** 16 — assumes two workflows (preview, production), wrangler environments and docs.
+**Turn cap:** 18 — assumes preview, staging and production deploy jobs, wrangler environments and docs (16 before the staging target was added).
 
-**Goal condition:** scripts/verify-S114.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, functions/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 16 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+**Goal condition:** scripts/verify-S114.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, functions/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 18 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 
 **`/goal` command**
 
 ```text
-/goal docs/v3/BACKLOG.md S114. Work item 0 first: if scripts/verify-S114.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S114.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, functions/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S114.sh, or stop after 16 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+/goal docs/v3/BACKLOG.md S114. Work item 0 first: if scripts/verify-S114.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S114.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, functions/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S114.sh, or stop after 18 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
 **Status:** `todo`
