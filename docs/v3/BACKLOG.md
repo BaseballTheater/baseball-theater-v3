@@ -5622,7 +5622,7 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 
 **Impact:** Before S112, local Baseball Theater showed a few recorded games. After it, it holds the end of the season and the whole postseason, real and complete, and one command refreshes any date range.
 
-**Source:** Open: may this story cite Pillar: Delightful (developers too), as S51 does with the owner's 2026-10-18 approval? Raised 2026-11-02.
+**Source:** Pillar: Delightful — developers too: one command gives local Baseball Theater real end-of-season and postseason data, with no serious setup (as S51 cites it). Asked whether S112 may cite Delightful, and S113 and S114 Dependable. Approved by owner 2026-11-02: "yes those are good pillars to use"
 
 **Depends on:** **S51** (local Postgres the seed loads into), **S111** (the season calendar that sets the default range).
 
@@ -5667,7 +5667,7 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 
 **Impact:** Before S113, there was nowhere for the real app to keep its data. After it, a production database exists, its tables are created and kept up to date by one command, and the deployed app is wired to it, ready for the first deploy.
 
-**Source:** Open: may this story cite Pillar: Dependable (the production data store), as the platform stories do? Raised 2026-11-02.
+**Source:** Pillar: Dependable — a production database that keeps fans' data through restarts and backup restores, so the app can be counted on. Asked whether S112 may cite Delightful, and S113 and S114 Dependable. Approved by owner 2026-11-02: "yes those are good pillars to use"
 
 **Depends on:** **S51** (the Worker composed on Postgres).
 
@@ -5712,7 +5712,7 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 
 **Impact:** Before S114, the app ran only on a developer's machine. After it, every change can be previewed at its own address against a copy of the database, and the owner can release to production with one approved step.
 
-**Source:** Open: may this story cite Pillar: Dependable (a repeatable, reviewed release), as the platform stories do? Raised 2026-11-02.
+**Source:** Pillar: Dependable — reviewed previews, release only with the owner's approval and a one-step rollback keep the live app trustworthy. Asked whether S112 may cite Delightful, and S113 and S114 Dependable. Approved by owner 2026-11-02: "yes those are good pillars to use"
 
 **Depends on:** **S113** (the production database the deployed Worker uses).
 
