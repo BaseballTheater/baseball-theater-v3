@@ -35,7 +35,7 @@ Check in this order:
 
 Read both lists from the note's frontmatter in `docs/v3/backlog/stories/S<N>.md`. The generated **Next** line in `BACKLOG.md` checks designs only, not `depends_on`, so don't rely on it alone. `superseded` stories are skipped.
 
-Run it exactly as `/goal S<N> done` (`CLAUDE.md` → `/goal <ID> done` shorthand): quote the `/goal` line and ACs word for word, `status: doing` + `pnpm backlog:build`, the reuse check, grader written and shown red on HEAD before product code, build inside the fence, grader green, `pnpm verify` 0, `status: done`, `CHANGELOG.md`, the baseline table, `scripts/audit.sh story <ID>`, one commit, and the `S<N> verified:` section with evidence.
+Run it exactly as `/goal S<N> done` (`CLAUDE.md` → `/goal <ID> done` shorthand): quote the `/goal` line and ACs word for word, `status: doing` + `pnpm backlog:build`, the reuse check, grader written and shown red on HEAD before product code, build inside the fence, grader green, `pnpm verify` 0, `status: done`, `CHANGELOG.md`, the baseline table, `scripts/audit.sh story <ID>`, one commit, and the `S<N> verified:` section with evidence. Don't push per story: the run pushes once, at the end (step 5).
 
 Give the owner a one-line progress note when each story starts and ends.
 
@@ -60,7 +60,7 @@ Then go back to step 2.
 
 ## 5. Stop
 
-Stop when `N` stories have been started, nothing is eligible, a review returns `blocked`, `pnpm verify` breaks in a way no story owns, or the owner interrupts. Never push, deploy or open a PR.
+Stop when `N` stories have been started, nothing is eligible, a review returns `blocked`, `pnpm verify` breaks in a way no story owns, or the owner interrupts. Then push `main` once, for the whole run (owner, 2026-11-02: "if we're using run-stories, we don't have to push until they are all done"): check GitHub Actions first and watch the new run, as `CLAUDE.md` → Agent / loop rules says, and report its result in the summary. Never deploy or open a PR.
 
 End with one summary:
 
