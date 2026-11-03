@@ -5,7 +5,15 @@
  * and the API serves its bundled fixtures. Coverage stays with the Node config
  * (`vitest.config.ts`), which runs every other test and holds the floors.
  */
+import { mkdirSync } from "node:fs";
 import { defineWorkersConfig } from "@cloudflare/vitest-pool-workers/config";
+
+// The Worker serves `web/dist` (wrangler.jsonc `assets`), and the pool refuses to start when it
+// is missing. CI tests before it builds the web app, so make sure the folder exists, as
+// `pnpm dev` does; the API tests never read the assets.
+mkdirSync(new URL("../web/dist", import.meta.url), {
+	recursive: true,
+});
 
 export default defineWorkersConfig({
 	test: {
