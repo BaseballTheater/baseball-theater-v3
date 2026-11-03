@@ -13237,3 +13237,43 @@ Owner-directed backlog change: S114 adds a staging target — every push to main
 **Answers and what was applied**
 
 Owner-directed backlog change: S114 adds a staging target — every push to main deploys to stage.baseball.theater on a long-lived Neon staging branch, production at baseball.theater stays behind the production environment approval; ACs renumber, README AC adds staging, turn cap 16 -> 18; S113 / S114 notes record the non-secret production setup IDs (commit d86edde). Owner, 2026-11-02: "Yes, agreed." Asked whether it needs the backlog and doc parity reviews, the owner said: "no backlog change needed". The next scheduled or drift-triggered review still checks it.
+
+---
+
+## 2026-11-02 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-03T07:50:43Z` |
+| HEAD at review | `3e3a4a2` (tree dirty) |
+| Trigger | drift, rule 10: S94 fence stop (3e3a4a2); S5 parked on owner question (342f95c) |
+| Stories `done` since last review | S93 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context subagent (did not write these stories). Read 3e3a4a2 and 342f95c in full, S94, S95, S99–S101, S103, S104, S5, S72, S96, S106, S107, and the code from 7e2e080 (S93) and the parked checkpoints 1d6ec5a (S111), 8e82a75 (S51), 3199a9d (S75).
+
+**1. Coverage.**
+- **Rule 10 class, not one story.** S94's stop (`3e3a4a2`): AC 4 regenerates `openapi/bt-api.v1.json`, and `web/src/api/codegen.test.ts` (ADR-016 drift gate, in `pnpm verify`) then needs `web/src/api/generated/bt-api.v1.ts` re-rendered, outside the fence. Every non-done story fencing `openapi/` without `web/src/` (frontmatter scan): S94, S95, S99, S100, S101, S103, S104 — each AC adds an additive game-payload field (`api:breaking`), so each would hit the same stop. Amended: all seven gain `web/src/api/generated/` (frontmatter, Scope files line, Goal condition, `/goal` line), with a note; only the generated dir, since the fields are optional (no web literal changes; the 2026-10-23 "additive wire fields" watch item applies to required fields). Precedent: S65 held just `web/src/api/generated/`. S93 (`7e2e080`) edited that same file outside its own fence; its grader (`scripts/verify-S93.sh`) has no fence check and its ledger entry doesn't mention it — recorded as pending drift (graders are frozen).
+- **S94's endpoint facts moved into the story** (from `3e3a4a2`'s message): full hash `e12a5c2692406844d5f15f52ce7754208f53da81867de7d3e9e773611f4a040a` (AC 1 named only `e12a5c26…`), required header `x-client-name: mlb` (400 empty body without it; AC 1 now names it), variables `gameRecapTags`, `relatedArticleTags`, `contentSource`; 25 videos, one recapArticle, relatedArticles on 823823. AC 4 said articles keep a "URL"; MLB gives a slug, so AC 4 points at a note reading it as the slug (no consumer story reads `relatedArticles`). These are corrections to what the endpoint is, not loosenings: the hash and header make AC 1 stricter.
+- **S5:** owner question, not decided here (below). The probe in `342f95c` shows ADR-029's "MLB's `Search` per query, as the current site does" cannot answer free text; recorded as a note, ACs untouched, stays `blocked`. ADR-029 and S5's notes plan one GraphQL helper for both hosts; with S5 parked and data-graph needing a persisted-query request with a required header, S94 is told to build only what it needs.
+- **Prior parity review's "for the next backlog review":** (1) ADR-023 "Install app row" vs A8 — ADR text, owner's edit; still open, not in this review's scope. (2) S5 vs ADR-002 — answered by ADR-029 (7828fd9); now reopened in substance by the S5 question. (3) none.
+- No new ADR, package or Later theme since the last review; no gap without a story found.
+
+**2. Ground truth — next 3 startable at HEAD `3e3a4a2`** (eligibility computed from every note's frontmatter: S111/S51/S75/S4/S5/S73/S28 blocked; S112–S114 wait on S51/S111; S72 on S5; S74 on S73/S75; S95/S97/S98 on S94; S108 on S106/S107).
+- **S94 (97, now `todo`):** no deps/design. `fixtures/raw/` exists, `graphql-content-823823.json` absent (red-first, its own). `functions/src/adapters/http/mlb.ts` exists; S93's `playMetricsUrl` (line 49) is the pattern for a second host and `fetchGame` attaches feeds with `Promise.all` (line 101). `functions/src/adapters/fixtures/bundled.ts`, `functions/src/scripts/record-fixtures.ts`, `functions/src/mappers/content.ts` exist. `pnpm mlb:scan-drift`, `api:spec`, `api:breaking`, `api:types` exist in root `package.json`. `web/src/api/codegen.test.ts` and `web/src/api/generated/bt-api.v1.ts` exist — now in the fence. No new route, so `generated.types.test.ts` is untouched. Turn cap 14 holds (S93, same shape, shipped in it).
+- **S96 (99):** deps S69, S41 done. `docs/v3/visual/game-shell/amendments/` and `game-rooms/amendments/` exist; design only; owner session parks it. Holds.
+- **S106 (102):** deps S93, S64, S68, S81 done; design S33, S57 done. `LiveRoom.tsx`, `LiveStatus.tsx`, `StrikeZoneChart.tsx`, `web/src/settings/useScoresHidden.ts`, `web/src/components/HiddenValue.tsx` exist; `GameSnapshot.playMetrics?` at `packages/domain/src/types.ts:191`; frames `game-rooms/live-medium.png`, `live-desktop.png`, `amendments/live-hidden-status-medium.png` exist; `winProbabilitySeries` absent (its own). `pnpm size`, `pnpm design:capture` exist. Notes added: play metrics refresh on every fetch (so AC 5's live growth is real, answering the note's open "if"), and S75's checkpoint already put `useScoresHidden` in `LiveRoom.tsx:35`. Fence holds `web/src/`, `packages/domain/`. Cap 14 holds.
+- (Fourth, S107 (103): deps S67, S68 done; `shell-scoreboard/amendments/`, `standings-search-settings/amendments/` exist. Holds.)
+
+**3. Prioritization challenge.** Against S94 before S106: S106 is user-visible (the Live chart) with every input landed, while S94 shows nothing until S95 → S97, and S97 also waits on S96's owner session; S94's persisted-query hash can be retired by MLB at any time. Kept: S94 heads the longest dependent chain (S95, S97, S98), S96's owner session can run in parallel, and both are in the next three, so a `/run-stories` batch takes both. Against S5/S72 at 90/91: both are owner-gated, so their place costs nothing. S112 at 77 is the generated Next line but cannot start (S51, S111 parked) — the known Next-line issue already in pending drift. Nothing found obsolete or quietly done. Systematic underestimate: ingest stories' fences missed the web codegen step (amended above).
+
+**Duplication sweep (ADR-025).** `pnpm dup:check`: 0 clones over 195 files. Same-meaning search over the code added since the last review: S93 `functions/src/mappers/play-metrics.ts` (pure mapping, no derived values); S111's three default-date files — `packages/domain/src/scoreboard-date.ts` owns `mlbToday` / `defaultScoreboardDate`, `functions/src/services/scoreboard-date.ts` and `web/src/api/scoreboardDate.ts` only call them; S75's recap rule — `game-recap` appears only in `packages/domain/src/highlights.ts:57` (`isGameRecapHighlight`); `svgPoints` / `speedLabel` single in `web/src/components/pitch/utils.ts`. None found.
+
+**Personal-data sweep (ADR-028).** S94, S96, S106, S107 add no table, personal field, outside service or browser key (game data and design only). New log lines since the last review (`functions/src/adapters/postgres/connect.ts:34`, `functions/src/scripts/db-seed.ts:34,48`, `functions/src/local-server.ts`) carry hosts, dates and errors, no personal fields. None found.
+
+**Verdict: `amended`.** S94 → `todo` with the fence fix and endpoint facts; six sibling ingest stories fenced the same way; S5, S106 notes; frame and baseline updated. Not `blocked`: the S5 question gates only S5 and S72, which were already parked, and the next three can start.
+
+**Owner question (gates S5 and S72 only).** Highlight search: MLB's `Search` on fastball-gateway takes only Film Room structured filters (`Description = [...]`, `HitResult = [...]`, `Season = [n]`), not free text, and `Description = ["walk-off"]` finds nothing; v2's free-text box used its own index. Which should launch search be — (a) BT's own search over stored games' highlight titles/blurbs (S50's GIN index), (b) MLB's structured filters exposed as filter choices instead of a free-text box, or (c) something else? ADR-029 and S5's ACs follow from the answer.
