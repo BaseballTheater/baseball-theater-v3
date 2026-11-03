@@ -235,7 +235,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 86 | [S18](#s18--live-hub-durable-object--livegamehub-port--one-way-websocket) | Live hub object + one-way WebSocket | `done` |
 | 87 | [S19](#s19--web-client-auto-updates-watched-game) | Web client auto-updates watched game | `done` |
 | 89 | [S4](#s4--standings-fixture-api--page) | Standings fixture API + page | `blocked` |
-| 90 | [S5](#s5--search-page-queries-highlights-fixture) | Search page queries highlights fixture | `blocked` |
+| 90 | [S5](#s5--search-page-queries-highlights-fixture) | Search page queries highlights fixture | `todo` |
 | 91 | [S72](#s72--highlight-search-by-date-team-and-tag) | Search chips: date / team / tag | `todo` |
 | 92 | [S73](#s73--installable-app-manifest-service-worker-update-notice-install-row) | Installable PWA + update notice | `blocked` |
 | 93 | [S28](#s28--version-sunset-path-deprecation-headers--stale-client-upgrade) | Version sunset path + stale-client upgrade | `blocked` |
@@ -1975,6 +1975,13 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 - So ADR-029's "asks MLB's `Search` per query, as the current site does" can't serve AC 1–2's `q=walk-off` as written. Which way to go is the owner's call (asked by this review); this review changes no AC. Once answered, the ACs, ADR-029 (owner's edit) and S72 may all move: S72's date + tag filters look closer to what MLB's filter language can do than S5's free text is.
 - Until then S72 waits on S5, as before.
 
+**Owner's answer (2026-11-03), applied — supersedes the 2026-11-02 "MLB's own search" notes above:** MLB's GraphQL `Search` takes only structured filters (probe at `342f95c`), so asked what launch search should look through, the owner said: *"Use the prior repo to see what to do."* The prior site (`~/Repos/BaseballTheater`, `server/Local/search.ts`) searched its own index of every highlight it had ingested — free text over title (×2), blurb, description and keywords, optionally limited to given games, newest game first, 20 per page — and never asked MLB per query. ADR-029 is amended to match. So:
+
+- **Search reads BT's stored games.** A query method on a port in `packages/ports` (the 2026-11-02 backlog review's repository-search notes apply again: a `GameRepository` method, its case in `functions/src/adapters/repository-contract.ts`, the memory adapter, and S50's Postgres adapter on the `games` JSONB / GIN index). No `MlbStatsClient` search method, no GraphQL helper, no `fixtures/search-*.json` recording.
+- **Match the prior site's behavior, not its code** (CLAUDE.md): match `q` case-insensitively against each highlight's title, blurb and keywords (`tags`), newest game first; page size 20.
+- **In-process test data.** The local stores start empty: the functions test seeds the repository with fixture `744834` (whose `Lane Thomas hits a walk-off home run` answers AC 1–2) before searching.
+- **AC 8's matchup** comes from the stored game each highlight belongs to (its `gamePk`, teams and date), so it no longer depends on what MLB's search returns.
+
 **Reuse check**
 
 **Reuse check** (ADR-025): before writing code, search `packages/domain`, `web/src/components/`, `web/src/layout/` and `web/src/api/` for what this story needs; record what was reused, or why nothing fit, in the story's ledger notes.
@@ -1987,7 +1994,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 /goal docs/v3/BACKLOG.md S5. Work item 0 first: if scripts/verify-S5.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S5.sh exits 0, pnpm verify exits 0, no files outside fixtures/, packages/domain/, packages/ports/, functions/src/, functions/vitest.config.ts, openapi/, web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S5.sh, or stop after 16 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `blocked`
+**Status:** `todo`
 
 ---
 
