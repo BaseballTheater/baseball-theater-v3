@@ -235,7 +235,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 86 | [S18](#s18--live-hub-durable-object--livegamehub-port--one-way-websocket) | Live hub object + one-way WebSocket | `done` |
 | 87 | [S19](#s19--web-client-auto-updates-watched-game) | Web client auto-updates watched game | `done` |
 | 89 | [S4](#s4--standings-fixture-api--page) | Standings fixture API + page | `blocked` |
-| 90 | [S5](#s5--search-page-queries-highlights-fixture) | Search page queries highlights fixture | `blocked` |
+| 90 | [S5](#s5--search-page-queries-highlights-fixture) | Search page queries highlights fixture | `todo` |
 | 91 | [S72](#s72--highlight-search-by-date-team-and-tag) | Search chips: date / team / tag | `todo` |
 | 92 | [S73](#s73--installable-app-manifest-service-worker-update-notice-install-row) | Installable PWA + update notice | `blocked` |
 | 93 | [S28](#s28--version-sunset-path-deprecation-headers--stale-client-upgrade) | Version sunset path + stale-client upgrade | `blocked` |
@@ -1975,6 +1975,13 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 - So ADR-029's "asks MLB's `Search` per query, as the current site does" can't serve AC 1–2's `q=walk-off` as written. Which way to go is the owner's call (asked by this review); this review changes no AC. Once answered, the ACs, ADR-029 (owner's edit) and S72 may all move: S72's date + tag filters look closer to what MLB's filter language can do than S5's free text is.
 - Until then S72 waits on S5, as before.
 
+**Owner's answer (2026-11-03), applied — MLB's free-text search, as the prior site's search page asks it:** after `342f95c` found MLB's `Search` rejecting plain words, the owner said: *"Use the prior repo to see what to do."* The prior site's search page (`~/Repos/BaseballTheater/client/src/Areas/Search/NewSearch.tsx`, Relay against `fastball-gateway.mlb.com/graphql`) sends **`queryType: "FREETEXT"`** with the typed words (`STRUCTURED` only for its date + tag links); the `342f95c` probes left `queryType` out, so MLB parsed the words as Film Room filters. ADR-029 stands as written. Probed read-only 2026-11-03 with `queryType: FREETEXT`, `limit`, `page`, `languagePreference: EN`, `contentPreference: MIXED`:
+
+- Free text works: "walkoff" 2,136 results, "walk off" 3,338, "Judge homers" 782. Each result carries `gamePk` and `gameDate` (non-game clips: `gamePk: -1`, `gameDate: null`) and `mediaPlayback[]` with `title`, `blurb`, `description`, `feeds`.
+- **A hyphenated single word matches nothing**: "walk-off" returns 0. AC 1's `q=walk-off` therefore needs BT to send hyphens as spaces ("walk off") — note it in the request builder and test it — and the fixture recording is of that request.
+- **AC 8's teams** are not in this result shape; check the schema for team fields on `plays` before recording, else stop and report as the earlier note says. A `gamePk: -1` clip has no game, so it shows no matchup or game link.
+- The prior site paged 36 per request; AC 8 says nothing of page size.
+
 **Reuse check**
 
 **Reuse check** (ADR-025): before writing code, search `packages/domain`, `web/src/components/`, `web/src/layout/` and `web/src/api/` for what this story needs; record what was reused, or why nothing fit, in the story's ledger notes.
@@ -1987,7 +1994,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 /goal docs/v3/BACKLOG.md S5. Work item 0 first: if scripts/verify-S5.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S5.sh exits 0, pnpm verify exits 0, no files outside fixtures/, packages/domain/, packages/ports/, functions/src/, functions/vitest.config.ts, openapi/, web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S5.sh, or stop after 16 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `blocked`
+**Status:** `todo`
 
 ---
 
