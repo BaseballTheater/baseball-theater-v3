@@ -1,5 +1,5 @@
 import type {
-	IdentityAccount, IdentityAdmin, IdentityClaims, IdentityProvider, SecretsProvider,
+	DeletionLog, IdentityAccount, IdentityAdmin, IdentityClaims, IdentityProvider, SecretsProvider, UserRepository,
 } from "@bt/ports";
 import type { AccountDataDeps } from "../../services/account-deletion.js";
 import type { AuthDeps } from "../../services/accounts.js";
@@ -81,19 +81,20 @@ export class StaticSecretsProvider implements SecretsProvider
 	}
 }
 
-/**
- * Auth for local dev and tests: in-memory users, sessions signed with a key
- * from `secrets` (a fixed test key by default), and `dev:` sign-in enabled.
- */
 /** The fixed key tests and the dev defaults sign with. */
 const DEV_SECRETS = new StaticSecretsProvider({
 	[SESSION_KEY_SECRET]: "dev-session-key",
 });
 
-export function createDevAuth(secrets: SecretsProvider = DEV_SECRETS): AuthDeps
+/**
+ * Auth for local dev and tests: `users` (in-memory unless the caller brings a store — the
+ * Worker passes Postgres, S51), sessions signed with a key from `secrets` (a fixed test key
+ * by default), and `dev:` sign-in enabled.
+ */
+export function createDevAuth(secrets: SecretsProvider = DEV_SECRETS, users: UserRepository = new InMemoryUserRepository()): AuthDeps
 {
 	return {
-		users: new InMemoryUserRepository(),
+		users,
 		sessions: createSessionSigner(secrets),
 		dev: new DevIdentityProvider(),
 	};
@@ -103,9 +104,14 @@ export function createDevAuth(secrets: SecretsProvider = DEV_SECRETS): AuthDeps
  * Downloads and deletion for local dev and tests (S77, S80): the registry over
  * `stores` plus in-memory downloads and mailer (returned as their concrete
  * classes, so tests can read what was sent), the dev identity admin and an
- * in-memory deletion log. `secrets` supplies the app origin for email links.
+ * deletion log (in-memory unless the caller brings one; the Worker passes Postgres, S51).
+ * `secrets` supplies the app origin for email links.
  */
-export function createDevAccountData(stores: Omit<PersonalDataDeps, "downloads" | "mailer">, secrets: SecretsProvider = DEV_SECRETS): AccountDataDeps & {
+export function createDevAccountData(
+	stores: Omit<PersonalDataDeps, "downloads" | "mailer">,
+	secrets: SecretsProvider = DEV_SECRETS,
+	deletionLog: DeletionLog = new InMemoryDeletionLog(),
+): AccountDataDeps & {
 	identityAdmins: [DevIdentityAdmin];
 	downloads: InMemoryExportStore;
 	mailer: InMemoryMailer;
@@ -121,7 +127,7 @@ export function createDevAccountData(stores: Omit<PersonalDataDeps, "downloads" 
 			mailer,
 		}),
 		identityAdmins: [new DevIdentityAdmin()],
-		deletionLog: new InMemoryDeletionLog(),
+		deletionLog,
 		downloads,
 		mailer,
 		secrets,

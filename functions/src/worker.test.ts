@@ -5,11 +5,13 @@
  * deployed, and in local dev only behind BT_INGEST_TICK.
  */
 import {
-	describe, expect, it, vi,
+	beforeAll, describe, expect, it, vi,
 } from "vitest";
 import { FixtureClient } from "./adapters/fixtures/fixture-client.js";
 import { HttpMlbStatsClient } from "./adapters/http/mlb.js";
 import * as gameIngest from "./services/game-ingest.js";
+import { useNodeDatabase } from "./test/node-database.js";
+import { handleApiRequest } from "./handlers/api.js";
 import worker from "./worker.js";
 import {
 	createMlbClient, createWorkerApp, tickAllowed, workerApp,
@@ -28,14 +30,15 @@ describe("the Worker composition (S45)", () =>
 		})).toBeInstanceOf(HttpMlbStatsClient);
 	});
 
-	it("seeds the configured day, with a given session key and app origin", async () =>
+	it("reads through to the fixtures into Postgres, with a given session key and app origin", async () =>
 	{
 		const app = createWorkerApp({
-			BT_SEED_DATE: "2026-09-05",
 			BT_SESSION_KEY: "k",
 			BT_APP_ORIGIN: "https://bt.test",
-		});
-		await app.ready;
+		}, await useNodeDatabase());
+		expect(await app.ingest.schedules.getByDate("2026-09-05")).toBeNull();
+		const response = await handleApiRequest(new Request("http://bt.test/api/v1/schedule?date=2026-09-05"), app.context);
+		expect(response.status).toBe(200);
 		expect((await app.ingest.schedules.getByDate("2026-09-05"))?.games.length).toBe(15);
 	});
 
@@ -61,9 +64,17 @@ describe("the Worker composition (S45)", () =>
 
 describe("the Worker entry (S45)", () =>
 {
+	// Node has no Hyperdrive: the Worker's scoped database falls back to PGlite (S51).
+	beforeAll(async () =>
+	{
+		await useNodeDatabase();
+	});
+
 	it("fetch answers the API through handleApiRequest", async () =>
 	{
-		const res = await worker.fetch(new Request("http://bt.test/api/v1/games/744834"), {});
+		const res = await worker.fetch(new Request("http://bt.test/api/v1/games/744834"), {}, {
+			waitUntil: () => undefined,
+		});
 		expect(res.status).toBe(200);
 		expect((await res.json() as { gamePk: number }).gamePk).toBe(744834);
 	});

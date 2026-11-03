@@ -97,17 +97,26 @@ importers:
         version: link:../packages/ports
       drizzle-orm:
         specifier: 0.44.2
-        version: 0.44.2(@electric-sql/pglite@0.3.3)(postgres@3.4.7)
+        version: 0.44.2(@electric-sql/pglite@0.5.10)(@types/pg@8.15.6)(pg@8.23.1)(postgres@3.4.9)
+      pg:
+        specifier: 8.23.1
+        version: 8.23.1
     devDependencies:
       '@cloudflare/vitest-pool-workers':
         specifier: 0.12.21
         version: 0.12.21(@vitest/runner@3.2.7)(@vitest/snapshot@3.2.7)(vitest@3.2.7(@types/node@22.20.1)(jsdom@26.1.0)(sugarss@5.0.1(postcss@8.5.26))(terser@5.51.2)(tsx@4.23.12)(yaml@2.9.0))
       '@electric-sql/pglite':
-        specifier: 0.3.3
-        version: 0.3.3
+        specifier: 0.5.10
+        version: 0.5.10
+      '@electric-sql/pglite-socket':
+        specifier: 0.2.13
+        version: 0.2.13(@electric-sql/pglite-age@0.0.11(@electric-sql/pglite@0.5.10))(@electric-sql/pglite-pg_hashids@0.0.11(@electric-sql/pglite@0.5.10))(@electric-sql/pglite-pg_ivm@0.0.11(@electric-sql/pglite@0.5.10))(@electric-sql/pglite-pg_textsearch@0.0.12(@electric-sql/pglite@0.5.10))(@electric-sql/pglite-pg_uuidv7@0.0.11(@electric-sql/pglite@0.5.10))(@electric-sql/pglite-pgtap@0.0.11(@electric-sql/pglite@0.5.10))(@electric-sql/pglite-pgvector@0.0.11(@electric-sql/pglite@0.5.10))(@electric-sql/pglite@0.5.10)
       '@types/node':
         specifier: ^22.13.10
         version: 22.20.1
+      '@types/pg':
+        specifier: 8.15.6
+        version: 8.15.6
       drizzle-kit:
         specifier: 0.31.1
         version: 0.31.1
@@ -938,8 +947,56 @@ packages:
   '@drizzle-team/brocli@0.10.2':
     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
 
-  '@electric-sql/pglite@0.3.3':
-    resolution: {integrity: sha512-JrvHOx9q0yvKEby0bK8qzGTVw6K+yEg8enxDWb2IwNKr5XZxRrBb+GNIqoAIP7yXyhRg5jcENWmdHmtnAT87vA==}
+  '@electric-sql/pglite-age@0.0.11':
+    resolution: {integrity: sha512-SpgPLSAp6bz4jno7soLSIvu3HeOlgxAlyOL5r+AaAWYdBSdy9QzVGYbWz1YG+UaK40uppEviCkDZs/OCnby/mw==}
+    peerDependencies:
+      '@electric-sql/pglite': 0.5.10
+
+  '@electric-sql/pglite-pg_hashids@0.0.11':
+    resolution: {integrity: sha512-LCnIPhmeYsU6wBsxcS253pwoGn9FYGopjieq0rtcFjuV0KGoXMMhVI/wNVkDDp+UJlsWWx/4HDang9/0UDPj+A==}
+    peerDependencies:
+      '@electric-sql/pglite': 0.5.10
+
+  '@electric-sql/pglite-pg_ivm@0.0.11':
+    resolution: {integrity: sha512-hx9b0r7XOv7+s8BHYbQF8CnhRgrJtx3MsCmce0S94EWkLrc0oIDyespl/yg0bjXSjPoj0dXG9Pbpn1ScezutXg==}
+    peerDependencies:
+      '@electric-sql/pglite': 0.5.10
+
+  '@electric-sql/pglite-pg_textsearch@0.0.12':
+    resolution: {integrity: sha512-4w+XqCu0kVPOdpTTP1OERkJejqhjQ2NaFBGIpfR7VWaPaGYvReLgLISmblo4ik+MvIweO5obgwmwOe41AkQ6Jw==}
+    peerDependencies:
+      '@electric-sql/pglite': 0.5.10
+
+  '@electric-sql/pglite-pg_uuidv7@0.0.11':
+    resolution: {integrity: sha512-bMmPYmncxuDyBZDOFzrRa/nI4yYzHVNpE+vTD9lXVTM1V4C+G6N4hRoJbEnmycSlMbEIKbAlXT7CLPBZ/cswrQ==}
+    peerDependencies:
+      '@electric-sql/pglite': 0.5.10
+
+  '@electric-sql/pglite-pgtap@0.0.11':
+    resolution: {integrity: sha512-G9apu/VxUlt9k6if60YJ6FmJbM3mY6cEs11sIGEgaOfORRDAtT9oKSpXzyfDGga7QVZwFkiGY/Ez1BaX73OCew==}
+    peerDependencies:
+      '@electric-sql/pglite': 0.5.10
+
+  '@electric-sql/pglite-pgvector@0.0.11':
+    resolution: {integrity: sha512-pUukU2iqI5TLBv/0D5Bk9R9zVyms+7Do6yscl4WRKW5pD2wNl8FlzGWDXphXj/Q42SsVIJHbP4+oqwjQC9fasg==}
+    peerDependencies:
+      '@electric-sql/pglite': 0.5.10
+
+  '@electric-sql/pglite-socket@0.2.13':
+    resolution: {integrity: sha512-z6kydnOvL5A4Y46bUQD3gZxi+cMJZFm700h9g+tMj11Z5rbhpozkFg2rK3Ln3BIjaHXkJogAR7UEj/qWtRBMKA==}
+    hasBin: true
+    peerDependencies:
+      '@electric-sql/pglite': 0.5.10
+      '@electric-sql/pglite-age': 0.0.11
+      '@electric-sql/pglite-pg_hashids': 0.0.11
+      '@electric-sql/pglite-pg_ivm': 0.0.11
+      '@electric-sql/pglite-pg_textsearch': 0.0.12
+      '@electric-sql/pglite-pg_uuidv7': 0.0.11
+      '@electric-sql/pglite-pgtap': 0.0.11
+      '@electric-sql/pglite-pgvector': 0.0.11
+
+  '@electric-sql/pglite@0.5.10':
+    resolution: {integrity: sha512-tXc/25U3ulOkiRQuTFdwIv+JhBqtMdAF7Gvo6CfZZWtSB4+hgC4Wr2vwK5ngvvN5PJfAAEGIsfyCVy1JhCOBYw==}
 
   '@emnapi/runtime@1.11.3':
     resolution: {integrity: sha512-Xz4Tpyki7XyrpbUK1jR1AhdAdaXyhhY4lZ3neLodmhpuWfy2PAQN5B46sAiU4liOXGLkHypn/qU+jvfWSCYYLA==}
@@ -2357,6 +2414,9 @@ packages:
 
   '@types/node@25.9.6':
     resolution: {integrity: sha512-JR6Q/PV5DKFvjrGFVqQJdeG0qvsqQQLDa3TzFrqVwhqRXqwNaxPo2KYCtCQXpOdIulCouKwT7a6in9nFthBAzw==}
+
+  '@types/pg@8.15.6':
+    resolution: {integrity: sha512-NoaMtzhxOrubeL/7UZuNTrejB4MPAJ0RpxZqXQf2qXuVlTPuG6Y8p4u9dKRaue4yjmC7ZhzVO2/Yyyn25znrPQ==}
 
   '@types/react-dom@19.2.5':
     resolution: {integrity: sha512-fMPwH9v7r/pp43yUd2/Mbiex5KouJwwR3dzHkhLREUC6764VyDsqxhAxv6OFEYR1RhjOyD1naqba8ECDBe7ZQg==}
@@ -4453,6 +4513,40 @@ packages:
   pend@1.2.0:
     resolution: {integrity: sha512-F3asv42UuXchdzt+xXqfW1OGlVBe+mxa2mqI0pg5yAHZPvFmY3Y6drSf/GQ1A86WgWEN9Kzh/WrgKa6iGcHXLg==}
 
+  pg-cloudflare@1.4.1:
+    resolution: {integrity: sha512-6PQbsFWZcp9EmJEwy5cGQ2La+AMWpP46lgbb8X+U/XsHIUweYDNCpeuKck5RxL2MdVFi7krbbEi5nX4Zh7JhrQ==}
+
+  pg-connection-string@2.14.1:
+    resolution: {integrity: sha512-qR3kGNPBLpCNtz0evbKA0Y/MRFXwSSdT+pTJvYp/bXTcReZbvX1kzF0IyTc1QnxqF7AZbOeBhNL8R5mYQZV/MA==}
+
+  pg-int8@1.0.1:
+    resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
+    engines: {node: '>=4.0.0'}
+
+  pg-pool@3.14.0:
+    resolution: {integrity: sha512-gKtPkFdQPU3DksooVLi9LsjZxrsBUZIpa+7aVx+LV5pNh0KzP4Zleud2po+ConrxbuXGBJ6Hfer6hdgpIBpBaw==}
+    peerDependencies:
+      pg: '>=8.0'
+
+  pg-protocol@1.16.1:
+    resolution: {integrity: sha512-p9VOFMiHB/ZbJATetbg+99PxssTVSQRnyuPSQ67mN1+1KBOjZaZ83ZQzltnxPhJwSsC3nwVjJ10DVJlerbFzLg==}
+
+  pg-types@2.2.0:
+    resolution: {integrity: sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA==}
+    engines: {node: '>=4'}
+
+  pg@8.23.1:
+    resolution: {integrity: sha512-aL96AHANtWjPLDOLqnhx+ngp9+UK7ETEU8VJrDCGvsSSi/mGLcWYsS6Herg7lmaBJe4uwrfqsa7gTEFaSizDoQ==}
+    engines: {node: '>= 16.0.0'}
+    peerDependencies:
+      pg-native: '>=3.0.1'
+    peerDependenciesMeta:
+      pg-native:
+        optional: true
+
+  pgpass@1.0.5:
+    resolution: {integrity: sha512-FdW9r/jQZhSeohs1Z3sI1yxFQNFvMcnmfuj4WBMUTxOrAyLMaTcE1aAMBiTlbMNaXvBCQuVi0R7hd8udDSP7ug==}
+
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
@@ -4524,8 +4618,24 @@ packages:
     resolution: {integrity: sha512-u82N74LFzG8ca+dD8puPnplTXoGH4fTPpVGuIbt36G3qvNlkvfD0lEAZSxaly3KX8TS/L1A1gsCEmvKmBcVbkQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postgres@3.4.7:
-    resolution: {integrity: sha512-Jtc2612XINuBjIl/QTWsV5UvE8UHuNblcO3vVADSrKsrc6RqGX6lOW1cEo3CM2v0XG4Nat8nI+YM7/f26VxXLw==}
+  postgres-array@2.0.0:
+    resolution: {integrity: sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==}
+    engines: {node: '>=4'}
+
+  postgres-bytea@1.0.1:
+    resolution: {integrity: sha512-5+5HqXnsZPE65IJZSMkZtURARZelel2oXUEO8rH83VS/hxH5vv1uHquPg5wZs8yMAfdv971IU+kcPUczi7NVBQ==}
+    engines: {node: '>=0.10.0'}
+
+  postgres-date@1.0.7:
+    resolution: {integrity: sha512-suDmjLVQg78nMK2UZ454hAG+OAW+HQPZ6n++TNDUX+L0+uUlLywnoxJKDou51Zm+zTCjrCl0Nq6J9C5hP9vK/Q==}
+    engines: {node: '>=0.10.0'}
+
+  postgres-interval@1.2.0:
+    resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
+    engines: {node: '>=0.10.0'}
+
+  postgres@3.4.9:
+    resolution: {integrity: sha512-GD3qdB0x1z9xgFI6cdRD6xu2Sp2WCOEoe3mtnyB5Ee0XrrL5Pe+e4CCnJrRMnL1zYtRDZmQQVbvOttLnKDLnaw==}
     engines: {node: '>=12'}
 
   prelude-ls@1.2.1:
@@ -4932,6 +5042,10 @@ packages:
   speedline-core@1.4.3:
     resolution: {integrity: sha512-DI7/OuAUD+GMpR6dmu8lliO2Wg5zfeh+/xsdyJZCzd8o5JgFUjCeLsBDuZjIQJdwXS3J0L/uZYrELKYqx+PXog==}
     engines: {node: '>=8.0'}
+
+  split2@4.2.0:
+    resolution: {integrity: sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg==}
+    engines: {node: '>= 10.x'}
 
   sprintf-js@1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
@@ -5681,6 +5795,10 @@ packages:
 
   xmlchars@2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
+
+  xtend@4.0.2:
+    resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
+    engines: {node: '>=0.4'}
 
   y18n@4.0.3:
     resolution: {integrity: sha512-JKhqTOwSrqNA1NY5lSztJ1GrBiUodLMmIZuLiDaMRJ+itFd+ABVE8XBjOvIWL+rSqNDC74LCSFmlb/U4UZ4hJQ==}
@@ -6568,7 +6686,46 @@ snapshots:
 
   '@drizzle-team/brocli@0.10.2': {}
 
-  '@electric-sql/pglite@0.3.3': {}
+  '@electric-sql/pglite-age@0.0.11(@electric-sql/pglite@0.5.10)':
+    dependencies:
+      '@electric-sql/pglite': 0.5.10
+
+  '@electric-sql/pglite-pg_hashids@0.0.11(@electric-sql/pglite@0.5.10)':
+    dependencies:
+      '@electric-sql/pglite': 0.5.10
+
+  '@electric-sql/pglite-pg_ivm@0.0.11(@electric-sql/pglite@0.5.10)':
+    dependencies:
+      '@electric-sql/pglite': 0.5.10
+
+  '@electric-sql/pglite-pg_textsearch@0.0.12(@electric-sql/pglite@0.5.10)':
+    dependencies:
+      '@electric-sql/pglite': 0.5.10
+
+  '@electric-sql/pglite-pg_uuidv7@0.0.11(@electric-sql/pglite@0.5.10)':
+    dependencies:
+      '@electric-sql/pglite': 0.5.10
+
+  '@electric-sql/pglite-pgtap@0.0.11(@electric-sql/pglite@0.5.10)':
+    dependencies:
+      '@electric-sql/pglite': 0.5.10
+
+  '@electric-sql/pglite-pgvector@0.0.11(@electric-sql/pglite@0.5.10)':
+    dependencies:
+      '@electric-sql/pglite': 0.5.10
+
+  '@electric-sql/pglite-socket@0.2.13(@electric-sql/pglite-age@0.0.11(@electric-sql/pglite@0.5.10))(@electric-sql/pglite-pg_hashids@0.0.11(@electric-sql/pglite@0.5.10))(@electric-sql/pglite-pg_ivm@0.0.11(@electric-sql/pglite@0.5.10))(@electric-sql/pglite-pg_textsearch@0.0.12(@electric-sql/pglite@0.5.10))(@electric-sql/pglite-pg_uuidv7@0.0.11(@electric-sql/pglite@0.5.10))(@electric-sql/pglite-pgtap@0.0.11(@electric-sql/pglite@0.5.10))(@electric-sql/pglite-pgvector@0.0.11(@electric-sql/pglite@0.5.10))(@electric-sql/pglite@0.5.10)':
+    dependencies:
+      '@electric-sql/pglite': 0.5.10
+      '@electric-sql/pglite-age': 0.0.11(@electric-sql/pglite@0.5.10)
+      '@electric-sql/pglite-pg_hashids': 0.0.11(@electric-sql/pglite@0.5.10)
+      '@electric-sql/pglite-pg_ivm': 0.0.11(@electric-sql/pglite@0.5.10)
+      '@electric-sql/pglite-pg_textsearch': 0.0.12(@electric-sql/pglite@0.5.10)
+      '@electric-sql/pglite-pg_uuidv7': 0.0.11(@electric-sql/pglite@0.5.10)
+      '@electric-sql/pglite-pgtap': 0.0.11(@electric-sql/pglite@0.5.10)
+      '@electric-sql/pglite-pgvector': 0.0.11(@electric-sql/pglite@0.5.10)
+
+  '@electric-sql/pglite@0.5.10': {}
 
   '@emnapi/runtime@1.11.3':
     dependencies:
@@ -7654,6 +7811,12 @@ snapshots:
     dependencies:
       undici-types: 7.24.6
 
+  '@types/pg@8.15.6':
+    dependencies:
+      '@types/node': 22.20.1
+      pg-protocol: 1.16.1
+      pg-types: 2.2.0
+
   '@types/react-dom@19.2.5(@types/react@19.2.18)':
     dependencies:
       '@types/react': 19.2.18
@@ -8383,10 +8546,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.2(@electric-sql/pglite@0.3.3)(postgres@3.4.7):
+  drizzle-orm@0.44.2(@electric-sql/pglite@0.5.10)(@types/pg@8.15.6)(pg@8.23.1)(postgres@3.4.9):
     optionalDependencies:
-      '@electric-sql/pglite': 0.3.3
-      postgres: 3.4.7
+      '@electric-sql/pglite': 0.5.10
+      '@types/pg': 8.15.6
+      pg: 8.23.1
+      postgres: 3.4.9
 
   dunder-proto@1.0.1:
     dependencies:
@@ -9926,6 +10091,41 @@ snapshots:
 
   pend@1.2.0: {}
 
+  pg-cloudflare@1.4.1:
+    optional: true
+
+  pg-connection-string@2.14.1: {}
+
+  pg-int8@1.0.1: {}
+
+  pg-pool@3.14.0(pg@8.23.1):
+    dependencies:
+      pg: 8.23.1
+
+  pg-protocol@1.16.1: {}
+
+  pg-types@2.2.0:
+    dependencies:
+      pg-int8: 1.0.1
+      postgres-array: 2.0.0
+      postgres-bytea: 1.0.1
+      postgres-date: 1.0.7
+      postgres-interval: 1.2.0
+
+  pg@8.23.1:
+    dependencies:
+      pg-connection-string: 2.14.1
+      pg-pool: 3.14.0(pg@8.23.1)
+      pg-protocol: 1.16.1
+      pg-types: 2.2.0
+      pgpass: 1.0.5
+    optionalDependencies:
+      pg-cloudflare: 1.4.1
+
+  pgpass@1.0.5:
+    dependencies:
+      split2: 4.2.0
+
   picocolors@1.1.1: {}
 
   picomatch@2.3.2: {}
@@ -9983,7 +10183,17 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postgres@3.4.7:
+  postgres-array@2.0.0: {}
+
+  postgres-bytea@1.0.1: {}
+
+  postgres-date@1.0.7: {}
+
+  postgres-interval@1.2.0:
+    dependencies:
+      xtend: 4.0.2
+
+  postgres@3.4.9:
     optional: true
 
   prelude-ls@1.2.1: {}
@@ -10503,6 +10713,8 @@ snapshots:
       '@types/node': 22.20.1
       image-ssim: 0.2.0
       jpeg-js: 0.4.4
+
+  split2@4.2.0: {}
 
   sprintf-js@1.0.3: {}
 
@@ -11416,6 +11628,8 @@ snapshots:
   xml-name-validator@5.0.0: {}
 
   xmlchars@2.2.0: {}
+
+  xtend@4.0.2: {}
 
   y18n@4.0.3: {}
 

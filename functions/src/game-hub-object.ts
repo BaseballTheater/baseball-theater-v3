@@ -10,6 +10,8 @@
  * it. One hub per game (ADR-020's regional hubs are a later routing change).
  */
 import type { GameSnapshot } from "@bt/domain";
+import { inDatabaseScope } from "./adapters/postgres/connect.js";
+import type { HyperdriveBinding } from "./adapters/postgres/connect.js";
 import type { HubSocket } from "./adapters/cloudflare/websocket.js";
 import {
 	openSocketPair, pingAutoResponse, upgradeResponse,
@@ -55,6 +57,7 @@ export class GameHubObject
 {
 	private readonly hub: LiveHubState;
 	private readonly lease: IngestLease | null;
+	private readonly hyperdrive: HyperdriveBinding | undefined;
 
 	constructor(private readonly state: GameHubState, env: WorkerEnv)
 	{
@@ -66,13 +69,20 @@ export class GameHubObject
 			return gamePk === undefined ? null : app.ingest.games.getByPk(gamePk);
 		});
 		this.lease = env.GAME_INGEST ? ingestLease(env.GAME_INGEST) : null;
+		this.hyperdrive = env.HYPERDRIVE;
 	}
 
 	/**
 	 * `GET /connect?gamePk=&since=` (a WebSocket upgrade, forwarded by the live route)
-	 * adds a viewer; `POST /publish` (from the ingest object) offers a snapshot.
+	 * adds a viewer; `POST /publish` (from the ingest object) offers a snapshot. A cold hub
+	 * loads the stored game from Postgres, so each call has its own connection (S51).
 	 */
-	async fetch(request: Request): Promise<Response>
+	fetch(request: Request): Promise<Response>
+	{
+		return inDatabaseScope(this.hyperdrive, () => this.route(request));
+	}
+
+	private async route(request: Request): Promise<Response>
 	{
 		const url = new URL(request.url);
 		if (url.pathname === "/publish" && request.method === "POST")

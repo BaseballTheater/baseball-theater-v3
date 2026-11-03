@@ -8,7 +8,7 @@ Clean-slate rewrite of baseball.theater. Planning docs in `docs/v3/` are the pro
 - **TypeScript** strict, ESM (`.js` extensions in relative imports)
 - **Vitest** (+ coverage thresholds per package)
 - **React 19 + Vite + Mantine 7** SPA (`web/`)
-- **Cloudflare Workers + Durable Objects** (API, live games, cron, static assets) · **Neon Postgres via Hyperdrive** (all durable data) · **Logto** (identity) are the prod target (ADR-017–022); **local default is fixtures + in-memory repos** (no cloud required)
+- **Cloudflare Workers + Durable Objects** (API, live games, cron, static assets) · **Neon Postgres via Hyperdrive** (all durable data) · **Logto** (identity) are the prod target (ADR-017–022); **local default is fixture MLB data + Postgres in Docker** (`compose.yaml`, Postgres 18 like Neon; `pnpm dev` starts and seeds it, S51), with PGlite for tests and the Node server — in-memory repos are test doubles only (no cloud required)
 - Ports & adapters: domain/ports stay cloud-agnostic (ADR-012)
 
 ## Monorepo layout
@@ -56,7 +56,7 @@ Do **not** put Cloudflare, Postgres, Logto, or other platform SDKs (or Express) 
 
 - Colocate `*.test.ts(x)` next to source
 - Web tests: jsdom + `web/src/test/setup.ts` (mocks `matchMedia` for Mantine)
-- Functions tests run in Node against memory repos + fixtures, and `*.workerd.test.ts` run the real Worker inside workerd via `@cloudflare/vitest-pool-workers` (`functions/vitest.workers.config.ts`, S45)
+- Functions tests run in Node against fixtures, with memory repos as doubles or PGlite where they compose the app, and `*.workerd.test.ts` run the real Worker inside workerd via `@cloudflare/vitest-pool-workers` (`functions/vitest.workers.config.ts`, S45) — its `HYPERDRIVE` binding pointed at a migrated PGlite served over a socket (`functions/src/test/pglite-server.ts`, S51), so no Docker is needed in CI
 - Coverage floors are enforced in each package’s `vitest.config.ts`
 - **Truth gate:** `pnpm verify` (see `.claude/skills/verify/SKILL.md`)
 

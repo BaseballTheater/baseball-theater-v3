@@ -3,12 +3,18 @@
  * workerd test runs the real one): its routes reach `GameIngest`, and its alarm polls.
  */
 import {
-	describe, expect, it,
+	beforeAll, describe, expect, it,
 } from "vitest";
 import {
 	ensureGameIngest, GameIngestObject, stubHubPublisher,
 } from "./game-ingest-object.js";
 import { FakeDurableStorage } from "./services/fake-durable-storage.js";
+import { useNodeDatabase } from "./test/node-database.js";
+
+beforeAll(async () =>
+{
+	await useNodeDatabase();
+});
 
 function object()
 {

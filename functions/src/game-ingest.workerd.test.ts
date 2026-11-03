@@ -15,6 +15,22 @@ const ensure = (stub: ReturnType<typeof env.GAME_INGEST.get>) => stub.fetch("htt
 	method: "POST",
 });
 
+/**
+ * The object's alarm, once one is set. The first poll is due at once, and workerd reports no
+ * alarm while its handler runs — which now reads and writes Postgres (S51) — so read until the
+ * handler has re-armed rather than once.
+ */
+async function armedAlarm(stub: ReturnType<typeof env.GAME_INGEST.get>): Promise<number | null>
+{
+	for (let attempt = 0; attempt < 50; attempt++)
+	{
+		const alarm = await runInDurableObject(stub, (_instance, state) => state.storage.getAlarm());
+		if (alarm !== null) return alarm;
+		await new Promise((resolve) => setTimeout(resolve, 20));
+	}
+	return null;
+}
+
 describe("GameIngestObject on workerd (S48)", () =>
 {
 	it("ensureRunning twice arms exactly one alarm; the alarm polls 745001 and arms the next", async () =>
@@ -26,7 +42,7 @@ describe("GameIngestObject on workerd (S48)", () =>
 		expect(await (await ensure(stub)).json()).toEqual({
 			armed: false,
 		});
-		const first = await runInDurableObject(stub, (_instance, state) => state.storage.getAlarm());
+		const first = await armedAlarm(stub);
 		expect(first).not.toBeNull();
 
 		expect(await runDurableObjectAlarm(stub)).toBe(true);

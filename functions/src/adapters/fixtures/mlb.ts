@@ -10,7 +10,8 @@ import { FixtureClient } from "./fixture-client.js";
 import type { FixtureFiles } from "./fixture-client.js";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const FIXTURES_ROOT = path.resolve(HERE, "../../../../fixtures");
+/** The committed `fixtures/` folder. */
+export const FIXTURES_ROOT = path.resolve(HERE, "../../../../fixtures");
 
 /** Files under `root` as a fixture source. */
 export function nodeFixtureFiles(root: string): FixtureFiles

@@ -2,11 +2,13 @@
  * Worker tests (S45; ADR-013 as amended by ADR-017): `*.workerd.test.ts` run inside
  * workerd, the runtime production uses, against the real Worker from `wrangler.jsonc`
  * through `@cloudflare/vitest-pool-workers`. No Cloudflare login: bindings are local
- * and the API serves its bundled fixtures. Coverage stays with the Node config
+ * and the API serves its bundled fixtures from Postgres — a migrated PGlite served over a
+ * socket for the run (`src/test/pglite-server.ts`, S51), so CI needs no Docker. Coverage stays with the Node config
  * (`vitest.config.ts`), which runs every other test and holds the floors.
  */
 import { mkdirSync } from "node:fs";
 import { defineWorkersConfig } from "@cloudflare/vitest-pool-workers/config";
+import { PGLITE_PORT } from "./src/test/pglite-server.js";
 
 // The Worker serves `web/dist` (wrangler.jsonc `assets`), and the pool refuses to start when it
 // is missing. CI tests before it builds the web app, so make sure the folder exists, as
@@ -19,6 +21,7 @@ export default defineWorkersConfig({
 	test: {
 		name: "functions-workerd",
 		include: ["src/**/*.workerd.test.ts"],
+		globalSetup: ["./src/test/pglite-server.ts"],
 		poolOptions: {
 			workers: {
 				// The real Worker (main, compatibility date and flags) as wrangler would run it.
@@ -33,6 +36,10 @@ export default defineWorkersConfig({
 				miniflare: {
 					bindings: {
 						BT_LOCAL: "1",
+					},
+					// The binding's local connection goes to the test PGlite, not compose.yaml's Postgres.
+					hyperdrives: {
+						HYPERDRIVE: `postgres://postgres:postgres@127.0.0.1:${PGLITE_PORT}/postgres`,
 					},
 				},
 			},

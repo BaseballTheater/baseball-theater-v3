@@ -33,7 +33,7 @@ import {
 	accountSettings, deletionLog, entitlements, gameProjections, games, identityLinks, replayArtifacts, scheduleDays, users,
 } from "./schema.js";
 
-/** Any Drizzle Postgres database: PGlite in tests, the `postgres` driver behind Hyperdrive in the Worker. */
+/** Any Drizzle Postgres database: PGlite in tests, node-postgres behind Hyperdrive in the Worker (S51). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the schema type parameter differs per driver; the adapter only uses table objects
 export type PostgresDb = PgDatabase<PgQueryResultHKT, any>;
 

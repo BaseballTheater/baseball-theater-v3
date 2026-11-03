@@ -18,12 +18,15 @@
 		"@bt/domain": "workspace:*",
 		"@bt/mlb-api": "workspace:*",
 		"@bt/ports": "workspace:*",
-		"drizzle-orm": "0.44.2"
+		"drizzle-orm": "0.44.2",
+		"pg": "8.23.1"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "0.12.21",
-		"@electric-sql/pglite": "0.3.3",
+		"@electric-sql/pglite": "0.5.10",
+		"@electric-sql/pglite-socket": "0.2.13",
 		"@types/node": "^22.13.10",
+		"@types/pg": "8.15.6",
 		"drizzle-kit": "0.31.1",
 		"oasdiff-js": "2.0.4",
 		"prettier": "3.9.6",

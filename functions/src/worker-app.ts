@@ -1,10 +1,13 @@
 /**
  * The API's composition on the Workers runtime (S45; ADR-017): which MLB client, repos
  * and accounts the Worker serves with — the same wiring as `local-server.ts`, built
- * once per isolate. Local dev (`pnpm dev`, wrangler on workerd) and the Workers tests
- * use it; no Cloudflare account or binding is needed (in-memory repos, ADR-018's
- * Postgres arrives in S50). Recording replays is a Node-only tool (`src/scripts/`) and
- * has no place in the Worker.
+ * once per isolate. Every repository is Postgres (ADR-018; S51): the Worker's are built
+ * on `scopedDatabase`, the connection of the request (or cron tick, or Durable Object call)
+ * in progress, which `inDatabaseScope` opens through the `HYPERDRIVE` binding — compose.yaml's
+ * Postgres in local dev, Neon deployed. Node callers (tests, `local-server.ts`) hand
+ * `createWorkerApp` a database directly. Downloads and the mailer stay in-process until their
+ * R2 and Email adapters (the launch checklist). Recording replays is a Node-only tool
+ * (`src/scripts/`) and has no place in the Worker.
  */
 import type { MlbStatsClient } from "@bt/ports";
 import {
@@ -12,16 +15,20 @@ import {
 } from "./adapters/fixtures/auth.js";
 import { createBundledFixtureClient } from "./adapters/fixtures/bundled.js";
 import { HttpMlbStatsClient } from "./adapters/http/mlb.js";
+import { scopedDatabase } from "./adapters/postgres/connect.js";
+import type { HyperdriveBinding } from "./adapters/postgres/connect.js";
+import type { PostgresDb } from "./adapters/postgres/repos.js";
 import {
-	InMemoryGameProjectionRepository,
-	InMemoryGameRepository,
-	InMemoryScheduleRepository,
-	InMemorySettingsRepository,
-} from "./adapters/memory/repos.js";
+	PostgresDeletionLog,
+	PostgresGameProjectionRepository,
+	PostgresGameRepository,
+	PostgresScheduleRepository,
+	PostgresSettingsRepository,
+	PostgresUserRepository,
+} from "./adapters/postgres/repos.js";
 import type { GameIngestNamespace } from "./game-ingest-object.js";
 import type { ApiContext } from "./handlers/api.js";
 import { APP_ORIGIN_SECRET } from "./services/data-downloads.js";
-import { ingestScheduleDay } from "./services/ingest.js";
 import { logApiUsage } from "./services/api-usage.js";
 import type { IngestDeps } from "./services/ingest.js";
 import { RefreshCoordinator } from "./services/refresh.js";
@@ -31,8 +38,6 @@ import { SESSION_KEY_SECRET } from "./services/session.js";
 export type WorkerEnv = {
 	/** `"1"` serves live statsapi.mlb.com; anything else, the bundled fixtures (the default). */
 	BT_USE_LIVE_MLB?: string;
-	/** The day seeded at start-up (default 2024-07-04, as `local-server.ts`). */
-	BT_SEED_DATE?: string;
 	/** Signs sessions; without it a random key per isolate (sessions end on restart, as locally today). */
 	BT_SESSION_KEY?: string;
 	/** Where download emails link (default: the Vite dev server). */
@@ -45,14 +50,14 @@ export type WorkerEnv = {
 	GAME_INGEST?: GameIngestNamespace;
 	/** The per-game live hubs (S18; `wrangler.jsonc` `durable_objects`); absent under Node. */
 	GAME_HUB?: GameIngestNamespace;
+	/** Postgres through Hyperdrive (S51; `wrangler.jsonc` `hyperdrive`); absent under Node. */
+	HYPERDRIVE?: HyperdriveBinding;
 };
 
 /** Everything a request or a cron tick needs: the handler's context plus the ingest loop's deps. */
 export type WorkerApp = {
 	context: ApiContext;
 	ingest: IngestDeps;
-	/** Resolves once the seed day is ingested; requests wait on it. */
-	ready: Promise<void>;
 };
 
 /** Fixtures are the default so local dev and tests never touch the network; `BT_USE_LIVE_MLB=1` opts in. */
@@ -65,14 +70,18 @@ export function createMlbClient(env: WorkerEnv): MlbStatsClient
 	return createBundledFixtureClient();
 }
 
-/** Wires the API for `env`. Exported for tests; the Worker calls `workerApp`, which builds it once. */
-export function createWorkerApp(env: WorkerEnv): WorkerApp
+/**
+ * Wires the API for `env` on `db`. Exported for tests and the Node server; the Worker calls
+ * `workerApp`, which builds it once on `scopedDatabase`. Nothing is seeded here: `pnpm db:seed`
+ * fills the database, and a day or game that isn't stored is read through from MLB anyway.
+ */
+export function createWorkerApp(env: WorkerEnv, db: PostgresDb): WorkerApp
 {
 	const ingest: IngestDeps = {
 		mlb: createMlbClient(env),
-		schedules: new InMemoryScheduleRepository(),
-		games: new InMemoryGameRepository(),
-		projections: new InMemoryGameProjectionRepository(),
+		schedules: new PostgresScheduleRepository(db),
+		games: new PostgresGameRepository(db),
+		projections: new PostgresGameProjectionRepository(db),
 		// One coordinator per isolate: stale out-of-window reads refresh single-flighted.
 		refresh: new RefreshCoordinator(),
 	};
@@ -82,12 +91,12 @@ export function createWorkerApp(env: WorkerEnv): WorkerApp
 			[APP_ORIGIN_SECRET]: env.BT_APP_ORIGIN,
 		},
 	});
-	const auth = createDevAuth(secrets);
-	const settings = new InMemorySettingsRepository();
+	const auth = createDevAuth(secrets, new PostgresUserRepository(db));
+	const settings = new PostgresSettingsRepository(db);
 	const account = createDevAccountData({
 		users: auth.users,
 		settings,
-	}, secrets);
+	}, secrets, new PostgresDeletionLog(db));
 	return {
 		context: {
 			ingest,
@@ -101,7 +110,6 @@ export function createWorkerApp(env: WorkerEnv): WorkerApp
 			},
 		},
 		ingest,
-		ready: ingestScheduleDay(ingest, env.BT_SEED_DATE ?? "2024-07-04").then(() => undefined),
 	};
 }
 
@@ -124,12 +132,14 @@ export function liveForwarder(namespace: GameIngestNamespace): (gamePk: number, 
 let app: WorkerApp | undefined;
 
 /**
- * The isolate's one app: in-memory state lives as long as the isolate, like the Node
- * server's process. Built on first use, from that first call's `env`.
+ * The isolate's one app, on `scopedDatabase`: what lives as long as the isolate (the refresh
+ * single-flight, the session key, the fixture client's caches) is shared, while each unit
+ * of work brings its own connection (`inDatabaseScope`). Built on first use, from that first
+ * call's `env`.
  */
 export function workerApp(env: WorkerEnv): WorkerApp
 {
-	app ??= createWorkerApp(env);
+	app ??= createWorkerApp(env, scopedDatabase);
 	return app;
 }
 

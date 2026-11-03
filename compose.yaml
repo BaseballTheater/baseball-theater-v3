@@ -1,0 +1,23 @@
+# Local Postgres for `pnpm dev` (S51; ADR-018): the same major version as the Neon project
+# (Postgres 18), reached by the Worker through Hyperdrive's `localConnectionString` in
+# wrangler.jsonc — keep the user, password, database and port here in step with it.
+# `pnpm dev` starts it and waits for it to be healthy; data lives in the named volume.
+services:
+    postgres:
+        image: postgres:18
+        environment:
+            POSTGRES_USER: bt
+            POSTGRES_PASSWORD: bt
+            POSTGRES_DB: bt
+        ports:
+            - "5432:5432"
+        volumes:
+            - bt-postgres:/var/lib/postgresql
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U bt -d bt"]
+            interval: 2s
+            timeout: 3s
+            retries: 30
+
+volumes:
+    bt-postgres:

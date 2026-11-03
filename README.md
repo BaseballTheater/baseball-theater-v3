@@ -7,22 +7,47 @@ Clean-slate rewrite of [baseball.theater](https://baseball.theater). Planning do
 - **React + Vite SPA** + **Mantine**
 - **pnpm** workspaces · **Vitest** · ESLint · Prettier · Husky
 - **Cloudflare Workers + Durable Objects**, **Neon Postgres** (via Hyperdrive), and **Logto** for prod (ADR-017–021)
-- **Local-first:** fixture MLB data + in-memory repos — **no cloud project required**
+- **Local-first:** fixture MLB data + Postgres in Docker — **no cloud project required**
 
 ## Quick start
+
+**Docker is the one prerequisite** beyond Node and pnpm: local development runs on Postgres
+in Docker, the same engine and major version production runs on Neon (Postgres 18).
 
 ```bash
 nvm use          # Node 24 LTS (.nvmrc)
 pnpm install
-pnpm dev         # API :8787 (Worker on workerd) + web :5173
+pnpm dev         # Postgres in Docker, seeded; API :8787 (Worker on workerd) + web :5173
 ```
 
-`pnpm dev` runs the API as the Cloudflare Worker it ships as (`wrangler.jsonc`,
-`functions/src/worker.ts`) on the local Workers runtime, workerd, through `wrangler dev`.
-No Cloudflare account or login is needed: the Worker serves the bundled fixtures from
-in-memory repos. Set `BT_USE_LIVE_MLB=1` (or `BT_INGEST_TICK=1` to let the cron ingest
-tick run) with `--var`, or in a git-ignored `functions/.dev.vars`. The Node server
-(`pnpm --filter @bt/functions start`) still exists for the Node-only tools.
+`pnpm dev` starts `compose.yaml`'s Postgres and waits until it is healthy, runs `pnpm db:seed`
+(applies the migrations and ingests every committed fixture day; running it again changes
+nothing), then runs the API as the Cloudflare Worker it ships as (`wrangler.jsonc`,
+`functions/src/worker.ts`) on the local Workers runtime, workerd, through `wrangler dev`. The
+Worker reaches Postgres through its `HYPERDRIVE` binding, whose `localConnectionString` points at
+the Docker database — the same code path as deployed, where it points at Neon. No Cloudflare
+account or login is needed. Set `BT_USE_LIVE_MLB=1` (or `BT_INGEST_TICK=1` to let the cron ingest
+tick run) with `--var`, or in a git-ignored `functions/.dev.vars`. The data lives in the
+`bt-postgres` volume; `docker compose down -v` starts it over. The Node server
+(`pnpm --filter @bt/functions start`, used by Lighthouse CI) runs on PGlite in-process instead,
+so it needs no Docker; tests run on PGlite too.
+
+### What local can't represent
+
+Local runs the deployed code on the same database engine, but some things exist only on
+Cloudflare and Neon:
+
+- **Hyperdrive pooling and caching** — locally the binding connects straight to Docker's
+  Postgres, with no connection pool or query cache in between.
+- **Neon wake-up delay** — a Neon compute that scaled to zero takes a moment to wake; the local
+  database is always up.
+- **Edge cache distribution** — Workers Cache across Cloudflare's edge, tiered, isn't there
+  locally; `Cache-Control` headers are set but nothing far away honors them.
+- **Durable Object placement and eviction** — locally every object lives in one workerd process
+  that never moves or evicts one; deployed, objects are placed near their first caller and
+  evicted when idle.
+
+Those are checked on a **preview deploy against a Neon branch**, never production.
 
 Open http://localhost:5173 — scoreboard for `2024-07-04` loads from fixtures.
 
@@ -37,7 +62,8 @@ Useful routes:
 | Command              | What                                             |
 | -------------------- | ------------------------------------------------ |
 | `pnpm verify`        | **Single health gate** (lint + coverage + build) |
-| `pnpm dev`           | Local API (Worker on workerd) + Vite             |
+| `pnpm dev`           | Postgres in Docker + Worker on workerd + Vite    |
+| `pnpm db:seed`       | Migrate and seed the local Postgres (idempotent) |
 | `pnpm test`          | Vitest (all packages)                            |
 | `pnpm test:coverage` | Coverage + thresholds                            |
 | `pnpm lint`          | ESLint                                           |

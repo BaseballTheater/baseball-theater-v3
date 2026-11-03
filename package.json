@@ -9,7 +9,8 @@
 	},
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
-		"dev": "concurrently -n api,web -c blue,green \"pnpm --filter @bt/functions dev\" \"pnpm --filter @bt/web dev\"",
+		"dev": "docker compose up -d --wait postgres && pnpm db:seed && concurrently -n api,web -c blue,green \"pnpm --filter @bt/functions dev\" \"pnpm --filter @bt/web dev\"",
+		"db:seed": "pnpm --filter @bt/functions exec tsx src/scripts/db-seed.ts",
 		"build": "pnpm lint && pnpm typecheck && pnpm -r --filter=!baseball-theater-v3 run build",
 		"typecheck": "pnpm -r --filter=!baseball-theater-v3 run typecheck",
 		"lint": "pnpm backlog:check && eslint .",

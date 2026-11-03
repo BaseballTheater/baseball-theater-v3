@@ -3,30 +3,44 @@
  * same Fetch-standard handler the Worker runs, served through Node's http. It composes
  * through `createWorkerApp` (ADR-025: one composition), so its MLB client, repositories,
  * auth, settings and account data are the Worker's, built from the same `BT_*` variables
- * (fixtures by default, `BT_USE_LIVE_MLB=1` for live statsapi.mlb.com).
+ * (fixtures by default, `BT_USE_LIVE_MLB=1` for live statsapi.mlb.com). Its Postgres is
+ * PGlite in the process (S51), migrated and seeded from the fixtures at start, so it needs
+ * no Docker: Lighthouse CI serves through it. `pnpm dev` is the Worker on compose.yaml's
+ * Postgres.
  */
 import { createServer } from "node:http";
 import { DEFAULT_CADENCE } from "@bt/domain";
+import {
+	FIXTURES_ROOT, FixtureMlbStatsClient, nodeFixtureFiles,
+} from "./adapters/fixtures/mlb.js";
 import { toNodeListener } from "./adapters/node/http.js";
+import { setNodeDatabase } from "./adapters/postgres/connect.js";
+import { migratedPglite } from "./adapters/postgres/migrate.js";
 import { handleApiRequest } from "./handlers/api.js";
 import { tickIngest } from "./services/ingest.js";
+import { seedFromFixtures } from "./services/seed.js";
 import { createWorkerApp } from "./worker-app.js";
 
 const PORT = Number(process.env.BT_API_PORT ?? 8787);
-const DEFAULT_DATE = process.env.BT_SEED_DATE ?? "2024-07-04";
+const DEFAULT_DATE = "2024-07-04";
 
 async function main(): Promise<void>
 {
 	if (process.env.BT_USE_LIVE_MLB === "1") console.log("[bt-api] BT_USE_LIVE_MLB=1 — using live statsapi.mlb.com");
 	// Without BT_SESSION_KEY the key is random per process, so issued sessions stop verifying after a restart.
+	const { db } = await migratedPglite();
+	setNodeDatabase(db);
 	const app = createWorkerApp({
 		BT_USE_LIVE_MLB: process.env.BT_USE_LIVE_MLB,
-		BT_SEED_DATE: DEFAULT_DATE,
 		BT_SESSION_KEY: process.env.BT_SESSION_KEY,
 		BT_APP_ORIGIN: process.env.BT_APP_ORIGIN,
-	});
-	await app.ready;
-	console.log(`[bt-api] Seeded fixtures for ${DEFAULT_DATE}`);
+	}, db);
+	const days = await seedFromFixtures({
+		...app.ingest,
+		// The seed is the committed fixtures, whichever client serves requests.
+		mlb: new FixtureMlbStatsClient(),
+	}, nodeFixtureFiles(FIXTURES_ROOT));
+	console.log(`[bt-api] Seeded PGlite from fixtures: ${days.join(", ")}`);
 
 	const server = createServer(toNodeListener((request) => handleApiRequest(request, app.context)));
 

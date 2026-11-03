@@ -5,6 +5,8 @@
 import {
 	describe, expect, it, vi,
 } from "vitest";
+import { migratedPglite } from "../adapters/postgres/migrate.js";
+import { ingestScheduleDay } from "../services/ingest.js";
 import { createWorkerApp, liveForwarder } from "../worker-app.js";
 import { handleApiRequest } from "./api.js";
 
@@ -14,8 +16,8 @@ const upgrade = {
 
 async function api(live?: (gamePk: number, request: Request) => Promise<Response>)
 {
-	const app = createWorkerApp({});
-	await app.ready;
+	const app = createWorkerApp({}, (await migratedPglite()).db);
+	await ingestScheduleDay(app.ingest, "2024-07-04");
 	return (path: string, headers: Record<string, string> = upgrade) => handleApiRequest(new Request(`http://bt.test${path}`, {
 		headers,
 	}), {
@@ -88,6 +90,6 @@ describe("liveForwarder", () =>
 		]);
 		expect(createWorkerApp({
 			GAME_HUB: namespace,
-		}).context.live).toBeTypeOf("function");
+		}, (await migratedPglite()).db).context.live).toBeTypeOf("function");
 	});
 });

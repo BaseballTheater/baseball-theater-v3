@@ -2,10 +2,12 @@
  * The `game-ingest:<gamePk>` Durable Object (S48; ADR-020 layer 1): a thin shell that
  * gives `GameIngest` (services/game-ingest.ts) its storage and alarm. The cron reaches it
  * through `ensureGameIngest`; a hub (S18) registers, renews and unregisters its lease
- * through `fetch`. It reads and writes through the isolate's composition (`workerApp`),
- * so until Postgres (S50) its writes land in that isolate's in-memory store.
+ * through `fetch`. It reads and writes Postgres through the isolate's composition
+ * (`workerApp`), each call and alarm on its own connection (`inDatabaseScope`, S51).
  */
 import type { GameSnapshot } from "@bt/domain";
+import { inDatabaseScope } from "./adapters/postgres/connect.js";
+import type { HyperdriveBinding } from "./adapters/postgres/connect.js";
 import type { AlarmStore } from "./services/game-ingest.js";
 import { hubPublisher } from "./game-hub-object.js";
 import { GameIngest, gameIngestName } from "./services/game-ingest.js";
@@ -34,22 +36,24 @@ export async function stubHubPublisher(_hubId: string, _snapshot: GameSnapshot):
 export class GameIngestObject
 {
 	private readonly ingest: GameIngest;
+	private readonly hyperdrive: HyperdriveBinding | undefined;
 
-	/**
-	 * Uses the isolate's ingest deps but not its seeded fixture day (`app.ready`): ingest
-	 * needs nothing seeded, and waiting on it would open a gap before `GameIngest` marks a
-	 * poll running, in which a second ensure could arm a second alarm.
-	 */
 	constructor(state: GameIngestState, env: WorkerEnv)
 	{
 		this.ingest = new GameIngest(state.storage, workerApp(env).ingest, env.GAME_HUB ? hubPublisher(env.GAME_HUB) : stubHubPublisher);
+		this.hyperdrive = env.HYPERDRIVE;
 	}
 
 	/**
 	 * `POST /ensure?gamePk=` starts polling (idempotent); `POST /hubs/register`,
 	 * `/hubs/renew` and `/hubs/unregister` with `?hub=` manage a hub's lease.
 	 */
-	async fetch(request: Request): Promise<Response>
+	fetch(request: Request): Promise<Response>
+	{
+		return inDatabaseScope(this.hyperdrive, () => this.route(request));
+	}
+
+	private async route(request: Request): Promise<Response>
 	{
 		const url = new URL(request.url);
 		const now = new Date();
@@ -91,7 +95,7 @@ export class GameIngestObject
 
 	alarm(): Promise<void>
 	{
-		return this.ingest.alarm(new Date());
+		return inDatabaseScope(this.hyperdrive, () => this.ingest.alarm(new Date()));
 	}
 }
 

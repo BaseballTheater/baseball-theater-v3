@@ -222,7 +222,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 73 | [S20](#s20--scoreboard-live-refresh-for-in-window-games) | Scoreboard live refresh for in-window games | `done` |
 | 74 | [S110](#s110--entry-bundle-headroom-pages-past-the-scoreboard-load-on-demand) | Entry bundle headroom | `done` |
 | 75 | [S111](#s111--the-scoreboard-opens-on-today-or-on-the-seasons-final-day-in-the-off-season) | Scoreboard opens on the right day | `blocked` |
-| 76 | [S51](#s51--representative-local-dev-pnpm-dev-on-postgres-in-docker) | `pnpm dev` on Postgres in Docker | `todo` |
+| 76 | [S51](#s51--representative-local-dev-pnpm-dev-on-postgres-in-docker) | `pnpm dev` on Postgres in Docker | `blocked` |
 | 77 | [S112](#s112--dev-seed-the-last-month-of-the-season-and-the-postseason-refreshable-by-date-range) | Dev seed (season end + postseason) | `todo` |
 | 78 | [S113](#s113--production-database-neon-through-hyperdrive-migrated-composed-into-the-worker) | Production database (Neon) | `todo` |
 | 79 | [S114](#s114--cloudflare-deploy-preview-staging-and-production-through-github-actions) | Cloudflare deploy | `todo` |
@@ -262,7 +262,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 115 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
 | 116 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
 
-**Next (generated):** **76 / S51** — the lowest **Priority** `todo` story not waiting on a design.
+**Next (generated):** **77 / S112** — the lowest **Priority** `todo` story not waiting on a design.
 
 **Before starting it:** confirm no [backlog review](#backlog-reviews) is due — the review-debt line in that section counts stories, but a drift event makes one due regardless.
 
@@ -2614,7 +2614,7 @@ Use Drizzle (owner, 2026-10-18): schema in TypeScript under `functions/src/adapt
 /goal docs/v3/BACKLOG.md S51. Work item 0 first: if scripts/verify-S51.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S51.sh exits 0, pnpm verify exits 0, no files outside compose.yaml, package.json, pnpm-lock.yaml, README.md, CLAUDE.md, functions/, wrangler.jsonc, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S51.sh, or stop after 14 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `todo`
+**Status:** `blocked`
 
 ---
 

@@ -6,6 +6,7 @@
  * `game-ingest:<gamePk>` Durable Object per in-window game (S48; ADR-020), whose alarms
  * own the ADR-002 cadence. Composition lives in `worker-app.ts`.
  */
+import { inDatabaseScope } from "./adapters/postgres/connect.js";
 import { ensureGameIngest } from "./game-ingest-object.js";
 import { handleApiRequest } from "./handlers/api.js";
 import { ensureIngestRunning } from "./services/game-ingest.js";
@@ -19,11 +20,11 @@ export { GameIngestObject } from "./game-ingest-object.js";
 type WorkerContext = { waitUntil(promise: Promise<unknown>): void };
 
 export default {
-	async fetch(request: Request, env: WorkerEnv): Promise<Response>
+	/** Each request on its own Postgres connection through Hyperdrive (S51), closed after the response. */
+	async fetch(request: Request, env: WorkerEnv, ctx: WorkerContext): Promise<Response>
 	{
 		const app = workerApp(env);
-		await app.ready;
-		return handleApiRequest(request, app.context);
+		return inDatabaseScope(env.HYPERDRIVE, () => handleApiRequest(request, app.context), (closing) => ctx.waitUntil(closing));
 	},
 
 	/**
@@ -35,7 +36,6 @@ export default {
 		const namespace = env.GAME_INGEST;
 		if (!tickAllowed(env) || !namespace) return;
 		const app = workerApp(env);
-		await app.ready;
-		ctx.waitUntil(ensureIngestRunning(app.ingest, (gamePk) => ensureGameIngest(namespace, gamePk)));
+		ctx.waitUntil(inDatabaseScope(env.HYPERDRIVE, () => ensureIngestRunning(app.ingest, (gamePk) => ensureGameIngest(namespace, gamePk))));
 	},
 };

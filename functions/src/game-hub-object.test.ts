@@ -12,7 +12,9 @@ import type { HubSocket } from "./adapters/cloudflare/websocket.js";
 import {
 	GameHubObject, gameHubName, hubPublisher,
 } from "./game-hub-object.js";
+import { ingestScheduleDay } from "./services/ingest.js";
 import { FakeDurableStorage } from "./services/fake-durable-storage.js";
+import { useNodeDatabase } from "./test/node-database.js";
 import { workerApp } from "./worker-app.js";
 
 vi.mock("./adapters/cloudflare/websocket.js", () => ({
@@ -97,7 +99,9 @@ const versions = (socket: TestSocket | undefined) => (socket?.sent ?? []).map((m
 
 beforeAll(async () =>
 {
-	await workerApp({}).ready;
+	// The isolate's composition on PGlite (S51), with the fixture day the hub reads stored.
+	await useNodeDatabase();
+	await ingestScheduleDay(workerApp({}).ingest, "2024-07-04");
 });
 
 describe("GameHubObject", () =>
