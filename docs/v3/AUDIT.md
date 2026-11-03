@@ -13475,3 +13475,18 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-11-03 — backlog review answers (2026-11-02)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-02 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-03T08:20:07Z` |
+| HEAD at capture | `5aa9495` (tree clean) |
+| Applied in | `5aa9495` — S5 back to todo: highlight search reads BT's stored games, as the prior site searched its own index (owner) |
+
+**Answers and what was applied**
+
+S5 (highlight search source). Owner, 2026-11-03: "Use the prior repo to see what to do." Applied: the prior site searched its own index of ingested highlights, so S5 searches BT's stored games through a repository query; ADR-029 amended; S5 back to todo.
