@@ -17,7 +17,7 @@ source "$(dirname "$0")/lib/checks.sh"
 
 check 1 "the built manifest.webmanifest: display standalone, theme_color #10100F, flag-mark icons at 192 and 512 that exist in the build"
 check 2 "the service worker registers at scope / and precaches the shell, never /api/ (config test + the built sw.js)"
-check 3 "a waiting worker shows the NoticeBanner 'An update to Baseball Theater is ready.' with Reload and ✕; Reload activates it and reloads (mocked registration)"
+check 3 "a waiting worker shows the floating NoticeBanner 'An update to Baseball Theater is ready.' with Snooze and Update Now (shell-scoreboard A6); Update Now activates it and reloads; Snooze hides it for an hour (mocked registration)"
 check 4 "Settings shows the Install app row only after beforeinstallprompt and never installed; iPhone/iPad Safari shows the Share steps, never installed (tests)"
 check 5 "standalone mode applies the S55 safe-area insets (CSS test); sw.js and index.html are served to revalidate (_headers test)"
 check 6 "the entry chunk stays inside the 200 KB budget; a Playwright flow covers the update notice and the flows pass"
@@ -87,8 +87,11 @@ fi
 
 # --- Check 3: the update notice --------------------------------------------------------------------
 grep -rqF 'An update to Baseball Theater is ready.' web/src --include='*.tsx' --include='*.ts' || bad 3 "web/src has no 'An update to Baseball Theater is ready.'"
+# Updated before S73 shipped (rule 7; owner, 2026-11-02: "Yes, edit the check."): A6 replaced
+# Reload and ✕ with Update Now and Snooze, so the check names what the rework builds.
 run_vitest 3 web src/pwa/UpdateNotice.test.tsx -t "update notice"
-run_vitest 3 web src/pwa/UpdateNotice.test.tsx -t "Reload"
+run_vitest 3 web src/pwa/UpdateNotice.test.tsx -t "Update Now"
+run_vitest 3 web src/pwa/UpdateNotice.test.tsx -t "Snooze"
 
 # --- Check 4: the Install app row ------------------------------------------------------------------
 run_vitest 4 web src/pages/settings/InstallApp.test.tsx -t "install row"
