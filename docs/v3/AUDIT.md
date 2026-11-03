@@ -13490,3 +13490,18 @@ functions build: Done
 **Answers and what was applied**
 
 S5 (highlight search source). Owner, 2026-11-03: "Use the prior repo to see what to do." Applied: the prior site searched its own index of ingested highlights, so S5 searches BT's stored games through a repository query; ADR-029 amended; S5 back to todo.
+
+---
+
+## 2026-11-03 — backlog review answers (2026-11-02)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-02 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-03T08:22:03Z` |
+| HEAD at capture | `caea038` (tree clean) |
+| Applied in | `caea038` — S5 back to todo: MLB's free-text search works with queryType FREETEXT, as the prior site's search page asks it (owner) |
+
+**Answers and what was applied**
+
+S5 (highlight search source), corrected. Owner, 2026-11-03: "Use the prior repo to see what to do." then "Wait, are you sure search works that way on the existing site? Not a graphql query?" The prior site's search page asks MLB's GraphQL search with queryType FREETEXT; the earlier entry's reading (its own index, from its server) was wrong and its ADR-029 amendment is reverted (06baaf5). ADR-029 stands; S5 back to todo with the probe's findings.
