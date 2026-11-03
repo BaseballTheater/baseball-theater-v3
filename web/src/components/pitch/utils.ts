@@ -22,3 +22,13 @@ export function speedLabel(mph: number): string
 {
 	return `${mph.toFixed(1)} mph`;
 }
+
+/**
+ * Scene points as an SVG `points` attribute, one decimal each. The zone and the flight
+ * charts both draw polylines through it (one helper, ADR-025; was a copy in each).
+ */
+export function svgPoints(points: readonly { x: number;
+	y: number }[]): string
+{
+	return points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+}

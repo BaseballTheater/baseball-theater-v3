@@ -36,7 +36,11 @@ function toggleVideo(element: HTMLVideoElement | null): void
  * means something to, such as the search box or a button. `autoPlay` starts the clip when
  * the reader chose it; the stage's first clip waits for a press.
  */
-export function VideoPlayer({ video, autoPlay = false }: { video: Video;
+export function VideoPlayer({
+	video, title = video.title, autoPlay = false,
+}: { video: Video;
+	/** The title under the clip; the game page passes `highlightTitle`'s (S75). */
+	title?: string;
 	autoPlay?: boolean; })
 {
 	const ref = useRef<HTMLVideoElement>(null);
@@ -116,7 +120,7 @@ export function VideoPlayer({ video, autoPlay = false }: { video: Video;
 					{clipClock(elapsed)} / {clipClock(total)}
 				</Text>
 			</Group>
-			<Text size="sm" fw={500}>{video.title}</Text>
+			<Text size="sm" fw={500}>{title}</Text>
 			<Stack gap={2}>
 				<Text fz={10} fw={700} tt="uppercase" c="var(--bt-muted)">Disclaimer:</Text>
 				<Text fz={10} lh={1.4} c="var(--bt-muted)">{DISCLAIMER}</Text>

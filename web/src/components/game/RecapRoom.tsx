@@ -1,7 +1,9 @@
 import {
 	Stack, Text, Title,
 } from "@mantine/core";
+import { recapHeading } from "@bt/domain";
 import type { GamePayload } from "../../api/game.js";
+import { useScoresHidden } from "../../settings/useScoresHidden.js";
 
 /**
  * The Recap room (S10; game-rooms `recap-mobile` / `recap-medium` / `recap-desktop`,
@@ -11,9 +13,14 @@ import type { GamePayload } from "../../api/game.js";
  * Every pairing draws the same document at the content width. The text arrives as
  * plain paragraphs (markup stripped at ingest, `mapRecap`), so nothing here renders HTML.
  * Shown only for a game with a recap — `roomsForPhase` keeps the tab away otherwise.
+ * With Hide Scores on it is headed "Recap" (`recapHeading`; game-rooms A4
+ * `recap-hidden-nonotice-mobile`, S75): MLB's headline tells the result, the article below
+ * reads unchanged for whoever opens it.
  */
-export function RecapRoom({ recap }: { recap: NonNullable<GamePayload["recap"]> })
+export function RecapRoom({ game, recap }: { game: { gamePk: number };
+	recap: NonNullable<GamePayload["recap"]>; })
 {
+	const scoresHidden = useScoresHidden(game);
 	return (
 		<Stack component="article" gap={16} px={8} pt={8} aria-label="Recap">
 			<Title
@@ -25,7 +32,7 @@ export function RecapRoom({ recap }: { recap: NonNullable<GamePayload["recap"]> 
 					borderBottom: "1px solid var(--bt-hairline)",
 				}}
 			>
-				{recap.headline}
+				{recapHeading(recap, scoresHidden)}
 			</Title>
 			{recap.text.split("\n\n").map((paragraph, i) => (
 				<Text key={i} fz={14} lh={1.55}>

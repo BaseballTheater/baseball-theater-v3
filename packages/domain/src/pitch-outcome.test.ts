@@ -1,7 +1,9 @@
 import {
 	describe, expect, it,
 } from "vitest";
-import { isSwingingStrike, pitchOutcome } from "./pitch-outcome.js";
+import {
+	isSwingingStrike, pitchCallLabel, pitchOutcome,
+} from "./pitch-outcome.js";
 
 function pitch(isBall: boolean, isStrike: boolean, isInPlay: boolean)
 {
@@ -63,5 +65,54 @@ describe("isSwingingStrike", () =>
 		expect(isSwingingStrike(call("F"))).toBe(false);
 		expect(isSwingingStrike(call("S", false))).toBe(false);
 		expect(isSwingingStrike(call(null))).toBe(false);
+	});
+});
+
+describe("pitchCallLabel (S75)", () =>
+{
+	const call = (code: string, callDescription: string, outcome: [boolean, boolean, boolean]) =>
+	{
+		const p = pitch(...outcome);
+		return {
+			details: {
+				...p.details,
+				call: code,
+				callDescription,
+			},
+		};
+	};
+	const scored = call("E", "In play, run(s)", [false, false, true]);
+	const out = call("X", "In play, out(s)", [false, false, true]);
+	const strike = call("C", "Called Strike", [false, true, false]);
+
+	it("reads IN PLAY for an in-play pitch that scored with scores hidden", () =>
+	{
+		expect(pitchCallLabel(scored, true)).toBe("IN PLAY");
+	});
+
+	it("reads IN PLAY for every in-play pitch with scores hidden, so the label can't tell a run scored", () =>
+	{
+		expect(pitchCallLabel(out, true)).toBe("IN PLAY");
+	});
+
+	it("is MLB's full call with scores shown", () =>
+	{
+		expect(pitchCallLabel(scored, false)).toBe("In play, run(s)");
+		expect(pitchCallLabel(out, false)).toBe("In play, out(s)");
+	});
+
+	it("leaves every other call alone with scores hidden", () =>
+	{
+		expect(pitchCallLabel(strike, true)).toBe("Called Strike");
+	});
+
+	it("falls back to the call code when MLB sent no description", () =>
+	{
+		expect(pitchCallLabel({
+			details: {
+				...strike.details,
+				callDescription: null,
+			},
+		}, false)).toBe("C");
 	});
 });

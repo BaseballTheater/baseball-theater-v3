@@ -1,14 +1,16 @@
 import type { PitchEvent, TrajectoryPoint } from "@bt/domain";
 import {
 	atBatReplayAt, catcherViewBatter, catcherViewGround, catcherViewPath, catcherViewPoint, catcherViewZone, catcherViewZoneDimensions, feetToInches, fitArt,
-	isSwingingStrike, pathUpTo, pitcherFigure, pitchFlight, pitchOutcome, PLATE_FRONT_Y_FT,
+	isSwingingStrike, pathUpTo, pitchCallLabel, pitcherFigure, pitchFlight, pitchOutcome, PLATE_FRONT_Y_FT,
 } from "@bt/domain";
 import { Box, Tooltip } from "@mantine/core";
 import { useEffect, useRef } from "react";
 import batterUrl from "./assets/batter.webp";
 import zoneUrl from "./assets/strikezone.svg";
 import { usePitchReplay, useReplayClock } from "./usePitchReplay.js";
-import { pitchDotColor, speedLabel } from "./utils.js";
+import {
+	pitchDotColor, speedLabel, svgPoints,
+} from "./utils.js";
 
 type Props = {
 	pitches: PitchEvent[];
@@ -27,6 +29,8 @@ type Props = {
 	replayingAll?: boolean;
 	onReplayAllEnd?: () => void;
 	onPlaybackEnd?: () => void;
+	/** Hide Scores for this game (`useScoresHidden`): an in-play call reads "IN PLAY" (S75). */
+	scoresHidden?: boolean;
 };
 
 /** The scene's own units: everything is placed in this 360 × 300 box, which scales as a whole to fit its column. */
@@ -85,13 +89,6 @@ function placed(left: number, top: number, width: number, height: number)
 function lengthLabel(feet: number): string
 {
 	return `${feetToInches(feet).toFixed(1)}"`;
-}
-
-/** Scene points as an SVG `points` attribute. */
-function svgPoints(points: { x: number;
-	y: number }[]): string
-{
-	return points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
 }
 
 /** The plate and batter's boxes on the ground: the same for every at-bat. */
@@ -171,7 +168,7 @@ function catcherFigure(data: NonNullable<PitchEvent["pitchData"]>)
  * to its column. A dot is a button: it selects that pitch, as a sequence row does.
  */
 export function StrikeZoneChart({
-	pitches, selectedPitchNumber, onSelectPitch, batSide, pitchHand, playing = false, onPlaybackEnd, replayingAll = false, onReplayAllEnd,
+	pitches, selectedPitchNumber, onSelectPitch, batSide, pitchHand, playing = false, onPlaybackEnd, replayingAll = false, onReplayAllEnd, scoresHidden = false,
 }: Props)
 {
 	const canvas = useRef<HTMLCanvasElement>(null);
@@ -358,7 +355,7 @@ export function StrikeZoneChart({
 									#{pitch.pitchNumber}{" "}
 									{pitch.details.typeDescription ?? pitch.details.type}
 									<br />
-									{pitch.details.callDescription ?? pitch.details.call}
+									{pitchCallLabel(pitch, scoresHidden)}
 									<br />
 									{pitch.pitchData ? speedLabel(pitch.pitchData.startSpeed) : null}
 								</>

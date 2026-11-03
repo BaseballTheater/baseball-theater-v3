@@ -11,21 +11,23 @@ import type { Video } from "./VideoCard.js";
  * from the store, so changing it in Settings moves the player without a reload.
  *
  * `video` is the clip the reader chose, or null; the stage falls back to `first` so it is
- * never empty, while the dialog only opens on a choice.
+ * never empty, while the dialog only opens on a choice. `scoresHidden` (the game page's
+ * `useScoresHidden`) goes to whichever one shows, for the recap clip's title (S75).
  */
 export function PlayerHost({
-	video, first, onClose, game, fromGamePk,
+	video, first, onClose, game, fromGamePk, scoresHidden,
 }: { video: Video | null;
 	first: Video | undefined;
 	onClose: () => void;
 	game?: PlayerGame;
-	fromGamePk?: number; })
+	fromGamePk?: number;
+	scoresHidden?: boolean; })
 {
 	const { videoPlayer } = useSettings();
 	if (videoPlayer === "stage")
 	{
 		const shown = video ?? first;
-		return shown ? <PlayerStage video={shown} autoPlay={video !== null} /> : null;
+		return shown ? <PlayerStage video={shown} autoPlay={video !== null} scoresHidden={scoresHidden} /> : null;
 	}
-	return video ? <LazyPlayerDialog video={video} onClose={onClose} game={game} fromGamePk={fromGamePk} /> : null;
+	return video ? <LazyPlayerDialog video={video} onClose={onClose} game={game} fromGamePk={fromGamePk} scoresHidden={scoresHidden} /> : null;
 }

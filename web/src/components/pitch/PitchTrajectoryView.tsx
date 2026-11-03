@@ -9,7 +9,9 @@ import {
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { usePitchReplay } from "./usePitchReplay.js";
-import { pitchDotColor, speedLabel } from "./utils.js";
+import {
+	pitchDotColor, speedLabel, svgPoints,
+} from "./utils.js";
 
 /** The two flight charts this view can show. */
 export type TrajectoryChart = FieldView;
@@ -78,13 +80,6 @@ const FIELD_RANGE: Record<FieldView, { above: number;
 		below: 6.5,
 	},
 };
-
-/** A polyline's `points` attribute. */
-function svgPoints(points: { x: number;
-	y: number }[]): string
-{
-	return points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
-}
 
 /**
  * One to-scale field chart of the pitch's flight (S64): from the side or from above,

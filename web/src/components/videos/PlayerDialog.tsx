@@ -2,6 +2,7 @@ import {
 	Anchor, Box, Group, Modal, UnstyledButton,
 } from "@mantine/core";
 import { Link } from "react-router-dom";
+import { highlightTitle } from "@bt/domain";
 import type { Video } from "./VideoCard.js";
 import { VideoPlayer } from "./VideoPlayer.js";
 
@@ -25,16 +26,21 @@ export type PlayerGame = {
  * already being played from the game"): the caller passes `game` when it knows it and
  * `fromGamePk` when it is that game's page.
  *
+ * With scores hidden the recap clip is titled "Recap (score hidden)" (`highlightTitle`,
+ * S75); only the game page passes `scoresHidden`, so Search and the digest keep MLB's title.
+ *
  * The content fills the screen so the Close row and the player share one focus trap; it
  * is transparent, so the overlay behind it is the dimmed page the frames draw.
  */
 export function PlayerDialog({
-	video, onClose, game, fromGamePk,
+	video, onClose, game, fromGamePk, scoresHidden = false,
 }: { video: Video;
 	onClose: () => void;
 	game?: PlayerGame;
-	fromGamePk?: number; })
+	fromGamePk?: number;
+	scoresHidden?: boolean; })
 {
+	const title = highlightTitle(video, scoresHidden);
 	const link = game && game.gamePk !== fromGamePk ? game : null;
 	return (
 		<Modal
@@ -42,7 +48,7 @@ export function PlayerDialog({
 			onClose={onClose}
 			fullScreen
 			withCloseButton={false}
-			aria-label={video.title}
+			aria-label={title}
 			styles={{
 				// The frames draw the page behind fully dimmed (Mantine's own overlay color can't take a CSS variable).
 				overlay: {
@@ -88,7 +94,7 @@ export function PlayerDialog({
 				}}
 			>
 				<Box w="100%" maw={560}>
-					<VideoPlayer video={video} autoPlay />
+					<VideoPlayer video={video} title={title} autoPlay />
 				</Box>
 			</Box>
 		</Modal>

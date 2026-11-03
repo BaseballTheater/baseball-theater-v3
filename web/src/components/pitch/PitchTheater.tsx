@@ -29,7 +29,7 @@ const CHART_LINKS: { chart: TrajectoryChart;
  * open at-bat in Plays (S41).
  */
 export function PitchTheater({
-	atBat, selected, onSelectPitch, arrivals = 0, replayingAll = false, onReplayAllEnd,
+	atBat, selected, onSelectPitch, arrivals = 0, replayingAll = false, onReplayAllEnd, scoresHidden = false,
 }: { atBat: AtBat;
 	selected: number | null;
 	onSelectPitch: (pitchNumber: number) => void;
@@ -37,7 +37,9 @@ export function PitchTheater({
 	arrivals?: number;
 	/** Every pitch of the at-bat replaying in turn (an at-bat just opened in Plays). */
 	replayingAll?: boolean;
-	onReplayAllEnd?: () => void; })
+	onReplayAllEnd?: () => void;
+	/** Hide Scores for this game, for the zone's call labels (S75). */
+	scoresHidden?: boolean; })
 {
 	const [charts, setCharts] = useState<TrajectoryChart[]>([]);
 	// Replays the selected pitch in the zone, at the speed it looks from behind the plate.
@@ -61,6 +63,7 @@ export function PitchTheater({
 				onPlaybackEnd={() => setPlaying(false)}
 				replayingAll={replayingAll}
 				onReplayAllEnd={onReplayAllEnd}
+				scoresHidden={scoresHidden}
 			/>
 			<Group gap={12} justify="center">
 				<Anchor

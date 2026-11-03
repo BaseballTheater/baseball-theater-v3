@@ -2,6 +2,7 @@ import { Box, Paper } from "@mantine/core";
 import type { CSSProperties } from "react";
 import { linescoreCells } from "@bt/domain";
 import type { GamePayload } from "../../api/game.js";
+import { HiddenValue } from "../HiddenValue.js";
 
 const HEAD: CSSProperties = {
 	color: "var(--bt-muted)",
@@ -35,15 +36,20 @@ const TOTAL: CSSProperties = {
  * 2026-10-29: "for now, let's make the linescore only take up the amount of width it
  * requires and center it"); the aim is innings spread evenly across the full width.
  * It scrolls sideways rather than overflow when extra innings outgrow the room.
+ * `hidden` masks every inning cell and R·H·E with `HiddenValue` (S75; game-rooms A4
+ * `plays-hidden-nonotice-mobile`): Plays passes its Hide Scores answer; Box passes none,
+ * since someone opening the box score wants the numbers (A4 `box-hidden-nonotice-mobile`).
  */
 export function Linescore({
-	linescore, away, home,
+	linescore, away, home, hidden = false,
 }: {
 	linescore: GamePayload["linescore"];
 	away: string;
 	home: string;
+	hidden?: boolean;
 })
 {
+	const mask = <HiddenValue kind="score" />;
 	const cells = linescoreCells(linescore, linescore?.scheduledInnings ?? 9);
 	const rows = [
 		{
@@ -125,7 +131,7 @@ export function Linescore({
 											borderRadius: 3,
 										}}
 									>
-										{runs ?? ""}
+										{hidden ? mask : runs ?? ""}
 									</Box>
 								</td>
 							))}
@@ -134,19 +140,19 @@ export function Linescore({
 								...TOTAL,
 								paddingTop: 8,
 							}}
-							>{row.runs}
+							>{hidden ? mask : row.runs}
 							</td>
 							<td style={{
 								...TOTAL,
 								paddingTop: 8,
 							}}
-							>{line?.hits ?? ""}
+							>{hidden ? mask : line?.hits ?? ""}
 							</td>
 							<td style={{
 								...TOTAL,
 								paddingTop: 8,
 							}}
-							>{line?.errors ?? ""}
+							>{hidden ? mask : line?.errors ?? ""}
 							</td>
 						</tr>
 					))}

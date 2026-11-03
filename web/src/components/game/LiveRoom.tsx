@@ -8,6 +8,7 @@ import type { LayoutVariant } from "../../layout/variant.js";
 import { MatchupCards } from "../pitch/MatchupCards.js";
 import { PitchSequence } from "../pitch/PitchSequence.js";
 import { PitchTheater } from "../pitch/PitchTheater.js";
+import { useScoresHidden } from "../../settings/useScoresHidden.js";
 import { LiveStatus } from "./LiveStatus.js";
 
 /** The pitcher's and batter's surnames: "Gusto vs Bregman". */
@@ -25,11 +26,13 @@ function matchupTitle(atBat: AtBat): string
  * select the same one. Mobile stacks it all under the status row; medium / desktop put
  * the cards and zone on the left with the status card beside them and the sequence
  * below. No win-probability chart at launch (owner, 2026-10-19). A game with no plays
- * yet shows the status alone.
+ * yet shows the status alone. With Hide Scores on the status masks the score and an
+ * in-play pitch reads "IN PLAY"; the result line and the batter's line stay (S75).
  */
 export function LiveRoom({ game, variant }: { game: GamePayload;
 	variant: LayoutVariant; })
 {
+	const scoresHidden = useScoresHidden(game);
 	const atBat = game.plays.at(-1);
 	const newest = atBat?.pitches.at(-1)?.pitchNumber ?? null;
 	const [picked, setPicked] = useState<{ atBat: number;
@@ -60,7 +63,7 @@ export function LiveRoom({ game, variant }: { game: GamePayload;
 	});
 	const cards = <MatchupCards plays={game.plays} atBat={atBat} />;
 	const sequence = (
-		<PitchSequence pitches={atBat.pitches} selectedPitchNumber={selected} onSelectPitch={select} variant={variant} />
+		<PitchSequence pitches={atBat.pitches} selectedPitchNumber={selected} onSelectPitch={select} variant={variant} scoresHidden={scoresHidden} />
 	);
 
 	if (variant === "mobile")
@@ -73,7 +76,7 @@ export function LiveRoom({ game, variant }: { game: GamePayload;
 					{atBat.result.description ? <Text fz={13}>Result: {atBat.result.description}</Text> : null}
 				</Box>
 				{cards}
-				<PitchTheater atBat={atBat} selected={selected} onSelectPitch={select} arrivals={arrivals} />
+				<PitchTheater atBat={atBat} selected={selected} onSelectPitch={select} arrivals={arrivals} scoresHidden={scoresHidden} />
 				<Text fz={12} fw={700} tt="uppercase">Pitch sequence</Text>
 				{sequence}
 			</Stack>
@@ -93,7 +96,7 @@ export function LiveRoom({ game, variant }: { game: GamePayload;
 						border: "1px solid var(--bt-light)",
 					}}
 					>
-						<PitchTheater atBat={atBat} selected={selected} onSelectPitch={select} arrivals={arrivals} />
+						<PitchTheater atBat={atBat} selected={selected} onSelectPitch={select} arrivals={arrivals} scoresHidden={scoresHidden} />
 					</Paper>
 				</Stack>
 				{status}

@@ -107,7 +107,7 @@ export function GamePage({ variant }: { variant: LayoutVariant })
 
 				{game.recap && rooms.includes("recap") ? (
 					<Tabs.Panel value="recap" pt="md">
-						<RecapRoom recap={game.recap} />
+						<RecapRoom game={game} recap={game.recap} />
 					</Tabs.Panel>
 				) : null}
 			</Tabs>

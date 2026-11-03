@@ -4,6 +4,8 @@ import {
 import { inningLabel } from "@bt/domain";
 import type { GamePayload } from "../../api/game.js";
 import type { LayoutVariant } from "../../layout/variant.js";
+import { useScoresHidden } from "../../settings/useScoresHidden.js";
+import { HiddenValue } from "../HiddenValue.js";
 import { BaseDiamond } from "./BaseDiamond.js";
 import { BsoPips } from "./BsoPips.js";
 
@@ -17,12 +19,16 @@ import { BsoPips } from "./BsoPips.js";
  * is a row under the tabs; at medium and desktop it is the status card at the top of
  * the right-hand column, 320px as drawn — `variant` comes from the layout host. The inning text is
  * `inningLabel`'s (packages/domain). The base diamond (S64) leads the row and the card.
+ * With Hide Scores on each team's runs read `–` through `HiddenValue` (`NYY – · BOS –`;
+ * game-rooms A5 `live-hidden-status-*`, S75); the pips and the inning stay.
  */
 export function LiveStatus({ game, variant }: { game: GamePayload;
 	variant: LayoutVariant; })
 {
 	const { linescore, teams } = game;
-	const score = `${teams.away.abbreviation} ${linescore?.teams.away.runs ?? 0} · ${teams.home.abbreviation} ${linescore?.teams.home.runs ?? 0}`;
+	const scoresHidden = useScoresHidden(game);
+	const runs = (value: number | null | undefined) => (scoresHidden ? <HiddenValue kind="score" /> : value ?? 0);
+	const score = <>{teams.away.abbreviation} {runs(linescore?.teams.away.runs)} · {teams.home.abbreviation} {runs(linescore?.teams.home.runs)}</>;
 	const inning = inningLabel(linescore);
 	const pips = <BsoPips balls={linescore?.balls ?? null} strikes={linescore?.strikes ?? null} outs={linescore?.outs ?? null} />;
 

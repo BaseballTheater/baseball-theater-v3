@@ -4,7 +4,7 @@ import {
 	describe, expect, it,
 } from "vitest";
 import {
-	classifyHighlight, clipClock, clipDuration, filterHighlights, groupHighlights, highlightGroup, sortHighlights,
+	classifyHighlight, clipClock, clipDuration, filterHighlights, groupHighlights, highlightGroup, highlightTitle, isGameRecapHighlight, sortHighlights,
 } from "./highlights.js";
 import { rankHighlightsByImpact } from "./impact.js";
 import type { MediaHighlight } from "./types.js";
@@ -186,5 +186,45 @@ describe("clipClock (S70)", () =>
 		expect(clipClock(3725)).toBe("1:02:05");
 		expect(clipClock(Number.NaN)).toBe("0:00");
 		expect(clipClock(-3)).toBe("0:00");
+	});
+});
+
+describe("isGameRecapHighlight (S75)", () =>
+{
+	it("finds 823823's one recap clip among its videos", () =>
+	{
+		expect(titles(VIDEOS.filter(isGameRecapHighlight))).toEqual(["Conforto clubs Cubs' 200th homer in close win"]);
+	});
+
+	it("takes any one of MLB's recap keywords", () =>
+	{
+		for (const tag of ["game-recap", "mlb_recap", "MLBCOM_GAME_RECAP"])
+		{
+			expect(isGameRecapHighlight({
+				tags: ["home-run", tag],
+			})).toBe(true);
+		}
+		expect(isGameRecapHighlight({
+			tags: ["home-run"],
+		})).toBe(false);
+		expect(isGameRecapHighlight({})).toBe(false);
+	});
+});
+
+describe("highlightTitle (S75)", () =>
+{
+	const recap = VIDEOS.find(isGameRecapHighlight)!;
+	const play = VIDEOS.find((h) => !isGameRecapHighlight(h))!;
+
+	it("titles the recap clip \"Recap (score hidden)\" with scores hidden", () =>
+	{
+		expect(highlightTitle(recap, true)).toBe("Recap (score hidden)");
+	});
+
+	it("keeps MLB's title for the recap with scores shown, and for every other clip either way", () =>
+	{
+		expect(highlightTitle(recap, false)).toBe(recap.title);
+		expect(highlightTitle(play, true)).toBe(play.title);
+		expect(highlightTitle(play, false)).toBe(play.title);
 	});
 });

@@ -3,7 +3,7 @@ import {
 } from "@mantine/core";
 import { IconPlayerPlay } from "@tabler/icons-react";
 import type { HighlightKind } from "@bt/domain";
-import { clipDuration } from "@bt/domain";
+import { clipDuration, highlightTitle } from "@bt/domain";
 import type { GamePayload } from "../../api/game.js";
 import { formatDate } from "../../format/datetime.js";
 
@@ -87,21 +87,25 @@ export function VideoStill({
  * One video (S69; game-shell Videos frames): the still with its duration, the title and
  * a `Highlight · Sep 5, 2026` meta line. One component for both modes — a grid cell
  * (still above the text) and a list row (a small still beside it). The whole card is
- * the button: choosing it calls `onPlay` with the video; the player is S70's.
+ * the button: choosing it calls `onPlay` with the video; the player is S70's. Its title is
+ * `highlightTitle`'s: the game page passes `scoresHidden`, so there the recap clip reads
+ * "Recap (score hidden)" (S75); Search and the digest pass none and keep MLB's title.
  */
 export function VideoCard({
-	video, layout, onPlay,
+	video, layout, onPlay, scoresHidden = false,
 }: { video: Video;
 	layout: "grid" | "list";
-	onPlay: (video: Video) => void; })
+	onPlay: (video: Video) => void;
+	scoresHidden?: boolean; })
 {
+	const title = highlightTitle(video, scoresHidden);
 	const meta = [video.kind ? KIND_LABELS[video.kind] : null, video.date ? formatDate(video.date) : null].filter(Boolean).join(" · ");
 	const text = (
 		<Stack gap={2} style={{
 			minWidth: 0,
 		}}
 		>
-			<Text fw={700} lh={1.3} lineClamp={2}>{video.title}</Text>
+			<Text fw={700} lh={1.3} lineClamp={2}>{title}</Text>
 			{meta ? <Text size="sm" c="var(--bt-muted)">{meta}</Text> : null}
 		</Stack>
 	);
@@ -109,7 +113,7 @@ export function VideoCard({
 		<UnstyledButton
 			data-testid="video-card"
 			data-layout={layout}
-			aria-label={`Play ${video.title}`}
+			aria-label={`Play ${title}`}
 			onClick={() => onPlay(video)}
 			style={{
 				display: "block",

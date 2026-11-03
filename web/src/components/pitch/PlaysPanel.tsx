@@ -5,11 +5,14 @@ import {
 import {
 	Accordion, Badge, Box, Group, Stack, Text, UnstyledButton,
 } from "@mantine/core";
+import type { ReactNode } from "react";
 import {
 	Fragment, useEffect, useRef, useState,
 } from "react";
 import { flushSync } from "react-dom";
 import type { GamePayload } from "../../api/game.js";
+import { useScoresHidden } from "../../settings/useScoresHidden.js";
+import { HiddenValue } from "../HiddenValue.js";
 import { shortPlayerName } from "../game/format.js";
 import { Linescore } from "../game/Linescore.js";
 import { AtBatViewer } from "./AtBatViewer.js";
@@ -55,8 +58,11 @@ function atBatLabel(atBat: AtBat): string
 	return `${inningTag(atBat)} · ${atBat.matchup.batter.fullName} — ${atBat.result.event}`;
 }
 
-/** What a collapsed row's second line ends with: the outs after it, or the score after a scoring play. */
-type RowEnd = (atBat: AtBat) => string | null;
+/**
+ * What a collapsed row's second line ends with: the outs after it, or the score after a
+ * scoring play — masked with Hide Scores on (S75).
+ */
+type RowEnd = (atBat: AtBat) => ReactNode;
 
 /**
  * A collapsed at-bat row as the frames draw it: `A. Judge — Flyout` over `vs K. Jansen ·
@@ -68,14 +74,16 @@ function ClosedRow({
 	tagged: boolean;
 	end: RowEnd; })
 {
-	const meta = [`vs ${shortPlayerName(atBat.matchup.pitcher.fullName)}`, `${atBat.pitches.length} pitch${atBat.pitches.length === 1 ? "" : "es"}`, end(atBat)];
+	const meta = [`vs ${shortPlayerName(atBat.matchup.pitcher.fullName)}`, `${atBat.pitches.length} pitch${atBat.pitches.length === 1 ? "" : "es"}`, end(atBat)].filter((part) => part !== null && part !== "");
 	return (
 		<Stack gap={2}>
 			<Text fz={15} fw={600}>
 				{tagged ? `${inningTag(atBat)} · ` : ""}
 				{shortPlayerName(atBat.matchup.batter.fullName)} — {atBat.result.event}
 			</Text>
-			<Text fz={12} c="var(--bt-accent)">{meta.filter(Boolean).join(" · ")}</Text>
+			<Text fz={12} c="var(--bt-accent)">
+				{meta.map((part, i) => <Fragment key={i}>{i > 0 ? " · " : ""}{part}</Fragment>)}
+			</Text>
 		</Stack>
 	);
 }
@@ -152,12 +160,17 @@ function InningSidebar({
  * individual batters in Live … you need to be able to select the inning you're looking
  * at. By default, it should show the most recent inning that has any actual information
  * to show"). An open at-bat is Live's cards, zone and pitch sequence (`AtBatViewer`).
+ * With Hide Scores on (S75; game-rooms A4 `plays-hidden-nonotice-mobile`,
+ * `plays-scoring-hidden-nonotice-mobile`) the linescore masks every inning and R·H·E, the
+ * Runs view masks the score after each play, and an in-play pitch reads "IN PLAY"; the
+ * descriptions and the batter's line stay, since someone browsing plays wants the plays.
  */
 export function PlaysPanel({ game }: { game: GamePayload })
 {
 	const { plays } = game;
 	const latest = defaultPlaysInning(plays);
 	const [view, setView] = useState<View | null>(null);
+	const scoresHidden = useScoresHidden(game);
 	if (latest === null)
 	{
 		return <Text c="dimmed">No pitch-level play data for this game yet.</Text>;
@@ -177,7 +190,7 @@ export function PlaysPanel({ game }: { game: GamePayload })
 			label: "",
 			plays: scoringPlays(plays),
 		}];
-		end = (atBat) => scoreAfterLabel(atBat, away, home);
+		end = (atBat) => (scoresHidden ? <HiddenValue kind="score" /> : scoreAfterLabel(atBat, away, home));
 	}
 	else
 	{
@@ -196,7 +209,7 @@ export function PlaysPanel({ game }: { game: GamePayload })
 
 	return (
 		<Stack gap={16}>
-			<Linescore linescore={game.linescore} away={away} home={home} />
+			<Linescore linescore={game.linescore} away={away} home={home} hidden={scoresHidden} />
 			<Group align="flex-start" gap={8} wrap="nowrap">
 				<Stack gap={8} style={{
 					flex: 1,
@@ -211,6 +224,7 @@ export function PlaysPanel({ game }: { game: GamePayload })
 							sections={sections}
 							tagged={shown === "runs"}
 							end={end}
+							scoresHidden={scoresHidden}
 							defaultOpen={view === null ? rows.at(-1)!.about.atBatIndex : null}
 						/>
 					)}
@@ -258,12 +272,13 @@ function afterScroll(then: () => void): () => void
  * succession, starting after the top of screen animation is completed").
  */
 function PlaysAccordion({
-	plays, sections, tagged, end, defaultOpen,
+	plays, sections, tagged, end, defaultOpen, scoresHidden,
 }: { plays: readonly AtBat[];
 	sections: Section[];
 	tagged: boolean;
 	end: RowEnd;
-	defaultOpen: number | null; })
+	defaultOpen: number | null;
+	scoresHidden: boolean; })
 {
 	const [open, setOpen] = useState<string | null>(defaultOpen === null ? null : String(defaultOpen));
 	// 0 while the old at-bat snaps shut; the open animation otherwise.
@@ -349,7 +364,9 @@ function PlaysAccordion({
 								</Accordion.Control>
 								<Accordion.Panel onTransitionEnd={() => replay(value)}>
 									{/* Only the open at-bat is mounted, so a closed one's replay stops with it. */}
-									{open === value ? <AtBatViewer plays={plays} atBat={atBat} autoplay={autoplay?.value === open ? autoplay.token : 0} /> : null}
+									{open === value ? (
+										<AtBatViewer plays={plays} atBat={atBat} autoplay={autoplay?.value === open ? autoplay.token : 0} scoresHidden={scoresHidden} />
+									) : null}
 								</Accordion.Panel>
 							</Accordion.Item>
 						);

@@ -9,6 +9,7 @@ import type {
 	GameRecap, HighlightKind, MediaHighlight,
 } from "@bt/domain";
 import type { ContentHighlightItem, GameContentResponse } from "@bt/mlb-api";
+import { isGameRecapHighlight } from "@bt/domain";
 
 /** Prefers the highest-fidelity MP4, falling back to the HLS cloud stream. */
 export function pickPlaybackUrl(item: ContentHighlightItem): string | null
@@ -28,13 +29,16 @@ function pickImageUrl(item: ContentHighlightItem): string | null
 const TAG_TYPES = new Set(["taxonomy", "mlbtax"]);
 
 /**
- * A video's kind from its keywords (S69): MLB's own `mlbtax` marks the recap and the
- * condensed game; a `highlight` / `in-game-highlight` tag marks a play highlight; the
- * rest (interviews, lineups, analysis) are plain videos.
+ * A video's kind from its keywords (S69): the recap is `isGameRecapHighlight`'s, the one
+ * recap rule (S75; ADR-025), asked of every keyword value; MLB's own `mlbtax` marks the
+ * condensed game; a `highlight` / `in-game-highlight` tag marks a play highlight; the rest
+ * (interviews, lineups, analysis) are plain videos.
  */
-function highlightKind(tags: readonly string[]): HighlightKind
+function highlightKind(tags: readonly string[], keywords: readonly string[]): HighlightKind
 {
-	if (tags.includes("mlb_recap")) return "recap";
+	if (isGameRecapHighlight({
+		tags: keywords,
+	})) return "recap";
 	if (tags.includes("condensed_game")) return "condensed";
 	if (tags.includes("highlight") || tags.includes("in-game-highlight")) return "highlight";
 	return "video";
@@ -53,7 +57,7 @@ export function mapHighlightItem(item: ContentHighlightItem): MediaHighlight
 		duration: item.duration ?? null,
 		imageUrl: pickImageUrl(item),
 		playbackUrl: pickPlaybackUrl(item),
-		kind: highlightKind(tags),
+		kind: highlightKind(tags, keywords.map((k) => k.value ?? "")),
 		date: item.date ?? null,
 		teamIds,
 		tags,

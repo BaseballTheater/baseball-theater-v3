@@ -49,6 +49,35 @@ export function filterHighlights(highlights: readonly MediaHighlight[], filter: 
 	});
 }
 
+/**
+ * The keywords MLB marks its game recap clip with (S75). On 823823's recording the one recap
+ * carries all three — `game-recap` (taxonomy), `mlb_recap` (mlbtax) and `MLBCOM_GAME_RECAP`
+ * (subject) — so any one of them is enough, and older recordings that kept only one still match.
+ */
+const GAME_RECAP_KEYWORDS = new Set(["game-recap", "mlb_recap", "MLBCOM_GAME_RECAP"]);
+
+/**
+ * Whether a clip is the game's recap video (S75). The one recap rule (ADR-025): the content
+ * mapper sets `kind: "recap"` from it, and the recap title below asks it. `tags` is whichever
+ * keyword values the caller holds — the mapper passes every keyword, BT's stored clips their
+ * taxonomy tags.
+ */
+export function isGameRecapHighlight(highlight: { tags?: readonly string[] }): boolean
+{
+	return (highlight.tags ?? []).some((tag) => GAME_RECAP_KEYWORDS.has(tag));
+}
+
+/**
+ * A clip's title as the game page shows it (S75; game-shell A2 `game-videos-hidden-mobile`).
+ * MLB titles the recap with the result ("Conforto clubs Cubs' 200th homer in close win"), so
+ * with Hide Scores on it reads "Recap (score hidden)"; every other title stays MLB's — a play
+ * highlight names the play, which someone opening the game's videos expects to see.
+ */
+export function highlightTitle(highlight: Pick<MediaHighlight, "title" | "tags">, scoresHidden: boolean): string
+{
+	return scoresHidden && isGameRecapHighlight(highlight) ? "Recap (score hidden)" : highlight.title;
+}
+
 /** The Videos room's sort choices: impact (the server's order, the default), then by publish time. */
 export type HighlightSort = "impact" | "newest" | "oldest";
 

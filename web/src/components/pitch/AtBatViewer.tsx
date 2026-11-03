@@ -11,6 +11,8 @@ type Props = {
 	atBat: AtBat;
 	/** Changes each time the at-bat is opened and scrolled into place: replay every pitch then. */
 	autoplay?: number;
+	/** Hide Scores for this game, for the pitch calls (S75). */
+	scoresHidden?: boolean;
 };
 
 /**
@@ -21,7 +23,7 @@ type Props = {
  * (game-rooms DESIGN: "the at-bat contents keep their mobile width").
  */
 export function AtBatViewer({
-	plays, atBat, autoplay = 0,
+	plays, atBat, autoplay = 0, scoresHidden = false,
 }: Props)
 {
 	const newest = atBat.pitches.at(-1)?.pitchNumber ?? null;
@@ -60,8 +62,9 @@ export function AtBatViewer({
 				onSelectPitch={choose}
 				replayingAll={replaying}
 				onReplayAllEnd={() => setReplaying(false)}
+				scoresHidden={scoresHidden}
 			/>
-			<PitchSequence pitches={atBat.pitches} selectedPitchNumber={selected} onSelectPitch={choose} variant="mobile" />
+			<PitchSequence pitches={atBat.pitches} selectedPitchNumber={selected} onSelectPitch={choose} variant="mobile" scoresHidden={scoresHidden} />
 		</Stack>
 	);
 }

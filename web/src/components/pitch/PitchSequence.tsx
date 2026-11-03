@@ -1,5 +1,7 @@
 import type { PitchEvent } from "@bt/domain";
-import { breakInches, zoneLabel } from "@bt/domain";
+import {
+	breakInches, pitchCallLabel, zoneLabel,
+} from "@bt/domain";
 import {
 	Box, Group, SimpleGrid, Stack, Text, UnstyledButton,
 } from "@mantine/core";
@@ -36,12 +38,6 @@ function pitchDetail(pitch: PitchEvent): { label: string;
 	];
 }
 
-/** The pitch's call as MLB words it ("Called Strike", "In play, run(s)"). */
-function callOf(pitch: PitchEvent): string
-{
-	return pitch.details.callDescription ?? pitch.details.call ?? "";
-}
-
 /**
  * The pitch sequence (S64; game-rooms Live frames, `230:2021`): pitches newest first,
  * the selected one expanded with its spin, break, release, zone and result, the rest
@@ -49,15 +45,19 @@ function callOf(pitch: PitchEvent): string
  * the current at-bat and Plays (S41) inside each expanded at-bat. Selection belongs to
  * the room, so a zone dot and a row select the same pitch. Rows are buttons; Up / Down
  * move the selection. Mobile lists the detail as rows; medium / desktop as a
- * four-column grid (`variant` from the layout host).
+ * four-column grid (`variant` from the layout host). Each call is `pitchCallLabel`'s, so
+ * with Hide Scores on an in-play pitch reads "IN PLAY" rather than say runs scored (S75).
  */
 export function PitchSequence({
-	pitches, selectedPitchNumber, onSelectPitch, variant,
+	pitches, selectedPitchNumber, onSelectPitch, variant, scoresHidden = false,
 }: { pitches: readonly PitchEvent[];
 	selectedPitchNumber: number | null;
 	onSelectPitch: (pitchNumber: number) => void;
-	variant: LayoutVariant; })
+	variant: LayoutVariant;
+	/** Hide Scores for this game (`useScoresHidden`, asked by the room). */
+	scoresHidden?: boolean; })
 {
+	const callOf = (pitch: PitchEvent) => pitchCallLabel(pitch, scoresHidden);
 	const newestFirst = [...pitches].reverse();
 
 	function onKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number)
