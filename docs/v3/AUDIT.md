@@ -13505,3 +13505,96 @@ S5 (highlight search source). Owner, 2026-11-03: "Use the prior repo to see what
 **Answers and what was applied**
 
 S5 (highlight search source), corrected. Owner, 2026-11-03: "Use the prior repo to see what to do." then "Wait, are you sure search works that way on the existing site? Not a graphql query?" The prior site's search page asks MLB's GraphQL search with queryType FREETEXT; the earlier entry's reading (its own index, from its server) was wrong and its ADR-029 amendment is reverted (06baaf5). ADR-029 stands; S5 back to todo with the probe's findings.
+
+---
+
+## 2026-11-03 — S111 completed
+
+**Scoreboard opens on the right day**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-03T08:22:20Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `15ccc43` (tree dirty) |
+| Grader | `scripts/verify-S111.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: defaultScoreboardDate(today, seasons) in packages/domain: today in season, the last postseason game's date until the next first spring game, and the final day when no next season is published (tests at each boundary)
+check 2 PASS: MLB's today is the America/New_York date of an instant, computed in packages/domain (test across midnight UTC); no view names the zone
+check 3 PASS: MlbStatsClient.fetchSeasonCalendar in the port, HTTP and fixture adapters; parseSeasonsResponse in packages/mlb-api from fixtures/raw/seasons-*.json (parse test, coverage); pnpm mlb:scan-drift clean and scans it; the fixture client serves it
+check 4 PASS: GET /api/v1/scoreboard/default-date returns { date } (functions tests with a fixed clock, in and out of season); route table and spec; pnpm api:breaking exits 0
+check 5 PASS: / and /games open the default day and ScoreboardPage without a date uses it; 2024-07-04 is gone from routes.tsx and ScoreboardPage.tsx (RTL with the route stubbed)
+check 6 PASS: ViewState loading while the default date loads; today in America/New_York when the route fails (RTL)
+check 7 PASS: design match: e2e/design/S111.spec.ts names scoreboard-mobile opened from /; docs/v3/design-checks/S111/scoreboard-mobile.png exists at 390px
+check 8 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**8/8 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with its ratified frame
+
+| Frame | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/shell-scoreboard/scoreboard-mobile.png` | `031a036814cbbf3e5bd33a2e7ca77ae6663d10af1a4ffd9bd250bfb95ff4a936` | `docs/v3/design-checks/S111/scoreboard-mobile.png` | `312abfe0df34670786ae3e242f6150fa543db1dc7cdb7af73135a1d6de744c65` |
+Owner: "Owner, 2026-11-03, on the scoreboard-mobile pair (recaptured on 2026-09-05 after "the frame on the right side of the scoreboard is broken"): "S111 looks good""
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S111 check results ---
+check 1 PASS: defaultScoreboardDate(today, seasons) in packages/domain: today in season, the last postseason game's date until the next first spring game, and the final day when no next season is published (tests at each boundary)
+check 2 PASS: MLB's today is the America/New_York date of an instant, computed in packages/domain (test across midnight UTC); no view names the zone
+check 3 PASS: MlbStatsClient.fetchSeasonCalendar in the port, HTTP and fixture adapters; parseSeasonsResponse in packages/mlb-api from fixtures/raw/seasons-*.json (parse test, coverage); pnpm mlb:scan-drift clean and scans it; the fixture client serves it
+check 4 PASS: GET /api/v1/scoreboard/default-date returns { date } (functions tests with a fixed clock, in and out of season); route table and spec; pnpm api:breaking exits 0
+check 5 PASS: / and /games open the default day and ScoreboardPage without a date uses it; 2024-07-04 is gone from routes.tsx and ScoreboardPage.tsx (RTL with the route stubbed)
+check 6 PASS: ViewState loading while the default date loads; today in America/New_York when the route fails (RTL)
+check 7 PASS: design match: e2e/design/S111.spec.ts names scoreboard-mobile opened from /; docs/v3/design-checks/S111/scoreboard-mobile.png exists at 390px
+check 8 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S111: 8/8 checks passed ---
+verify-S111: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+web build: dist/assets/VideoPlayer-SbpeEsaH.js                2.95 kB │ gzip:   1.43 kB
+web build: dist/assets/Table-BiIiQeYG.js                      4.15 kB │ gzip:   1.63 kB
+web build: dist/assets/Modal-CNZjxNpd.js                      4.82 kB │ gzip:   1.73 kB
+web build: dist/assets/workbox-window.prod.es5-BBnX5xw4.js    5.75 kB │ gzip:   2.36 kB
+web build: dist/assets/TextInput-CUAeGVdm.js                 28.11 kB │ gzip:   9.21 kB
+web build: dist/assets/SettingsPage-BkMaH5qE.js              37.16 kB │ gzip:  11.92 kB
+web build: dist/assets/GamePage-Qza67qJ-.js                  87.10 kB │ gzip:  29.77 kB
+web build: dist/assets/index-DYNcYKwK.js                    481.28 kB │ gzip: 154.57 kB
+web build: ✓ built in 1.82s
+web build: PWA v1.0.3
+web build: mode      generateSW
+web build: precache  22 entries (861.79 KiB)
+web build: files generated
+web build:   dist/sw.js
+web build:   dist/workbox-2fbc6a65.js
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154306,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

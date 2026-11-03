@@ -14,6 +14,15 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## The scoreboard opens on the right day
+
+- **Before, Baseball Theater always opened on a fixed sample day from 2024. Now it opens on today during the
+  season — spring training through the World Series — and, once the season is over, on the day of the World
+  Series final until the next spring begins, so the off-season shows the last games played instead of an empty
+  day.** Details: S111 — `defaultScoreboardDate` / `mlbToday` (America/New_York) in `packages/domain`, MLB's
+  season calendar and World Series schedule through `MlbStatsClient.fetchSeasonCalendar`,
+  `GET /api/v1/scoreboard/default-date`; design matched by the owner. _(2026-11-03)_
+
 ## The app opens faster, and has room to grow
 
 - **Before, everything in Baseball Theater downloaded up front, even pages you might never open, and the first
