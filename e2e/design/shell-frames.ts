@@ -62,7 +62,9 @@ async function openDrawer(page: Page): Promise<void>
 	})).toBeInViewport({
 		ratio: 1,
 	});
-	await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== "running"));
+	// Wait out the finite ones (the slide-in). An endless one — a live game's blinking dot
+	// (LiveIndicator, since S66 puts one on the scoreboard behind the drawer) — never ends.
+	await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== "running" || a.effect?.getTiming().iterations === Infinity));
 }
 
 /** Registers one capture test per shell frame, each run only at its frame's pairing. */
