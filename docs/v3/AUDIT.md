@@ -13207,3 +13207,33 @@ Owner-directed backlog change: S111 (default scoreboard date, top priority), S11
 **Answers and what was applied**
 
 Owner-directed backlog change: S111 (default scoreboard date, top priority), S112 (dev seed), S113 (production database), S114 (Cloudflare deploy) added and the order set to S111, S51, S112, S113, S114 ahead of S75 and the S4 / S73 / S28 rework, with everything at priority 75+ moved +5 (commit 1e63c09); FEATURES' Daily scoreboard row records the default-date rule in the owner's words; S112 / S113 / S114 cite Delightful / Dependable / Dependable (owner: "yes those are good pillars to use", commit 86de706). Asked whether it needs the backlog and doc parity reviews, the owner said: "no review needed, as these are all bundled together and should not affect the rest of the featureset". The next scheduled or drift-triggered review still checks it.
+
+---
+
+## 2026-11-02 — backlog review answers (2026-11-02)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-02 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-03T05:45:35Z` |
+| HEAD at capture | `d86edde` (tree clean) |
+| Applied in | `d86edde` — Owner-directed: S114 adds a stage.baseball.theater target; S113/S114 record the owner's production setup |
+
+**Answers and what was applied**
+
+Owner-directed backlog change: S114 adds a staging target — every push to main deploys to stage.baseball.theater on a long-lived Neon staging branch, production at baseball.theater stays behind the production environment approval; ACs renumber, README AC adds staging, turn cap 16 -> 18; S113 / S114 notes record the non-secret production setup IDs (commit d86edde). Owner, 2026-11-02: "Yes, agreed." Asked whether it needs the backlog and doc parity reviews, the owner said: "no backlog change needed". The next scheduled or drift-triggered review still checks it.
+
+---
+
+## 2026-11-02 — doc parity review answers (2026-11-02)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-02 doc parity review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-03T05:45:35Z` |
+| HEAD at capture | `d86edde` (tree dirty) |
+| Applied in | `d86edde` — Owner-directed: S114 adds a stage.baseball.theater target; S113/S114 record the owner's production setup |
+
+**Answers and what was applied**
+
+Owner-directed backlog change: S114 adds a staging target — every push to main deploys to stage.baseball.theater on a long-lived Neon staging branch, production at baseball.theater stays behind the production environment approval; ACs renumber, README AC adds staging, turn cap 16 -> 18; S113 / S114 notes record the non-secret production setup IDs (commit d86edde). Owner, 2026-11-02: "Yes, agreed." Asked whether it needs the backlog and doc parity reviews, the owner said: "no backlog change needed". The next scheduled or drift-triggered review still checks it.
