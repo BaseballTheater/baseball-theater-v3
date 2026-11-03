@@ -1,4 +1,6 @@
-import type { DayDigestResponse, StandingsResponse } from "@bt/domain";
+import type {
+	DayDigestResponse, ScoreboardDefaultDateResponse, StandingsResponse,
+} from "@bt/domain";
 import { createServer } from "node:http";
 import {
 	describe, expect, it,
@@ -15,7 +17,8 @@ import {
 import { handleApiRequest } from "./api.js";
 import { ingestScheduleDay } from "../services/ingest.js";
 
-async function withServer(run: (base: string) => Promise<void>): Promise<void>
+/** A server over the fixtures; `now` fixes the ingest clock (S111's default date reads it). */
+async function withServer(run: (base: string) => Promise<void>, now?: () => Date): Promise<void>
 {
 	const schedules = new InMemoryScheduleRepository();
 	const games = new InMemoryGameRepository();
@@ -26,6 +29,9 @@ async function withServer(run: (base: string) => Promise<void>): Promise<void>
 		schedules,
 		games,
 		projections,
+		...now && {
+			now,
+		},
 	};
 	await ingestScheduleDay(ingest, "2024-07-04");
 
@@ -75,6 +81,36 @@ describe("handleApiRequest", () =>
 			expect(body.gamePk).toBe(744834);
 			expect(body.plays.length).toBe(61);
 		});
+	});
+
+	it("default date in season (S111): MLB's today, the Eastern date, cacheable for five minutes", async () =>
+	{
+		// 23:30 Eastern on 2026-09-05 is already 09-06 in UTC; MLB's day is still the 5th.
+		await withServer(async (base) =>
+		{
+			const response = await fetch(`${base}/api/v1/scoreboard/default-date`);
+			expect(response.status).toBe(200);
+			expect(response.headers.get("cache-control")).toBe("public, max-age=300");
+			expect((await response.json()) as ScoreboardDefaultDateResponse).toEqual({
+				date: "2026-09-05",
+			});
+		}, () => new Date("2026-09-06T03:30:00Z"));
+	});
+
+	it("default date in the off-season (S111): the last World Series game until spring", async () =>
+	{
+		// After 2026's five-game Series ended on 10-28 (MLB's calendar still said 10-31).
+		await withServer(async (base) =>
+		{
+			const body = (await (await fetch(`${base}/api/v1/scoreboard/default-date`)).json()) as ScoreboardDefaultDateResponse;
+			expect(body.date).toBe("2026-10-28");
+		}, () => new Date("2026-11-02T17:00:00Z"));
+		// January, before 2026's spring: still 2025's final (Game 7, 11-01).
+		await withServer(async (base) =>
+		{
+			const body = (await (await fetch(`${base}/api/v1/scoreboard/default-date`)).json()) as ScoreboardDefaultDateResponse;
+			expect(body.date).toBe("2025-11-01");
+		}, () => new Date("2026-01-15T17:00:00Z"));
 	});
 
 	it("serves the standings (S4): the 2026-09-05 recording's six divisions, each team with a name and its record", async () =>

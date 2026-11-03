@@ -15,9 +15,10 @@ const FIXTURES = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../
 
 /**
  * What `FixtureClient` reads by name: `schedule-<date>`, `game-<pk>`, `plays-<pk>`, `standings-<date>`,
- * `players-*`, and from `raw/` the play-metrics recordings (S93).
+ * `players-*`, and from `raw/` the play-metrics recordings (S93) and the season calendars and World
+ * Series (S111).
  */
-const SERVED = /^(schedule-\d{4}-\d{2}-\d{2}|game-\d+|plays-\d+|standings-\d{4}-\d{2}-\d{2}|players-.+|raw\/playmetrics-\d+)\.json$/;
+const SERVED = /^(schedule-\d{4}-\d{2}-\d{2}|game-\d+|plays-\d+|standings-\d{4}-\d{2}-\d{2}|players-.+|raw\/playmetrics-\d+|raw\/seasons-\d{4}|raw\/worldseries-\d{4})\.json$/;
 
 describe("bundled fixtures (S45)", () =>
 {

@@ -85,6 +85,11 @@ class FakeMlbStatsClient implements MlbStatsClient
 		return null;
 	}
 
+	async fetchSeasonCalendar(): Promise<null>
+	{
+		return null;
+	}
+
 	async fetchStandings(date: string): Promise<StandingsSnapshot>
 	{
 		const table = await readFixture<StandingsSnapshot>("standings-2026-09-05.json");

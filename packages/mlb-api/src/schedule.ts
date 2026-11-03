@@ -78,6 +78,8 @@ export interface ScheduleGame {
 	ifNecessary?: string;
 	ifNecessaryDescription?: string;
 	seriesDescription?: string;
+	/** A postseason game's own name, `"World Series Game 1"` (S111's World Series recordings). */
+	description?: string;
 	seriesGameNumber?: number;
 	gamesInSeries?: number;
 	seriesStatus?: SeriesStatus;

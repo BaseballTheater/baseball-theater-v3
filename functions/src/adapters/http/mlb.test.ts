@@ -22,6 +22,7 @@ const BY_PATH: [RegExp, string][] = [
 	[/\/api\/v1\/people$/, "people-823823.json"],
 	[/\/api\/v1\/schedule$/, "schedule-2026-09-05.json"],
 	[/\/bdfed\/playMetrics\/823823$/, "playmetrics-823823.json"],
+	[/\/api\/v1\/seasons\/2026$/, "seasons-2026.json"],
 ];
 
 function client(): { mlb: HttpMlbStatsClient;
@@ -34,7 +35,10 @@ function client(): { mlb: HttpMlbStatsClient;
 		{
 			const url = new URL(String(input));
 			urls.push(url.toString());
-			const file = BY_PATH.find(([re]) => re.test(url.pathname))?.[1];
+			// The World Series is the schedule path asked by game type and season (S111).
+			const file = url.searchParams.get("gameType") === "W"
+				? `worldseries-${url.searchParams.get("season")}.json`
+				: BY_PATH.find(([re]) => re.test(url.pathname))?.[1];
 			return file ? new Response(readFileSync(path.join(RAW, file))) : new Response("{}", {
 				status: 404,
 			});
@@ -91,5 +95,21 @@ describe("HttpMlbStatsClient (S2)", () =>
 		expect(urls).toEqual(["https://bdfed.stitch.mlbinfra.com/bdfed/playMetrics/823823?keyMoments=true&scoringPlays=true&homeRuns=true&strikeouts=true&hardHits=true&highLeverage=false&leadChange=true&winProb=true&absChallenge=true"]);
 		expect(metrics?.atBats).toHaveLength(85);
 		expect(await mlb.fetchPlayMetrics(1)).toBeNull();
+	});
+
+	it("season calendar: the recorded 2026 calendar with its World Series final; null when unpublished", async () =>
+	{
+		const { mlb, urls } = client();
+		expect(await mlb.fetchSeasonCalendar(2026)).toEqual({
+			season: 2026,
+			springStartDate: "2026-02-20",
+			lastGameDate: "2026-10-28",
+		});
+		expect(urls).toEqual([
+			"https://statsapi.mlb.com/api/v1/seasons/2026?sportId=1",
+			"https://statsapi.mlb.com/api/v1/schedule?sportId=1&gameType=W&season=2026",
+		]);
+		// No recording for 2031: the calendar answers 404, so the season is unknown.
+		expect(await mlb.fetchSeasonCalendar(2031)).toBeNull();
 	});
 });

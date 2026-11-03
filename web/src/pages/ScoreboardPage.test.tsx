@@ -296,3 +296,82 @@ describe("ScoreboardPage render count (S66, ADR-026)", () =>
 		expect(counter.count()).toBe(1);
 	});
 });
+
+describe("ScoreboardPage without a date (S111)", () =>
+{
+	/** `/games` with no day: the page asks the server for its default day. */
+	function renderUndated()
+	{
+		return render(
+			<MantineProvider>
+				<QueryClientProvider client={createQueryClient()}>
+					<MemoryRouter initialEntries={["/games"]}>
+						<Routes>
+							<Route path="/games" element={<ScoreboardPage variant="mobile" />} />
+						</Routes>
+					</MemoryRouter>
+				</QueryClientProvider>
+			</MantineProvider>,
+		);
+	}
+
+	/** Answers the default-date route with `defaultDate` (a status for a failure, null to never answer). */
+	function serveUndated(defaultDate: string | number | null)
+	{
+		const fetchMock = vi.fn((request: Request) =>
+		{
+			if (new URL(request.url).pathname !== "/api/v1/scoreboard/default-date") return Promise.resolve(orDigest(request, day()));
+			if (defaultDate === null) return new Promise<Response>(() => undefined);
+			return Promise.resolve(typeof defaultDate === "number" ? jsonResponse({
+				error: "upstream",
+			}, defaultDate) : jsonResponse({
+				date: defaultDate,
+			}));
+		});
+		vi.stubGlobal("fetch", fetchMock);
+		return fetchMock;
+	}
+
+	/** The `date` each schedule request asked for. */
+	function scheduleDates(fetchMock: ReturnType<typeof vi.fn>): string[]
+	{
+		return fetchMock.mock.calls
+			.map(([request]) => new URL((request as Request).url))
+			.filter((url) => url.pathname === "/api/v1/schedule")
+			.map((url) => url.searchParams.get("date")!);
+	}
+
+	afterEach(() =>
+	{
+		vi.useRealTimers();
+	});
+
+	it("without a date: opens the server's default day", async () =>
+	{
+		const fetchMock = serveUndated("2026-09-05");
+		renderUndated();
+		expect(await modules()).toHaveLength(3);
+		expect(scheduleDates(fetchMock)).toEqual(["2026-09-05"]);
+	});
+
+	it("default date loading: ViewState's loader until the day is known, no date control yet", () =>
+	{
+		serveUndated(null);
+		renderUndated();
+		expect(screen.getByLabelText("Loading")).toBeInTheDocument();
+		expect(screen.queryByTestId("date-control")).toBeNull();
+	});
+
+	it("default date fails: opens MLB's today, the Eastern date", async () =>
+	{
+		// 23:30 Eastern on 2026-09-05 (already the 6th in UTC).
+		vi.useFakeTimers({
+			toFake: ["Date"],
+		});
+		vi.setSystemTime(new Date("2026-09-06T03:30:00Z"));
+		const fetchMock = serveUndated(503);
+		renderUndated();
+		await modules();
+		expect(scheduleDates(fetchMock)).toEqual(["2026-09-05"]);
+	});
+});

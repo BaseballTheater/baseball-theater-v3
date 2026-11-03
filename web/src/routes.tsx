@@ -7,6 +7,7 @@ import { ViewState } from "./components/ViewState.js";
 import { ScoreboardPage } from "./pages/ScoreboardPage.js";
 import type { LayoutVariant } from "./layout/variant.js";
 import { useAccountDeleted } from "./api/accountDeleted.js";
+import { useScoreboardDefaultDate } from "./api/scoreboardDate.js";
 import { DeletedAccountPage } from "./pages/settings/DeletedAccountPage.js";
 import { useSession } from "./session/session.js";
 
@@ -34,6 +35,16 @@ function SignedInOnly({ children }: { children: ReactNode })
 	if (session.status === "loading") return null;
 	if (session.status === "signedOut") return <SignedOutSettings />;
 	return children;
+}
+
+/**
+ * `/` and `/games` open the day the server names (S111): today in season, the last final
+ * in the off-season. The URL then names the day, so it can be shared and stepped from.
+ */
+function DefaultDay()
+{
+	const date = useScoreboardDefaultDate();
+	return date ? <Navigate to={`/games/${date}`} replace /> : <ViewState kind="loading" />;
 }
 
 /*
@@ -65,8 +76,8 @@ export function AppRoutes({ variant }: { variant: LayoutVariant })
 	return (
 		<Suspense fallback={<ViewState kind="loading" />}>
 			<Routes>
-				<Route path="/" element={<Navigate to="/games/2024-07-04" replace />} />
-				<Route path="/games" element={<Navigate to="/games/2024-07-04" replace />} />
+				<Route path="/" element={<DefaultDay />} />
+				<Route path="/games" element={<DefaultDay />} />
 				<Route path="/games/:date" element={<ScoreboardPage variant={variant} />} />
 				<Route path="/game/:gamePk" element={<GamePage variant={variant} />} />
 				<Route path="/game/:gamePk/:tab" element={<GamePage variant={variant} />} />

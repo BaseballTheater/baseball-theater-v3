@@ -23,6 +23,7 @@ import {
 	parsePlayMetricsResponse,
 	parseRecordedReplayWalk,
 	parseScheduleResponse,
+	parseSeasonsResponse,
 	parseStandingsResponse,
 	uncoveredPaths,
 } from "@bt/mlb-api";
@@ -50,6 +51,9 @@ type Parser = (input: unknown) => unknown;
  */
 const PARSERS: ReadonlyArray<readonly [RegExp, Parser]> = [
 	[/^schedule-.*\.json$/, parseScheduleResponse],
+	// A season's World Series is a schedule response (S111).
+	[/^worldseries-\d{4}\.json$/, parseScheduleResponse],
+	[/^seasons-\d{4}\.json$/, parseSeasonsResponse],
 	[/^live-\d+-base\.json$/, parseLiveFeedResponse],
 	[/^live-\d+\.json$/, parseLiveFeedResponse],
 	[/^content-.*\.json$/, parseGameContentResponse],

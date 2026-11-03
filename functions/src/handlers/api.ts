@@ -17,6 +17,7 @@ import {
 } from "../services/data-downloads.js";
 import type { ApiUsageLog } from "../services/api-usage.js";
 import { getDayDigest } from "../services/digest.js";
+import { getDefaultScoreboardDate } from "../services/scoreboard-date.js";
 import type { IngestDeps } from "../services/ingest.js";
 import { getOrRefreshGame, getOrRefreshSchedule } from "../services/ingest.js";
 import { edgeCacheControl } from "./cache-control.js";
@@ -207,6 +208,16 @@ export const API_ROUTER: readonly RouteEntry[] = [
 				});
 			}
 			return sendJson(200, "GET /api/v1/standings", await ctx.ingest.mlb.fetchStandings(date));
+		},
+	},
+	{
+		route: "GET /api/v1/scoreboard/default-date",
+		handle: async (_url, _params, ctx) =>
+		{
+			const response = sendJson(200, "GET /api/v1/scoreboard/default-date", await getDefaultScoreboardDate(ctx.ingest));
+			// The answer moves once a day at most; five minutes spares MLB a calendar read per visit.
+			response.headers.set("Cache-Control", "public, max-age=300");
+			return response;
 		},
 	},
 	{

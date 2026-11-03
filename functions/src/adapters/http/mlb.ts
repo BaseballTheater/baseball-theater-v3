@@ -13,6 +13,7 @@ import type {
 	GameSnapshot,
 	PlayerProfile,
 	ScheduleDay,
+	SeasonCalendar,
 	StandingsSnapshot,
 	Unversioned,
 } from "@bt/domain";
@@ -26,6 +27,7 @@ import {
 	parsePeopleResponse,
 	parsePlayMetricsResponse,
 	parseScheduleResponse,
+	parseSeasonsResponse,
 	parseStandingsResponse,
 } from "@bt/mlb-api";
 import type { MlbStatsClient } from "@bt/ports";
@@ -35,6 +37,7 @@ import { mapStandings } from "../../mappers/standings.js";
 import { mapLiveFeed } from "../../mappers/live.js";
 import { mapPlayMetrics } from "../../mappers/play-metrics.js";
 import { mapScheduleResponse } from "../../mappers/schedule.js";
+import { mapSeasonCalendar } from "../../mappers/season-calendar.js";
 
 const DEFAULT_BASE_URL = "https://statsapi.mlb.com";
 
@@ -46,6 +49,18 @@ const DEFAULT_BASE_URL = "https://statsapi.mlb.com";
 export function playMetricsUrl(gamePk: number): string
 {
 	return `https://bdfed.stitch.mlbinfra.com/bdfed/playMetrics/${gamePk}?keyMoments=true&scoringPlays=true&homeRuns=true&strikeouts=true&hardHits=true&highLeverage=false&leadChange=true&winProb=true&absChallenge=true`;
+}
+
+/** One season's calendar (S111); the recorder (S14) records the same URL. */
+export function seasonsUrl(season: number, baseUrl = DEFAULT_BASE_URL): string
+{
+	return `${baseUrl}/api/v1/seasons/${season}?sportId=1`;
+}
+
+/** One season's World Series schedule (S111): its last listed game is the season's final. */
+export function worldSeriesUrl(season: number, baseUrl = DEFAULT_BASE_URL): string
+{
+	return `${baseUrl}/api/v1/schedule?sportId=1&gameType=W&season=${season}`;
 }
 
 const SCHEDULE_HYDRATE =
@@ -147,6 +162,23 @@ export class HttpMlbStatsClient implements MlbStatsClient
 		try
 		{
 			return mapPlayMetrics(parsePlayMetricsResponse(await this.getJson(playMetricsUrl(gamePk))));
+		}
+		catch
+		{
+			return null;
+		}
+	}
+
+	/** The season's calendar with its World Series final (S111); null when unpublished or unreachable. */
+	async fetchSeasonCalendar(season: number): Promise<SeasonCalendar | null>
+	{
+		try
+		{
+			const [seasons, worldSeries] = await Promise.all([
+				this.getJson(seasonsUrl(season, this.baseUrl)),
+				this.getJson(worldSeriesUrl(season, this.baseUrl)),
+			]);
+			return mapSeasonCalendar(parseSeasonsResponse(seasons), parseScheduleResponse(worldSeries));
 		}
 		catch
 		{

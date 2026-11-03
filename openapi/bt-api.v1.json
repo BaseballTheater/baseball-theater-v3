@@ -909,6 +909,13 @@
 				"required": ["abbreviation", "id", "name", "teamName"],
 				"type": "object"
 			},
+			"ScoreboardDefaultDateResponse": {
+				"additionalProperties": false,
+				"description": "The day the scoreboard opens on (S111): today in season, the last final in the off-season.",
+				"properties": { "date": { "description": "The day, `YYYY-MM-DD`.", "type": "string" } },
+				"required": ["date"],
+				"type": "object"
+			},
 			"SettingsRequest": {
 				"additionalProperties": false,
 				"description": "A settings write: the whole document with a bumped `version`; an older version is ignored (ADR-022). `gameRowSlot` (S67), `collapseNonFavorites` and `hideScores` (S68), `videoPlayer` (S70) may be left out — each reads as its default — so a page loaded before they shipped can still save.",
@@ -1375,6 +1382,29 @@
 					}
 				},
 				"summary": "Games scheduled on one day."
+			}
+		},
+		"/api/v1/scoreboard/default-date": {
+			"get": {
+				"operationId": "getScoreboardDefaultDate",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ScoreboardDefaultDateResponse" }
+							}
+						},
+						"description": "OK"
+					},
+					"426": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
+					}
+				},
+				"summary": "The day the scoreboard opens on: today (MLB's day, America/New_York) during a season, and the last postseason game's day from then until the next season's first spring training game."
 			}
 		},
 		"/api/v1/standings": {

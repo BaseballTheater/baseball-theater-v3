@@ -141,6 +141,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/scoreboard/default-date": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The day the scoreboard opens on: today (MLB's day, America/New_York) during a season, and the last postseason game's day from then until the next season's first spring training game. */
+        get: operations["getScoreboardDefaultDate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/standings": {
         parameters: {
             query?: never;
@@ -622,6 +639,11 @@ export interface components {
             name: string;
             record?: components["schemas"]["TeamRecord"] | null;
             teamName: string;
+        };
+        /** @description The day the scoreboard opens on (S111): today in season, the last final in the off-season. */
+        ScoreboardDefaultDateResponse: {
+            /** @description The day, `YYYY-MM-DD`. */
+            date: string;
         };
         /** @description A settings write: the whole document with a bumped `version`; an older version is ignored (ADR-022). `gameRowSlot` (S67), `collapseNonFavorites` and `hideScores` (S68), `videoPlayer` (S70) may be left out — each reads as its default — so a page loaded before they shipped can still save. */
         SettingsRequest: {
@@ -1138,6 +1160,35 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
+            426: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    getScoreboardDefaultDate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScoreboardDefaultDateResponse"];
                 };
             };
             /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */

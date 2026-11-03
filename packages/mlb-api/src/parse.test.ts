@@ -8,6 +8,7 @@ import {
 	parseLiveFeedResponse,
 	parsePlayMetricsResponse,
 	parseScheduleResponse,
+	parseSeasonsResponse,
 } from "./parse.js";
 
 const rawDir = fileURLToPath(new URL("../../../fixtures/raw/", import.meta.url));
@@ -142,6 +143,34 @@ describe("parsePlayMetricsResponse (S93)", () =>
 		expect(() => parsePlayMetricsResponse({
 			allPlayMetrics: [{
 				when: "top 1",
+			}],
+		})).toThrow();
+	});
+});
+
+describe("parseSeasonsResponse (S111)", () =>
+{
+	it("seasons: parses the recorded 2026 calendar", () =>
+	{
+		const [season] = parseSeasonsResponse(readRaw("seasons-2026.json")).seasons;
+		expect(season?.seasonId).toBe("2026");
+		expect(season?.springStartDate).toBe("2026-02-20");
+		expect(season?.postSeasonEndDate).toBe("2026-10-31");
+	});
+
+	it("seasons: an unpublished season is an empty list", () =>
+	{
+		expect(parseSeasonsResponse({
+			seasons: [],
+		}).seasons).toEqual([]);
+	});
+
+	it("seasons: a date that is not a calendar day is rejected", () =>
+	{
+		expect(() => parseSeasonsResponse({
+			seasons: [{
+				seasonId: "2026",
+				springStartDate: "Feb 20",
 			}],
 		})).toThrow();
 	});

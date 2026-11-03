@@ -27,6 +27,7 @@ export * from "./live.js";
 export * from "./game-time.js";
 export * from "./team-record.js";
 export * from "./calendar-date.js";
+export * from "./scoreboard-date.js";
 export * from "./slot-occupant.js";
 export * from "./highlights.js";
 export * from "./hide-scores.js";

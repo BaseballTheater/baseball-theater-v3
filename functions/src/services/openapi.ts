@@ -120,6 +120,12 @@ export const ROUTE_DESCRIPTIONS: Record<ApiRoute, RouteDescription> = {
 			400: "`date` is missing or not `YYYY-MM-DD`.",
 		},
 	},
+	"GET /api/v1/scoreboard/default-date": {
+		operationId: "getScoreboardDefaultDate",
+		summary: "The day the scoreboard opens on: today (MLB's day, America/New_York) during a season, and the last postseason game's day from then until the next season's first spring training game.",
+		parameters: [],
+		errors: {},
+	},
 	"GET /api/v1/standings": {
 		operationId: "getStandings",
 		summary: "The division standings as of one day: each division's teams in rank order, with wins, losses, winning percentage and games back (null for the leader).",

@@ -20,6 +20,7 @@ import { AppRoutes } from "./routes.js";
 import { SessionProvider } from "./session/SessionProvider.js";
 import { DEV_SIGN_IN_TOKEN } from "./session/session.js";
 import { setSessionToken } from "./session/token.js";
+import { jsonResponse } from "./test/jsonResponse.js";
 import { stubMeApi } from "./test/meApi.js";
 
 /** Shows the router's current path, to observe redirects. */
@@ -64,7 +65,8 @@ describe("Settings gating", () =>
 	{
 		renderApp("/settings");
 		// Signed out, /settings first asks the server whether the account was just deleted (S79, S87).
-		await waitFor(() => expect(screen.getByLabelText("path")).toHaveTextContent(/^\/games\/2024-07-04$/));
+		// The scoreboard's default day stays unanswered here (S111), so the path rests on /games.
+		await waitFor(() => expect(screen.getByLabelText("path")).toHaveTextContent(/^\/games$/));
 		await userEvent.click(screen.getByRole("button", {
 			name: "Open navigation",
 		}));
@@ -91,5 +93,20 @@ describe("Settings gating", () =>
 		expect(await screen.findByRole("heading", {
 			name: /settings/i,
 		})).toBeInTheDocument();
+	});
+});
+
+describe("default day (S111)", () =>
+{
+	it.each(["/", "/games"])("default day: %s opens the day the server names", async (path) =>
+	{
+		const me = stubMeApi();
+		vi.stubGlobal("fetch", vi.fn((request: Request) => new URL(request.url).pathname === "/api/v1/scoreboard/default-date"
+			? Promise.resolve(jsonResponse({
+				date: "2026-10-28",
+			}))
+			: me(request)));
+		renderApp(path);
+		await waitFor(() => expect(screen.getByLabelText("path")).toHaveTextContent(/^\/games\/2026-10-28$/));
 	});
 });

@@ -1,6 +1,7 @@
 import type {
 	ApiRequestFor, ApiRoute, ApiRouteWithBody, GameSnapshotResponse, MeDeleteResponse,
 	MeDownloadFileResponse, MeDownloadResponse, MeResponse, ScheduleDayResponse, SettingsResponse, DayDigestResponse, StandingsResponse,
+	ScoreboardDefaultDateResponse,
 } from "@bt/domain";
 import {
 	describe, expect, it,
@@ -37,6 +38,7 @@ const fidelity = {
 	"GET /api/v1/standings": true as MutuallyAssignable<Json200<"/api/v1/standings">, StandingsResponse>,
 	"GET /api/v1/me": true as MutuallyAssignable<Json200<"/api/v1/me">, MeResponse>,
 	"POST /api/v1/me/download": true as MutuallyAssignable<Json200<"/api/v1/me/download", "post">, MeDownloadResponse>,
+	"GET /api/v1/scoreboard/default-date": true as MutuallyAssignable<Json200<"/api/v1/scoreboard/default-date">, ScoreboardDefaultDateResponse>,
 	"GET /api/v1/me/download": true as MutuallyAssignable<Json200<"/api/v1/me/download">, MeDownloadResponse>,
 	"GET /api/v1/me/download/:downloadId": true as MutuallyAssignable<Json200<"/api/v1/me/download/{downloadId}">, MeDownloadFileResponse>,
 	"POST /api/v1/me/delete": true as MutuallyAssignable<Json200<"/api/v1/me/delete", "post">, MeDeleteResponse>,
@@ -51,7 +53,7 @@ const requestFidelity = {
 } satisfies Record<ApiRouteWithBody, true>;
 
 /** The other side of exhaustiveness: every path the spec publishes is one the table knows. */
-type SpecPathsCovered = MutuallyAssignable<keyof paths, "/api/v1/games/{gamePk}" | "/api/v1/schedule" | "/api/v1/digest" | "/api/v1/standings" | "/api/v1/me" | "/api/v1/me/download" | "/api/v1/me/download/{downloadId}" | "/api/v1/me/delete" | "/api/v1/me/settings">;
+type SpecPathsCovered = MutuallyAssignable<keyof paths, "/api/v1/games/{gamePk}" | "/api/v1/schedule" | "/api/v1/digest" | "/api/v1/standings" | "/api/v1/scoreboard/default-date" | "/api/v1/me" | "/api/v1/me/download" | "/api/v1/me/download/{downloadId}" | "/api/v1/me/delete" | "/api/v1/me/settings">;
 const specPathsCovered: SpecPathsCovered = true;
 
 /**
@@ -66,7 +68,7 @@ describe("generated response types — spec fidelity", () =>
 {
 	it("pairs every S26 route with its generated type (checked by tsc)", () =>
 	{
-		expect(Object.keys(fidelity).sort()).toEqual(["GET /api/v1/digest", "GET /api/v1/games/:gamePk", "GET /api/v1/me", "GET /api/v1/me/download", "GET /api/v1/me/download/:downloadId", "GET /api/v1/me/settings", "GET /api/v1/schedule", "GET /api/v1/standings", "POST /api/v1/me/delete", "POST /api/v1/me/download", "PUT /api/v1/me/settings"]);
+		expect(Object.keys(fidelity).sort()).toEqual(["GET /api/v1/digest", "GET /api/v1/games/:gamePk", "GET /api/v1/me", "GET /api/v1/me/download", "GET /api/v1/me/download/:downloadId", "GET /api/v1/me/settings", "GET /api/v1/schedule", "GET /api/v1/scoreboard/default-date", "GET /api/v1/standings", "POST /api/v1/me/delete", "POST /api/v1/me/download", "PUT /api/v1/me/settings"]);
 		expect(Object.keys(requestFidelity)).toEqual(["POST /api/v1/me/delete", "PUT /api/v1/me/settings"]);
 		expect([specPathsCovered, wrongPairing]).toEqual([true, true]);
 	});

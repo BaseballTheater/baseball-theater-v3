@@ -13,6 +13,7 @@ import type { LiveFeedResponse } from "./live.js";
 import type { PeopleResponse } from "./people.js";
 import type { PlayMetricsResponse } from "./playmetrics.js";
 import type { ScheduleResponse } from "./schedule.js";
+import type { SeasonsResponse } from "./seasons.js";
 import type { StandingsResponse } from "./standings.js";
 
 /**
@@ -944,6 +945,7 @@ const scheduleGameSchema = z.object({
 	ifNecessary: z.string().optional(),
 	ifNecessaryDescription: z.string().optional(),
 	seriesDescription: z.string().optional(),
+	description: z.string().optional(),
 	seriesGameNumber: z.number().optional(),
 	gamesInSeries: z.number().optional(),
 	seriesStatus: z
@@ -1339,6 +1341,43 @@ export function parseGameContentResponse(input: unknown): GameContentResponse
 export function parseStandingsResponse(input: unknown): StandingsResponse
 {
 	return standingsResponseSchema.parse(input);
+}
+
+const calendarDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+
+const seasonSchema = z.object({
+	seasonId: z.string(),
+	hasWildcard: z.boolean().optional(),
+	preSeasonStartDate: calendarDate.optional(),
+	preSeasonEndDate: calendarDate.optional(),
+	seasonStartDate: calendarDate.optional(),
+	springStartDate: calendarDate.optional(),
+	springEndDate: calendarDate.optional(),
+	regularSeasonStartDate: calendarDate.optional(),
+	lastDate1stHalf: calendarDate.optional(),
+	allStarDate: calendarDate.optional(),
+	firstDate2ndHalf: calendarDate.optional(),
+	regularSeasonEndDate: calendarDate.optional(),
+	postSeasonStartDate: calendarDate.optional(),
+	postSeasonEndDate: calendarDate.optional(),
+	seasonEndDate: calendarDate.optional(),
+	offseasonStartDate: calendarDate.optional(),
+	offSeasonEndDate: calendarDate.optional(),
+	seasonLevelGamedayType: z.string().optional(),
+	gameLevelGamedayType: z.string().optional(),
+	qualifierPlateAppearances: z.number().optional(),
+	qualifierOutsPitched: z.number().optional(),
+});
+
+const seasonsResponseSchema = z.object({
+	copyright: z.string().optional(),
+	seasons: z.array(seasonSchema),
+});
+
+/** `GET /api/v1/seasons/{season}?sportId=1` (S111): one season's calendar, or none if unpublished. */
+export function parseSeasonsResponse(input: unknown): SeasonsResponse
+{
+	return seasonsResponseSchema.parse(input);
 }
 
 const playMetricsCountSchema = z.object({

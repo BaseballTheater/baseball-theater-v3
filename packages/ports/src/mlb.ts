@@ -4,6 +4,7 @@ import type {
 	MediaHighlight,
 	PlayerProfile,
 	ScheduleDay,
+	SeasonCalendar,
 	StandingsSnapshot,
 	Unversioned,
 } from "@bt/domain";
@@ -26,6 +27,11 @@ export interface MlbStatsClient {
 	 */
 	fetchPlayMetrics(gamePk: number): Promise<GamePlayMetrics | null>;
 	fetchStandings(date: string): Promise<StandingsSnapshot>;
+	/**
+	 * One season's calendar — its first spring game and its last postseason game (S111) — or
+	 * null when MLB has not published the season or it can't be had.
+	 */
+	fetchSeasonCalendar(season: number): Promise<SeasonCalendar | null>;
 	/** Identity + season lines for the given player ids, in the order returned. */
 	fetchPlayers(ids: number[]): Promise<PlayerProfile[]>;
 	/**

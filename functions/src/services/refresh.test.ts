@@ -42,6 +42,7 @@ function spyClient(): {
 		fetchGameContent: (pk: number) => real.fetchGameContent(pk),
 		fetchPlayMetrics: (pk: number) => real.fetchPlayMetrics(pk),
 		fetchStandings: (d: string) => real.fetchStandings(d),
+		fetchSeasonCalendar: (season: number) => real.fetchSeasonCalendar(season),
 		fetchPlayers: (ids: number[]) => real.fetchPlayers(ids),
 		fetchGameTimestamps: (pk: number) => real.fetchGameTimestamps(pk),
 		fetchGameDiffPatch: (pk: number, s: string, e: string) =>

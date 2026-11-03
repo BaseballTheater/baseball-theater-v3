@@ -4,6 +4,7 @@ import type {
 	MediaHighlight,
 	PlayerProfile,
 	ScheduleDay,
+	SeasonCalendar,
 	StandingsSnapshot,
 	AtBat,
 	Unversioned,
@@ -11,10 +12,11 @@ import type {
 import { rankHighlightsByImpact } from "@bt/domain";
 import type { GameDiffPatchResponse, ReplayPatchEntry } from "@bt/mlb-api";
 import {
-	parseGameTimestamps, parsePlayMetricsResponse, parseRecordedReplayWalk,
+	parseGameTimestamps, parsePlayMetricsResponse, parseRecordedReplayWalk, parseScheduleResponse, parseSeasonsResponse,
 } from "@bt/mlb-api";
 import type { MlbStatsClient } from "@bt/ports";
 import { mapPlayMetrics } from "../../mappers/play-metrics.js";
+import { mapSeasonCalendar } from "../../mappers/season-calendar.js";
 
 type ScheduleFixture = {
 	date: string;
@@ -177,6 +179,27 @@ export class FixtureClient implements MlbStatsClient
 		try
 		{
 			return mapPlayMetrics(parsePlayMetricsResponse(await this.readJson(`raw/playmetrics-${gamePk}.json`)));
+		}
+		catch
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * The recorded calendar and World Series, `fixtures/raw/seasons-<season>.json` and
+	 * `worldseries-<season>.json` (S111), mapped as the HTTP client maps them; null for a
+	 * season with no recording, as MLB answers for one it hasn't published.
+	 */
+	async fetchSeasonCalendar(season: number): Promise<SeasonCalendar | null>
+	{
+		try
+		{
+			const [seasons, worldSeries] = await Promise.all([
+				this.readJson(`raw/seasons-${season}.json`),
+				this.readJson(`raw/worldseries-${season}.json`),
+			]);
+			return mapSeasonCalendar(parseSeasonsResponse(seasons), parseScheduleResponse(worldSeries));
 		}
 		catch
 		{

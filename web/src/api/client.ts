@@ -79,6 +79,12 @@ export async function fetchStandings(date?: string)
 	}));
 }
 
+/** The day the scoreboard opens on (S111): today in season, the last final in the off-season. */
+export async function fetchScoreboardDefaultDate()
+{
+	return unwrap(await api.GET("/api/v1/scoreboard/default-date"));
+}
+
 /** "Best of <date>" (S71): the day's top videos across its games. */
 export async function fetchDigest(date: string)
 {

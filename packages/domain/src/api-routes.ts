@@ -29,6 +29,12 @@ export type GameSnapshotResponse = GameSnapshot;
 /** The division standings as of one day (S4): MLB's tables, projected to BT's shape. */
 export type StandingsResponse = StandingsSnapshot;
 
+/** The day the scoreboard opens on (S111): today in season, the last final in the off-season. */
+export interface ScoreboardDefaultDateResponse {
+	/** The day, `YYYY-MM-DD`. */
+	date: string;
+}
+
 /** "Best of <date>" (S71): the day's top clips across its games, ranked by `dayDigest`. */
 export interface DayDigestResponse {
 	/** The day, `YYYY-MM-DD`. */
@@ -138,6 +144,7 @@ export interface ApiResponseTypes {
 	GameSnapshotResponse: GameSnapshotResponse;
 	DayDigestResponse: DayDigestResponse;
 	StandingsResponse: StandingsResponse;
+	ScoreboardDefaultDateResponse: ScoreboardDefaultDateResponse;
 	MeResponse: MeResponse;
 	MeDownloadResponse: MeDownloadResponse;
 	MeDownloadFileResponse: MeDownloadFileResponse;
@@ -156,6 +163,7 @@ export const ApiRoutes = {
 	"GET /api/v1/games/:gamePk": "GameSnapshotResponse",
 	"GET /api/v1/digest": "DayDigestResponse",
 	"GET /api/v1/standings": "StandingsResponse",
+	"GET /api/v1/scoreboard/default-date": "ScoreboardDefaultDateResponse",
 	"GET /api/v1/me": "MeResponse",
 	"POST /api/v1/me/download": "MeDownloadResponse",
 	"GET /api/v1/me/download": "MeDownloadResponse",

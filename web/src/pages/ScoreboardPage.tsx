@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { scoreboardRows } from "@bt/domain";
 import { useScheduleDay } from "../api/schedule.js";
+import { useScoreboardDefaultDate } from "../api/scoreboardDate.js";
 import type { ScheduleDayPayload } from "../api/schedule.js";
 import { ViewState } from "../components/ViewState.js";
 import { CollapsedBar } from "../components/scoreboard/CollapsedBar.js";
@@ -62,15 +63,32 @@ function Games({ day, variant }: { day: ScheduleDayPayload;
 }
 
 /**
- * The scoreboard (S31 frames; S66): the date control, then the day's games as
+ * The scoreboard (S31 frames; S66) for the URL's day, or, with none in the URL, the
+ * server's default day (S111) — `ViewState`'s loading treatment until it is known.
+ */
+export function ScoreboardPage({ variant }: { variant: LayoutVariant })
+{
+	const { date } = useParams();
+	return date ? <ScoreboardDay date={date} variant={variant} /> : <DefaultScoreboardDay variant={variant} />;
+}
+
+/** No day in the URL: ask for the default; it is MLB's today if the server can't say. */
+function DefaultScoreboardDay({ variant }: { variant: LayoutVariant })
+{
+	const date = useScoreboardDefaultDate();
+	return date ? <ScoreboardDay date={date} variant={variant} /> : <ViewState kind="loading" />;
+}
+
+/**
+ * One day's scoreboard: the date control, then the day's games as
  * `ScoreboardModule`s — one column on mobile, two on medium and desktop, from the
  * host's `variant` — and the day digest under them (S71), or the loading, empty or
  * error state from `ViewState`. The
  * date control stays through every state so the reader can always move to another day.
  */
-export function ScoreboardPage({ variant }: { variant: LayoutVariant })
+function ScoreboardDay({ date, variant }: { date: string;
+	variant: LayoutVariant; })
 {
-	const { date = "2024-07-04" } = useParams();
 	const {
 		data: day, error, refetch,
 	} = useScheduleDay(date);

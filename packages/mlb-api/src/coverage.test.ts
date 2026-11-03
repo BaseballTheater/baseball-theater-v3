@@ -12,6 +12,7 @@ import {
 	parsePeopleResponse,
 	parsePlayMetricsResponse,
 	parseScheduleResponse,
+	parseSeasonsResponse,
 	parseStandingsResponse,
 } from "./parse.js";
 import { parseRecordedReplayWalk } from "./replay.js";
@@ -37,6 +38,10 @@ const fixtures: ReadonlyArray<[string, (input: unknown) => unknown]> = [
 	["playmetrics-823823.json", parsePlayMetricsResponse],
 	["timestamps-823823.json", parseGameTimestamps],
 	["standings-2026-09-05.json", parseStandingsResponse],
+	["seasons-2025.json", parseSeasonsResponse],
+	["seasons-2026.json", parseSeasonsResponse],
+	["worldseries-2025.json", parseScheduleResponse],
+	["worldseries-2026.json", parseScheduleResponse],
 	["people-823823.json", parsePeopleResponse],
 	["diffpatch-823823.json", parseRecordedReplayWalk],
 ];
