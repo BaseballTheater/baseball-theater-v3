@@ -13,7 +13,8 @@ const requireExtensions = createRequire(import.meta.url)("eslint-plugin-require-
 
 export default tseslint.config(
 	{
-		ignores: ["**/dist/**", "**/coverage/**", "**/node_modules/**", "docs/**", "tools/eslint-rules/fixtures/**"],
+		// `.wrangler/` is wrangler dev's scratch output (bundles it leaves behind when a dev server is killed); owner, 2026-11-03.
+		ignores: ["**/dist/**", "**/coverage/**", "**/node_modules/**", "**/.wrangler/**", "docs/**", "tools/eslint-rules/fixtures/**"],
 	},
 	js.configs.recommended,
 	...tseslint.configs.recommended,
