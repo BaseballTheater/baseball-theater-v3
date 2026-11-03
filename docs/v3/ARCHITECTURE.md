@@ -550,7 +550,7 @@ Use short ADRs in-place. Status: `Proposed` → `Accepted` → `Superseded`.
 - Ingestion + storage are mandatory for core UX (not optional cache in front of a proxy)
 - “Live” UX is designed against BT freshness guarantees
 - Parameters still open: pre-game lead, post-game trail, poll interval(s), TTL / when refresh-on-read fires
-- Media/search and other domains need separate ADRs; they do not automatically inherit this pattern
+- Media/search and other domains need separate ADRs; they do not automatically inherit this pattern (highlight search: [ADR-029](#adr-029--highlight-search-asks-mlb-on-every-query-for-now-accepted-2026-11-02))
 
 **Not decided here:** transport to clients (HTTP poll vs push), database product, exact MLB endpoints, multi-sport, etc.
 
@@ -1353,6 +1353,21 @@ Owner, 2026-10-23: *"I need tools to allow a user to delete all of their data, a
 
 **Consequence:** S76 builds the port, registry, manifest and checks; S77 the export and deletion API; S80 separates them (owner, 2026-10-27): stored downloads behind `ExportStore`, the rate limit, the `Mailer` port, and deletion without a token; S78 the design amendment for the Settings flow; S79 builds it. The R2 adapter, its lifecycle rule and the Cloudflare Email adapter come with the Worker and deploy work. S50 (Postgres) and every later store register in the same change that adds them.
 
+### ADR-029 — Highlight search asks MLB on every query, for now (accepted 2026-11-02)
+
+Owner, 2026-11-02, asked what highlight search should look through at launch (only the games BT has already saved, or MLB's own search each time): *"MLB's own search on every query, for now. It can match the existing site (repo is called baseball-theater)."* Asked whether to record it as an ADR: *"Yes"*. This is the separate ADR that [ADR-002](#adr-002--data-access-topology-for-schedule--game-details-accepted) asked media and search to have.
+
+**Decision:**
+
+- **Search is answered by MLB, per query, on the server.** `GET /api/v1/search/highlights` asks MLB's GraphQL `Search` operation (`fastball-gateway.mlb.com/graphql`), as the current site does, through `MlbStatsClient` in `packages/ports`; the handler maps MLB's results to BT's response. Nothing is indexed or stored for search.
+- **The browser still reads only BT.** Clients call BT's route, never MLB (ADR-002's "clients read BT" holds, and question 9 below stays answered *no*). Video files still play from MLB's hosts, as ADR-002 allows.
+- **Offline locally and in CI.** The fixture client answers searches from recorded MLB responses (`fixtures/search-*.json`, recorded with S14's recorder), so `pnpm verify` never needs the network.
+- **"For now."** This is the launch answer, not the end state: a search over BT's own stored games (a GIN index on the `games` JSONB exists since S50) or a historical index can replace it later, behind the same route and port.
+
+**Why:** MLB's search already covers every highlight it has published, so search is complete on day one with nothing to build or keep in sync; the current site has worked this way. The cost is a request to MLB per search, the per-request pattern ADR-002 moved the game and schedule surfaces away from; search is the one surface allowed it, and only server-side.
+
+**Consequence:** S5 builds it (its notes, 2026-11-02). One small GraphQL POST helper in `functions/src/adapters/http/` serves both this host and S94's `data-graph.mlb.com` (ADR-025). Open question 3 is answered by this ADR.
+
 ---
 
 ## 4. Impact curation pipeline
@@ -1694,7 +1709,7 @@ _None of these block scaffolding. Defaults are fine until tuned._
 
 1. Concrete **lead / trail / interval** values (and whether they vary by status)? Out-of-window TTL follows [ADR-021](#adr-021--graduated-cache-freshness-accepted-2026-10-18); its ladder values are tunable.
 2. ~~Client sync: **poll the BT API**, **Firestore listeners**, or hybrid?~~ → **Narrowed** by [ADR-014](#adr-014--client-state-management-accepted): clients read BT over HTTP, and **BT-mediated push and poll both write the one server read cache** — never direct Firestore listeners on hot game docs. Transport **decided** by [ADR-020](#adr-020--live-delivery--cadence-durable-objects-accepted-2026-10-18): WebSocket from the game's Durable Object, one-way, in-window games only. Cadence values still open.
-3. Historical highlight index (v2 ES) vs live MLB GraphQL search?
+3. ~~Historical highlight index (v2 ES) vs live MLB GraphQL search?~~ → **Decided** by [ADR-029](#adr-029--highlight-search-asks-mlb-on-every-query-for-now-accepted-2026-11-02): live MLB GraphQL search, server-side, for now.
 4. **Patreon** OAuth link + webhook/refresh + patron migration UX (auth: Logto email sign-in at launch, no passkeys at launch — ADR-019; Patreon ≠ login)
 5. AI provider(s) when enrichment ships; heuristic vs model for first impact-sort
 6. Crosswalk seed + refresh when Phase 1 deep links ship
