@@ -61,6 +61,13 @@ explicitly where that's the case. For what's still ahead, see
   screen uses it yet; the win-probability chart and better video ranking build on it.** Details: S93 — MLB's
   play-metrics feed recorded for 823823, typed and parsed in `packages/mlb-api`, `MlbStatsClient.fetchPlayMetrics`,
   `GameSnapshot.playMetrics` (optional: absent when the feed fails). _(2026-11-02)_
+- **Before, Baseball Theater couldn't tell which play an ABS challenge video shows: MLB's usual video feed links
+  those clips to nothing. Now it keeps MLB's own link from each video to the exact pitch it shows, for 18 of a
+  game's 25 videos on the sample game (three ABS challenges among them), plus MLB's related news stories about the
+  game. Nothing on screen uses it yet; linking videos to their plays builds on it.** Details: S94 — MLB's GraphQL
+  game content (`data-graph.mlb.com`, persisted query `getGamesByGamePks`) recorded for 823823, typed and parsed in
+  `packages/mlb-api`, `MlbStatsClient.fetchGameGraphContent`, `GameSnapshot.videoPlayRefs` / `relatedArticles`
+  (optional: absent when MLB's call fails). _(2026-11-02)_
 - **Before, Baseball Theater could only keep its data in memory, which empties whenever the server restarts.
   Now it has a real Postgres database layer, checked against exactly the same rules as the test stores: an
   older update can never overwrite a newer one, and deleting your account removes your rows. It isn't

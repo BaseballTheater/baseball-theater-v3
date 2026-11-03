@@ -392,6 +392,11 @@
 						"$ref": "#/components/schemas/GameRecap",
 						"description": "MLB's editorial recap (S10); absent until MLB publishes one."
 					},
+					"relatedArticles": {
+						"description": "mlb.com stories about the game (S94); absent, like `videoPlayRefs`, when the source failed or had none.",
+						"items": { "$ref": "#/components/schemas/RelatedArticle" },
+						"type": "array"
+					},
 					"status": {
 						"additionalProperties": false,
 						"properties": {
@@ -427,6 +432,11 @@
 					"version": {
 						"description": "ADR-022: monotonic per game; bumps only when the content changes (`stampVersion`).",
 						"type": "number"
+					},
+					"videoPlayRefs": {
+						"description": "The pitch each video shows, where MLB links one (S94). Absent when MLB's GraphQL game content (a persisted query MLB may retire) failed or had no links: the game is served as before.",
+						"items": { "$ref": "#/components/schemas/VideoPlayRef" },
+						"type": "array"
 					},
 					"windowMode": { "enum": ["active", "cache"], "type": "string" }
 				},
@@ -768,6 +778,17 @@
 				"required": ["era", "fullName", "id", "losses", "wins"],
 				"type": "object"
 			},
+			"RelatedArticle": {
+				"additionalProperties": false,
+				"description": "An mlb.com story about the game (S94; GraphQL `relatedArticles`). MLB gives the article's slug, not a URL; whoever shows it builds the mlb.com link from the slug.",
+				"properties": {
+					"blurb": { "type": ["string", "null"] },
+					"headline": { "type": "string" },
+					"slug": { "type": "string" }
+				},
+				"required": ["slug", "headline", "blurb"],
+				"type": "object"
+			},
 			"Role": {
 				"description": "What a user may administer. Lives in BT, not the identity provider (ADR-019: no provider RBAC).",
 				"enum": ["member", "admin"],
@@ -1018,6 +1039,13 @@
 				"description": "A team's season record (S65; the scoreboard module's `81-62`).",
 				"properties": { "losses": { "type": "number" }, "wins": { "type": "number" } },
 				"required": ["wins", "losses"],
+				"type": "object"
+			},
+			"VideoPlayRef": {
+				"additionalProperties": false,
+				"description": "The pitch a video shows, by MLB's own link (S94; GraphQL `playIdRef`): `videoId` is the video's id in the content feed (`MediaHighlight.id`), `playId` the pitch's `PitchEvent.playId`. It covers clips the content feed links to no play, such as ABS challenges.",
+				"properties": { "playId": { "type": "string" }, "videoId": { "type": "string" } },
+				"required": ["videoId", "playId"],
 				"type": "object"
 			},
 			"VideoPlayerMode": { "enum": ["dialog", "stage"], "type": "string" }

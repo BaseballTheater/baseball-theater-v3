@@ -1,4 +1,5 @@
 import type {
+	GameGraphContent,
 	GamePlayMetrics,
 	GameSnapshot,
 	MediaHighlight,
@@ -26,6 +27,12 @@ export interface MlbStatsClient {
 	 * Ingest calls it (ADR-002); `fetchGame` attaches it as `playMetrics`.
 	 */
 	fetchPlayMetrics(gamePk: number): Promise<GamePlayMetrics | null>;
+	/**
+	 * Each video's pitch link and the game's related articles, from MLB's GraphQL game content
+	 * (S94; a persisted query MLB may retire): null when it fails or adds nothing, never a
+	 * throw. Ingest calls it (ADR-002); `fetchGame` attaches `videoPlayRefs` / `relatedArticles`.
+	 */
+	fetchGameGraphContent(gamePk: number): Promise<GameGraphContent | null>;
 	fetchStandings(date: string): Promise<StandingsSnapshot>;
 	/**
 	 * One season's calendar — its first spring game and its last postseason game (S111) — or

@@ -97,6 +97,41 @@ describe("HttpMlbStatsClient (S2)", () =>
 		expect(await mlb.fetchPlayMetrics(1)).toBeNull();
 	});
 
+	it("fetchGameGraphContent asks data-graph's persisted query with MLB's client headers and maps the recording (S94)", async () =>
+	{
+		const asked: { url: URL;
+			headers: Headers; }[] = [];
+		const mlb = new HttpMlbStatsClient({
+			fetchImpl: async (input, init) =>
+			{
+				const url = new URL(String(input));
+				const headers = new Headers(init?.headers);
+				asked.push({
+					url,
+					headers,
+				});
+				const ok = url.searchParams.get("variables")?.includes("[823823]") && headers.get("x-client-name") === "mlb";
+				return ok ? new Response(readFileSync(path.join(RAW, "graphql-content-823823.json"))) : new Response("", {
+					status: 400,
+				});
+			},
+		});
+		const graph = await mlb.fetchGameGraphContent(823823);
+		const { url, headers } = asked[0]!;
+		expect(`${url.origin}${url.pathname}`).toBe("https://data-graph.mlb.com/graphql/");
+		expect(url.searchParams.get("operationName")).toBe("getGamesByGamePks");
+		expect(JSON.parse(url.searchParams.get("extensions")!).persistedQuery.sha256Hash).toBe("e12a5c2692406844d5f15f52ce7754208f53da81867de7d3e9e773611f4a040a");
+		expect(JSON.parse(url.searchParams.get("variables")!)).toMatchObject({
+			gamePks: [823823],
+			locale: "EN_US",
+		});
+		expect(headers.get("x-client-name")).toBe("mlb");
+		expect(headers.get("content-type")).toBe("application/json");
+		expect(graph?.videoPlayRefs).toHaveLength(18);
+		// The gateway's 400 for anything it won't answer is a null, not a throw.
+		expect(await mlb.fetchGameGraphContent(1)).toBeNull();
+	});
+
 	it("season calendar: the recorded 2026 calendar with its World Series final; null when unpublished", async () =>
 	{
 		const { mlb, urls } = client();

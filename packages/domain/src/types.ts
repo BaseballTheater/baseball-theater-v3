@@ -162,6 +162,32 @@ export type GamePlayMetrics = {
 	atBats: AtBatMetrics[];
 };
 
+/**
+ * The pitch a video shows, by MLB's own link (S94; GraphQL `playIdRef`): `videoId` is the
+ * video's id in the content feed (`MediaHighlight.id`), `playId` the pitch's `PitchEvent.playId`.
+ * It covers clips the content feed links to no play, such as ABS challenges.
+ */
+export type VideoPlayRef = {
+	videoId: string;
+	playId: string;
+};
+
+/**
+ * An mlb.com story about the game (S94; GraphQL `relatedArticles`). MLB gives the article's
+ * slug, not a URL; whoever shows it builds the mlb.com link from the slug.
+ */
+export type RelatedArticle = {
+	slug: string;
+	headline: string;
+	blurb: string | null;
+};
+
+/** What MLB's GraphQL game content adds to a game (S94); either list may be empty. */
+export type GameGraphContent = {
+	videoPlayRefs: VideoPlayRef[];
+	relatedArticles: RelatedArticle[];
+};
+
 export type GameSnapshot = {
 	gamePk: number;
 	gameDate: string; // YYYY-MM-DD (schedule date)
@@ -189,6 +215,13 @@ export type GameSnapshot = {
 	 * (an internal mlb.com source) failed or had nothing: the game is served as before.
 	 */
 	playMetrics?: GamePlayMetrics;
+	/**
+	 * The pitch each video shows, where MLB links one (S94). Absent when MLB's GraphQL game
+	 * content (a persisted query MLB may retire) failed or had no links: the game is served as before.
+	 */
+	videoPlayRefs?: VideoPlayRef[];
+	/** mlb.com stories about the game (S94); absent, like `videoPlayRefs`, when the source failed or had none. */
+	relatedArticles?: RelatedArticle[];
 	/** Who is on base and who is batting and pitching (S63); `null` unless in progress, absent on older recordings. */
 	live?: GameLive | null;
 	fetchedAt: string; // ISO

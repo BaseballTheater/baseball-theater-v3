@@ -23,7 +23,7 @@ import type {
 	Unversioned,
 } from "@bt/domain";
 import type { MlbStatsClient } from "@bt/ports";
-import { playMetricsUrl } from "../adapters/http/mlb.js";
+import { graphContentRequest, playMetricsUrl } from "../adapters/http/mlb.js";
 
 const DEFAULT_BASE_URL = "https://statsapi.mlb.com";
 
@@ -43,10 +43,11 @@ export interface RawRecorderOptions {
 	fetchImpl?: typeof fetch;
 }
 
-/** One raw upstream payload: the `fixtures/raw/` basename and its URL. */
+/** One raw upstream payload: the `fixtures/raw/` basename, its URL, and any headers it needs beyond `accept`. */
 export interface RawEndpoint {
 	name: string;
 	url: string;
+	headers?: Record<string, string>;
 }
 
 /**
@@ -82,6 +83,11 @@ export function rawEndpoints(
 			// MLB's play-metrics feed (S93), on its own host: the URL the HTTP client asks.
 			name: `playmetrics-${gamePk}`,
 			url: playMetricsUrl(gamePk),
+		},
+		{
+			// MLB's GraphQL game content (S94): the request the HTTP client makes, headers included.
+			name: `graphql-content-${gamePk}`,
+			...graphContentRequest(gamePk),
 		},
 		{
 			name: `standings-${date}`,
@@ -120,6 +126,7 @@ export async function recordRaw(
 		const response = await doFetch(endpoint.url, {
 			headers: {
 				accept: "application/json",
+				...endpoint.headers,
 			},
 		});
 		if (!response.ok)

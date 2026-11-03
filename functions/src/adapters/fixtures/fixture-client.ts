@@ -1,4 +1,5 @@
 import type {
+	GameGraphContent,
 	GamePlayMetrics,
 	GameSnapshot,
 	MediaHighlight,
@@ -12,9 +13,10 @@ import type {
 import { rankHighlightsByImpact } from "@bt/domain";
 import type { GameDiffPatchResponse, ReplayPatchEntry } from "@bt/mlb-api";
 import {
-	parseGameTimestamps, parsePlayMetricsResponse, parseRecordedReplayWalk, parseScheduleResponse, parseSeasonsResponse,
+	parseGameTimestamps, parseGraphContentResponse, parsePlayMetricsResponse, parseRecordedReplayWalk, parseScheduleResponse, parseSeasonsResponse,
 } from "@bt/mlb-api";
 import type { MlbStatsClient } from "@bt/ports";
+import { mapGraphContent } from "../../mappers/graph-content.js";
 import { mapPlayMetrics } from "../../mappers/play-metrics.js";
 import { mapSeasonCalendar } from "../../mappers/season-calendar.js";
 
@@ -88,6 +90,7 @@ export class FixtureClient implements MlbStatsClient
 		const data = await this.readJson<GameFixture>(file);
 		const plays = await this.loadPlays(gamePk);
 		const playMetrics = await this.fetchPlayMetrics(gamePk);
+		const graph = await this.fetchGameGraphContent(gamePk);
 		const now = new Date().toISOString();
 		return {
 			...data,
@@ -95,6 +98,12 @@ export class FixtureClient implements MlbStatsClient
 			highlights: rankHighlightsByImpact(data.highlights ?? []),
 			...playMetrics && {
 				playMetrics,
+			},
+			...graph?.videoPlayRefs.length && {
+				videoPlayRefs: graph.videoPlayRefs,
+			},
+			...graph?.relatedArticles.length && {
+				relatedArticles: graph.relatedArticles,
 			},
 			fetchedAt: now,
 			windowMode: "cache",
@@ -168,6 +177,22 @@ export class FixtureClient implements MlbStatsClient
 			),
 		);
 		return loaded.flat();
+	}
+
+	/**
+	 * The recorded GraphQL game content, `fixtures/raw/graphql-content-<gamePk>.json` (S94),
+	 * mapped; null for a game with no recording, as the HTTP client answers when the call fails.
+	 */
+	async fetchGameGraphContent(gamePk: number): Promise<GameGraphContent | null>
+	{
+		try
+		{
+			return mapGraphContent(parseGraphContentResponse(await this.readJson(`raw/graphql-content-${gamePk}.json`)), gamePk);
+		}
+		catch
+		{
+			return null;
+		}
 	}
 
 	/**

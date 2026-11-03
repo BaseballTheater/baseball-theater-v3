@@ -9,6 +9,7 @@
  * the live feed hydrate carries no playback URLs.
  */
 import type {
+	GameGraphContent,
 	GamePlayMetrics,
 	GameSnapshot,
 	PlayerProfile,
@@ -22,6 +23,7 @@ import type { GameContentResponse, GameDiffPatchResponse } from "@bt/mlb-api";
 import {
 	parseGameContentResponse,
 	parseGameDiffPatchResponse,
+	parseGraphContentResponse,
 	parseGameTimestamps,
 	parseLiveFeedResponse,
 	parsePeopleResponse,
@@ -32,6 +34,7 @@ import {
 } from "@bt/mlb-api";
 import type { MlbStatsClient } from "@bt/ports";
 import { mapContentHighlights, mapRecap } from "../../mappers/content.js";
+import { mapGraphContent } from "../../mappers/graph-content.js";
 import { mapPeople } from "../../mappers/players.js";
 import { mapStandings } from "../../mappers/standings.js";
 import { mapLiveFeed } from "../../mappers/live.js";
@@ -40,6 +43,50 @@ import { mapScheduleResponse } from "../../mappers/schedule.js";
 import { mapSeasonCalendar } from "../../mappers/season-calendar.js";
 
 const DEFAULT_BASE_URL = "https://statsapi.mlb.com";
+
+/** An upstream request: the URL, and any headers it needs beyond `accept`. */
+export type MlbRequest = {
+	url: string;
+	headers?: Record<string, string>;
+};
+
+/**
+ * MLB's GraphQL game content for one game (S94): the persisted query `getGamesByGamePks`
+ * on `data-graph.mlb.com`, as mlb.com's game pages ask it. The hash, the variables and the
+ * `x-client-name: mlb` and `content-type: application/json` headers (without either the
+ * gateway answers 400 with an empty body) live
+ * only here; the recorder (S14) records the same request. MLB can retire the hash at any time,
+ * so callers treat the answer as optional.
+ */
+export function graphContentRequest(gamePk: number): MlbRequest
+{
+	const extensions = {
+		persistedQuery: {
+			operationName: "getGamesByGamePks",
+			sha256Hash: "e12a5c2692406844d5f15f52ce7754208f53da81867de7d3e9e773611f4a040a",
+			version: 1,
+		},
+	};
+	const variables = {
+		gameRecapTags: ["game-recap"],
+		relatedArticleTags: ["storytype-article"],
+		gamePks: [gamePk],
+		locale: "EN_US",
+		contentSource: "MLB",
+	};
+	const query = new URLSearchParams({
+		operationName: "getGamesByGamePks",
+		extensions: JSON.stringify(extensions),
+		variables: JSON.stringify(variables),
+	});
+	return {
+		url: `https://data-graph.mlb.com/graphql/?${query}`,
+		headers: {
+			"x-client-name": "mlb",
+			"content-type": "application/json",
+		},
+	};
+}
 
 /**
  * MLB's play-metrics feed (S93): an internal mlb.com source on its own host, not the Stats
@@ -98,13 +145,19 @@ export class HttpMlbStatsClient implements MlbStatsClient
 		const feedUrl = `${this.baseUrl}/api/v1.1/game/${gamePk}/feed/live`;
 		const feed = parseLiveFeedResponse(await this.getJson(feedUrl));
 		const snapshot = mapLiveFeed(feed, this.now().toISOString(), "active");
-		const [content, playMetrics] = await Promise.all([this.fetchContent(gamePk), this.fetchPlayMetrics(gamePk)]);
+		const [content, playMetrics, graph] = await Promise.all([this.fetchContent(gamePk), this.fetchPlayMetrics(gamePk), this.fetchGameGraphContent(gamePk)]);
 		return {
 			...snapshot,
 			highlights: content ? rankHighlightsByImpact(mapContentHighlights(content)) : [],
 			recap: content ? mapRecap(content) : undefined,
 			...playMetrics && {
 				playMetrics,
+			},
+			...graph?.videoPlayRefs.length && {
+				videoPlayRefs: graph.videoPlayRefs,
+			},
+			...graph?.relatedArticles.length && {
+				relatedArticles: graph.relatedArticles,
 			},
 		};
 	}
@@ -156,6 +209,20 @@ export class HttpMlbStatsClient implements MlbStatsClient
 	 * `undefined` when it can't be had — content is best-effort, never a reason a
 	 * game fails to load.
 	 */
+	/** MLB's GraphQL game content, mapped; null when the call fails, can't be parsed or adds nothing (S94 AC 5). */
+	async fetchGameGraphContent(gamePk: number): Promise<GameGraphContent | null>
+	{
+		try
+		{
+			const { url, headers } = graphContentRequest(gamePk);
+			return mapGraphContent(parseGraphContentResponse(await this.getJson(url, headers)), gamePk);
+		}
+		catch
+		{
+			return null;
+		}
+	}
+
 	/** The play-metrics feed, mapped; null when it fails, can't be parsed or has no at-bats (S93 AC 5). */
 	async fetchPlayMetrics(gamePk: number): Promise<GamePlayMetrics | null>
 	{
@@ -199,11 +266,12 @@ export class HttpMlbStatsClient implements MlbStatsClient
 		}
 	}
 
-	private async getJson(url: string): Promise<unknown>
+	private async getJson(url: string, headers: Record<string, string> = {}): Promise<unknown>
 	{
 		const response = await this.fetchImpl(url, {
 			headers: {
 				accept: "application/json",
+				...headers,
 			},
 		});
 		if (!response.ok)

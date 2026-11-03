@@ -11,6 +11,7 @@ import { z } from "zod";
 import type { GameContentResponse } from "./content.js";
 import type { LiveFeedResponse } from "./live.js";
 import type { PeopleResponse } from "./people.js";
+import type { GraphContentResponse } from "./graphql-content.js";
 import type { PlayMetricsResponse } from "./playmetrics.js";
 import type { ScheduleResponse } from "./schedule.js";
 import type { SeasonsResponse } from "./seasons.js";
@@ -1471,6 +1472,79 @@ const playMetricsResponseSchema = z.object({
 export function parsePlayMetricsResponse(input: unknown): PlayMetricsResponse
 {
 	return playMetricsResponseSchema.parse(input);
+}
+
+const graphContentTagSchema = z.object({
+	slug: z.string().optional(),
+	type: z.string().optional(),
+	title: z.string().optional(),
+	gamePk: z.number().optional(),
+	team: z.object({
+		id: z.number().optional(),
+		__typename: z.string().optional(),
+	}).optional(),
+	__typename: z.string().optional(),
+});
+
+const graphContentArticleSchema = z.object({
+	slug: z.string(),
+	headline: z.string().optional(),
+	blurb: z.string().optional(),
+	description: z.string().nullable().optional(),
+	contentDate: z.string().optional(),
+	templateUrl: z.string().optional(),
+	type: z.string().optional(),
+	tags: z.array(graphContentTagSchema).optional(),
+	__typename: z.string().optional(),
+});
+
+const graphContentVideoSchema = z.object({
+	id: z.string(),
+	slug: z.string().optional(),
+	title: z.string().optional(),
+	headline: z.string().optional(),
+	blurb: z.string().optional(),
+	description: z.string().nullable().optional(),
+	accessibilityText: z.string().nullable().optional(),
+	duration: z.string().optional(),
+	guid: z.string().nullable().optional(),
+	playIdRef: z.string().nullable().optional(),
+	date: z.string().optional(),
+	contentDate: z.string().optional(),
+	preferredPlaybackScenarioURL: z.string().optional(),
+	playbacks: z.array(z.object({
+		name: z.string().optional(),
+		url: z.string().optional(),
+		__typename: z.string().optional(),
+	})).optional(),
+	thumbnail: z.object({
+		templateUrl: z.string().optional(),
+		__typename: z.string().optional(),
+	}).optional(),
+	tags: z.array(graphContentTagSchema).optional(),
+	__typename: z.string().optional(),
+});
+
+const graphContentResponseSchema = z.object({
+	data: z.object({
+		getGamesByGamePks: z.array(z.object({
+			gamePk: z.number(),
+			gameDate: z.string().optional(),
+			content: z.object({
+				videoContent: z.array(graphContentVideoSchema).optional(),
+				recapArticle: z.array(graphContentArticleSchema).optional(),
+				relatedArticles: z.array(graphContentArticleSchema).optional(),
+				__typename: z.string().optional(),
+			}).nullable().optional(),
+			__typename: z.string().optional(),
+		})).optional(),
+	}).optional(),
+});
+
+/** `GET data-graph.mlb.com/graphql/?operationName=getGamesByGamePks` (S94; MLB's GraphQL game content). */
+export function parseGraphContentResponse(input: unknown): GraphContentResponse
+{
+	return graphContentResponseSchema.parse(input);
 }
 
 /** `GET /api/v1/people` */

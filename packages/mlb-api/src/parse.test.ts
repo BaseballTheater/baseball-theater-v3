@@ -5,6 +5,7 @@ import {
 } from "vitest";
 import {
 	parseGameContentResponse,
+	parseGraphContentResponse,
 	parseLiveFeedResponse,
 	parsePlayMetricsResponse,
 	parseScheduleResponse,
@@ -125,6 +126,34 @@ describe("parseGameContentResponse", () =>
 
 describe("parsePlayMetricsResponse (S93)", () =>
 {
+	it("graphql content: parses the recorded 823823 getGamesByGamePks response, its videos and articles (S94)", () =>
+	{
+		const parsed = parseGraphContentResponse(readRaw("graphql-content-823823.json"));
+		const game = parsed.data!.getGamesByGamePks![0]!;
+		expect(game.gamePk).toBe(823823);
+		const videos = game.content!.videoContent!;
+		expect(videos).toHaveLength(25);
+		expect(videos.filter((v) => v.playIdRef)).toHaveLength(18);
+		expect(game.content!.recapArticle).toHaveLength(1);
+		expect(game.content!.relatedArticles![0]!.slug).toBe("griffin-conine-father-son-duo-home-runs");
+	});
+
+	it("graphql content: a video without its id is rejected (S94)", () =>
+	{
+		expect(() => parseGraphContentResponse({
+			data: {
+				getGamesByGamePks: [{
+					gamePk: 1,
+					content: {
+						videoContent: [{
+							title: "no id",
+						}],
+					},
+				}],
+			},
+		})).toThrow();
+	});
+
 	it("play metrics: parses the recorded 823823 feed, its index lists and every at-bat", () =>
 	{
 		const parsed = parsePlayMetricsResponse(readRaw("playmetrics-823823.json"));

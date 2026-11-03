@@ -3171,5 +3171,86 @@
         }
       }
     ]
-  }
+  },
+  "videoPlayRefs": [
+    {
+      "videoId": "ryan-gusto-in-play-run-s-to-michael-conforto",
+      "playId": "c515390e-a3e3-3a91-8df6-8185dc0fc29f"
+    },
+    {
+      "videoId": "kyle-stowers-homers-19-on-a-fly-ball-to-center-field",
+      "playId": "3b6cb4d8-c8ed-3b22-8b70-653d6f8c05d2"
+    },
+    {
+      "videoId": "ian-happ-singles-on-a-sharp-line-drive-to-right-fielder-owen-caissie-migu",
+      "playId": "b0d941ef-d2eb-3512-a952-dd8c84965ee5"
+    },
+    {
+      "videoId": "griffin-conine-homers-15-on-a-fly-ball-to-right-field-javier-sanoja-scores",
+      "playId": "874c613e-e449-38dd-8eb6-9659ad89a049"
+    },
+    {
+      "videoId": "ryan-gusto-in-play-run-s-to-pete-crow-armstrong",
+      "playId": "f6b1845b-c0db-31ac-be6a-5b2b33a6416b"
+    },
+    {
+      "videoId": "calvin-faucher-in-play-run-s-to-michael-busch",
+      "playId": "32396d8e-df7f-32d0-a9d5-10769321d039"
+    },
+    {
+      "videoId": "ryan-gusto-in-play-run-s-to-nico-hoerner",
+      "playId": "74bcfa90-f3f3-393f-8619-2a08f86e2855"
+    },
+    {
+      "videoId": "jakob-marsee-lines-out-to-left-fielder-ian-happ",
+      "playId": "11245839-9bc6-3f01-ba50-4c61e34359f5"
+    },
+    {
+      "videoId": "pete-crow-armstrong-grounds-out-second-baseman-javier-sanoja-to-first-bas",
+      "playId": "b410abe5-5105-314e-adc7-f76a3bf6b406"
+    },
+    {
+      "videoId": "ryan-zeferjahn-in-play-out-s-to-otto-lopez",
+      "playId": "383e2af4-becb-30ea-8feb-e3956f5199c3"
+    },
+    {
+      "videoId": "ryan-gusto-in-play-no-out-to-nico-hoerner",
+      "playId": "58fe0c70-2309-348b-9fb4-1a2accbae042"
+    },
+    {
+      "videoId": "javier-assad-in-play-run-s-to-joe-mack",
+      "playId": "8a77ac86-05da-3e79-bc71-e36e9868bf94"
+    },
+    {
+      "videoId": "javier-assad-in-play-run-s-to-owen-caissie",
+      "playId": "f8ddcc0b-a7ed-3140-8c08-39cde28037c0"
+    },
+    {
+      "videoId": "michael-conforto-called-out-on-strikes-ju6lir",
+      "playId": "5d5d4113-edff-3b77-ad96-a0f4661b63ac"
+    },
+    {
+      "videoId": "javier-assad-foul-tip-to-kyle-stowers",
+      "playId": "8f99d69b-a7f8-32f0-961c-b7c8e427df2b"
+    },
+    {
+      "videoId": "cubs-challenged-pitch-result-call-on-the-field-was-confirmed-jakob-marsee-walks",
+      "playId": "c6d6b471-8e0d-3517-aa38-670fd25ab9a0"
+    },
+    {
+      "videoId": "dax-fulton-ball-to-pete-crow-armstrong-capture-review",
+      "playId": "ffda5d34-3931-36c7-8466-d2c367f7788b"
+    },
+    {
+      "videoId": "marlins-challenged-pitch-result-griffin-conine-called-out-on-strikes-capture-rev",
+      "playId": "684f1229-12fe-362a-a242-563e313b2ea4"
+    }
+  ],
+  "relatedArticles": [
+    {
+      "slug": "griffin-conine-father-son-duo-home-runs",
+      "headline": "Like father, like son: Conines join exclusive company with HR feat",
+      "blurb": "MIAMI – It might be time to anoint the Conines as the “Marlins Family.”\nWhen Griffin Conine demolished Cubs lefty Caleb Thielbar’s inside fastball for a two-run homer in the fifth inning of Saturday’s 6-5 loss at loanDepot park, it made him part of baseball history."
+    }
+  ]
 }

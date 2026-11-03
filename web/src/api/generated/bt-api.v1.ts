@@ -376,6 +376,8 @@ export interface components {
             plays: components["schemas"]["AtBat"][];
             /** @description MLB's editorial recap (S10); absent until MLB publishes one. */
             recap?: components["schemas"]["GameRecap"];
+            /** @description mlb.com stories about the game (S94); absent, like `videoPlayRefs`, when the source failed or had none. */
+            relatedArticles?: components["schemas"]["RelatedArticle"][];
             status: {
                 abstractGameState: string;
                 codedGameState: components["schemas"]["GameStatusCode"] | string;
@@ -391,6 +393,8 @@ export interface components {
             } | null;
             /** @description ADR-022: monotonic per game; bumps only when the content changes (`stampVersion`). */
             version: number;
+            /** @description The pitch each video shows, where MLB links one (S94). Absent when MLB's GraphQL game content (a persisted query MLB may retire) failed or had no links: the game is served as before. */
+            videoPlayRefs?: components["schemas"]["VideoPlayRef"][];
             /** @enum {string} */
             windowMode: "active" | "cache";
         };
@@ -570,6 +574,12 @@ export interface components {
             losses: number | null;
             wins: number | null;
         };
+        /** @description An mlb.com story about the game (S94; GraphQL `relatedArticles`). MLB gives the article's slug, not a URL; whoever shows it builds the mlb.com link from the slug. */
+        RelatedArticle: {
+            blurb: string | null;
+            headline: string;
+            slug: string;
+        };
         /**
          * @description What a user may administer. Lives in BT, not the identity provider (ADR-019: no provider RBAC).
          * @enum {string}
@@ -702,6 +712,11 @@ export interface components {
         TeamRecord: {
             losses: number;
             wins: number;
+        };
+        /** @description The pitch a video shows, by MLB's own link (S94; GraphQL `playIdRef`): `videoId` is the video's id in the content feed (`MediaHighlight.id`), `playId` the pitch's `PitchEvent.playId`. It covers clips the content feed links to no play, such as ABS challenges. */
+        VideoPlayRef: {
+            playId: string;
+            videoId: string;
         };
         /** @enum {string} */
         VideoPlayerMode: "dialog" | "stage";

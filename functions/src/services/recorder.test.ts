@@ -29,6 +29,7 @@ import type {
 import type { GameDiffPatchResponse } from "@bt/mlb-api";
 import type { MlbStatsClient } from "@bt/ports";
 import { FixtureMlbStatsClient } from "../adapters/fixtures/mlb.js";
+import { graphContentRequest } from "../adapters/http/mlb.js";
 import {
 	rawEndpoints, recordNormalized, recordRaw,
 } from "./recorder.js";
@@ -81,6 +82,11 @@ class FakeMlbStatsClient implements MlbStatsClient
 	}
 
 	async fetchPlayMetrics(): Promise<null>
+	{
+		return null;
+	}
+
+	async fetchGameGraphContent(): Promise<null>
 	{
 		return null;
 	}
@@ -147,22 +153,48 @@ describe("fixture recorder", () =>
 			},
 		);
 
-		// The seven names packages/mlb-api/src/coverage.test.ts consumes (play metrics since S93).
+		// The eight names packages/mlb-api/src/coverage.test.ts consumes (play metrics since S93, GraphQL content since S94).
 		expect(written).toEqual([
 			`schedule-${DATE}.json`,
 			`live-${GAME_PK}.json`,
 			`content-${GAME_PK}.json`,
 			`timestamps-${GAME_PK}.json`,
 			`playmetrics-${GAME_PK}.json`,
+			`graphql-content-${GAME_PK}.json`,
 			`standings-${DATE}.json`,
 			`people-${GAME_PK}.json`,
 		]);
-		expect(seen).toHaveLength(7);
-		expect(await readdir(path.join(out, "raw"))).toHaveLength(7);
+		expect(seen).toHaveLength(8);
+		expect(await readdir(path.join(out, "raw"))).toHaveLength(8);
 
 		// Byte-exact: not re-stringified through JSON.parse.
 		const onDisk = await readFile(path.join(out, "raw", `live-${GAME_PK}.json`), "utf8");
 		expect(onDisk).toBe(body);
+	});
+
+	it("graphql: the GraphQL content is recorded with the HTTP client's own request, headers included (S94)", async () =>
+	{
+		const out = await mkdtemp(path.join(tmpdir(), "bt-gql-"));
+		const asked = new Map<string, Headers>();
+		const fakeFetch = (async (input: string | URL | Request, init?: RequestInit) =>
+		{
+			asked.set(String(input), new Headers(init?.headers));
+			return new Response("{}", {
+				status: 200,
+			});
+		}) as unknown as typeof fetch;
+		await recordRaw({
+			date: DATE,
+			gamePk: GAME_PK,
+		}, out, {
+			baseUrl: "",
+			fetchImpl: fakeFetch,
+		});
+		const request = graphContentRequest(GAME_PK);
+		const headers = asked.get(request.url);
+		expect(headers?.get("x-client-name")).toBe("mlb");
+		expect(headers?.get("content-type")).toBe("application/json");
+		expect(headers?.get("accept")).toBe("application/json");
 	});
 
 	it("names every raw endpoint the coverage gate expects", () =>
@@ -179,6 +211,7 @@ describe("fixture recorder", () =>
 		expect(names).toContain(`content-${GAME_PK}`);
 		expect(names).toContain(`timestamps-${GAME_PK}`);
 		expect(names).toContain(`playmetrics-${GAME_PK}`);
+		expect(names).toContain(`graphql-content-${GAME_PK}`);
 		expect(names).toContain(`standings-${DATE}`);
 		expect(names).toContain(`people-${GAME_PK}`);
 	});

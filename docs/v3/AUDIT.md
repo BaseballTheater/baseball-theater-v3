@@ -13277,3 +13277,85 @@ Fresh-context subagent (did not write these stories). Read 3e3a4a2 and 342f95c i
 **Verdict: `amended`.** S94 → `todo` with the fence fix and endpoint facts; six sibling ingest stories fenced the same way; S5, S106 notes; frame and baseline updated. Not `blocked`: the S5 question gates only S5 and S72, which were already parked, and the next three can start.
 
 **Owner question (gates S5 and S72 only).** Highlight search: MLB's `Search` on fastball-gateway takes only Film Room structured filters (`Description = [...]`, `HitResult = [...]`, `Season = [n]`), not free text, and `Description = ["walk-off"]` finds nothing; v2's free-text box used its own index. Which should launch search be — (a) BT's own search over stored games' highlight titles/blurbs (S50's GIN index), (b) MLB's structured filters exposed as filter choices instead of a free-text box, or (c) something else? ADR-029 and S5's ACs follow from the answer.
+
+---
+
+## 2026-11-02 — S94 completed
+
+**Ingest GraphQL game content**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-03T07:58:14Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `744f78e` (tree dirty) |
+| Grader | `scripts/verify-S94.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: fixtures/raw/graphql-content-823823.json is MLB's recorded getGamesByGamePks response for 823823; the recorder and the HTTP adapter build the one request (persisted query, x-client-name: mlb); local dev bundles it; no web code calls it
+check 2 PASS: packages/mlb-api types the payload as named interfaces split by purpose, parses it with zod (test on the recording); the coverage gate and pnpm mlb:scan-drift cover it with no drift
+check 3 PASS: MlbStatsClient.fetchGameGraphContent(gamePk) in the fixture and HTTP adapters (tests)
+check 4 PASS: a functions mapper projects GameSnapshot.videoPlayRefs (18 of 823823's 25 videos, each a real pitch playId, keyed so they join the content feed) and relatedArticles (headline, blurb, slug); spec additive, api:breaking 0
+check 5 PASS: the source is optional: when the call fails or returns nothing the fields are absent and the game is served as before (test)
+check 6 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**6/6 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S94 check results ---
+check 1 PASS: fixtures/raw/graphql-content-823823.json is MLB's recorded getGamesByGamePks response for 823823; the recorder and the HTTP adapter build the one request (persisted query, x-client-name: mlb); local dev bundles it; no web code calls it
+check 2 PASS: packages/mlb-api types the payload as named interfaces split by purpose, parses it with zod (test on the recording); the coverage gate and pnpm mlb:scan-drift cover it with no drift
+check 3 PASS: MlbStatsClient.fetchGameGraphContent(gamePk) in the fixture and HTTP adapters (tests)
+check 4 PASS: a functions mapper projects GameSnapshot.videoPlayRefs (18 of 823823's 25 videos, each a real pitch playId, keyed so they join the content feed) and relatedArticles (headline, blurb, slug); spec additive, api:breaking 0
+check 5 PASS: the source is optional: when the call fails or returns nothing the fields are absent and the game is served as before (test)
+check 6 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S94: 6/6 checks passed ---
+verify-S94: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+web build: dist/assets/VideoPlayer-TUpclYNV.js                2.95 kB │ gzip:   1.43 kB
+web build: dist/assets/Table-D3sYgQNM.js                      4.15 kB │ gzip:   1.63 kB
+web build: dist/assets/Modal-CjODce6l.js                      4.82 kB │ gzip:   1.73 kB
+web build: dist/assets/workbox-window.prod.es5-BBnX5xw4.js    5.75 kB │ gzip:   2.36 kB
+web build: dist/assets/TextInput-DQ-EnfRv.js                 28.11 kB │ gzip:   9.21 kB
+web build: dist/assets/SettingsPage-BggHQFv5.js              37.16 kB │ gzip:  11.92 kB
+web build: dist/assets/GamePage-CbhY9HQN.js                  87.10 kB │ gzip:  29.77 kB
+web build: dist/assets/index-CofFgyqm.js                    481.25 kB │ gzip: 154.56 kB
+web build: ✓ built in 1.82s
+web build: PWA v1.0.3
+web build: mode      generateSW
+web build: precache  22 entries (861.76 KiB)
+web build: files generated
+web build:   dist/sw.js
+web build:   dist/workbox-2fbc6a65.js
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154291,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

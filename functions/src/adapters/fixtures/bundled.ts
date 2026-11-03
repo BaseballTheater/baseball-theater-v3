@@ -13,6 +13,7 @@ import game823823 from "../../../../fixtures/game-823823.json" with { type: "jso
 import players823823 from "../../../../fixtures/players-823823.json" with { type: "json" };
 import plays744834 from "../../../../fixtures/plays-744834.json" with { type: "json" };
 import plays823823 from "../../../../fixtures/plays-823823.json" with { type: "json" };
+import graphContent823823 from "../../../../fixtures/raw/graphql-content-823823.json" with { type: "json" };
 import playMetrics823823 from "../../../../fixtures/raw/playmetrics-823823.json" with { type: "json" };
 import seasons2025 from "../../../../fixtures/raw/seasons-2025.json" with { type: "json" };
 import seasons2026 from "../../../../fixtures/raw/seasons-2026.json" with { type: "json" };
@@ -34,6 +35,8 @@ export const BUNDLED_FIXTURES: Readonly<Record<string, unknown>> = {
 	"plays-823823.json": plays823823,
 	// The recorded play-metrics feed (S93): pnpm dev reads only bundled fixtures.
 	"raw/playmetrics-823823.json": playMetrics823823,
+	// MLB's recorded GraphQL game content (S94).
+	"raw/graphql-content-823823.json": graphContent823823,
 	// The recorded season calendars and World Series (S111), for the scoreboard's default day.
 	"raw/seasons-2025.json": seasons2025,
 	"raw/seasons-2026.json": seasons2026,
