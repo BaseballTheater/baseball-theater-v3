@@ -51,7 +51,7 @@ _Edit as we agree._
 | v2 capability | Verdict | Notes |
 |---------------|---------|-------|
 | ApiTest / swagger explorer | **Carry** | Can be internal/dev-only |
-| Daily scoreboard by date | **Carry** | BT-backed (ADR-002) |
+| Daily scoreboard by date | **Carry** | BT-backed (ADR-002). Opens on today; between the last postseason game and the next spring training game it opens on that final day (owner, 2026-11-02: "Show the final day of the season by default, rather than \"today\" if today is between the final day of the season and the next spring training first game"; "final day" is the last postseason game) |
 | Game → Box score | **Carry** | A full line score with each inning boxed, the batting / pitching tables, and the game's details — venue is one line of them (owner, 2026-10-14: "Plays and Box Score should have a full line score with boxes for the innings"; "The box score page will have all kinds of details and stats and that's just one of them") |
 | Game → Editorial recap | **Carry** | May coexist with **AI summaries** (New). No line score and no score (owner, 2026-10-14: "Recap should have nothing") |
 | Game → Live play / linescore context | **Carry** | Live *is* the pitch theater: diamond, BSO pips, win-probability chart (left out at launch until the owner picks a data source — owner, 2026-10-19; back from MLB's play metrics, owner, 2026-10-30: *"Bring back win probability charts"*), zone, trajectory, accordion pitch list. The score sits beside the diamond, never in the game header, and Live has no line score (owner, 2026-10-14: "Live should have the score, but not in the header"; "In a small status near the diamond status") |
