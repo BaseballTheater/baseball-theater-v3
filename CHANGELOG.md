@@ -56,6 +56,13 @@ explicitly where that's the case. For what's still ahead, see
   Details: S68 — `scoreboardRows`, `collapsedBarState`, `shouldHideScores` in `packages/domain`;
   `useScoresHidden`, `HiddenValue`, `CollapsedBar`; Settings → Game List switches; design matched by the
   owner. _(2026-10-30)_
+- **Before, Hide Scores protected only the scoreboard: opening a game's Live or Plays tab, or its videos, gave the
+  result away. Now, with Hide Scores on, the game page keeps the score out of sight too — Live masks the score,
+  a pitch that drove in a run reads "IN PLAY", Plays masks the line score and the score after each scoring play,
+  the recap is headed just "Recap", and the recap video reads "Recap (score hidden)". The pitches, plays and
+  batters' lines stay, and the box score is unchanged for anyone who opens it.** Details: S75 — `pitchCallLabel`,
+  `recapHeading`, `isGameRecapHighlight`, `highlightTitle` in `packages/domain`; `Linescore`'s hidden mode; every
+  room asks `useScoresHidden(game)`; design matched by the owner. _(2026-11-03)_
 - **Before, the right side of each game on the scoreboard was empty. Now it shows the winning and losing
   pitchers once a game ends, the bases, count and who's batting and pitching while it's live, and tonight's
   starters before first pitch — or, if you choose Room Menu in Settings, quick links straight into the game's

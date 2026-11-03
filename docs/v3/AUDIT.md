@@ -13598,3 +13598,106 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-11-03 — S75 completed
+
+**Hide Scores in the rooms**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-03T08:24:26Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `31d8115` (tree dirty) |
+| Grader | `scripts/verify-S75.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: with Hide Scores on, Live's status reads {AWY} – · {HOM} – through HiddenValue; inning, pips, result and batter's line unchanged; no Count: or outs text (RTL)
+check 2 PASS: pitchCallLabel(pitch, scoresHidden) in packages/domain (unit test); the pitch sequence and zone use it, no other in-play label in web/src
+check 3 PASS: the shared Linescore takes a hidden mode: Plays masks every inning cell and R·H·E; Box renders the same with Hide Scores on and off (RTL)
+check 4 PASS: the Runs view masks the score after each scoring play; descriptions unchanged (RTL)
+check 5 PASS: recapHeading(recap, scoresHidden) in packages/domain (unit test); the Recap room renders it with the body and Source: MLB unchanged (RTL)
+check 6 PASS: isGameRecapHighlight and highlightTitle in packages/domain (unit tests), the content mapper's one recap rule; the game page's video card and player title use it; other titles and Search unchanged (RTL)
+check 7 PASS: every hidden decision comes from useScoresHidden(game); nothing reads the setting directly; no Scores hidden / spoiler-free text in web/src
+check 8 PASS: files this story adds or edits reference no team logo and read no viewport outside web/src/layout/
+check 9 PASS: design match: e2e/design/S75.spec.ts names the hidden-scores frames it builds; docs/v3/design-checks/S75/ holds them at their pairing widths
+check 10 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**10/10 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with its ratified frame
+
+| Frame | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/game-rooms/amendments/box-hidden-nonotice-mobile.png` | `928788fa8792534803dbe51a380f1ec99b553b1276c91fe22b58a3078a39ba2e` | `docs/v3/design-checks/S75/box-hidden-nonotice-mobile.png` | `c464839fd327e9acc268b4ca7982007f7d100122bcb01e9d39da112bdc656063` |
+| `docs/v3/visual/game-shell/amendments/game-videos-hidden-nonotice-mobile.png` | `5c62e3a72b1ace4ffb2acbd2c237a4b0d91bb47285ab0993c235365c330e644a` | `docs/v3/design-checks/S75/game-videos-hidden-nonotice-mobile.png` | `33a9d2d3b9c2f09bc5f5ec20d2e05789a9b07a3db26e182463268ed7ea9fc6a7` |
+| `docs/v3/visual/game-rooms/amendments/live-hidden-status-medium.png` | `12f48be96f72b8a59ad4613fb60486c21fe389c00aa916fa4e7c7ba2844d445f` | `docs/v3/design-checks/S75/live-hidden-status-medium.png` | `e75f3cf5771f03fc9d2a2e747d68eea48787921ada7af092a317161faf3b8211` |
+| `docs/v3/visual/game-rooms/amendments/live-hidden-status-mobile.png` | `bc7c7ebc0ea653293a3af799ebb2c253f043070da8ab87412bc1f9ee7e3947fd` | `docs/v3/design-checks/S75/live-hidden-status-mobile.png` | `3189f0bbb93725b5488fe8816d8adbb68111e98435d5c1bd0007ce17416a1490` |
+| `docs/v3/visual/game-rooms/amendments/plays-hidden-nonotice-mobile.png` | `5767d445e9097d1a093cfad9f7ae6c8d8465ea93dc977c9f661f211e8867851a` | `docs/v3/design-checks/S75/plays-hidden-nonotice-mobile.png` | `80da081bd542e568d90d34ce06b8cd5b9d3ededfc9fc4c807aa50767a24f6188` |
+| `docs/v3/visual/game-rooms/amendments/plays-scoring-hidden-nonotice-mobile.png` | `590e32628c4bcd6fd8660a412403a316b35e31b7749813b9a20793e1cb201c2d` | `docs/v3/design-checks/S75/plays-scoring-hidden-nonotice-mobile.png` | `79c1b04bc7008dd8950b579cbed2e574fa58b8ed16b905d1f2fc27997cfab009` |
+| `docs/v3/visual/game-rooms/amendments/recap-hidden-nonotice-mobile.png` | `d35a701cd21e8cf90bfc6c9fea694c9fb2146f1ced613acc09fa4a895484b57d` | `docs/v3/design-checks/S75/recap-hidden-nonotice-mobile.png` | `732d73df1970e023d3ad3de32cbbdd692dc30621c68dec127ce7a50dc3185ee5` |
+Owner: "Owner, 2026-11-03, on the seven S75 pairs (live-hidden-status mobile/medium; plays, plays-scoring, recap, box hidden-nonotice; game-videos-hidden-nonotice): "S75 matches""
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S75 check results ---
+check 1 PASS: with Hide Scores on, Live's status reads {AWY} – · {HOM} – through HiddenValue; inning, pips, result and batter's line unchanged; no Count: or outs text (RTL)
+check 2 PASS: pitchCallLabel(pitch, scoresHidden) in packages/domain (unit test); the pitch sequence and zone use it, no other in-play label in web/src
+check 3 PASS: the shared Linescore takes a hidden mode: Plays masks every inning cell and R·H·E; Box renders the same with Hide Scores on and off (RTL)
+check 4 PASS: the Runs view masks the score after each scoring play; descriptions unchanged (RTL)
+check 5 PASS: recapHeading(recap, scoresHidden) in packages/domain (unit test); the Recap room renders it with the body and Source: MLB unchanged (RTL)
+check 6 PASS: isGameRecapHighlight and highlightTitle in packages/domain (unit tests), the content mapper's one recap rule; the game page's video card and player title use it; other titles and Search unchanged (RTL)
+check 7 PASS: every hidden decision comes from useScoresHidden(game); nothing reads the setting directly; no Scores hidden / spoiler-free text in web/src
+check 8 PASS: files this story adds or edits reference no team logo and read no viewport outside web/src/layout/
+check 9 PASS: design match: e2e/design/S75.spec.ts names the hidden-scores frames it builds; docs/v3/design-checks/S75/ holds them at their pairing widths
+check 10 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S75: 10/10 checks passed ---
+verify-S75: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+web build: dist/assets/VideoPlayer-DWjI2a_2.js                2.95 kB │ gzip:   1.43 kB
+web build: dist/assets/Table-Ci75P59T.js                      4.15 kB │ gzip:   1.63 kB
+web build: dist/assets/Modal-CJFQmQhf.js                      4.82 kB │ gzip:   1.73 kB
+web build: dist/assets/workbox-window.prod.es5-BBnX5xw4.js    5.75 kB │ gzip:   2.36 kB
+web build: dist/assets/TextInput-C7mAxbLV.js                 28.11 kB │ gzip:   9.21 kB
+web build: dist/assets/SettingsPage-Cra_OWCA.js              37.16 kB │ gzip:  11.92 kB
+web build: dist/assets/GamePage-CGcvpS4F.js                  87.10 kB │ gzip:  29.77 kB
+web build: dist/assets/index-DfFrer79.js                    481.28 kB │ gzip: 154.57 kB
+web build: ✓ built in 1.80s
+web build: PWA v1.0.3
+web build: mode      generateSW
+web build: precache  22 entries (861.79 KiB)
+web build: files generated
+web build:   dist/sw.js
+web build:   dist/workbox-2fbc6a65.js
+web build: Done
+functions build$ tsc -p tsconfig.json --noEmit
+functions build: Done
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154305,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
