@@ -13359,3 +13359,39 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-11-03 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-03T08:04:11Z` |
+| HEAD at review | `929282c` (tree dirty) |
+| Trigger | drift, rule 10: S95 fence stop (929282c), fixtures/ outside its fence |
+| Stories `done` since last review | S94 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context subagent (did not write these stories). Read 929282c, efb09aa (S94) in full, every non-done story note's frontmatter, and S95, S96, S98, S106, S108, S75, S91, S112 in full; the recorder (`functions/src/services/recorder.ts:155–203`), both fixture regeneration tests, both MLB adapters' `fetchGame`.
+
+**1. Coverage.**
+- **Rule 10 class, not one story.** `recordNormalized` writes `schedule-<date>.json`, `game-<pk>.json`, `plays-<pk>.json`, `standings-<date>.json`, `players-<pk>.json`; `functions/src/services/fixture-823823.test.ts:52–54` byte-compares `game-823823.json` and `plays-823823.json`, and `functions/src/services/schedule-fixture.test.ts:57` `schedule-2026-09-05.json`, with a fresh regeneration from `fixtures/raw/`. Frontmatter scan of every non-done story for one that changes those outputs and lacks `fixtures/`: **S95** (AC 1 `playId` from `guid`, `content.ts:54`; AC 4 `playLink`; AC 2's challenge data, below), **S98** (the HTTP client ranks inside `fetchGame`, `mlb.ts:151`, and that order is what the recorder writes; moving or re-keying the rank changes it), **S108** (AC 2's schedule win probability, if attached in the client's `fetchSchedule`, changes `schedule-2026-09-05.json`). Each gains `fixtures/` in frontmatter, Scope files, Goal condition and `/goal` line, with a note. Not widened, with reason: S4, S5, S99–S105, S111 already fence `fixtures/`; S75's mapper edit makes `highlightKind` call `isGameRecapHighlight` with the same output (its "one recap rule" note); S91's prediction is per-session in the handler, not ingested; S72, S28, S106, S97, S74, S73 touch no mapper output; S112's seed writes git-ignored files and reuses the recorder; S51/S113/S114 are dev/deploy.
+- **S95 needs data no mapper stores.** AC 2 matches ABS clips by challenging team and outcome (`isOverturned` in the feed). S93's play metrics carry only `absChallenge: boolean` (`functions/src/mappers/play-metrics.ts:26`; raw play metrics have no team/outcome). The live feed's `reviewDetails` (`challengeTeamId`, `isOverturned`, typed `packages/mlb-api/src/live.ts:310–316`) is projected nowhere (grep: no `reviewDetails` in `functions/src/`, `packages/domain/src/`). On 823823: play level for at-bats 34, 69, 83; pitch event level for 39 (event 0) and 82 (event 2). Projecting it changes `plays-823823.json` (covered by the widening). Recorded as a note; turn cap 10 → 12. No AC changed.
+- Prior parity review's "for the next backlog review": (1) ADR-023 install row vs A8 and (2) S5 vs ADR-002 — both still the owner's (unchanged since the 2026-11-02 review, which answered them); (3) none. `pnpm parity:debt`: not due.
+- No new ADR, package or Later theme since 744f78e.
+
+**2. Ground truth — next 3 startable at HEAD `929282c`** (eligibility from every note's depends_on + design: S112 waits on S111/S51 blocked; S113 on S51; S114 on S113; S72 on S5; S74 on S73/S75; S97 on S95/S96; S98 on S95; S108 on S106/S107).
+- **S95 (98, now `todo`):** deps S93, S94 done. `functions/src/mappers/content.ts` (`playId: item.mediaPlaybackId`, line 54), `packages/domain/src/impact.ts`, `packages/domain/src/plays.ts`, `functions/src/mappers/graph-content.ts` (S94's `videoPlayRefs`) exist; `fixtures/raw/content-823823.json` carries 16 `guid` keys; `scripts/verify-S95.sh` absent (red-first, its own); `pnpm api:breaking`, `pnpm api:types` exist in `package.json`. Fence now holds `fixtures/` and `web/src/api/generated/`; web code doesn't read `playId`. Holds with the widening and cap 12.
+- **S96 (99):** deps S69, S41 done. `docs/v3/visual/game-shell/amendments/` (A1–A4) and `game-rooms/amendments/` (A1–A5) exist; `standings-search-settings/amendments/search-playing-floating-mobile.png` (cited by its note) exists; `scripts/verify-S96.sh` absent (its own). Design only; owner session parks it. Holds.
+- **S106 (102):** deps S93, S64, S68, S81 done; design S33, S57 done. `web/src/components/game/LiveRoom.tsx` (`useScoresHidden` at line 35), `LiveStatus.tsx`, `web/src/components/pitch/StrikeZoneChart.tsx` exist; `GameSnapshot.playMetrics?` at `packages/domain/src/types.ts:217`; frames `game-rooms/live-medium.png`, `live-desktop.png`, `amendments/live-hidden-status-medium.png` exist; `pnpm size`, `pnpm design:capture` exist; `scripts/verify-S106.sh` absent (its own). Its note's `mlb.ts:101` is now `mlb.ts:148` (dated "checked at 3e3a4a2", left as is). Holds.
+
+**3. Prioritization challenge.** Against S95 before S106: S106 is user-visible now with every input landed, while S95 shows nothing until S97 (which also waits on S96's owner session), and S95 grew (the `reviewDetails` projection). Kept: S95 heads S97 and S98, its inputs (S93, S94) are fresh and its fixture work is cheapest now; S96 can run in its owner session in parallel; S106 is next regardless. Against S112–S114 ahead of everything (priority 77–79): all wait on S51/S111's owner answers, so they don't block the chain. Nothing obsolete; S94 didn't quietly do any of S95 (it kept `mapHighlightItem` unchanged). Underestimated class: ingest stories keep missing a regenerated artifact in their fence (generated web types at 3e3a4a2, normalized fixtures at 929282c); both are now pending-drift checks in the frame.
+
+**Duplication sweep (ADR-025).** `pnpm dup:check`: 0 clones. Same-meaning search over S94's code (efb09aa): `functions/src/mappers/graph-content.ts` is pure mapping; the request builder `graphContentRequest` is shared by the client and the recorder (one place). Hit: the game's optional parts (`playMetrics`, `videoPlayRefs`, `relatedArticles`) are assembled twice, `functions/src/adapters/http/mlb.ts:148–162` and `functions/src/adapters/fixtures/fixture-client.ts:95–109`, as is the rank (`mlb.ts:151,204`, `fixture-client.ts:98,120`). Amendment: S95's note says to apply `videoPlayLinks` once in a place both paths share; S98's existing note already moves the rank there once.
+
+**Personal-data sweep (ADR-028).** S94 adds MLB game content only (video ids, article slugs/headlines); no table, personal field, outside service or browser key; its only log lines are the pre-existing `functions/src/scripts/record-fixtures.ts:38,55` (file names and errors). S95, S96, S106 add none. None found.
+
+**Verdict: `amended`.** S95 → `todo` with `fixtures/` and cap 12; S98 and S108 widened the same way; notes on S95's challenge data and the one assembly point; frame (last review, pending drift) and baseline As of updated. Not `blocked`: no new owner question; the pending ones (S5's search source; S111 and S75 design matches; S51's `pnpm dev` check) gate only stories already parked.
