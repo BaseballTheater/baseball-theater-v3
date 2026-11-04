@@ -7,6 +7,8 @@ description: Work through the backlog in priority order — the next N stories (
 
 The owner's shorthand (2026-10-30): _"loop the next 10 stories, in order, and if you get blocked, move on to the next story that has no unresolved dependencies."_ This skill strings together the flow `CLAUDE.md` already defines for one story — it adds no new rules and relaxes none.
 
+**This thread coordinates; each story runs in its own fresh-context subagent** (owner, 2026-11-04: "All 3", to running each story in a fresh-context subagent among the token cuts). Before this, one context carried every story: 92% of a run's input tokens, a median of 200–300k tokens re-sent on every request, because whatever one story read stayed for all the later ones. Here the coordinator keeps only what it needs to choose and check stories: the gate scripts, `docs/v3/INDEX.md`'s story list, `git`, and each worker's short report. **Don't read story notes, code, skills or ledger entries in this thread** beyond the frontmatter eligibility needs; the workers and review subagents read them.
+
 **Argument:** `N`, the number of stories to **start** (default 10). Count starts, not finishes, so a run of parked stories can't stretch the loop past what the owner expected. Resuming a story that was already `doing` or `blocked` (step 1) does not count.
 
 ## 0. Before the first story
@@ -16,13 +18,13 @@ The owner's shorthand (2026-10-30): _"loop the next 10 stories, in order, and if
 
 ## 1. Owner answers first
 
-If the owner has, **in this session**, answered a parked story's question (a design match "Yes", a ratification go-ahead, a fence or scope decision), finish that story before starting new ones: set `status: doing`, apply the answer (e.g. `scripts/audit.sh story <ID> --design-match -` with the owner's words), then finish it per step 3. Never infer an answer — no explicit owner words in this session, no change.
+If the owner has, **in this session**, answered a parked story's question (a design match "Yes", a ratification go-ahead, a fence or scope decision), finish that story before starting new ones: hand it to a worker (step 3) with the owner's words quoted **verbatim** in the brief, to apply (e.g. `scripts/audit.sh story <ID> --design-match -` with those words) and then finish the story. Never infer an answer — no explicit owner words in this session, no change.
 
 ## 2. Gates, before every story
 
 Check in this order:
 
-1. **Backlog review due?** `scripts/review-debt.sh` counts `done` flips since the last review (6 triggers it) and the drift events git records; add any it can't see (`CLAUDE.md` → Agent / loop rules). Don't read `docs/v3/AUDIT.md` to count — it is ~1 MB. If due, run `.claude/skills/backlog-review/SKILL.md` in a **fresh-context subagent** (the Agent tool; this skill is the owner's explicit request for it — the agent that built the stories must not review them). Commit its result.
+1. **Backlog review due?** `scripts/review-debt.sh` counts `done` flips since the last review (6 triggers it) and the drift events git records; add any it can't see (`CLAUDE.md` → Agent / loop rules). Don't read `docs/v3/AUDIT.md` to count — it is ~1 MB. If due, run `.claude/skills/backlog-review/SKILL.md` in a **fresh-context subagent** (the Agent tool; this skill is the owner's explicit request for it — the agent that built the stories must not review them). Give it the skill's path and the script's output and let it read the skill; **don't read the skill into this thread** (it is ~12 KB and was being pasted into the coordinator's context on every review). It makes its edits, logs them with `scripts/audit.sh review` and commits; check the commit landed. A design intake (the script says when) is two reviewer subagents, each given `.claude/skills/design-intake-review/SKILL.md`'s path; then one more subagent, given both reports and the skill's path, merges, applies, logs and commits, so the merge also happens outside this thread.
 2. **Doc parity due?** `pnpm parity:debt`. If due, run `.claude/skills/doc-parity-review/SKILL.md` the same way.
 3. A review verdict of **`blocked` stops the whole loop** — go to step 5. Questions from a `continue` / `amended` review don't stop it; collect them for the summary.
 
@@ -35,7 +37,15 @@ Check in this order:
 
 Read both lists from the note's frontmatter in `docs/v3/backlog/stories/S<N>.md`. The generated **Next** line in `BACKLOG.md` checks designs only, not `depends_on`, so don't rely on it alone. `superseded` stories are skipped.
 
-Run it exactly as `/goal S<N> done` (`CLAUDE.md` → `/goal <ID> done` shorthand): quote the `/goal` line and ACs word for word, `status: doing` + `pnpm backlog:build`, the reuse check, grader written and shown red on HEAD before product code, build inside the fence, grader green, `pnpm verify` 0, `status: done`, `CHANGELOG.md`, the baseline table, `scripts/audit.sh story <ID>`, one commit, and the `S<N> verified:` section with evidence. Don't push per story: the run pushes once, at the end (step 5).
+Find it from the **Stories** section of `docs/v3/INDEX.md` (open stories with their `depends_on` and design lists, then the `done` ones) or the notes' frontmatter; nothing else is needed to choose.
+
+**Hand the story to a worker:** one fresh-context `general-purpose` subagent per story (the Agent tool, `run_in_background: false`: the next story waits on this one's commit). Workers run one at a time, never in parallel: they share the working tree. The brief is self-contained, since the worker starts with none of this thread's context:
+
+> Run `/goal S<N> done` exactly as `CLAUDE.md` → "`/goal <ID> done` shorthand" defines it, as one step of `/run-stories` (`.claude/skills/run-stories/SKILL.md`, steps 3–4): quote the `/goal` line and ACs word for word, `status: doing` + `pnpm backlog:build`, the reuse check, grader written and shown red on HEAD before product code, build inside the fence, grader green, `pnpm verify` 0, `status: done`, `CHANGELOG.md`, the baseline table (rule 17), `scripts/audit.sh story S<N>`, one commit. Start from `docs/v3/INDEX.md`. Do not push, start another story, or run a review. If the story is blocked (step 4's list), park it as step 4 says and stop. [Owner's answers for this story, quoted verbatim, if any.]
+>
+> Reply with only: **outcome** (`done` or `parked`); the **commit** sha; a **one-line impact**; your `Goal for S<N>:` quote and your `S<N> verified:` section exactly as you wrote them; and, if parked, **each question for the owner**, written as step 5 asks (bold direct question first, then self-contained context), plus any drift event (turn cap, fence).
+
+When it returns, check rather than trust: `git status` is clean, `git log -1` is the commit it named, and the note's `status` is `done` or `blocked`. If not, finish or park the story yourself from what is committed, and say so. Relay the worker's `Goal for S<N>:` quote and `S<N> verified:` section to the owner as they are (the `/goal` rule asks for both); keep any questions for the summary. Don't push per story: the run pushes once, at the end (step 5).
 
 Give the owner a one-line progress note when each story starts and ends.
 
@@ -49,7 +59,7 @@ A story is **blocked** when it needs something only the owner can give, or the r
 - the turn cap reached;
 - an owner decision the story can't make (a pillar citation, an `Open:` source, a new ADR).
 
-Park it:
+The worker parks it (and the coordinator, if a worker stops without doing so):
 
 1. Commit everything done so far as a **checkpoint** (grader, code, captures), worded like earlier checkpoints: `S<N> checkpoint (parked for …): …`. `pnpm verify` must exit 0 at the checkpoint. If it doesn't and can't be made to inside the fence, revert the story's product changes, keep the grader, and say so.
 2. Set `status: blocked` in its note, `pnpm backlog:build`, include it in that commit. A committed checkpoint satisfies rule 6, so other stories may run.

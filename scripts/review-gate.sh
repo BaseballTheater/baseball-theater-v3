@@ -37,15 +37,15 @@ if blocked backlog; then
   waiting+=("backlog review")
 elif ! out="$(scripts/review-debt.sh 2>&1)"; then
   if grep -q "design intake" <<<"$out"; then
-    todo+=("DESIGN INTAKE REVIEW: follow .claude/skills/design-intake-review/SKILL.md. Fresh context: two independent general-purpose Agent subagents each report without editing; you merge and apply their reports, then log with scripts/audit.sh review."$'\n'"$out")
+    todo+=("DESIGN INTAKE REVIEW: two independent general-purpose Agent subagents, each given the path .claude/skills/design-intake-review/SKILL.md, report without editing; then one more subagent, given both reports and that path, merges and applies them and logs with scripts/audit.sh review. Don't read the skill into this context yourself."$'\n'"$out")
   else
-    todo+=("BACKLOG REVIEW: follow .claude/skills/backlog-review/SKILL.md in one fresh-context general-purpose Agent subagent; log with scripts/audit.sh review."$'\n'"$out")
+    todo+=("BACKLOG REVIEW: one fresh-context general-purpose Agent subagent, given the path .claude/skills/backlog-review/SKILL.md and this output, runs it, logs with scripts/audit.sh review and commits. Don't read the skill into this context yourself."$'\n'"$out")
   fi
 fi
 if blocked parity; then
   waiting+=("doc parity review")
 elif ! out="$(scripts/parity-debt.sh 2>&1)"; then
-  todo+=("DOC PARITY REVIEW: follow .claude/skills/doc-parity-review/SKILL.md in one fresh-context general-purpose Agent subagent; log with scripts/audit.sh parity."$'\n'"$out")
+  todo+=("DOC PARITY REVIEW: one fresh-context general-purpose Agent subagent, given the path .claude/skills/doc-parity-review/SKILL.md and this output, runs it, logs with scripts/audit.sh parity and commits. Don't read the skill into this context yourself."$'\n'"$out")
 fi
 
 wait_note=""
