@@ -14068,3 +14068,34 @@ Question for the owner (does not block): should a video played from Search's flo
 For the next backlog review:
 - ARCHITECTURE "Heuristic bootstrap (Phase A)" lists runs, late innings, event type and keywords but not win probability added (S98); outside parity's write scope.
 - The Search floating player play-link gap above, once the owner answers.
+
+---
+
+## 2026-11-04 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-04T22:06:15Z` |
+| HEAD at review | `92c6656` (tree dirty) |
+| Trigger | design intake: shell-scoreboard A7 (S107 draft, unratified) |
+| Stories `done` since last review | none (S97, S107 parked) |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Design intake review (`.claude/skills/design-intake-review/SKILL.md`), one fresh-context reviewer, short stage. Same case as the 2026-11-04 intake at `ac18059` (S96's drafts): a single story's draft amendment, nothing ratified, no frontend ADR change. Figma not opened. Read: A7 in full, S108's note, A3's header, `web/src/components/scoreboard/GameRowSlot.tsx`, `packages/domain/src/settings.ts` (`GAME_ROW_SLOTS`).
+
+**Input: A7 is not ratified.** `docs/v3/visual/shell-scoreboard/amendments/A7.md` (added by `92c6656`, S107's park) says "**Draft, not ratified.**", its Ratification section says "Not ratified. Awaiting the owner's review of section W.", it has 3 open questions and "Manifest: Pending". `grep -c 'Ratified by'` is 1 for A1–A6 and 0 for A7. `git show --stat 92c6656` adds no `.png` and changes no `RATIFIED.md`. S107 is `status: blocked`. Per the skill ("Never treat an unratified frame as a decision") and rule 18, **nothing is taken in**.
+
+**Provisional inventory (for the post-ratification intake).** 4 named frames, not exported: `scoreboard-slot-winprob-mobile/-medium/-desktop`, `scoreboard-slot-winprob-hidden-mobile`. Component: a Win Probability slot occupant (the Live room's Win probability card, S106, in small). States: live (line so far, both teams' %), final (whole line, no %, `Final`), scheduled (`Odds at first pitch`), Hide Scores on (`–`, `Hidden with scores`). Repeal: the Status slot's pre-game win probability bar. Data: `winProbabilitySeries` (S106) per started game.
+
+**Ownership.** S108 owns all of it (owned 1 / unowned 0 / re-scoped 0). No new story.
+
+**Gating.** S108's note has `design: [[S107]]` and `status: todo`; S107 is `blocked`, so `pnpm backlog:check` keeps S108 from `doing`. Holds.
+
+**Amendment (notes only, ACs unchanged).** Added a note to S108 listing gaps between A7's drawn states and its ACs for the post-ratification intake: (a) A7 draws a per-at-bat line on live/final rows but AC 2 has the schedule payload carry only the current home win probability; (b) a final row's no-percentage state is not in AC 3; (c) the repealed pre-game bar and the Status slot's scheduled row (A7 Q3; A3's override still names the pregame win probability) have no AC, though `GameRowSlot` already shows probables there; (d) the scheduled and Hide Scores texts hang on A7 Q1–Q2.
+
+**For the parity review:** nothing.
+
+**Owner questions:** A7's three open questions, asked at S107's ratification; none new.
