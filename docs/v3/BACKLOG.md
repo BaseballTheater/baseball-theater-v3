@@ -248,7 +248,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 99 | [S96](#s96--design-a-videos-play-link-and-the-play-it-opens) | Design: video play link | `blocked` |
 | 100 | [S97](#s97--video-cards-link-to-their-play-in-the-plays-room) | Video → play link (UI) | `todo` |
 | 101 | [S98](#s98--rank-videos-by-how-much-their-play-changed-the-odds-of-winning) | Impact rank from win probability | `done` |
-| 102 | [S106](#s106--live-room-win-probability-chart) | Live win-probability chart | `todo` |
+| 102 | [S106](#s106--live-room-win-probability-chart) | Live win-probability chart | `blocked` |
 | 103 | [S107](#s107--design-the-win-probability-slot-on-live-and-final-games) | Design: win-probability slot | `todo` |
 | 104 | [S108](#s108--scoreboard-win-probability-slot-on-live-and-final-games) | Win-probability slot | `todo` |
 | 105 | [S99](#s99--ingest-mlbs-player-of-the-game) | Ingest player of the game | `todo` |
@@ -5465,7 +5465,7 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 /goal docs/v3/BACKLOG.md S106. Work item 0 first: if scripts/verify-S106.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S106.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/vitest.config.ts, packages/domain/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S106.sh, or stop after 14 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `todo`
+**Status:** `blocked`
 
 ---
 

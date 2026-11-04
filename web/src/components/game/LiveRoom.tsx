@@ -10,6 +10,7 @@ import { PitchSequence } from "../pitch/PitchSequence.js";
 import { PitchTheater } from "../pitch/PitchTheater.js";
 import { useScoresHidden } from "../../settings/useScoresHidden.js";
 import { LiveStatus } from "./LiveStatus.js";
+import { WinProbabilityCard } from "./WinProbabilityCard.js";
 
 /** The pitcher's and batter's surnames: "Gusto vs Bregman". */
 function matchupTitle(atBat: AtBat): string
@@ -24,8 +25,9 @@ function matchupTitle(atBat: AtBat): string
  * view of each pitch's flight, and the pitch sequence of the at-bat in progress — the last play.
  * One pitch is selected at a time, newest by default; a zone dot and a sequence row
  * select the same one. Mobile stacks it all under the status row; medium / desktop put
- * the cards and zone on the left with the status card beside them and the sequence
- * below. No win-probability chart at launch (owner, 2026-10-19). A game with no plays
+ * the cards and zone on the left with the status card beside them, the Win probability
+ * card under it (S106; owner, 2026-10-30: "Bring back win probability charts"; none at
+ * mobile, as the frame draws none), and the sequence below. A game with no plays
  * yet shows the status alone. With Hide Scores on the status masks the score and an
  * in-play pitch reads "IN PLAY"; the result line and the batter's line stay (S75).
  */
@@ -99,7 +101,13 @@ export function LiveRoom({ game, variant }: { game: GamePayload;
 						<PitchTheater atBat={atBat} selected={selected} onSelectPitch={select} arrivals={arrivals} scoresHidden={scoresHidden} />
 					</Paper>
 				</Stack>
-				{status}
+				<Stack gap={16} align="flex-end" style={{
+					flex: "0 0 auto",
+				}}
+				>
+					{status}
+					<WinProbabilityCard game={game} scoresHidden={scoresHidden} />
+				</Stack>
 			</Group>
 			{sequence}
 		</Stack>
