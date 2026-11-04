@@ -2,6 +2,7 @@
 
 Every earlier **As of** line of the [Current baseline](#current-baseline), newest first (rule 17). When a change moves the baseline's **As of** line on, the line it replaces goes to the top of this list, unchanged.
 
+- 2026-11-03 — **S75** done: Hide Scores reaches the game rooms and the recap video's title.
 - 2026-11-03 — **S111** done: the scoreboard opens on today, or on the World Series final in the off-season.
 - 2026-11-03 — **S95** done: each video links to the play it shows, ABS challenge clips included.
 - 2026-11-03 — the backlog review after S95's fence stop widened S95, S98 and S108 to `fixtures/` and returned S95 to `todo`.

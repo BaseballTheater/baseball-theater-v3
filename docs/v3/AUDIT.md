@@ -13748,3 +13748,92 @@ The backlog tooling changed (owner-directed): the ledger is read through one par
 **What changed, and the owner's answer**
 
 The backlog frame changed (owner-directed): rule 17 now moves the replaced **As of** line to a new frame note, 06 Baseline history, which holds the 97 earlier As of entries unchanged; and a generated docs index, docs/v3/INDEX.md, is where agents start reading (CLAUDE.md, the review and run-stories skills). No story was added, removed, re-scoped or re-prioritized. Owner, 2026-11-04, asked whether it needs a backlog review: "No backlog review". The stories-done count stays at 3 (S95, S111, S75).
+
+---
+
+## 2026-11-04 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-04T19:29:58Z` |
+| HEAD at review | `ac18059` (tree dirty) |
+| Trigger | design intake: game-shell A5, game-rooms A6 (S96 drafts, unratified) |
+| Stories `done` since last review | S95, S111, S75 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Design intake review (`.claude/skills/design-intake-review/SKILL.md`), run by **one** fresh-context reviewer, which also acted as coordinator. The skill asks for two independent reviewers on a full intake (several surfaces, or new frontend ADRs). This one is a single story's draft pair with nothing ratified and no ADR change, and this session had no way to start a second isolated reviewer. Report-only reading, then the coordinator's edits. Figma was not reachable (no network to Figma from this machine), so the frames in section "V" were not opened. Read: both draft amendments in full, S96 and S97 notes, game-shell A1–A4 and game-rooms A5 headers, the ratification blocks of every amendment on both surfaces, rule 18 (frame 00:70–96), `scripts/review-debt.sh`, the 2026-11-02 and 2026-11-03 review entries (AUDIT.md:12391, :13367), and the code below.
+
+**Inputs: neither amendment is ratified.**
+- `docs/v3/visual/game-shell/amendments/A5.md` and `docs/v3/visual/game-rooms/amendments/A6.md` (added by `ac18059`, S96's park) both say "**Draft, not ratified.**", have a "Ratification: Not ratified" section, open questions (A5: 3, A6: 2) and "Manifest: Pending". `grep 'Ratified by'` matches A1–A4 (game-shell) and A1–A5 (game-rooms) but not A5 or A6. No PNG was added (`git show --stat ac18059`: no `.png`), and no `RATIFIED.md` changed. S96 is `status: blocked`.
+- The skill says "Never treat an unratified frame as a decision. A frame in Figma that is not in a ratified surface is an open question for the owner, not work." Rule 18 says "UI stories are written and changed only from ratified designs and amendments." So: **nothing is taken in.** The inventory below records what the drafts would add, so that the intake that follows ratification starts from it.
+
+**1. Inventory of the drafts (provisional).**
+- game-shell A5, 8 frames (named, not exported): `game-videos-grid-playlink-mobile/-medium/-desktop`, `game-videos-list-playlink-mobile/-medium/-desktop`, `video-player-dialog-playlink-mobile/-medium`. Component: one play link `Play · <half> <inning> →` under the meta line of a card or list row whose clip has a play, and at top left of the floating player's overlay row. State: a clip without a play shows no link. New pairings: list mode at medium and desktop, drawn for the first time. Data: `MediaHighlight.playId` (S95), plus the play's half and inning.
+- game-rooms A6, 3 frames: `plays-opened-mobile/-medium/-desktop`. The Plays room opened on one play: its inning chosen, its at-bat open, marked by `From the video · <clip title>` and a 3px left bar in the link color. Data: the play's at-bat and inning, and the clip's title.
+
+**2. Ownership.** Every draft item maps to **S97** (Design: S96), and nothing is unowned. S97 stays gated by `pnpm backlog:check` until S96 is `done`. No ACs changed. Gaps the post-ratification intake must weigh, now in S97's notes:
+- AC 1 names the card link but not the player's.
+- AC 3's frames would be A5's 8 plus A6's 3.
+- A6's mark needs the clip title, but AC 2's URL is only `?play=<playId>`.
+- A6 Q2: does the mark go away when another at-bat opens?
+- A5 Q2: Search's player is S5's surface, not S97's.
+Fence check: `PlayerDialog.tsx`, `PlayerStage.tsx`, `PlayerHost.tsx` and `LazyPlayerDialog.tsx` are all in `web/src/components/videos/`, which answers the 2026-10-30 note.
+
+**3. Derivation layer (ADR-025), for S97.**
+- A video's `playId` is a **pitch** id. On 823823, 20 of 40 highlights have one; all 20 are distinct and all match a `PitchEvent.playId` in `fixtures/plays-823823.json`; none matches an at-bat. The pitch → at-bat lookup exists only privately inside `videoPlayLinks` (`packages/domain/src/video-play-links.ts:43`, `atBatOfPitch`). The S97 note says to export one domain function and use it in both places.
+- The link's `Top 6th` label: `inningLabel` (`inning.ts:31`) takes a linescore, and `PlaysPanel.tsx` spells halves inline at :52 (`Top 3`) and :200 (`Top 6th · NYY`). The S97 note asks for one at-bat label function that reuses `ordinal`.
+
+**Check 2: the next 3 startable at HEAD `ac18059`.** Eligibility came from each note's `depends_on` and `design`:
+- S112, S113 and S114 (priorities 77–79) wait on S51, which is `blocked` on the owner's `pnpm dev` check (`8e82a75`). The generated Next line names S112 because it checks only designs (`assemble.ts:139–147`); `/run-stories` checks `depends_on`.
+- S4, S73 and S28 are `blocked`. S72 waits on S5, S74 on S73, S97 on S96, and S108 on S106/S107.
+
+The next 3:
+- **S5 (90, `todo`).** Deps S70, S61, S68, S81 done; designs S34, S56 done. `web/src/pages/SearchPage.tsx`, `web/src/components/ViewState.tsx`, `web/src/components/team/MatchupAbbr.tsx`, `packages/ports/src/mlb.ts` and `fixtures/game-744834.json` exist. `pnpm design:capture` exists. `scripts/verify-S5.sh` is absent (its own, red-first). Cap 16. Findings:
+  - The "ADR." note is stale: ADR-029 exists (ARCHITECTURE.md:1356) and answers open question 3.
+  - ADR-029's "one small GraphQL POST helper" doesn't exist. S94 built `graphContentRequest` (`mlb.ts:62`) as a GET `MlbRequest` builder (`:49`), sent by the private `getJson` (`:261`).
+  - Both are noted on S5. No AC changed.
+- **S98 (101).** Deps S93, S95 done. `packages/domain/src/impact.ts` (`rankHighlightsByImpact`, `:25`), `functions/src/mappers/game-extras.ts` and `functions/src/services/fixture-823823.test.ts` exist. `fixtures/` is in the fence. Cap 8. Findings:
+  - S95 built the single assembly point (`withGameExtras`, `game-extras.ts:18`, called at `mlb.ts:150` and `fixture-client.ts:96`). This answers the last review's "whether S95's single assembly point also absorbs S98's rank move": it does.
+  - The note's `mlb.ts:76,120` and `fixture-client.ts:88,101` are stale.
+  - Two leftover rank calls sit in `fetchGameContent` (`mlb.ts:196`, `fixture-client.ts:112`), which no service calls (grep: only tests and the port).
+  - All noted on S98.
+- **S106 (102).** Deps S93, S64, S68, S81 done; designs S33, S57 done. `LiveRoom.tsx` (`useScoresHidden` at :35) and `LiveStatus.tsx` (:29) exist, as do `StrikeZoneChart.tsx`, `GameSnapshot.playMetrics?` (`types.ts:220`), the frames `game-rooms/live-medium.png`, `live-desktop.png` and `amendments/live-hidden-status-medium.png`, and `pnpm size` and `pnpm design:capture`. `scripts/verify-S106.sh` is absent (its own). Cap 14. Findings:
+  - S75 is `done` (`30088d7`), so the rebase caveat is gone.
+  - Play metrics are fetched at `mlb.ts:149`, not `:101`.
+  - Noted on S106.
+
+**3. Prioritization challenge.**
+- Against S112–S114 at the top: they are the owner's order (2026-11-02, "Yes, that order"), and S51's park is only the owner's hands-on check. Kept, and flagged as the main thing holding the loop.
+- Against S97 at 100 while S96 parks: rule 18 keeps it out of Next anyway, so there is nothing to move.
+- Against S5 ahead of S106: S5 has cap 16 and an unproven team-field question (AC 8). S106 has every input landed and is visible on tablet and desktop. Order kept, because S5's last owner answer is fresh and the owner ordered search earlier. The owner may swap them.
+- Nothing obsolete was found, and nothing was quietly done elsewhere.
+
+**Current baseline (rule 17).** The "Video play links + further MLB feeds" row still listed S95 as planned and said "`MediaHighlight.playId` holds `mediaPlaybackId` and links no video", which is false since `fe2421b`. Corrected to:
+- S95 done: `playId` is the pitch's.
+- S96 parked with the draft amendments.
+- S97 gated.
+
+The As of line was moved on. S75's previous As of line went to Baseline history.
+
+**Duplication sweep (ADR-025).**
+- `pnpm dup:check`: 0 clones (199 files).
+- Code added since `929282c`: S95 (`fe2421b`), S75's checkpoint (`eaef215`, `pitch-outcome.ts`). S111 and S75 completions touched only docs.
+- Same-meaning hits:
+  - (a) `rankHighlightsByImpact` is still called in `fetchGameContent` in both adapters beside `withGameExtras`. These callers are unused, and the item is noted on S98.
+  - (b) The pitch → at-bat map is private to `videoPlayLinks`, which S97 will need. Noted on S97.
+  - (c) Half-inning spelled inline in `PlaysPanel.tsx:34,52,200` beside `inning.ts`. Pre-existing (S41), noted on S97 because S97 adds a fourth use.
+
+**Personal-data sweep (ADR-028).**
+- Since `929282c`, the `git diff` of `web/src`, `functions/src` and `packages` adds no `console.*`, `localStorage`, `sessionStorage` or `indexedDB` lines.
+- S95 adds MLB ids only.
+- S5 (MLB search, server-side, no store), S98 (ordering) and S106 (derived series, no store) add no store.
+- Result: none found.
+
+**For the parity review.** Nothing queued. S97 and S96 cite "Feature: Video play links" (FEATURES.md:98), which fits. `pnpm parity:debt`: not due. No story was inserted or removed.
+
+**Owner questions.** None new from this review. The decisions that are pending all belong to the owner's S96 ratification session (A5 Q1–Q3, A6 Q1–Q2) and to S51's `pnpm dev` check, and both are already asked by their own stories.
+
+**Verdict: `amended`.** Notes only: S97, S98, S106, S5. Also the baseline row, the As of line and the scheduling note. No AC, priority, status, fence or Source line changed. Not `blocked`: S5, S98 and S106 can start.
