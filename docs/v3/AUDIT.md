@@ -13995,3 +13995,38 @@ export const label = game.abbreviation + " @ ";  1176ms
 ```
 
 </details>
+
+---
+
+## 2026-11-04 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-04T21:33:45Z` |
+| HEAD at review | `58aa31d` (tree dirty) |
+| Trigger | design intake: game-shell A5, game-rooms A6 ratified (S96) |
+| Stories `done` since last review | S98, S96 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+**Who:** one fresh-context reviewer in two stages (stage 1 mapped, stage 2 spot-checked against code and applied). Not two independent reviewers: the intake covers two amendments from one design story (S96) and no frontend ADR changed.
+
+**Inventory (game-shell A5):** play link `Play · <half> <inning> →` on its own line under the meta line on grid cards and list rows at mobile/medium/desktop; none on clips without a `playId`; the same link at top left of the floating player's overlay row (mobile/medium); no play icon on any thumbnail (grid, list, every phase, Hide Scores, room behind the player), duration badge kept; list mode drawn at medium/desktop for the first time. 8 frames.
+**Inventory (game-rooms A6):** Plays room opened on the play — inning chosen, at-bat open, 3px link-color bar down its left edge; `Video: <clip title>` in link color above every at-bat with a clip, however the room was reached. 3 frames.
+
+**Ownership map:** all elements owned by S97 (8 already partly or fully covered, re-scoped in place); no new story; no other story edited (Search's player is outside A5; DayDigest already uses `bare`).
+
+**Edits to S97:** AC 1 reworded (link text, own line under meta, grid and list, navigates without playing); new AC 2 (link in the floating player when the game-link slot is empty); new AC 3 (no play icon, duration kept, scores shown and hidden); AC 4 (was 2) mark tightened to the 3px link-color bar; new AC 5 (`Video:` line per at-bat with a clip, counted by distinct at-bats on 823823); AC 6 (was 3) lists the 11 frames explicitly; turn cap 12 → 16 with its assumption text (frontmatter, Turn cap, Goal condition and `/goal` line); stale 2026-11-04 notes corrected (drafts header, `From the video ·` premise, "private `atBatOfPitch`"); new intake note on the card button restructure, `VideoStill` icon removal, the player slot, one lookup, no clip param.
+
+**Evidence (spot-checked at 58aa31d):** `packages/domain/src/video-play-links.ts:23` exports `atBatIndexByPitch`; `web/src/components/videos/VideoCard.tsx:113-117` renders the card as one `UnstyledButton` with `aria-label="Play ${title}"` and `onClick={() => onPlay(video)}`, and `:62` draws `IconPlayerPlay`; the 11 frame names grep from `docs/v3/visual/game-shell/amendments/A5.md` and `docs/v3/visual/game-rooms/amendments/A6.md`; A5 spells the bottom half `Bot` (`Play · Bot 8th`), `inningLabel` already uses `Bot`, `PlaysPanel.tsx:34,203` use `Bottom`.
+
+**Disagreements:** none (single reviewer).
+**Parity:** no story added and no `**Source:**` line changed — nothing queued.
+
+**Owner questions:**
+1. When you arrive at a play from a video and then open another at-bat or inning, should the bar on the video's play stay, move or go away? (Until answered, S97 builds only the arrival state.)
+2. When one at-bat has several clips, one `Video:` line per clip or one per at-bat? (Until answered, one per at-bat as drawn.)
+3. Should the play link show on cards when Hide Scores is on? No hidden frame draws it.
+4. Should Search's floating player get the play link too? If yes, that's a separate amendment and story, not S97.
