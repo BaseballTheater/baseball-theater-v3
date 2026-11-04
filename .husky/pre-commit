@@ -4,3 +4,7 @@ pnpm exec lint-staged
 # Builds from the staged notes + AUDIT.md (like pnpm backlog:build, but from the index), re-stages
 # the result, and refuses a hand edit of the generated file staged on its own.
 node scripts/backlog-vault/cli.ts pre-commit --quiet
+
+# Refuses the commit unless the tests its staged files reach (the changed packages and their
+# dependents, through Vitest's import graph) pass. See scripts/pre-commit-tests.ts.
+node scripts/pre-commit-tests.ts
