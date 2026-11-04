@@ -9,6 +9,10 @@
  * final without a recap (744834: Videos, Plays, Box — S10 shows Recap only when one
  * exists) and a final with one (823823, on 2026-09-05: Videos, Plays, Box, Recap), so
  * between them every room opens.
+ *
+ * They run on several workers, each test twice in CI (S89), so none may depend on another:
+ * each gets its own browser context, and the one signed-in flow only reads Settings, so the
+ * shared dev account is never changed.
  */
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";

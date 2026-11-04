@@ -38,7 +38,8 @@
 		"size": "size-limit --json",
 		"design:capture": "BT_DESIGN_CAPTURE=1 playwright test --config e2e/playwright.config.ts",
 		"design:review": "node e2e/design-review.ts",
-		"e2e": "playwright test --config e2e/playwright.config.ts",
+		"e2e": "playwright test --config e2e/playwright.config.ts --workers=4 flows/ design/harness.spec.ts",
+		"e2e:design": "playwright test --config e2e/playwright.config.ts design/",
 		"lighthouse": "cd e2e && lhci autorun --config=../lighthouserc.json",
 		"lighthouse:serve": "concurrently -k -n api,web \"pnpm --filter @bt/functions exec tsx src/local-server.ts\" \"node scripts/wait-for-port.ts 8787 && pnpm --filter @bt/web exec vite preview --port 4173 --strictPort\""
 	},

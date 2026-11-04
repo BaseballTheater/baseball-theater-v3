@@ -9,8 +9,10 @@ concurrency:
     group: ci-${{ github.ref }}
     cancel-in-progress: true
 
+# S89: the checks run as separate jobs that start together, so a push learns sooner whether it
+# is green. Each job sets itself up the same way (checkout, pnpm, Node from .nvmrc, install).
 jobs:
-    build:
+    verify:
         runs-on: ubuntu-latest
         timeout-minutes: 30
         steps:
@@ -40,18 +42,6 @@ jobs:
             - name: No breaking API changes (oasdiff)
               run: pnpm api:breaking
 
-            # Browsers run only here, never in pnpm verify (law P8).
-            - name: Install the Playwright browser
-              run: pnpm exec playwright install --with-deps chromium
-
-            - name: Main flows (Playwright, fixtures)
-              run: pnpm e2e
-
-            # Budgets on the built app (ADR-026): LCP warns over 2.5 s and fails
-            # at 5 s (owner, 2026-10-29); TBT and layout shift fail over budget.
-            - name: Performance budgets (Lighthouse CI)
-              run: pnpm lighthouse
-
             - name: Upload coverage summaries
               if: always()
               uses: actions/upload-artifact@v4
@@ -59,3 +49,93 @@ jobs:
                   name: coverage
                   path: "**/coverage/coverage-summary.json"
                   if-no-files-found: ignore
+
+    # The main flows on several workers (S89), each run twice so no flow depends on another's
+    # order. Browsers run only here and in the design-spec job, never in pnpm verify (law P8).
+    flows:
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 9.15.0
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: ".nvmrc"
+                  cache: pnpm
+
+            - name: Install
+              run: pnpm install --frozen-lockfile
+
+            - name: Install the Playwright browser
+              run: pnpm exec playwright install --with-deps chromium
+
+            - name: Main flows (Playwright, fixtures)
+              run: pnpm e2e --repeat-each=2
+
+    # Every design-capture spec still runs in CI, without BT_DESIGN_CAPTURE, so nothing is
+    # written to the tree but a spec that breaks fails the push (S89 AC 2; it caught S97's at
+    # 2b4de06). Taking the captures is `pnpm design:capture`, on request.
+    design-specs:
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 9.15.0
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: ".nvmrc"
+                  cache: pnpm
+
+            - name: Install
+              run: pnpm install --frozen-lockfile
+
+            - name: Install the Playwright browser
+              run: pnpm exec playwright install --with-deps chromium
+
+            - name: Design-capture specs (no captures written)
+              run: pnpm e2e:design
+
+    # Budgets on the built app (ADR-026): LCP warns over 2.5 s and fails at 5 s (owner,
+    # 2026-10-29); TBT and layout shift fail over budget. Alone on its runner, so nothing else
+    # shares the machine it times; it builds only the web app it serves.
+    lighthouse:
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 9.15.0
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: ".nvmrc"
+                  cache: pnpm
+
+            - name: Install
+              run: pnpm install --frozen-lockfile
+
+            - name: Build the web app
+              run: pnpm --filter @bt/web run build
+
+            - name: Performance budgets (Lighthouse CI)
+              run: pnpm lighthouse
+
+    # One check that stands for all of them, for a branch rule to require (so the rule needn't
+    # change when the jobs do).
+    ci-passed:
+        if: always()
+        needs: [verify, flows, design-specs, lighthouse]
+        runs-on: ubuntu-latest
+        steps:
+            - name: Every CI job passed
+              run: test "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}" = "false"

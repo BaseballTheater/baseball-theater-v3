@@ -15,6 +15,8 @@ export default defineConfig({
 	testDir: ".",
 	outputDir: process.env.BT_E2E_OUTPUT ?? "test-results",
 	fullyParallel: false,
+	// One worker for the design specs, which share the dev account and its settings; `pnpm e2e`
+	// runs the flows with --workers=4 (S89), since each flow keeps its state in its own browser.
 	workers: 1,
 	reporter: [["list"]],
 	use: {

@@ -274,6 +274,7 @@ explicitly where that's the case. For what's still ahead, see
 
 ## New screens are checked against the approved designs
 
+- **Before, every change waited for each automated check in turn, about nine minutes. Now the checks run side by side, so a change learns sooner whether it is safe, and a broken screenshot script still fails the check without taking new pictures.** Details: S89 — `ci.yml` runs verify, the flows (`--workers=4`, `--repeat-each=2`), the design specs (`pnpm e2e:design`) and Lighthouse as parallel jobs, plus one `ci-passed` gate; `pnpm e2e` runs only `e2e/flows/` and the harness. _(2026-11-04)_
 - **Before, the app's frame looked close to the approved design but not quite: the logo's letters
   were in the wrong typeface, the highlighted menu item was the wrong red, and the menu text was
   smaller and greyer than drawn. Now the logo uses its real typeface, the menu matches the drawing,

@@ -14168,3 +14168,85 @@ No story flipped to `done` since the last parity review (4599c77), so FEATURES' 
 Nothing new: no features added this review, and no FEATURES item newly unserved.
 
 **Edits:** none.
+
+---
+
+## 2026-11-04 — S89 completed
+
+**Faster CI (parallel jobs, workers)**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-04T22:42:47Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `ab1bcf3` (tree dirty) |
+| Grader | `scripts/verify-S89.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: ci.yml runs pnpm verify (with the API spec checks), the flows and Lighthouse as separate jobs that start together; the Lighthouse job runs nothing else
+check 2 PASS: pnpm e2e runs only e2e/flows/ and the harness; pnpm design:capture still takes captures; a CI job of its own runs every e2e/design/ spec without BT_DESIGN_CAPTURE
+check 3 PASS: the flows run on more than one worker, and CI runs them with --repeat-each=2; no flow is serial or shares module state
+check 4 PASS: Lighthouse waits on the server's ready line (startServerReadyPattern), not a timeout
+check 5 PASS: law P11: the vault test reading ci.yml finds a step running pnpm verify (scripts/backlog-vault/ci-law.test.ts passes)
+check 6 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**6/6 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S89 check results ---
+check 1 PASS: ci.yml runs pnpm verify (with the API spec checks), the flows and Lighthouse as separate jobs that start together; the Lighthouse job runs nothing else
+check 2 PASS: pnpm e2e runs only e2e/flows/ and the harness; pnpm design:capture still takes captures; a CI job of its own runs every e2e/design/ spec without BT_DESIGN_CAPTURE
+check 3 PASS: the flows run on more than one worker, and CI runs them with --repeat-each=2; no flow is serial or shares module state
+check 4 PASS: Lighthouse waits on the server's ready line (startServerReadyPattern), not a timeout
+check 5 PASS: law P11: the vault test reading ci.yml finds a step running pnpm verify (scripts/backlog-vault/ci-law.test.ts passes)
+check 6 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S89: 6/6 checks passed ---
+verify-S89: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  883ms
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 854ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  420ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  432ms
+ ✓ |tools| size-limit/size-limit.test.js (2 tests) 141ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 102ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 114ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 79ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 90ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 16ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  14:47:15
+   Duration  7.95s (transform 91ms, setup 0ms, collect 3.98s, tests 2.33s, environment 1ms, prepare 486ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/claude/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154293,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
