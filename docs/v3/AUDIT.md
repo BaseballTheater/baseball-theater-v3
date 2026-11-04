@@ -13701,3 +13701,18 @@ functions build: Done
 ```
 
 </details>
+
+---
+
+## 2026-11-03 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-04T07:51:38Z` |
+| HEAD at capture | `c86e316` (tree clean) |
+| Change | `5470524` — CI: Lighthouse stops waiting out its 60 s timeout; verify lints and typechecks once (owner) |
+
+**What changed, and the owner's answer**
+
+`pnpm verify` changed (a drift event): it now runs `pnpm build` (lint, then each package's typecheck and build) && dup:check && test:coverage && size, so lint and typecheck run once instead of twice; `pnpm build` drops its separate `pnpm typecheck`. In the same commit, Lighthouse CI stops waiting out its 60 s timeout (its ready pattern allows Vite's colour codes, and the preview starts once the API listens). Owner, 2026-11-03, asked whether to make the verify change, which sets off a backlog review: "Do both, skip the backlog review". No backlog review run for it; the next scheduled or drift-triggered review still checks it. The stories-done count stays at 3 (S95, S111, S75).
