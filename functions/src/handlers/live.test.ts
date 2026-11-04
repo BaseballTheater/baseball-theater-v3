@@ -52,9 +52,12 @@ describe("GET /api/v1/games/:gamePk/live", () =>
 
 	it("refuses a plain GET (426), an unknown game (404) and a server without hubs (501), each pointing at the cached GET", async () =>
 	{
-		expect((await (await api())("/api/v1/games/745001/live", {})).status).toBe(426);
-		expect((await (await api())("/api/v1/games/1/live")).status).toBe(404);
-		const res = await (await api())("/api/v1/games/745001/live");
+		// One app (no hubs) answers all three: building a migrated database per request
+		// tripled the setup and timed this test out on CI's slower runners.
+		const get = await api();
+		expect((await get("/api/v1/games/745001/live", {})).status).toBe(426);
+		expect((await get("/api/v1/games/1/live")).status).toBe(404);
+		const res = await get("/api/v1/games/745001/live");
 		expect(res.status).toBe(501);
 		expect(await res.json()).toMatchObject({
 			hint: "/api/v1/games/745001",
