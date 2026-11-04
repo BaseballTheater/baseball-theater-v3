@@ -65,9 +65,9 @@ for (const pairing of ["mobile", "medium", "desktop"])
 	frames.push([`game-videos-list-playlink-${pairing}`, async (page) =>
 	{
 		await page.goto("/game/823823/videos");
-		await page.getByRole("radio", {
-			name: "List",
-		}).click();
+		// The segmented control's radio is hidden under its icon label; click the label (as S69's spec does).
+		await page.locator("label[for$='-list']").click();
+		await page.getByTestId("videos-list").first().waitFor();
 		await page.getByTestId("play-link").first().waitFor();
 	}]);
 	frames.push([`plays-opened-${pairing}`, async (page) =>
