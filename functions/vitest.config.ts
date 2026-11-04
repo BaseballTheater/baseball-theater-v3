@@ -7,6 +7,10 @@ export default defineConfig({
 		include: ["src/**/*.test.ts"],
 		// `*.workerd.test.ts` run inside workerd under vitest.workers.config.ts (S45).
 		exclude: ["src/**/*.workerd.test.ts"],
+		// Many tests build their own migrated PGlite (S51): ~1 s locally, but 5–6 s on a loaded
+		// 2-core CI runner, which the 5 s default timed out (live.test.ts, worker-app.test.ts).
+		// No test asserts on speed; this only stops slow setup reading as a failure.
+		testTimeout: 20_000,
 		coverage: {
 			provider: "v8",
 			reporter: ["text", "json-summary"],
