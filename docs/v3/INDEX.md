@@ -494,9 +494,10 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 | 110 | [S104](backlog/stories/S104.md) Ingest pitcher season averages | `todo` | S103 | — |
 | 111 | [S105](backlog/stories/S105.md) Ingest venue field drawings | `todo` | S103 | — |
 | 113 | [S89](backlog/stories/S89.md) Faster CI (parallel jobs, workers) | `todo` | S62 | — |
-| 114 | [S90](backlog/stories/S90.md) Next-pitch model (train + evaluate) | `todo` | S63 | — |
-| 115 | [S92](backlog/stories/S92.md) Design: next-pitch odds (owner-ratified) | `todo` | S64 | — |
-| 116 | [S91](backlog/stories/S91.md) Next-pitch odds in Live (paid) | `todo` | S90, S64 | S92 |
+| 114 | [S115](backlog/stories/S115.md) Design captures in CI (on request) | `todo` | S89 | — |
+| 115 | [S90](backlog/stories/S90.md) Next-pitch model (train + evaluate) | `todo` | S63 | — |
+| 116 | [S92](backlog/stories/S92.md) Design: next-pitch odds (owner-ratified) | `todo` | S64 | — |
+| 117 | [S91](backlog/stories/S91.md) Next-pitch odds in Live (paid) | `todo` | S90, S64 | S92 |
 | 76 | [S51](backlog/stories/S51.md) `pnpm dev` on Postgres in Docker | `blocked` | S50 | — |
 | 89 | [S4](backlog/stories/S4.md) Standings fixture API + page | `blocked` | S81 | S34 |
 | 92 | [S73](backlog/stories/S73.md) Installable PWA + update notice | `blocked` | S55, S60, S6, S81 | S55, S56 |

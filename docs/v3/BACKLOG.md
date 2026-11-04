@@ -260,9 +260,10 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 111 | [S105](#s105--ingest-ballpark-field-drawings-by-venue-from-baseball-savant) | Ingest venue field drawings | `todo` |
 | 112 | [S9](#s9--representative-local-dev-pnpm-dev-on-the-firestore-emulator) | `pnpm dev` on the Firestore emulator | `superseded` |
 | 113 | [S89](#s89--faster-ci-parallel-jobs-flows-on-several-workers-design-captures-out-of-pnpm-e2e) | Faster CI (parallel jobs, workers) | `todo` |
-| 114 | [S90](#s90--next-pitch-model-training-data-a-trained-model-and-an-honest-evaluation) | Next-pitch model (train + evaluate) | `todo` |
-| 115 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
-| 116 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
+| 114 | [S115](#s115--design-captures-on-request-in-github-actions) | Design captures in CI (on request) | `todo` |
+| 115 | [S90](#s90--next-pitch-model-training-data-a-trained-model-and-an-honest-evaluation) | Next-pitch model (train + evaluate) | `todo` |
+| 116 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
+| 117 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
 
 **Next (generated):** **77 / S112** — the lowest **Priority** `todo` story not waiting on a design.
 
@@ -5851,6 +5852,39 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 ```text
 /goal docs/v3/BACKLOG.md S114. Work item 0 first: if scripts/verify-S114.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S114.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, functions/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S114.sh, or stop after 18 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
+
+**Status:** `todo`
+
+### S115 — Design captures on request in GitHub Actions
+
+**Gap:** A UI story's design match (rule 22) needs `pnpm design:capture <ID>`, which starts the app as `pnpm dev` does (Postgres in Docker) and drives a browser. The cloud sessions that build stories have neither a Playwright browser nor a Docker daemon, so S97 and S106 parked with their capture specs written but no captures. GitHub's runners have both: CI already installs Chromium and runs the specs in `pnpm e2e`. Inserted by the owner, 2026-11-04 (asked whether to write a GitHub Actions workflow that takes a story's captures on request, the owner said: *"Yes do 1 and 2"*).
+
+**Impact:** Before S115, a story's design screenshots could only be taken on the owner's own computer. S115 impact: anyone can ask GitHub to take them, so a story built in the cloud reaches its design match without waiting for that computer.
+
+**Source:** Pillar: Delightful — developers too: a story built anywhere gets its design screenshots without the owner's computer (as S89 cites it). Asked which pillar S115 should cite, Delightful (as S89) or Dependable. Approved by owner 2026-11-04: "Delightful (Recommended)"
+
+**Depends on:** **S89** (it moves the design captures out of `pnpm e2e`, so a capture run is its own command).
+
+**Scope files:** `.github/workflows/`, `e2e/`, `package.json`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`
+
+**Work**
+
+0. Write `scripts/verify-S115.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** building (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S115.sh` performs)
+
+1. A workflow under `.github/workflows/` runs on `workflow_dispatch` with a required `story` input (`S<N>`): it installs, installs Playwright's Chromium, starts the app as `pnpm dev` does, runs `pnpm design:capture <story>`, and uploads `docs/v3/design-checks/<story>/` as a workflow artifact.
+2. An optional `commit` input (default off) commits those captures to the branch the workflow ran on, in one commit naming the story; with it off, nothing is pushed.
+3. The run fails when the story has no `e2e/design/<story>.spec.ts` or the spec saves no capture.
+4. Design captures still never run in `pnpm verify` (law P8), and the workflow's steps run no `pnpm verify` or deploy.
+5. This file's S115 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- A run that commits uses the workflow's token, which by GitHub's rule triggers no further workflow runs; the owner's design match still happens in a session (`scripts/audit.sh story <ID> --design-match -`).
+- Turn cap, Goal condition and `/goal` command are the next backlog review's to add (rule 8), as for S89.
+
+**Reuse check** (ADR-025): before writing the workflow, read `.github/workflows/ci.yml` (S62, S89) for its install, Playwright and Node setup steps and reuse them; record what was reused in the story's ledger notes.
 
 **Status:** `todo`
 
