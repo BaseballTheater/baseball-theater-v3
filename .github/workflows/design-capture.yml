@@ -82,4 +82,7 @@ jobs:
                   git add "docs/v3/design-checks/$STORY/"
                   if git diff --cached --quiet; then echo "captures unchanged; nothing to commit"; exit 0; fi
                   git commit -m "$STORY: design captures (CI, design-capture.yml)"
+                  # Another run (another story's captures) may have pushed meanwhile; its files never
+                  # overlap these, so rebase onto it before pushing.
+                  git pull --rebase origin "${GITHUB_REF_NAME}"
                   git push origin "HEAD:${GITHUB_REF_NAME}"
