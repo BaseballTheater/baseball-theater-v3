@@ -22,9 +22,11 @@ cd "$(dirname "$0")/.." || exit 0
 
 LEDGER="docs/v3/AUDIT.md"
 
-# Blocked if the newest "<kind> review (…)" / "<kind> review answers" entry is a blocked review.
+# Blocked if the newest review or answers entry of the kind is a blocked review (ledger.ts
+# reviewBlocked, the ledger's one parser). A ledger that can't be read counts as blocked, so
+# the gate waits for a person rather than running reviews on a broken ledger.
 blocked() {
-  grep -E "^## [^ ]+ — $1 review (\(|answers)" "$LEDGER" | tail -1 | grep -q '(`blocked`)'
+  [ "$(node scripts/backlog-vault/cli.ts --audit "$LEDGER" review-blocked "$1" 2>/dev/null)" != "clear" ]
 }
 
 [ -n "$(git status --porcelain 2>/dev/null)" ] && exit 0
@@ -40,7 +42,7 @@ elif ! out="$(scripts/review-debt.sh 2>&1)"; then
     todo+=("BACKLOG REVIEW: follow .claude/skills/backlog-review/SKILL.md in one fresh-context general-purpose Agent subagent; log with scripts/audit.sh review."$'\n'"$out")
   fi
 fi
-if blocked "doc parity"; then
+if blocked parity; then
   waiting+=("doc parity review")
 elif ! out="$(scripts/parity-debt.sh 2>&1)"; then
   todo+=("DOC PARITY REVIEW: follow .claude/skills/doc-parity-review/SKILL.md in one fresh-context general-purpose Agent subagent; log with scripts/audit.sh parity."$'\n'"$out")

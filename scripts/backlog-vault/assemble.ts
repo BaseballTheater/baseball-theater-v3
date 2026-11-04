@@ -7,6 +7,7 @@ import { parse as parseYaml } from "yaml";
 import {
 	GENERATED_LINES, parseBacklog, STATUS_TABLE_MARKER, storyIds,
 } from "./parse.ts";
+import { parseLedger, storiesDoneSince } from "./ledger.ts";
 import type { SourceDocs } from "./source.ts";
 import { sourceProblems } from "./source.ts";
 import { renderNotes } from "./vault.ts";
@@ -168,29 +169,15 @@ export function nextStoryLine(stories: NextCandidate[]): string
 	return `${GENERATED_LINES.next.prefix}${text}`;
 }
 
-/** `**Review debt (generated …):**` — stories completed since the newest review entry in AUDIT.md. */
+/**
+ * `**Review debt (generated …):**` — stories completed since the newest backlog review in AUDIT.md.
+ * The count is ledger.ts's {@link storiesDoneSince}, the same one `pnpm review:debt` reports.
+ */
 export function reviewDebtLine(audit: string): string
 {
-	const headings = audit.split("\n").filter((l) => l.startsWith("## "));
-	let lastReview: RegExpExecArray | null = null;
-	let since: string[] = [];
-	for (const heading of headings)
-	{
-		const review = /^## (\S+) — backlog review \(`([a-z]+)`\)$/.exec(heading);
-		if (review)
-		{
-			lastReview = review;
-			since = [];
-			continue;
-		}
-		const completed = /^## \S+ — (S\d+) completed$/.exec(heading)?.[1];
-		if (completed && !since.includes(completed))
-		{
-			since.push(completed);
-		}
-	}
+	const { review, stories: since } = storiesDoneSince(parseLedger(audit), "backlog");
 	const count = `${since.length} of ${REVIEW_BACKSTOP} stories \`done\` since the last backlog review`;
-	const when = lastReview ? ` (${lastReview[1]}, verdict \`${lastReview[2]}\`)` : " (no review logged yet)";
+	const when = review ? ` (${review.date}, verdict \`${review.verdict}\`)` : " (no review logged yet)";
 	const which = since.length > 0 ? `: ${since.join(", ")}` : "";
 	const verdict = since.length >= REVIEW_BACKSTOP
 		? " **A review is due before the next story starts.**"

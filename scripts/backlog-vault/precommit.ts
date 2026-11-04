@@ -13,10 +13,13 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 import { buildFromNotes } from "./assemble.ts";
+import { parseLedger, renderLedgerIndex } from "./ledger.ts";
 
 export const NOTES_DIR = "docs/v3/backlog";
 export const BACKLOG = "docs/v3/BACKLOG.md";
 export const AUDIT = "docs/v3/AUDIT.md";
+/** The ledger's generated index (ledger.ts), rebuilt here from the staged AUDIT.md. */
+export const AUDIT_INDEX = "docs/v3/audit.jsonl";
 export const FEATURES = "docs/v3/FEATURES.md";
 export const INTENT = "docs/v3/INTENT.md";
 
@@ -93,7 +96,7 @@ function restage(repo: string, path: string, before: string | undefined, content
 
 export function runPrecommit(repo: string): PrecommitResult
 {
-	const changed = paths(git(repo, ["diff", "--cached", "--name-only", "-z", "--", NOTES_DIR, BACKLOG, AUDIT, FEATURES, INTENT]));
+	const changed = paths(git(repo, ["diff", "--cached", "--name-only", "-z", "--", NOTES_DIR, BACKLOG, AUDIT, AUDIT_INDEX, FEATURES, INTENT]));
 	if (changed.length === 0)
 	{
 		return {
@@ -121,10 +124,13 @@ export function runPrecommit(repo: string): PrecommitResult
 		intent,
 	};
 
+	const audit = staged(repo, AUDIT);
 	let built;
+	let index: string | undefined;
 	try
 	{
-		built = buildFromNotes(notes, staged(repo, AUDIT), docs);
+		built = buildFromNotes(notes, audit, docs);
+		index = audit === undefined ? undefined : renderLedgerIndex(parseLedger(audit));
 	}
 	catch (error)
 	{
@@ -162,6 +168,13 @@ export function runPrecommit(repo: string): PrecommitResult
 	{
 		restage(repo, BACKLOG, stagedBacklog, built.backlog);
 		restaged.push(BACKLOG);
+	}
+	// The index is generated from AUDIT.md, so a staged hand edit of it is simply rebuilt over.
+	const stagedIndex = staged(repo, AUDIT_INDEX);
+	if (index !== undefined && stagedIndex !== index)
+	{
+		restage(repo, AUDIT_INDEX, stagedIndex, index);
+		restaged.push(AUDIT_INDEX);
 	}
 	return {
 		ok: true,

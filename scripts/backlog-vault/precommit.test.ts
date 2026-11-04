@@ -10,8 +10,9 @@ import {
 import {
 	AUDIT, FIXTURE, notesFor,
 } from "./fixture.ts";
+import { parseLedger, renderLedgerIndex } from "./ledger.ts";
 import {
-	AUDIT as AUDIT_PATH, BACKLOG, NOTES_DIR, runPrecommit,
+	AUDIT as AUDIT_PATH, AUDIT_INDEX, BACKLOG, NOTES_DIR, runPrecommit,
 } from "./precommit.ts";
 
 let repo = "";
@@ -49,6 +50,7 @@ beforeEach(() =>
 	}
 	write(BACKLOG, FIXTURE);
 	write(AUDIT_PATH, AUDIT);
+	write(AUDIT_INDEX, renderLedgerIndex(parseLedger(AUDIT)));
 	git("add", "-A");
 	git("commit", "-qm", "base");
 });
@@ -115,8 +117,28 @@ describe("runPrecommit", () =>
 
 		const result = runPrecommit(repo);
 
-		expect(result.restaged).toEqual([BACKLOG]);
+		expect(result.restaged).toEqual([BACKLOG, AUDIT_INDEX]);
 		expect(stagedFile(BACKLOG)).toContain("2 of 6 stories `done` since the last backlog review (2026-09-10, verdict `amended`): S1, S9.");
+		expect(stagedFile(AUDIT_INDEX).trim().split("\n").at(-1)).toBe(JSON.stringify({
+			line: 6,
+			date: "2026-09-13",
+			kind: "completed",
+			story: "S9",
+			heading: "## 2026-09-13 — S9 completed",
+		}));
+	});
+
+	it("rebuilds a hand-edited audit.jsonl from AUDIT.md", () =>
+	{
+		write(AUDIT_INDEX, "{\"hand\":\"edit\"}\n");
+		git("add", AUDIT_INDEX);
+
+		const result = runPrecommit(repo);
+
+		expect(result.ok).toBe(true);
+		expect(result.restaged).toEqual([AUDIT_INDEX]);
+		expect(stagedFile(AUDIT_INDEX)).toBe(renderLedgerIndex(parseLedger(AUDIT)));
+		expect(read(AUDIT_INDEX)).toBe(renderLedgerIndex(parseLedger(AUDIT)));
 	});
 
 	it("refuses a hand edit of BACKLOG.md staged on its own", () =>

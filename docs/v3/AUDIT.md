@@ -29,6 +29,8 @@ A story completion entry is written **before** the commit, so "shipped in the co
 - **What was tested and verified** — the grader's own per-check lines (`scripts/lib/checks.sh`). This is the list of what a green exit code actually covered. A grader that reports 6/6 has proven six things and nothing else.
 - **Verdict** (review entries) — `continue` · `amended` · `blocked`. `blocked` stops the loop.
 
+**Finding an entry without reading this whole file:** [`audit.jsonl`](./audit.jsonl) is its generated index, one JSON object per entry: `line` (where its heading is here), `date`, `kind` (`completed`, `re-verified`, `backfill`, `design-match`, `review`, `answers`, `skip`), and `story`, `review`, `verdict`, `answers` or `at` where they apply. `grep '"story":"S75"' docs/v3/audit.jsonl` gives the line to read from. It is rebuilt from this file by `pnpm backlog:build` and the pre-commit hook, and `pnpm backlog:check` fails when it is stale; never edit it by hand.
+
 ## Gaps this file does not close
 
 A grader proves its own checks. It does not prove the checks were the right ones. Entries below are evidence of what was verified, not a warrant that the story was well specified — that is the review entries' job.

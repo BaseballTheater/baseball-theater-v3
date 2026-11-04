@@ -28,7 +28,10 @@ STORIES="docs/v3/backlog/stories"
 DOCS=(docs/v3/INTENT.md docs/v3/ORIGIN.md docs/v3/FEATURES.md docs/v3/VISUAL-DESIGN.md docs/v3/ARCHITECTURE.md)
 BACKSTOP=6
 
-base="$(git log -1 --format=%h -G'^## [^ ]+ — doc parity review' -- "$LEDGER")"
+# The ledger is read through scripts/backlog-vault/ledger.ts, its one parser: the base is the newest
+# commit that logged a doc parity review, its answers or a skip of one.
+LEDGER_CLI=(node scripts/backlog-vault/cli.ts --audit "$LEDGER")
+base="$("${LEDGER_CLI[@]}" ledger-base parity)" || { echo "parity: could not read ${LEDGER}" >&2; exit 2; }
 if [ -z "$base" ]; then
   echo "parity: no doc parity review logged in ${LEDGER} yet — one is due."
   exit 1
@@ -71,9 +74,7 @@ while IFS= read -r path; do
 done < <(git diff --name-only --diff-filter=M "$base" HEAD -- "$STORIES")
 
 # Stories completed since the newest parity entry, by ledger order (re-verifications don't count).
-done_since="$(awk '/^## .* — doc parity review \(/ { delete seen; n = 0; next }
-  match($0, /^## [^ ]+ — S[0-9]+ completed$/) { split($0, w, " "); if (!(w[4] in seen)) { seen[w[4]] = 1; ids[++n] = w[4] } }
-  END { s = ""; for (i = 1; i <= n; i++) if (ids[i] in seen) s = s (s ? ", " : "") ids[i]; print s }' "$LEDGER")"
+done_since="$("${LEDGER_CLI[@]}" done-since parity)" || { echo "could not read ${LEDGER}" >&2; exit 2; }
 done_count=0
 [ -n "$done_since" ] && done_count="$(tr ',' '\n' <<<"$done_since" | wc -l | tr -d ' ')"
 if [ "$done_count" -ge "$BACKSTOP" ]; then

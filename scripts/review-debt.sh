@@ -33,7 +33,10 @@ LEDGER="${BT_AUDIT_LEDGER:-docs/v3/AUDIT.md}"
 STORIES="docs/v3/backlog/stories"
 BACKSTOP=6
 
-base="$(git log -1 --format=%h -G'^## [^ ]+ — backlog review' -- "$LEDGER")"
+# The ledger is read through scripts/backlog-vault/ledger.ts, its one parser: the base is the newest
+# commit that logged a backlog review, its answers or a skip of one.
+LEDGER_CLI=(node scripts/backlog-vault/cli.ts --audit "$LEDGER")
+base="$("${LEDGER_CLI[@]}" ledger-base backlog)" || { echo "review: could not read ${LEDGER}" >&2; exit 2; }
 if [ -z "$base" ]; then
   echo "review: no backlog review logged in ${LEDGER} yet — one is due."
   exit 1
@@ -83,9 +86,7 @@ done < <(git diff --name-only --diff-filter=M "$base" HEAD -- "$STORIES")
 
 # Stories completed since the newest backlog review (`## … — backlog review (\`verdict\`)`; answers
 # and skip entries don't reset it), by ledger order (re-verifications don't count).
-done_since="$(awk '/^## .* — backlog review \(/ { delete seen; n = 0; next }
-  match($0, /^## [^ ]+ — S[0-9]+ completed$/) { split($0, w, " "); if (!(w[4] in seen)) { seen[w[4]] = 1; ids[++n] = w[4] } }
-  END { s = ""; for (i = 1; i <= n; i++) if (ids[i] in seen) s = s (s ? ", " : "") ids[i]; print s }' "$LEDGER")"
+done_since="$("${LEDGER_CLI[@]}" done-since backlog)" || { echo "could not read ${LEDGER}" >&2; exit 2; }
 done_count=0
 [ -n "$done_since" ] && done_count="$(tr ',' '\n' <<<"$done_since" | wc -l | tr -d ' ')"
 if [ "$done_count" -ge "$BACKSTOP" ]; then

@@ -5,6 +5,11 @@
  *   pnpm backlog:check    exit 1 if build would change anything; --backlog-only compares BACKLOG.md alone
  *   pnpm backlog:import   recovery: regenerate the notes from docs/v3/BACKLOG.md
  *   cli.ts pre-commit     (the Husky hook) build from the index and re-stage; refuse hand edits of BACKLOG.md
+ *   cli.ts ledger-base backlog|parity   the commit the debt checks measure drift from (ledger.ts)
+ *   cli.ts done-since backlog|parity    stories completed since the newest review of that kind
+ *   cli.ts review-blocked backlog|parity  prints `blocked` when that review waits for the owner, else `clear`
+ *
+ * build and check also cover docs/v3/audit.jsonl, the ledger's generated index (`--index <file>`).
  *
  * `--dir <notes dir>` (default docs/v3/backlog), `--backlog <file>` (default docs/v3/BACKLOG.md),
  * and `--audit <file>` (default docs/v3/AUDIT.md, read for the generated review-debt line) let
@@ -16,10 +21,14 @@ import {
 	access, mkdir, readdir, readFile, rm, writeFile,
 } from "node:fs/promises";
 import {
-	dirname, join, resolve,
+	dirname, join, relative, resolve,
 } from "node:path";
 import { parseArgs } from "node:util";
 import { buildFromNotes } from "./assemble.ts";
+import type { ReviewKind } from "./ledger.ts";
+import {
+	ledgerBase, parseLedger, renderLedgerIndex, reviewBlocked, storiesDoneSince,
+} from "./ledger.ts";
 import { parseBacklog } from "./parse.ts";
 import { runPrecommit } from "./precommit.ts";
 import type { SourceDocs } from "./source.ts";
@@ -42,6 +51,10 @@ const { values, positionals } = parseArgs({
 			type: "string",
 			default: join(repoRoot, "docs/v3/AUDIT.md"),
 		},
+		index: {
+			type: "string",
+			default: join(repoRoot, "docs/v3/audit.jsonl"),
+		},
 		"backlog-only": {
 			type: "boolean",
 			default: false,
@@ -56,6 +69,7 @@ const { values, positionals } = parseArgs({
 const dir = resolve(values.dir);
 const backlogPath = resolve(values.backlog);
 const auditPath = resolve(values.audit);
+const indexPath = resolve(values.index);
 
 async function readAudit(): Promise<string | undefined>
 {
@@ -137,6 +151,12 @@ async function build()
 	await writeNotes(notes, built.notes);
 	await writeFile(backlogPath, built.backlog);
 	log(`built ${backlogPath} from ${built.notes.size} notes`);
+	const audit = await readAudit();
+	if (audit !== undefined)
+	{
+		await writeFile(indexPath, renderLedgerIndex(parseLedger(audit)));
+		log(`built ${indexPath} from ${auditPath}`);
+	}
 }
 
 async function check()
@@ -157,6 +177,12 @@ async function check()
 				stale.push(join(dir, path));
 			}
 		}
+	}
+	const audit = await readAudit();
+	if (!values["backlog-only"] && audit !== undefined
+		&& (await readFile(indexPath, "utf8").catch(() => undefined)) !== renderLedgerIndex(parseLedger(audit)))
+	{
+		stale.push(indexPath);
 	}
 	if (stale.length > 0)
 	{
@@ -189,18 +215,56 @@ async function preCommit()
 	}
 }
 
+/** The review kind named after a ledger command (`ledger-base backlog`). */
+function reviewKind(): ReviewKind
+{
+	const kind = positionals[1];
+	if (kind !== "backlog" && kind !== "parity")
+	{
+		throw new Error(`${positionals[0]} needs 'backlog' or 'parity'`);
+	}
+	return kind;
+}
+
+/** Prints the short sha of the commit the debt checks measure from, or nothing when no review is logged. */
+async function printLedgerBase()
+{
+	const base = ledgerBase(repoRoot, relative(repoRoot, auditPath), reviewKind());
+	if (base)
+	{
+		console.log(base);
+	}
+}
+
+/** Prints the stories completed since the newest review of the kind, comma-separated (empty when none). */
+async function printDoneSince()
+{
+	const audit = await readAudit();
+	console.log(audit === undefined ? "" : storiesDoneSince(parseLedger(audit), reviewKind()).stories.join(", "));
+}
+
+/** Prints `blocked` when the review waits for the owner (ledger.ts reviewBlocked), else `clear`; an error prints neither. */
+async function printReviewBlocked()
+{
+	const audit = await readAudit();
+	console.log(audit !== undefined && reviewBlocked(parseLedger(audit), reviewKind()) ? "blocked" : "clear");
+}
+
 const commands: Record<string, () => Promise<void>> = {
 	build,
 	check,
 	import: importBacklog,
 	"pre-commit": preCommit,
+	"ledger-base": printLedgerBase,
+	"done-since": printDoneSince,
+	"review-blocked": printReviewBlocked,
 };
 
 // lint-staged and hooks may append file paths; only the first positional is the command.
 const command = commands[positionals[0] ?? ""];
 if (!command)
 {
-	console.error("usage: cli.ts <build|check|import|pre-commit> [--dir <notes dir>] [--backlog <file>] [--audit <file>] [--backlog-only] [--quiet]");
+	console.error("usage: cli.ts <build|check|import|pre-commit|ledger-base|done-since|review-blocked <kind>> [--dir <notes dir>] [--backlog <file>] [--audit <file>] [--index <file>] [--backlog-only] [--quiet]");
 	process.exitCode = 2;
 }
 else

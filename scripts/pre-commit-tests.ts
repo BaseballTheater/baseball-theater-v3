@@ -16,6 +16,10 @@
  * - Files read from disk, not imported, are invisible to the graph: anything under `fixtures/`
  *   runs all of `functions`' tests. A package's own package.json or vitest config runs its
  *   whole suite; the root lockfile, package.json, tsconfig or vitest config runs every suite.
+ * - The repo-tooling suites outside the workspace packages run whole when a file they test is
+ *   staged: the backlog tool's (`pnpm test:backlog`) for scripts/backlog-vault/, scripts/audit.sh,
+ *   the backlog notes and the ledger (one of its tests reads the real AUDIT.md), and the tools
+ *   suite (`pnpm test:tools`) for tools/. Both take a few seconds.
  * - Coverage thresholds and the workerd suite (`functions/vitest.workers.config.ts`) are left to
  *   `pnpm verify` and CI, to keep a commit fast.
  * - It tests the working tree, so unstaged edits to a staged file are tested too.
@@ -34,6 +38,32 @@ const packageDirs = ["packages/domain", "packages/mlb-api", "packages/ports", "f
 
 /** Root files whose change can alter how any test resolves or runs. */
 const runEverything = /^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|tsconfig[^/]*\.json|vitest\.config\.ts)$/;
+
+/** Repo-tooling suites outside the workspace packages: run whole, from the repo root, when a staged file matches. */
+const toolingSuites = [
+	{
+		label: "scripts/backlog-vault",
+		config: "scripts/backlog-vault/vitest.config.ts",
+		// The tool itself, the ledger writer, the backlog notes and docs it builds from, and the CI workflow (law P11's test).
+		triggers: [
+			/^scripts\/(backlog-vault\/|audit\.sh$|lib\/)/,
+			/^docs\/v3\/(backlog\/|AUDIT\.md$|audit\.jsonl$|BACKLOG\.md$|FEATURES\.md$|INTENT\.md$)/,
+			/^\.github\/workflows\//,
+		],
+	},
+	{
+		label: "tools",
+		config: "tools/vitest.config.js",
+		triggers: [/^tools\//],
+	},
+];
+
+/**
+ * Git exports these to hooks, pointing at this repo's index and directory. Tests that make
+ * their own temporary repos (the backlog tool's) would then read and write this repo's index,
+ * so each suite runs without them, as it does under `pnpm verify`.
+ */
+const hookGitVariables = ["GIT_INDEX_FILE", "GIT_DIR", "GIT_WORK_TREE", "GIT_PREFIX", "GIT_OBJECT_DIRECTORY", "GIT_COMMON_DIR", "GIT_ALTERNATE_OBJECT_DIRECTORIES"];
 
 /** Files Vitest can place in its import graph. */
 const graphFile = /\.(ts|tsx|js|jsx|mjs|cjs|json)$/;
@@ -142,21 +172,41 @@ function main(): number
 		}
 	}
 
-	const runs = packages.flatMap((pkg) =>
+	const runs: { label: string;
+		cwd: string;
+		mode: string;
+		args: string[] }[] = packages.flatMap((pkg) =>
 	{
+		const cwd = join(repoRoot, pkg.dir);
 		if (full.has(pkg))
 		{
 			return [{
-				pkg,
+				label: pkg.dir,
+				cwd,
+				mode: "full suite",
 				args: ["vitest", "run"],
 			}];
 		}
 		const files = related.get(pkg);
 		return files ? [{
-			pkg,
+			label: pkg.dir,
+			cwd,
+			mode: "related",
 			args: ["vitest", "related", "--run", "--passWithNoTests", ...files],
 		}] : [];
 	});
+	for (const suite of toolingSuites)
+	{
+		if (staged.some((file) => suite.triggers.some((t) => t.test(file)) || runEverything.test(file)))
+		{
+			runs.push({
+				label: suite.label,
+				cwd: repoRoot,
+				mode: "full suite",
+				args: ["vitest", "run", "--config", suite.config],
+			});
+		}
+	}
 
 	if (runs.length === 0)
 	{
@@ -164,16 +214,23 @@ function main(): number
 		return 0;
 	}
 
-	for (const { pkg, args } of runs)
+	for (const {
+		label, cwd, mode, args,
+	} of runs)
 	{
-		console.log(`pre-commit tests: ${pkg.dir} (${args[1] === "run" ? "full suite" : "related"})`);
+		console.log(`pre-commit tests: ${label} (${mode})`);
+		const env = {
+			...process.env,
+		};
+		hookGitVariables.forEach((name) => delete env[name]);
 		const result = spawnSync("pnpm", ["exec", ...args], {
-			cwd: join(repoRoot, pkg.dir),
+			cwd,
+			env,
 			stdio: "inherit",
 		});
 		if (result.status !== 0)
 		{
-			console.error(`\npre-commit tests failed in ${pkg.dir}; commit refused. Fix them, or BT_SKIP_PRECOMMIT_TESTS=1 to land red on purpose.`);
+			console.error(`\npre-commit tests failed in ${label}; commit refused. Fix them, or BT_SKIP_PRECOMMIT_TESTS=1 to land red on purpose.`);
 			return result.status ?? 1;
 		}
 	}

@@ -1,0 +1,225 @@
+{"line":42,"date":"2026-09-08","kind":"backfill","story":"S1","heading":"## 2026-09-08 — S1 verified (backfill, no grader)"}
+{"line":62,"date":"2026-09-08","kind":"backfill","story":"S11","heading":"## 2026-09-08 — S11 verified (backfill)"}
+{"line":112,"date":"2026-09-08","kind":"backfill","story":"S12","heading":"## 2026-09-08 — S12 verified (backfill)"}
+{"line":162,"date":"2026-09-08","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-09-08 — backlog review (`amended`)"}
+{"line":186,"date":"2026-09-08","kind":"backfill","story":"S23","heading":"## 2026-09-08 — S23 verified (backfill)"}
+{"line":240,"date":"2026-09-08","kind":"backfill","story":"S21","heading":"## 2026-09-08 — S21 verified (backfill)"}
+{"line":286,"date":"2026-09-08","kind":"completed","story":"S13","heading":"## 2026-09-08 — S13 completed"}
+{"line":368,"date":"2026-09-09","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-09-09 — backlog review (`amended`)"}
+{"line":538,"date":"2026-09-09","kind":"completed","story":"S14","heading":"## 2026-09-09 — S14 completed"}
+{"line":620,"date":"2026-09-09","kind":"re-verified","story":"S14","heading":"## 2026-09-09 — S14 re-verified"}
+{"line":702,"date":"2026-09-09","kind":"completed","story":"S16","heading":"## 2026-09-09 — S16 completed"}
+{"line":784,"date":"2026-09-09","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-09-09 — backlog review (`amended`)"}
+{"line":970,"date":"2026-09-09","kind":"completed","story":"S17","heading":"## 2026-09-09 — S17 completed"}
+{"line":1050,"date":"2026-09-09","kind":"completed","story":"S22","heading":"## 2026-09-09 — S22 completed"}
+{"line":1140,"date":"2026-09-09","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-09-09 — backlog review (`amended`)"}
+{"line":1232,"date":"2026-09-09","kind":"completed","story":"S15","heading":"## 2026-09-09 — S15 completed"}
+{"line":1318,"date":"2026-09-10","kind":"completed","story":"S7","heading":"## 2026-09-10 — S7 completed"}
+{"line":1400,"date":"2026-09-10","kind":"re-verified","story":"S22","heading":"## 2026-09-10 — S22 re-verified"}
+{"line":1490,"date":"2026-09-10","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-09-10 — backlog review (`amended`)"}
+{"line":1578,"date":"2026-09-10","kind":"completed","story":"S30","heading":"## 2026-09-10 — S30 completed"}
+{"line":1658,"date":"2026-09-13","kind":"completed","story":"S24","heading":"## 2026-09-13 — S24 completed"}
+{"line":1744,"date":"2026-09-13","kind":"completed","story":"S26","heading":"## 2026-09-13 — S26 completed"}
+{"line":1838,"date":"2026-09-13","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-09-13 — backlog review (`amended`)"}
+{"line":1971,"date":"2026-09-13","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-09-13 — backlog review (`amended`)"}
+{"line":2068,"date":"2026-09-13","kind":"re-verified","story":"S15","heading":"## 2026-09-13 — S15 re-verified"}
+{"line":2118,"date":"2026-09-13","kind":"re-verified","story":"S22","heading":"## 2026-09-13 — S22 re-verified"}
+{"line":2172,"date":"2026-09-14","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-09-14 — backlog review (`amended`)"}
+{"line":2309,"date":"2026-09-14","kind":"completed","story":"S27","heading":"## 2026-09-14 — S27 completed"}
+{"line":2401,"date":"2026-09-15","kind":"completed","story":"S25","heading":"## 2026-09-15 — S25 completed"}
+{"line":2495,"date":"2026-09-16","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-09-16 — backlog review (`amended`)"}
+{"line":2724,"date":"2026-09-18","kind":"completed","story":"S29","heading":"## 2026-09-18 — S29 completed"}
+{"line":2816,"date":"2026-10-04","kind":"review","review":"backlog","verdict":"blocked","heading":"## 2026-10-04 — backlog review (`blocked`)"}
+{"line":2890,"date":"2026-10-09","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-09 — backlog review (`amended`)"}
+{"line":2990,"date":"2026-10-09","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-10-09 — doc parity review (`amended`)"}
+{"line":3070,"date":"2026-10-09","kind":"answers","review":"backlog","answers":"2026-10-09","heading":"## 2026-10-09 — backlog review answers (2026-10-09)"}
+{"line":3092,"date":"2026-10-10","kind":"completed","story":"S35","heading":"## 2026-10-10 — S35 completed"}
+{"line":3172,"date":"2026-10-10","kind":"re-verified","story":"S35","heading":"## 2026-10-10 — S35 re-verified"}
+{"line":3252,"date":"2026-10-10","kind":"re-verified","story":"S35","heading":"## 2026-10-10 — S35 re-verified"}
+{"line":3332,"date":"2026-10-10","kind":"completed","story":"S36","heading":"## 2026-10-10 — S36 completed"}
+{"line":3414,"date":"2026-10-12","kind":"completed","story":"S37","heading":"## 2026-10-12 — S37 completed"}
+{"line":3496,"date":"2026-10-12","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-12 — backlog review (`amended`)"}
+{"line":3617,"date":"2026-10-13","kind":"review","review":"parity","verdict":"continue","heading":"## 2026-10-13 — doc parity review (`continue`)"}
+{"line":3676,"date":"2026-10-13","kind":"completed","story":"S38","heading":"## 2026-10-13 — S38 completed"}
+{"line":3756,"date":"2026-10-14","kind":"completed","story":"S31","heading":"## 2026-10-14 — S31 completed"}
+{"line":3838,"date":"2026-10-14","kind":"completed","story":"S32","heading":"## 2026-10-14 — S32 completed"}
+{"line":3907,"date":"2026-10-14","kind":"completed","story":"S33","heading":"## 2026-10-14 — S33 completed"}
+{"line":3976,"date":"2026-10-14","kind":"completed","story":"S34","heading":"## 2026-10-14 — S34 completed"}
+{"line":4045,"date":"2026-10-14","kind":"completed","story":"S32","heading":"## 2026-10-14 — S32 completed"}
+{"line":4127,"date":"2026-10-14","kind":"completed","story":"S33","heading":"## 2026-10-14 — S33 completed"}
+{"line":4209,"date":"2026-10-14","kind":"completed","story":"S34","heading":"## 2026-10-14 — S34 completed"}
+{"line":4291,"date":"2026-10-14","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-14 — backlog review (`amended`)"}
+{"line":4329,"date":"2026-10-14","kind":"answers","review":"backlog","answers":"2026-10-14","heading":"## 2026-10-14 — backlog review answers (2026-10-14)"}
+{"line":4345,"date":"2026-10-14","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-10-14 — doc parity review (`amended`)"}
+{"line":4416,"date":"2026-10-14","kind":"answers","review":"parity","answers":"2026-10-14","heading":"## 2026-10-14 — doc parity review answers (2026-10-14)"}
+{"line":4431,"date":"2026-10-15","kind":"completed","story":"S39","heading":"## 2026-10-15 — S39 completed"}
+{"line":4517,"date":"2026-10-15","kind":"completed","story":"S40","heading":"## 2026-10-15 — S40 completed"}
+{"line":4603,"date":"2026-10-15","kind":"completed","story":"S40","heading":"## 2026-10-15 — S40 completed"}
+{"line":4689,"date":"2026-10-18","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-18 — backlog review (`amended`)"}
+{"line":4733,"date":"2026-10-18","kind":"answers","review":"backlog","answers":"2026-10-18","heading":"## 2026-10-18 — backlog review answers (2026-10-18)"}
+{"line":4752,"date":"2026-10-18","kind":"answers","review":"backlog","answers":"2026-10-18","heading":"## 2026-10-18 — backlog review answers (2026-10-18)"}
+{"line":4767,"date":"2026-10-18","kind":"answers","review":"backlog","answers":"2026-10-18","heading":"## 2026-10-18 — backlog review answers (2026-10-18)"}
+{"line":4782,"date":"2026-10-18","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-10-18 — doc parity review (`amended`)"}
+{"line":4863,"date":"2026-10-18","kind":"answers","review":"parity","answers":"2026-10-18","heading":"## 2026-10-18 — doc parity review answers (2026-10-18)"}
+{"line":4879,"date":"2026-10-19","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-19 — backlog review (`amended`)"}
+{"line":4910,"date":"2026-10-19","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-10-19 — doc parity review (`amended`)"}
+{"line":4973,"date":"2026-10-19","kind":"answers","review":"parity","answers":"2026-10-19","heading":"## 2026-10-19 — doc parity review answers (2026-10-19)"}
+{"line":4994,"date":"2026-10-19","kind":"completed","story":"S43","heading":"## 2026-10-19 — S43 completed"}
+{"line":5076,"date":"2026-10-19","kind":"completed","story":"S42","heading":"## 2026-10-19 — S42 completed"}
+{"line":5160,"date":"2026-10-19","kind":"completed","story":"S52","heading":"## 2026-10-19 — S52 completed"}
+{"line":5244,"date":"2026-10-19","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-19 — backlog review (`amended`)"}
+{"line":5315,"date":"2026-10-19","kind":"review","review":"parity","verdict":"blocked","heading":"## 2026-10-19 — doc parity review (`blocked`)"}
+{"line":5371,"date":"2026-10-19","kind":"answers","review":"parity","answers":"2026-10-19","heading":"## 2026-10-19 — doc parity review answers (2026-10-19)"}
+{"line":5396,"date":"2026-10-19","kind":"completed","story":"S53","heading":"## 2026-10-19 — S53 completed"}
+{"line":5476,"date":"2026-10-20","kind":"review","review":"parity","verdict":"continue","heading":"## 2026-10-20 — doc parity review (`continue`)"}
+{"line":5517,"date":"2026-10-20","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-20 — backlog review (`amended`)"}
+{"line":5608,"date":"2026-10-20","kind":"review","review":"parity","verdict":"continue","heading":"## 2026-10-20 — doc parity review (`continue`)"}
+{"line":5646,"date":"2026-10-20","kind":"completed","story":"S54","heading":"## 2026-10-20 — S54 completed"}
+{"line":5726,"date":"2026-10-20","kind":"review","review":"backlog","verdict":"continue","heading":"## 2026-10-20 — backlog review (`continue`)"}
+{"line":5798,"date":"2026-10-21","kind":"completed","story":"S55","heading":"## 2026-10-21 — S55 completed"}
+{"line":5878,"date":"2026-10-21","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-21 — backlog review (`amended`)"}
+{"line":5972,"date":"2026-10-21","kind":"answers","review":"backlog","answers":"2026-10-21","heading":"## 2026-10-21 — backlog review answers (2026-10-21)"}
+{"line":5999,"date":"2026-10-21","kind":"completed","story":"S56","heading":"## 2026-10-21 — S56 completed"}
+{"line":6079,"date":"2026-10-21","kind":"review","review":"backlog","verdict":"blocked","heading":"## 2026-10-21 — backlog review (`blocked`)"}
+{"line":6125,"date":"2026-10-21","kind":"answers","review":"backlog","answers":"2026-10-21","heading":"## 2026-10-21 — backlog review answers (2026-10-21)"}
+{"line":6149,"date":"2026-10-21","kind":"answers","review":"backlog","answers":"2026-10-21","heading":"## 2026-10-21 — backlog review answers (2026-10-21)"}
+{"line":6170,"date":"2026-10-21","kind":"completed","story":"S57","heading":"## 2026-10-21 — S57 completed"}
+{"line":6250,"date":"2026-10-22","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-22 — backlog review (`amended`)"}
+{"line":6293,"date":"2026-10-22","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-10-22 — doc parity review (`amended`)"}
+{"line":6325,"date":"2026-10-22","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-22 — backlog review (`amended`)"}
+{"line":6373,"date":"2026-10-22","kind":"completed","story":"S58","heading":"## 2026-10-22 — S58 completed"}
+{"line":6453,"date":"2026-10-22","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-22 — backlog review (`amended`)"}
+{"line":6508,"date":"2026-10-23","kind":"completed","story":"S44","heading":"## 2026-10-23 — S44 completed"}
+{"line":6590,"date":"2026-10-23","kind":"completed","story":"S49","heading":"## 2026-10-23 — S49 completed"}
+{"line":6670,"date":"2026-10-23","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-23 — backlog review (`amended`)"}
+{"line":6712,"date":"2026-10-23","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-10-23 — doc parity review (`amended`)"}
+{"line":6745,"date":"2026-10-23","kind":"completed","story":"S46","heading":"## 2026-10-23 — S46 completed"}
+{"line":6827,"date":"2026-10-23","kind":"completed","story":"S8","heading":"## 2026-10-23 — S8 completed"}
+{"line":6911,"date":"2026-10-23","kind":"completed","story":"S59","heading":"## 2026-10-23 — S59 completed"}
+{"line":6993,"date":"2026-10-23","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-23 — backlog review (`amended`)"}
+{"line":7037,"date":"2026-10-23","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-10-23 — doc parity review (`amended`)"}
+{"line":7070,"date":"2026-10-24","kind":"completed","story":"S76","heading":"## 2026-10-24 — S76 completed"}
+{"line":7152,"date":"2026-10-24","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-24 — backlog review (`amended`)"}
+{"line":7207,"date":"2026-10-24","kind":"completed","story":"S77","heading":"## 2026-10-24 — S77 completed"}
+{"line":7291,"date":"2026-10-24","kind":"completed","story":"S6","heading":"## 2026-10-24 — S6 completed"}
+{"line":7379,"date":"2026-10-25","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-25 — backlog review (`amended`)"}
+{"line":7434,"date":"2026-10-25","kind":"answers","review":"backlog","answers":"2026-10-25","heading":"## 2026-10-25 — backlog review answers (2026-10-25)"}
+{"line":7452,"date":"2026-10-25","kind":"answers","review":"parity","answers":"2026-10-23","heading":"## 2026-10-25 — doc parity review answers (2026-10-23)"}
+{"line":7468,"date":"2026-10-25","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-10-25 — doc parity review (`amended`)"}
+{"line":7512,"date":"2026-10-26","kind":"answers","review":"parity","answers":"2026-10-25","heading":"## 2026-10-26 — doc parity review answers (2026-10-25)"}
+{"line":7527,"date":"2026-10-26","kind":"answers","review":"backlog","answers":"2026-10-25","heading":"## 2026-10-26 — backlog review answers (2026-10-25)"}
+{"line":7542,"date":"2026-10-27","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-27 — backlog review (`amended`)"}
+{"line":7604,"date":"2026-10-27","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-10-27 — doc parity review (`amended`)"}
+{"line":7639,"date":"2026-10-28","kind":"completed","story":"S80","heading":"## 2026-10-28 — S80 completed"}
+{"line":7727,"date":"2026-10-28","kind":"completed","story":"S80","heading":"## 2026-10-28 — S80 completed"}
+{"line":7815,"date":"2026-10-28","kind":"completed","story":"S60","heading":"## 2026-10-28 — S60 completed"}
+{"line":7907,"date":"2026-10-28","kind":"answers","review":"backlog","answers":"2026-10-27","heading":"## 2026-10-28 — backlog review answers (2026-10-27)"}
+{"line":7924,"date":"2026-10-28","kind":"answers","review":"parity","answers":"2026-10-27","heading":"## 2026-10-28 — doc parity review answers (2026-10-27)"}
+{"line":7939,"date":"2026-10-28","kind":"completed","story":"S78","heading":"## 2026-10-28 — S78 completed"}
+{"line":8019,"date":"2026-10-28","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-28 — backlog review (`amended`)"}
+{"line":8054,"date":"2026-10-28","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-10-28 — doc parity review (`amended`)"}
+{"line":8091,"date":"2026-10-28","kind":"re-verified","story":"S60","heading":"## 2026-10-28 — S60 re-verified"}
+{"line":8160,"date":"2026-10-28","kind":"completed","story":"S81","heading":"## 2026-10-28 — S81 completed"}
+{"line":8246,"date":"2026-10-28","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-28 — backlog review (`amended`)"}
+{"line":8313,"date":"2026-10-28","kind":"answers","review":"backlog","answers":"2026-10-28","heading":"## 2026-10-28 — backlog review answers (2026-10-28)"}
+{"line":8332,"date":"2026-10-28","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-10-28 — doc parity review (`amended`)"}
+{"line":8372,"date":"2026-10-28","kind":"completed","story":"S83","heading":"## 2026-10-28 — S83 completed"}
+{"line":8467,"date":"2026-10-28","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-28 — backlog review (`amended`)"}
+{"line":8531,"date":"2026-10-28","kind":"answers","review":"backlog","answers":"2026-10-28","heading":"## 2026-10-28 — backlog review answers (2026-10-28)"}
+{"line":8552,"date":"2026-10-28","kind":"review","review":"parity","verdict":"continue","heading":"## 2026-10-28 — doc parity review (`continue`)"}
+{"line":8595,"date":"2026-10-28","kind":"re-verified","story":"S60","at":"74a93e0","heading":"## 2026-10-28 — S60 re-verified at `74a93e0`"}
+{"line":8651,"date":"2026-10-28","kind":"completed","story":"S84","heading":"## 2026-10-28 — S84 completed"}
+{"line":8739,"date":"2026-10-28","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-28 — backlog review (`amended`)"}
+{"line":8803,"date":"2026-10-28","kind":"review","review":"parity","verdict":"continue","heading":"## 2026-10-28 — doc parity review (`continue`)"}
+{"line":8837,"date":"2026-10-28","kind":"answers","review":"backlog","answers":"2026-10-28","heading":"## 2026-10-28 — backlog review answers (2026-10-28)"}
+{"line":8854,"date":"2026-10-28","kind":"review","review":"parity","verdict":"continue","heading":"## 2026-10-28 — doc parity review (`continue`)"}
+{"line":8887,"date":"2026-10-28","kind":"completed","story":"S85","heading":"## 2026-10-28 — S85 completed"}
+{"line":8969,"date":"2026-10-28","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-28 — backlog review (`amended`)"}
+{"line":9016,"date":"2026-10-29","kind":"completed","story":"S82","heading":"## 2026-10-29 — S82 completed"}
+{"line":9092,"date":"2026-10-29","kind":"completed","story":"S82","heading":"## 2026-10-29 — S82 completed"}
+{"line":9159,"date":"2026-10-29","kind":"completed","story":"S82","heading":"## 2026-10-29 — S82 completed"}
+{"line":9226,"date":"2026-10-29","kind":"completed","story":"S82","heading":"## 2026-10-29 — S82 completed"}
+{"line":9306,"date":"2026-10-29","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-29 — backlog review (`amended`)"}
+{"line":9358,"date":"2026-10-29","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-10-29 — doc parity review (`amended`)"}
+{"line":9393,"date":"2026-10-29","kind":"answers","review":"backlog","answers":"2026-10-29","heading":"## 2026-10-29 — backlog review answers (2026-10-29)"}
+{"line":9408,"date":"2026-10-29","kind":"completed","story":"S86","heading":"## 2026-10-29 — S86 completed"}
+{"line":9488,"date":"2026-10-29","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-29 — backlog review (`amended`)"}
+{"line":9517,"date":"2026-10-29","kind":"completed","story":"S87","heading":"## 2026-10-29 — S87 completed"}
+{"line":9597,"date":"2026-10-29","kind":"completed","story":"S79","heading":"## 2026-10-29 — S79 completed"}
+{"line":9702,"date":"2026-10-29","kind":"answers","review":"backlog","answers":"2026-10-29","heading":"## 2026-10-29 — backlog review answers (2026-10-29)"}
+{"line":9717,"date":"2026-10-29","kind":"answers","review":"parity","answers":"2026-10-29","heading":"## 2026-10-29 — doc parity review answers (2026-10-29)"}
+{"line":9732,"date":"2026-10-29","kind":"completed","story":"S88","heading":"## 2026-10-29 — S88 completed"}
+{"line":9812,"date":"2026-10-29","kind":"answers","review":"backlog","answers":"2026-10-29","heading":"## 2026-10-29 — backlog review answers (2026-10-29)"}
+{"line":9827,"date":"2026-10-29","kind":"completed","story":"S62","heading":"## 2026-10-29 — S62 completed"}
+{"line":9911,"date":"2026-10-29","kind":"answers","review":"parity","answers":"2026-10-29","heading":"## 2026-10-29 — doc parity review answers (2026-10-29)"}
+{"line":9926,"date":"2026-10-29","kind":"completed","story":"S61","heading":"## 2026-10-29 — S61 completed"}
+{"line":10010,"date":"2026-10-29","kind":"review","review":"parity","verdict":"continue","heading":"## 2026-10-29 — doc parity review (`continue`)"}
+{"line":10054,"date":"2026-10-29","kind":"completed","story":"S63","heading":"## 2026-10-29 — S63 completed"}
+{"line":10134,"date":"2026-10-29","kind":"completed","story":"S65","heading":"## 2026-10-29 — S65 completed"}
+{"line":10209,"date":"2026-10-29","kind":"completed","story":"S65","heading":"## 2026-10-29 — S65 completed"}
+{"line":10291,"date":"2026-10-29","kind":"completed","story":"S3","heading":"## 2026-10-29 — S3 completed"}
+{"line":10390,"date":"2026-10-29","kind":"completed","story":"S2","heading":"## 2026-10-29 — S2 completed"}
+{"line":10502,"date":"2026-10-29","kind":"completed","story":"S10","heading":"## 2026-10-29 — S10 completed"}
+{"line":10587,"date":"2026-10-29","kind":"completed","story":"S10","heading":"## 2026-10-29 — S10 completed"}
+{"line":10685,"date":"2026-10-29","kind":"answers","review":"parity","answers":"2026-10-29","heading":"## 2026-10-29 — doc parity review answers (2026-10-29)"}
+{"line":10700,"date":"2026-10-29","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-29 — backlog review (`amended`)"}
+{"line":10746,"date":"2026-10-29","kind":"answers","review":"backlog","answers":"2026-10-29","heading":"## 2026-10-29 — backlog review answers (2026-10-29)"}
+{"line":10764,"date":"2026-10-29","kind":"answers","review":"parity","answers":"2026-10-29","heading":"## 2026-10-29 — doc parity review answers (2026-10-29)"}
+{"line":10779,"date":"2026-10-29","kind":"answers","review":"parity","answers":"2026-10-29","heading":"## 2026-10-29 — doc parity review answers (2026-10-29)"}
+{"line":10794,"date":"2026-10-29","kind":"answers","review":"backlog","answers":"2026-10-29","heading":"## 2026-10-29 — backlog review answers (2026-10-29)"}
+{"line":10809,"date":"2026-10-29","kind":"completed","story":"S64","heading":"## 2026-10-29 — S64 completed"}
+{"line":10912,"date":"2026-10-29","kind":"answers","review":"backlog","answers":"2026-10-29","heading":"## 2026-10-29 — backlog review answers (2026-10-29)"}
+{"line":10927,"date":"2026-10-29","kind":"review","review":"parity","verdict":"continue","heading":"## 2026-10-29 — doc parity review (`continue`)"}
+{"line":10963,"date":"2026-10-29","kind":"answers","review":"parity","answers":"2026-10-29","heading":"## 2026-10-29 — doc parity review answers (2026-10-29)"}
+{"line":10978,"date":"2026-10-29","kind":"completed","story":"S41","heading":"## 2026-10-29 — S41 completed"}
+{"line":11086,"date":"2026-10-30","kind":"completed","story":"S66","heading":"## 2026-10-30 — S66 completed"}
+{"line":11196,"date":"2026-10-30","kind":"completed","story":"S45","heading":"## 2026-10-30 — S45 completed"}
+{"line":11286,"date":"2026-10-30","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-30 — backlog review (`amended`)"}
+{"line":11340,"date":"2026-10-30","kind":"completed","story":"S67","heading":"## 2026-10-30 — S67 completed"}
+{"line":11434,"date":"2026-10-30","kind":"answers","review":"backlog","answers":"2026-10-30","heading":"## 2026-10-30 — backlog review answers (2026-10-30)"}
+{"line":11452,"date":"2026-10-30","kind":"answers","review":"backlog","answers":"2026-10-30","heading":"## 2026-10-30 — backlog review answers (2026-10-30)"}
+{"line":11467,"date":"2026-10-30","kind":"answers","review":"backlog","answers":"2026-10-30","heading":"## 2026-10-30 — backlog review answers (2026-10-30)"}
+{"line":11482,"date":"2026-10-30","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-10-30 — doc parity review (`amended`)"}
+{"line":11517,"date":"2026-10-30","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-10-30 — backlog review (`amended`)"}
+{"line":11579,"date":"2026-10-30","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-10-30 — doc parity review (`amended`)"}
+{"line":11613,"date":"2026-10-30","kind":"completed","story":"S68","heading":"## 2026-10-30 — S68 completed"}
+{"line":11712,"date":"2026-10-30","kind":"completed","story":"S69","heading":"## 2026-10-30 — S69 completed"}
+{"line":11808,"date":"2026-10-30","kind":"answers","review":"backlog","answers":"2026-10-30","heading":"## 2026-10-30 — backlog review answers (2026-10-30)"}
+{"line":11823,"date":"2026-10-30","kind":"answers","review":"backlog","answers":"2026-10-30","heading":"## 2026-10-30 — backlog review answers (2026-10-30)"}
+{"line":11845,"date":"2026-10-30","kind":"answers","review":"parity","answers":"2026-10-30","heading":"## 2026-10-30 — doc parity review answers (2026-10-30)"}
+{"line":11867,"date":"2026-10-30","kind":"answers","review":"backlog","answers":"2026-10-30","heading":"## 2026-10-30 — backlog review answers (2026-10-30)"}
+{"line":11882,"date":"2026-10-30","kind":"answers","review":"parity","answers":"2026-10-30","heading":"## 2026-10-30 — doc parity review answers (2026-10-30)"}
+{"line":11897,"date":"2026-10-30","kind":"completed","story":"S47","heading":"## 2026-10-30 — S47 completed"}
+{"line":11981,"date":"2026-10-30","kind":"review","review":"parity","verdict":"continue","heading":"## 2026-10-30 — doc parity review (`continue`)"}
+{"line":12017,"date":"2026-10-30","kind":"completed","story":"S48","heading":"## 2026-10-30 — S48 completed"}
+{"line":12107,"date":"2026-10-30","kind":"completed","story":"S18","heading":"## 2026-10-30 — S18 completed"}
+{"line":12195,"date":"2026-10-31","kind":"completed","story":"S70","heading":"## 2026-10-31 — S70 completed"}
+{"line":12289,"date":"2026-10-31","kind":"completed","story":"S19","heading":"## 2026-10-31 — S19 completed"}
+{"line":12391,"date":"2026-11-02","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-11-02 — backlog review (`amended`)"}
+{"line":12453,"date":"2026-11-02","kind":"answers","review":"backlog","answers":"2026-11-02","heading":"## 2026-11-02 — backlog review answers (2026-11-02)"}
+{"line":12471,"date":"2026-11-02","kind":"review","review":"parity","verdict":"continue","heading":"## 2026-11-02 — doc parity review (`continue`)"}
+{"line":12500,"date":"2026-11-02","kind":"completed","story":"S110","heading":"## 2026-11-02 — S110 completed"}
+{"line":12581,"date":"2026-11-02","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-11-02 — backlog review (`amended`)"}
+{"line":12621,"date":"2026-11-02","kind":"completed","story":"S50","heading":"## 2026-11-02 — S50 completed"}
+{"line":12705,"date":"2026-11-02","kind":"completed","story":"S109","heading":"## 2026-11-02 — S109 completed"}
+{"line":12796,"date":"2026-11-02","kind":"completed","story":"S20","heading":"## 2026-11-02 — S20 completed"}
+{"line":12885,"date":"2026-11-02","kind":"completed","story":"S71","heading":"## 2026-11-02 — S71 completed"}
+{"line":12979,"date":"2026-11-02","kind":"answers","review":"backlog","answers":"2026-11-02","heading":"## 2026-11-02 — backlog review answers (2026-11-02)"}
+{"line":12997,"date":"2026-11-02","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-11-02 — backlog review (`amended`)"}
+{"line":13034,"date":"2026-11-02","kind":"completed","story":"S93","heading":"## 2026-11-02 — S93 completed"}
+{"line":13116,"date":"2026-11-02","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-11-02 — doc parity review (`amended`)"}
+{"line":13155,"date":"2026-11-02","kind":"answers","review":"backlog","answers":"2026-11-02","heading":"## 2026-11-02 — backlog review answers (2026-11-02)"}
+{"line":13170,"date":"2026-11-02","kind":"answers","review":"parity","answers":"2026-11-02","heading":"## 2026-11-02 — doc parity review answers (2026-11-02)"}
+{"line":13185,"date":"2026-11-02","kind":"answers","review":"backlog","answers":"2026-11-02","heading":"## 2026-11-02 — backlog review answers (2026-11-02)"}
+{"line":13200,"date":"2026-11-02","kind":"answers","review":"parity","answers":"2026-11-02","heading":"## 2026-11-02 — doc parity review answers (2026-11-02)"}
+{"line":13215,"date":"2026-11-02","kind":"answers","review":"backlog","answers":"2026-11-02","heading":"## 2026-11-02 — backlog review answers (2026-11-02)"}
+{"line":13230,"date":"2026-11-02","kind":"answers","review":"parity","answers":"2026-11-02","heading":"## 2026-11-02 — doc parity review answers (2026-11-02)"}
+{"line":13245,"date":"2026-11-02","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-11-02 — backlog review (`amended`)"}
+{"line":13285,"date":"2026-11-02","kind":"completed","story":"S94","heading":"## 2026-11-02 — S94 completed"}
+{"line":13367,"date":"2026-11-03","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-11-03 — backlog review (`amended`)"}
+{"line":13403,"date":"2026-11-03","kind":"completed","story":"S95","heading":"## 2026-11-03 — S95 completed"}
+{"line":13483,"date":"2026-11-03","kind":"answers","review":"backlog","answers":"2026-11-02","heading":"## 2026-11-03 — backlog review answers (2026-11-02)"}
+{"line":13498,"date":"2026-11-03","kind":"answers","review":"backlog","answers":"2026-11-02","heading":"## 2026-11-03 — backlog review answers (2026-11-02)"}
+{"line":13513,"date":"2026-11-03","kind":"completed","story":"S111","heading":"## 2026-11-03 — S111 completed"}
+{"line":13606,"date":"2026-11-03","kind":"completed","story":"S75","heading":"## 2026-11-03 — S75 completed"}
+{"line":13709,"date":"2026-11-03","kind":"skip","review":"backlog","heading":"## 2026-11-03 — backlog review skipped"}
