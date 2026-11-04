@@ -32,6 +32,8 @@ export function WinProbabilityCard({ game, scoresHidden }: { game: GamePayload;
 	const line = series.points.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.home).toFixed(1)}`).join(" ");
 	const area = `${line} L${x(n - 1).toFixed(1)},${PLOT} L${x(0).toFixed(1)},${PLOT} Z`;
 	// Each inning's label sits under its first at-bat.
+	// A label at either edge is anchored inward so it isn't cut off by the chart.
+	const anchor = (labelX: number) => labelX < 8 ? "start" : labelX > W - 8 ? "end" : "middle";
 	const innings = series.points.flatMap((p, i) => i === 0 || series.points[i - 1]!.inning !== p.inning ? [{
 		inning: p.inning,
 		x: x(i),
@@ -70,7 +72,7 @@ export function WinProbabilityCard({ game, scoresHidden }: { game: GamePayload;
 					<line x1={0} x2={W} y1={y(50)} y2={y(50)} stroke="var(--bt-light)" strokeWidth={1} strokeDasharray="3 3" data-testid="win-probability-midline" />
 					<path d={line} fill="none" stroke="var(--bt-accent)" strokeWidth={2} strokeLinejoin="round" data-testid="win-probability-line" data-points={n} />
 					{innings.map((label) => (
-						<text key={label.inning} x={label.x} y={H - 4} fontSize={10} fill="var(--bt-muted)" textAnchor="middle" data-testid="win-probability-inning">
+						<text key={label.inning} x={label.x} y={H - 4} fontSize={10} fill="var(--bt-muted)" textAnchor={anchor(label.x)} data-testid="win-probability-inning">
 							{label.inning}
 						</text>
 					))}
