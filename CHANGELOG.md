@@ -274,6 +274,7 @@ explicitly where that's the case. For what's still ahead, see
 
 ## New screens are checked against the approved designs
 
+- **Before, a new screen's design screenshots could only be taken on the owner's own computer, so work done in the cloud stalled waiting for it. Now GitHub takes them on request: name the story, and the screenshots come back as a download, or straight into the project if asked.** Details: S115 — `.github/workflows/design-capture.yml` (`workflow_dispatch`, inputs `story` and `commit`), running exactly `e2e/design/<story>.spec.ts`. _(2026-11-04)_
 - **Before, every change waited for each automated check in turn, about nine minutes. Now the checks run side by side, so a change learns sooner whether it is safe, and a broken screenshot script still fails the check without taking new pictures.** Details: S89 — `ci.yml` runs verify, the flows (`--workers=4`, `--repeat-each=2`), the design specs (`pnpm e2e:design`) and Lighthouse as parallel jobs, plus one `ci-passed` gate; `pnpm e2e` runs only `e2e/flows/` and the harness. _(2026-11-04)_
 - **Before, the app's frame looked close to the approved design but not quite: the logo's letters
   were in the wrong typeface, the highlighted menu item was the wrong red, and the menu text was

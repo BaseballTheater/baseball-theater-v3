@@ -1,0 +1,85 @@
+name: Design capture
+
+# S115: take a story's design captures (rule 22) on request, on a GitHub runner, which has the
+# browser and Docker a cloud session lacks. Run it from the Actions tab or with
+# `gh workflow run design-capture.yml -f story=S106` (add `-f commit=true` to commit them).
+# The owner's design match still happens in a session (`scripts/audit.sh story <ID> --design-match -`).
+on:
+    workflow_dispatch:
+        inputs:
+            story:
+                description: "Story ID whose captures to take, e.g. S106 (runs e2e/design/<story>.spec.ts)"
+                required: true
+                type: string
+            commit:
+                description: "Commit the captures to the branch this runs on (off: upload them only)"
+                required: false
+                type: boolean
+                default: false
+
+permissions:
+    contents: read
+
+concurrency:
+    group: design-capture-${{ github.ref }}
+    cancel-in-progress: false
+
+jobs:
+    capture:
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        # Write access only so the optional commit step can push the captures.
+        permissions:
+            contents: write
+        env:
+            STORY: ${{ inputs.story }}
+        steps:
+            - uses: actions/checkout@v4
+
+            # The input only ever reaches the shell through $STORY, and only once it is S<N>.
+            - name: The story has a capture spec
+              run: |
+                  echo "$STORY" | grep -Eq '^S[0-9]+$' || { echo "story must look like S106, got: $STORY"; exit 1; }
+                  test -f "e2e/design/$STORY.spec.ts" || { echo "no e2e/design/$STORY.spec.ts"; exit 1; }
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 9.15.0
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: ".nvmrc"
+                  cache: pnpm
+
+            - name: Install
+              run: pnpm install --frozen-lockfile
+
+            - name: Install the Playwright browser
+              run: pnpm exec playwright install --with-deps chromium
+
+            # Exactly the story's spec: a bare ID is a pattern, so S10 would also run S106 and S109.
+            # The Playwright config starts the app with `pnpm dev` (Postgres on the runner's Docker).
+            - name: Take the captures
+              run: pnpm design:capture "e2e/design/$STORY.spec.ts"
+
+            - name: The spec saved captures
+              run: |
+                  ls docs/v3/design-checks/"$STORY"/*.png > /dev/null 2>&1 || { echo "e2e/design/$STORY.spec.ts saved no capture"; exit 1; }
+                  ls -l docs/v3/design-checks/"$STORY"/
+
+            - name: Upload the captures
+              uses: actions/upload-artifact@v4
+              with:
+                  name: design-checks-${{ inputs.story }}
+                  path: docs/v3/design-checks/${{ inputs.story }}/
+                  if-no-files-found: error
+
+            - name: Commit the captures
+              if: ${{ inputs.commit }}
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git add "docs/v3/design-checks/$STORY/"
+                  if git diff --cached --quiet; then echo "captures unchanged; nothing to commit"; exit 0; fi
+                  git commit -m "$STORY: design captures (CI, design-capture.yml)"
+                  git push origin "HEAD:${GITHUB_REF_NAME}"
