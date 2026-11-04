@@ -14,6 +14,17 @@ import type {
 /** MLB's taxonomy tag on an ABS challenge clip. */
 const ABS_TAG = "abs";
 
+/**
+ * Each pitch's `playId` → the `atBatIndex` of the at-bat it was thrown in. A video's `playId`
+ * names a pitch (S95), while S93's play metrics are per at-bat, so anything that joins the two
+ * goes through this one lookup (ADR-025): `videoPlayLinks` to check a link, the impact rank (S98)
+ * to find a clip's win probability. Pitches with no `playId` are left out.
+ */
+export function atBatIndexByPitch(plays: readonly AtBat[]): Map<string, number>
+{
+	return new Map(plays.flatMap((atBat) => atBat.pitches.filter((p) => p.playId).map((p) => [p.playId as string, atBat.about.atBatIndex] as const)));
+}
+
 /** What an ABS clip's title says the challenge did: overturned, confirmed, or nothing. */
 function titledOutcome(title: string): boolean | null
 {
@@ -40,7 +51,7 @@ export function videoPlayLinks(
 	playMetrics?: GamePlayMetrics,
 ): MediaHighlight[]
 {
-	const atBatOfPitch = new Map(plays.flatMap((atBat) => atBat.pitches.filter((p) => p.playId).map((p) => [p.playId, atBat.about.atBatIndex] as const)));
+	const atBatOfPitch = atBatIndexByPitch(plays);
 	const refs = new Map(playRefs.map((ref) => [ref.videoId, ref.playId]));
 	const linked = videos.map((video): MediaHighlight =>
 	{

@@ -13837,3 +13837,81 @@ The As of line was moved on. S75's previous As of line went to Baseline history.
 **Owner questions.** None new from this review. The decisions that are pending all belong to the owner's S96 ratification session (A5 Q1–Q3, A6 Q1–Q2) and to S51's `pnpm dev` check, and both are already asked by their own stories.
 
 **Verdict: `amended`.** Notes only: S97, S98, S106, S5. Also the baseline row, the As of line and the scheduling note. No AC, priority, status, fence or Source line changed. Not `blocked`: S5, S98 and S106 can start.
+
+---
+
+## 2026-11-04 — S98 completed
+
+**Impact rank from win probability**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-04T19:41:54Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `1bfdfb1` (tree dirty) |
+| Grader | `scripts/verify-S98.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: rankHighlightsByImpact in packages/domain ranks a clip with a play by the absolute win probability its play added, key moments and lead changes first among ties, clips without a play by keyword score after them; withGameExtras hands it the play metrics, the one place it runs with them (unit tests named 'S98 AC 1')
+check 2 PASS: on 823823 the server's order puts the clip of the largest win-probability swing first, and Griffin Conine's two-run home run (+19.6%) above the solo home runs that swung less (test named 'S98 AC 2')
+check 3 PASS: with no play metrics the order is today's keyword order (test named 'S98 AC 3')
+check 4 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**4/4 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S98 check results ---
+check 1 PASS: rankHighlightsByImpact in packages/domain ranks a clip with a play by the absolute win probability its play added, key moments and lead changes first among ties, clips without a play by keyword score after them; withGameExtras hands it the play metrics, the one place it runs with them (unit tests named 'S98 AC 1')
+check 2 PASS: on 823823 the server's order puts the clip of the largest win-probability swing first, and Griffin Conine's two-run home run (+19.6%) above the solo home runs that swung less (test named 'S98 AC 2')
+check 3 PASS: with no play metrics the order is today's keyword order (test named 'S98 AC 3')
+check 4 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S98: 4/4 checks passed ---
+verify-S98: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  1059ms
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 1069ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  599ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  468ms
+ ✓ |tools| size-limit/size-limit.test.js (2 tests) 179ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 124ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 129ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 66ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 126ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 23ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  11:47:01
+   Duration  9.80s (transform 76ms, setup 0ms, collect 5.03s, tests 2.84s, environment 1ms, prepare 543ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/claude/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154311,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

@@ -2,6 +2,7 @@
 
 Every earlier **As of** line of the [Current baseline](#current-baseline), newest first (rule 17). When a change moves the baseline's **As of** line on, the line it replaces goes to the top of this list, unchanged.
 
+- 2026-11-04 — the design intake review for S96's draft amendments (game-shell A5, game-rooms A6) took nothing in, since neither is ratified, and corrected the video play links row: S95 is done and S96 is parked awaiting the owner.
 - 2026-11-03 — **S75** done: Hide Scores reaches the game rooms and the recap video's title.
 - 2026-11-03 — **S111** done: the scoreboard opens on today, or on the World Series final in the off-season.
 - 2026-11-03 — **S95** done: each video links to the play it shows, ABS challenge clips included.

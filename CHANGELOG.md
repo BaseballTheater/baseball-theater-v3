@@ -35,6 +35,14 @@ explicitly where that's the case. For what's still ahead, see
 
 ## A game's videos are easy to browse
 
+- **Before, "biggest moments first" was a guess from each clip's title, so any home run beat a game-saving
+  catch or a big two-out single. Now the clips are ordered by how much their play actually changed each team's
+  chance of winning, by MLB's own numbers: in the Cubs–Marlins sample game, Griffin Conine's two-run homer
+  (which swung the odds almost 20 points) leads, ahead of solo homers that mattered less. Clips with no single
+  play, like graphics and the recap, follow in the old order.** Details: S98 — `rankHighlightsByImpact` in
+  `packages/domain` ranks by the absolute win probability added (S93), key moments and lead changes first among
+  ties, through the one pitch-to-at-bat lookup `atBatIndexByPitch`; run in `withGameExtras` with the play
+  metrics; keyword order when there are none. _(2026-11-04)_
 - **Before, a highlight couldn't be watched inside Baseball Theater. Now tapping a clip plays it right there,
   floating over the dimmed page with a Close button (and, from Search, a link to its game). Or, if you prefer,
   it plays in a fixed player above the clips. The required MLB notice always shows under it, and on iPhone it
