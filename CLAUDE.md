@@ -74,6 +74,7 @@ Auth direction: Logto (email sign-in at launch, **no passkeys at launch**) behin
 
 ## Agent / loop rules
 
+- **Read the docs from `docs/v3/INDEX.md` down** (owner, 2026-11-04: a cascading linked docs approach "whenever it is mostly lossless contextually"). It is generated (`pnpm backlog:build`) and lists every doc with its size, the line range of each section of the big ones (ADRs, backlog rules by number, frame notes), and every story by status with a link to its note. Open the smallest thing that answers the question and read only its line range. Never open `docs/v3/BACKLOG.md` or `docs/v3/AUDIT.md` whole: a story's text is its note, and a ledger entry is found through `docs/v3/audit.jsonl`.
 - Work from `docs/v3/BACKLOG.md` stories; acceptance criteria must map to commands/tests
 - **`docs/v3/BACKLOG.md` is generated — never edit it directly.** Its source is the Obsidian notes in `docs/v3/backlog/`: one `stories/S<N>.md` per story (frontmatter `title`, `table_title`, `priority`, `status` are authoritative; the body is the story text minus its heading and `**Status:**` line) plus `frame/` notes for everything around the stories. After any edit run `pnpm backlog:build`, and commit the notes and `BACKLOG.md` together. `pnpm backlog:check` (in `pnpm verify` and CI) fails when they diverge; the pre-commit hook rebuilds and rejects hand edits to `BACKLOG.md`.
 - Update backlog **Status** in the same change set: `status: doing` in the story's note when you start, `status: done` when every AC passes (never leave it stale after finishing), then `pnpm backlog:build` before running the grader. The **Story status** table and its order are generated from each note's `status`/`priority` (IDs are labels, not order) — re-prioritize by editing `priority`, never by hand-editing the table. Keep the **Current baseline** table (`docs/v3/backlog/frame/01 Current baseline.md`) and its **As of** line in sync too (`docs/v3/BACKLOG.md` rule 17) — whenever a story flips to `done` or is inserted/removed/re-scoped.
@@ -100,8 +101,8 @@ Story IDs in `docs/v3/BACKLOG.md` are `S` + digits (`S1`…`S29`, case-insensiti
 
 When the goal you are handed is just a story ID plus `done` (e.g. `/goal S27 done`):
 
-1. Find `### S<N> — …` in `docs/v3/BACKLOG.md`. Begin your first response with `Goal for S<N>:` then, quoted **word for word**, that story's `/goal …` line followed by its full **Acceptance criteria** list (including nested bullets).
-2. If there is no `### S<N> —` heading for the ID, or the story has no **`/goal` command** block, say so plainly and stop — do not guess what the story means.
+1. Open the story's note, `docs/v3/backlog/stories/S<N>.md`: its body is the story's `### S<N> — …` section of `docs/v3/BACKLOG.md`, word for word (don't open BACKLOG.md whole — it is ~1 MB). Begin your first response with `Goal for S<N>:` then, quoted **word for word**, that story's `/goal …` line followed by its full **Acceptance criteria** list (including nested bullets).
+2. If there is no note (no `### S<N> —` heading) for the ID, or the story has no **`/goal` command** block, say so plainly and stop — do not guess what the story means.
 3. Work toward the quoted text, not a paraphrase.
 4. Never edit a story's `/goal` line or acceptance criteria — in its note `docs/v3/backlog/stories/S<N>.md` or anywhere they are generated (`docs/v3/BACKLOG.md`, rebuilt by `pnpm backlog:build`) — to make them easier to satisfy.
 5. When you believe you are finished, end with a section headed `S<N> verified:` listing every clause of the quoted `/goal` line and every acceptance criterion, each with concrete evidence from this session (grader/test output, command exit codes, file contents). Do not mark a clause passed without showing the evidence.

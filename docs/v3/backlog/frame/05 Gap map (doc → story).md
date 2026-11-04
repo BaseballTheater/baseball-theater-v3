@@ -34,3 +34,5 @@
 | Client state (ADR-024) + account settings (ADR-027) | **S8** → **S59** → **S6** (one Zustand store hydrated from the account) |
 | Code quality (ADR-025) | **S52** derivations + lint, **S53** `jscpd` + comment check + reuse-check rule; duplication sweep in every backlog review |
 | Budgets + coverage (ADR-026) | **S54** size + render counts + ratchet, **S81** Playwright + design-match captures (rule 22), **S62** Lighthouse CI + flows; bringing LCP under 2.5 s (both pages warn at about 3.2–3.3 s) — no story yet (owner, 2026-10-29: "we can figure out the problems later") |
+
+---

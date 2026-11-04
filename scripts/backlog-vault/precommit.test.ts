@@ -10,9 +10,10 @@ import {
 import {
 	AUDIT, FIXTURE, notesFor,
 } from "./fixture.ts";
+import { docIndexFor } from "./doc-index.ts";
 import { parseLedger, renderLedgerIndex } from "./ledger.ts";
 import {
-	AUDIT as AUDIT_PATH, AUDIT_INDEX, BACKLOG, NOTES_DIR, runPrecommit,
+	AUDIT as AUDIT_PATH, AUDIT_INDEX, BACKLOG, DOC_INDEX, NOTES_DIR, runPrecommit,
 } from "./precommit.ts";
 
 let repo = "";
@@ -51,6 +52,13 @@ beforeEach(() =>
 	write(BACKLOG, FIXTURE);
 	write(AUDIT_PATH, AUDIT);
 	write(AUDIT_INDEX, renderLedgerIndex(parseLedger(AUDIT)));
+	write(DOC_INDEX, docIndexFor(FIXTURE, notesFor(FIXTURE), [{
+		path: "BACKLOG.md",
+		text: FIXTURE,
+	}, {
+		path: "AUDIT.md",
+		text: AUDIT,
+	}]));
 	git("add", "-A");
 	git("commit", "-qm", "base");
 });
@@ -86,7 +94,10 @@ describe("runPrecommit", () =>
 		const result = runPrecommit(repo);
 
 		expect(result.ok).toBe(true);
-		expect(result.restaged).toEqual([BACKLOG]);
+		// The docs index lists each story's status, so it moves with S9 too.
+		expect(result.restaged).toEqual([BACKLOG, DOC_INDEX]);
+		expect(stagedFile(DOC_INDEX)).toContain("[S9](backlog/stories/S9.md) Align `pnpm dev` | `doing` |");
+		expect(stagedFile(DOC_INDEX)).not.toContain("UNSTAGED");
 		expect(stagedFile(BACKLOG)).toContain("| 1 | [S9](#s9--align-pnpm-dev-with-emulator-story-document--smoke) | Align `pnpm dev` | `doing` |");
 		expect(stagedFile(BACKLOG)).not.toContain("UNSTAGED");
 		expect(read(framePath)).toContain("UNSTAGED FRAME EDIT");

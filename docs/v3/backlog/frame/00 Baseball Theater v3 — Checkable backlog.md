@@ -62,8 +62,10 @@
     the baseline table in the same commit — it lives in `docs/v3/backlog/frame/01 Current baseline.md`;
     edit it there and run `pnpm backlog:build`: the affected rows' **State** (citing the story ID and the
     concrete path/command that now exists) and the **As of** line (date, HEAD it describes, last story
-    landed). A row may only say **Done** for something that exists at HEAD — not for what a story promises.
-    A backlog review checks the table against HEAD and fixes any row that has drifted.
+    landed). The **As of** line it replaces moves, unchanged, to the top of [Baseline history](#baseline-history)
+    (owner, 2026-11-04: cascading linked docs "whenever it is mostly lossless contextually"), so the baseline note
+    stays the current state. A row may only say **Done** for something that exists at HEAD — not for what a story
+    promises. A backlog review checks the table against HEAD and fixes any row that has drifted.
 
 18. **UI is designed before it is built, and the product owner ratifies the design.** A story that
     builds or restyles a user-facing surface carries a `**Design:**` line naming the design stories

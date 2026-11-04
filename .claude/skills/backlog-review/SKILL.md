@@ -46,7 +46,7 @@ Run all four. Each produces findings or cited evidence — never a bare "looks f
 
 Scope: the **next 3** stories by Priority with Status `todo`, plus the concerns they touch.
 
-- Does the carried product loop have a gap that no story owns? Compare `docs/v3/FEATURES.md`, `VISUAL-DESIGN.md`, and the accepted ADRs against the Gap map at the bottom of `BACKLOG.md`.
+- Does the carried product loop have a gap that no story owns? Compare `docs/v3/FEATURES.md`, `VISUAL-DESIGN.md`, and the accepted ADRs against the Gap map (`docs/v3/backlog/frame/05 Gap map (doc → story).md`). Find the ADRs and the rest through `docs/v3/INDEX.md`, reading each by its line range, and read stories from their notes rather than `BACKLOG.md` (~1 MB).
 - Did a recently accepted ADR create work that no story carries?
 - Is a story about to be built on something that does not exist and is not a listed dependency?
 - Is there a **Later theme** that recent work has promoted into a real blocker?

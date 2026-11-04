@@ -9,7 +9,8 @@
  *   cli.ts done-since backlog|parity    stories completed since the newest review of that kind
  *   cli.ts review-blocked backlog|parity  prints `blocked` when that review waits for the owner, else `clear`
  *
- * build and check also cover docs/v3/audit.jsonl, the ledger's generated index (`--index <file>`).
+ * build and check also cover docs/v3/audit.jsonl, the ledger's generated index (`--index <file>`),
+ * and docs/v3/INDEX.md, the docs index agents start reading from (doc-index.ts; beside BACKLOG.md).
  *
  * `--dir <notes dir>` (default docs/v3/backlog), `--backlog <file>` (default docs/v3/BACKLOG.md),
  * and `--audit <file>` (default docs/v3/AUDIT.md, read for the generated review-debt line) let
@@ -25,6 +26,8 @@ import {
 } from "node:path";
 import { parseArgs } from "node:util";
 import { buildFromNotes } from "./assemble.ts";
+import type { IndexedDoc } from "./doc-index.ts";
+import { docIndexFor, isIndexedDoc } from "./doc-index.ts";
 import type { ReviewKind } from "./ledger.ts";
 import {
 	ledgerBase, parseLedger, renderLedgerIndex, reviewBlocked, storiesDoneSince,
@@ -85,6 +88,20 @@ async function readSourceDocs(): Promise<SourceDocs>
 		intent: await readFile(join(docsDir, "INTENT.md"), "utf8"),
 	};
 }
+
+/** docs/v3's own Markdown docs (the directory BACKLOG.md sits in), for the docs index. */
+async function readIndexedDocs(): Promise<IndexedDoc[]>
+{
+	const docsDir = dirname(backlogPath);
+	const names = (await readdir(docsDir).catch(() => [] as string[])).filter(isIndexedDoc).sort();
+	return Promise.all(names.map(async (path) => ({
+		path,
+		text: await readFile(join(docsDir, path), "utf8"),
+	})));
+}
+
+/** Where the docs index lives: INDEX.md beside BACKLOG.md. */
+const docIndexPath = () => join(dirname(backlogPath), "INDEX.md");
 
 function log(message: string)
 {
@@ -157,6 +174,8 @@ async function build()
 		await writeFile(indexPath, renderLedgerIndex(parseLedger(audit)));
 		log(`built ${indexPath} from ${auditPath}`);
 	}
+	await writeFile(docIndexPath(), docIndexFor(built.backlog, built.notes, await readIndexedDocs()));
+	log(`built ${docIndexPath()}`);
 }
 
 async function check()
@@ -183,6 +202,11 @@ async function check()
 		&& (await readFile(indexPath, "utf8").catch(() => undefined)) !== renderLedgerIndex(parseLedger(audit)))
 	{
 		stale.push(indexPath);
+	}
+	if (!values["backlog-only"]
+		&& (await readFile(docIndexPath(), "utf8").catch(() => undefined)) !== docIndexFor(built.backlog, built.notes, await readIndexedDocs()))
+	{
+		stale.push(docIndexPath());
 	}
 	if (stale.length > 0)
 	{

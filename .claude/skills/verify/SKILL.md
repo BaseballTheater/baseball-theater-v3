@@ -19,6 +19,8 @@ This is the truth signal. Exit code **0** means:
 
 Exit code **non-zero** means the change is not done. Do not claim success.
 
+The output is kept short to save context (owner, 2026-11-04): tests print a dot each, logs only from failing tests, and coverage as totals per package; a failure still prints in full, and a missed floor names the metric. For the per-file coverage table, run `pnpm --filter <package> exec vitest run --coverage`.
+
 ### What this covers
 
 | Check                    | How                                                           |

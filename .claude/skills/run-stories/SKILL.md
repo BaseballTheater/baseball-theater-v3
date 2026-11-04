@@ -22,7 +22,7 @@ If the owner has, **in this session**, answered a parked story's question (a des
 
 Check in this order:
 
-1. **Backlog review due?** Count `done` flips since the last review entry in `docs/v3/AUDIT.md` (6 triggers it), plus any drift event (`CLAUDE.md` → Agent / loop rules). If due, run `.claude/skills/backlog-review/SKILL.md` in a **fresh-context subagent** (the Agent tool; this skill is the owner's explicit request for it — the agent that built the stories must not review them). Commit its result.
+1. **Backlog review due?** `scripts/review-debt.sh` counts `done` flips since the last review (6 triggers it) and the drift events git records; add any it can't see (`CLAUDE.md` → Agent / loop rules). Don't read `docs/v3/AUDIT.md` to count — it is ~1 MB. If due, run `.claude/skills/backlog-review/SKILL.md` in a **fresh-context subagent** (the Agent tool; this skill is the owner's explicit request for it — the agent that built the stories must not review them). Commit its result.
 2. **Doc parity due?** `pnpm parity:debt`. If due, run `.claude/skills/doc-parity-review/SKILL.md` the same way.
 3. A review verdict of **`blocked` stops the whole loop** — go to step 5. Questions from a `continue` / `amended` review don't stop it; collect them for the summary.
 

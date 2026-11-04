@@ -13,6 +13,7 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 import { buildFromNotes } from "./assemble.ts";
+import { docIndexFor, isIndexedDoc } from "./doc-index.ts";
 import { parseLedger, renderLedgerIndex } from "./ledger.ts";
 
 export const NOTES_DIR = "docs/v3/backlog";
@@ -20,6 +21,9 @@ export const BACKLOG = "docs/v3/BACKLOG.md";
 export const AUDIT = "docs/v3/AUDIT.md";
 /** The ledger's generated index (ledger.ts), rebuilt here from the staged AUDIT.md. */
 export const AUDIT_INDEX = "docs/v3/audit.jsonl";
+/** The docs index (doc-index.ts), rebuilt here from the staged notes and docs/v3 docs. */
+export const DOC_INDEX = "docs/v3/INDEX.md";
+const DOCS_DIR = "docs/v3";
 export const FEATURES = "docs/v3/FEATURES.md";
 export const INTENT = "docs/v3/INTENT.md";
 
@@ -96,7 +100,8 @@ function restage(repo: string, path: string, before: string | undefined, content
 
 export function runPrecommit(repo: string): PrecommitResult
 {
-	const changed = paths(git(repo, ["diff", "--cached", "--name-only", "-z", "--", NOTES_DIR, BACKLOG, AUDIT, AUDIT_INDEX, FEATURES, INTENT]));
+	// Any docs/v3 doc can move a line range in INDEX.md, so a change anywhere in docs/v3/ rebuilds.
+	const changed = paths(git(repo, ["diff", "--cached", "--name-only", "-z", "--", DOCS_DIR]));
 	if (changed.length === 0)
 	{
 		return {
@@ -143,7 +148,8 @@ export function runPrecommit(repo: string): PrecommitResult
 
 	const stagedBacklog = staged(repo, BACKLOG);
 	// BACKLOG.md staged with nothing it is built from can only be a hand edit (or a stale build).
-	if (changed.length === 1 && changed[0] === BACKLOG && stagedBacklog !== built.backlog)
+	const builtFrom = changed.filter((p) => p !== DOC_INDEX && p !== AUDIT_INDEX);
+	if (builtFrom.length === 1 && builtFrom[0] === BACKLOG && stagedBacklog !== built.backlog)
 	{
 		return {
 			ok: false,
@@ -168,6 +174,24 @@ export function runPrecommit(repo: string): PrecommitResult
 	{
 		restage(repo, BACKLOG, stagedBacklog, built.backlog);
 		restaged.push(BACKLOG);
+	}
+	const indexedDocs = paths(git(repo, ["ls-files", "-z", "--cached", "--", DOCS_DIR]))
+		.map((path) => path.slice(DOCS_DIR.length + 1))
+		.filter(isIndexedDoc)
+		.flatMap((path) =>
+		{
+			const text = staged(repo, `${DOCS_DIR}/${path}`);
+			return text === undefined ? [] : [{
+				path,
+				text,
+			}];
+		});
+	const docIndex = docIndexFor(built.backlog, built.notes, indexedDocs);
+	const stagedDocIndex = staged(repo, DOC_INDEX);
+	if (stagedDocIndex !== docIndex)
+	{
+		restage(repo, DOC_INDEX, stagedDocIndex, docIndex);
+		restaged.push(DOC_INDEX);
 	}
 	// The index is generated from AUDIT.md, so a staged hand edit of it is simply rebuilt over.
 	const stagedIndex = staged(repo, AUDIT_INDEX);

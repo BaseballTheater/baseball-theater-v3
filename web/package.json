@@ -9,7 +9,7 @@
 		"typecheck": "tsc -p tsconfig.json --noEmit",
 		"preview": "vite preview",
 		"test": "vitest run",
-		"test:coverage": "vitest run --coverage",
+		"test:coverage": "vitest run --coverage --coverage.reporter=text-summary --coverage.reporter=json-summary --reporter=dot --silent=passed-only",
 		"api:types": "node src/api/codegen.ts"
 	},
 	"dependencies": {
