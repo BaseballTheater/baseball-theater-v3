@@ -3,10 +3,13 @@
 #
 #   pnpm parity:debt          # prints why or why not; exit 1 when due, 0 when not
 #
-# Measured from the commit that logged the newest "doc parity review" entry, or the
-# owner's answers to one, in docs/v3/AUDIT.md. A parity review commits its edits
-# together with that entry, and applying the owner's answers is logged the same way
-# (scripts/audit.sh answers parity), so neither counts as debt.
+# Measured from the commit that logged the newest "doc parity review" entry, the
+# owner's answers to one, or the owner's skip of one, in docs/v3/AUDIT.md. A parity
+# review commits its edits together with that entry, and applying the owner's answers
+# (scripts/audit.sh answers parity) or declining a review (scripts/audit.sh skip parity)
+# is logged the same way, so none counts as debt. The stories-done count resets only on
+# a review itself, never on answers or a skip (owner, 2026-11-03: "Skip notes should
+# not reset the counter").
 # Due when, since then: a product doc changed, a story note was added or removed, a
 # story's **Source:** line changed, a pillar-cited story's purpose changed (its Gap,
 # Impact or acceptance criteria — the owner's approval may no longer cover it), or 6

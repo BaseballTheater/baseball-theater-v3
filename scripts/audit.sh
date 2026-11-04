@@ -15,10 +15,16 @@
 #   scripts/audit.sh review --verdict continue --trigger manual --findings -
 #   scripts/audit.sh parity --trigger "S40 inserted" --verdict amended --findings -
 #   scripts/audit.sh answers backlog --review 2026-10-09 --commit 6a46b62 --answers -
+#   scripts/audit.sh skip backlog --commit 5470524 --answers -   # owner: no review needed
 #
 # An answers entry records the owner's answers to a review's questions and what
 # was applied from them. Applying them is part of finishing that review, not new
-# drift: the debt checks measure from the answers entry, as from the review.
+# drift: the debt checks measure their drift events from the answers entry.
+# A skip entry records the owner declining a review for a drift event (an
+# owner-directed change, say): that event no longer makes the review due. Neither
+# entry resets the count of stories done since the last review — only a review
+# does (owner, 2026-11-03: "Skip notes should not reset the counter, they should
+# just avoid incrementing it"), so a count already at the backstop stays due.
 #
 # Flags: --commit <sha> names the shipping commit; --no-verify skips the repo-wide
 # pnpm verify for entries covered by another run; --findings - reads stdin.
@@ -59,7 +65,7 @@ else
 fi
 
 usage() {
-  sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//' >&2
+  sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//' >&2
   exit 2
 }
 
@@ -132,6 +138,7 @@ case "$MODE" in
   review) ;;
   parity) ;;
   answers) ;;
+  skip) ;;
   *) usage ;;
 esac
 
@@ -387,6 +394,48 @@ if [ "$MODE" = "answers" ]; then
     echo "$ANSWERS"
   } >>"$LEDGER"
   echo "audit answers: appended the owner's answers to the ${REVIEW_DATE} ${KIND} to ${LEDGER}"
+  exit 0
+fi
+
+# --- skip ----------------------------------------------------------------------
+# The owner declined a review for a drift event. The heading "— <kind> skipped" moves
+# the debt scripts' drift base (it starts "— <kind>") but is not a review heading
+# ("— <kind> (`verdict`)"), so the stories-done count runs on through it.
+if [ "$MODE" = "skip" ]; then
+  case "${1:-}" in
+    backlog) KIND="backlog review" ;;
+    parity) KIND="doc parity review" ;;
+    *) echo "audit: skip needs 'backlog' or 'parity' (which review was declined)" >&2; exit 2 ;;
+  esac
+  shift
+  ANSWERS=""
+  APPLIED_IN="the commit that adds this entry"
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --answers) ANSWERS="$(read_arg "${2:-}")"; shift 2 ;;
+      --commit) APPLIED_IN="\`$(git rev-parse --short "${2:-}")\` — $(git log -1 --format=%s "${2:-}")"; shift 2 ;;
+      *) echo "audit: unknown option $1" >&2; usage ;;
+    esac
+  done
+  [ -n "$ANSWERS" ] || { echo "audit: --answers is required (what changed, then the owner's \"no\", quoted)" >&2; exit 2; }
+  {
+    echo
+    echo "---"
+    echo
+    echo "## ${TODAY} — ${KIND} skipped"
+    echo
+    echo "| | |"
+    echo "|---|---|"
+    echo "| Entry | the owner declined a ${KIND} for this change — its drift no longer makes one due; the stories-done count is unchanged |"
+    echo "| Captured (UTC) | \`${STAMP}\` |"
+    echo "| HEAD at capture | \`${HEAD_SHA}\` (tree ${TREE}) |"
+    echo "| Change | ${APPLIED_IN} |"
+    echo
+    echo "**What changed, and the owner's answer**"
+    echo
+    echo "$ANSWERS"
+  } >>"$LEDGER"
+  echo "audit skip: appended the owner's skip of a ${KIND} to ${LEDGER}"
   exit 0
 fi
 

@@ -4,9 +4,12 @@
 #
 #   pnpm review:debt          # prints why or why not; exit 1 when due, 0 when not
 #
-# The sibling of scripts/parity-debt.sh. Measured from the commit that logged the
-# newest "backlog review" entry, or the owner's answers to one, in docs/v3/AUDIT.md
-# (a design intake logs as a backlog review, so it moves the same base).
+# The sibling of scripts/parity-debt.sh. Drift events are measured from the commit that
+# logged the newest "backlog review" entry, the owner's answers to one, or the owner's
+# skip of one, in docs/v3/AUDIT.md (a design intake logs as a backlog review, so it
+# moves the same base). The stories-done count resets only on a review itself, never on
+# answers or a skip (owner, 2026-11-03: "Skip notes should not reset the counter"), as
+# the generated review-debt line in BACKLOG.md counts (scripts/backlog-vault/assemble.ts).
 #
 # Detects the drift events that leave a trace in committed history:
 #   - a surface ratified or a ratified amendment landed     → design intake review
@@ -78,8 +81,9 @@ while IFS= read -r path; do
   [ "$(acs "$base" "$path")" != "$(acs HEAD "$path")" ] && reasons+=("${id}'s acceptance criteria rewritten")
 done < <(git diff --name-only --diff-filter=M "$base" HEAD -- "$STORIES")
 
-# Stories completed since the newest backlog review entry, by ledger order (re-verifications don't count).
-done_since="$(awk '/^## .* — backlog review / { delete seen; n = 0; next }
+# Stories completed since the newest backlog review (`## … — backlog review (\`verdict\`)`; answers
+# and skip entries don't reset it), by ledger order (re-verifications don't count).
+done_since="$(awk '/^## .* — backlog review \(/ { delete seen; n = 0; next }
   match($0, /^## [^ ]+ — S[0-9]+ completed$/) { split($0, w, " "); if (!(w[4] in seen)) { seen[w[4]] = 1; ids[++n] = w[4] } }
   END { s = ""; for (i = 1; i <= n; i++) if (ids[i] in seen) s = s (s ? ", " : "") ids[i]; print s }' "$LEDGER")"
 done_count=0
