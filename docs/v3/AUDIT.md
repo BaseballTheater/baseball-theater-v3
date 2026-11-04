@@ -13718,3 +13718,18 @@ functions build: Done
 **What changed, and the owner's answer**
 
 `pnpm verify` changed (a drift event): it now runs `pnpm build` (lint, then each package's typecheck and build) && dup:check && test:coverage && size, so lint and typecheck run once instead of twice; `pnpm build` drops its separate `pnpm typecheck`. In the same commit, Lighthouse CI stops waiting out its 60 s timeout (its ready pattern allows Vite's colour codes, and the preview starts once the API listens). Owner, 2026-11-03, asked whether to make the verify change, which sets off a backlog review: "Do both, skip the backlog review". No backlog review run for it; the next scheduled or drift-triggered review still checks it. The stories-done count stays at 3 (S95, S111, S75).
+
+---
+
+## 2026-11-04 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-04T08:08:05Z` |
+| HEAD at capture | `ccfde69` (tree clean) |
+| Change | `ccfde69` — Ledger read through one parser, with a generated JSONL index (owner) |
+
+**What changed, and the owner's answer**
+
+The backlog tooling changed (owner-directed): the ledger is read through one parser (scripts/backlog-vault/ledger.ts) with a generated index, docs/v3/audit.jsonl; review-debt.sh, parity-debt.sh and review-gate.sh call it instead of their own heading patterns; the pre-commit test gate also runs the backlog tool's and tools' suites. It changes how review debt is computed (same results on the current ledger), not the stories. Owner, 2026-11-04, asked whether it needs a backlog review: "No". The stories-done count stays at 3 (S95, S111, S75).
