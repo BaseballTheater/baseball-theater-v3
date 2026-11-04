@@ -13733,3 +13733,18 @@ functions build: Done
 **What changed, and the owner's answer**
 
 The backlog tooling changed (owner-directed): the ledger is read through one parser (scripts/backlog-vault/ledger.ts) with a generated index, docs/v3/audit.jsonl; review-debt.sh, parity-debt.sh and review-gate.sh call it instead of their own heading patterns; the pre-commit test gate also runs the backlog tool's and tools' suites. It changes how review debt is computed (same results on the current ledger), not the stories. Owner, 2026-11-04, asked whether it needs a backlog review: "No". The stories-done count stays at 3 (S95, S111, S75).
+
+---
+
+## 2026-11-04 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-04T08:59:12Z` |
+| HEAD at capture | `9f530f8` (tree clean) |
+| Change | `9f530f8` — Agents read the docs from a generated index; verify prints a fifth as much (owner) |
+
+**What changed, and the owner's answer**
+
+The backlog frame changed (owner-directed): rule 17 now moves the replaced **As of** line to a new frame note, 06 Baseline history, which holds the 97 earlier As of entries unchanged; and a generated docs index, docs/v3/INDEX.md, is where agents start reading (CLAUDE.md, the review and run-stories skills). No story was added, removed, re-scoped or re-prioritized. Owner, 2026-11-04, asked whether it needs a backlog review: "No backlog review". The stories-done count stays at 3 (S95, S111, S75).
