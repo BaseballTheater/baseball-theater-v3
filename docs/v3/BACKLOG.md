@@ -285,7 +285,13 @@ scripts/audit.sh review --trigger "…" --since "S23, S21, S13" --verdict amende
 
 This section keeps only the *forward-looking* scheduling state: what is due next, and the drift the next review has to weigh.
 
-**Last review:** 2026-11-04 at HEAD `ac18059`, verdict **`amended`**. **Trigger: design intake** — S96's checkpoint added game-shell A5 and game-rooms A6. Both are **unratified drafts** (no `Ratified by:`, open questions, manifests pending, no PNGs; frames only in Figma section "V"), so the intake took nothing from them (rule 18). Count: 3 of 6 since the last review (S95, S111, S75). One fresh-context reviewer, not two (a single draft surface pair, nothing ratified, no frontend ADR change); see [AUDIT](./AUDIT.md).
+**Last review:** 2026-11-04 at HEAD `daf8331`, verdict **`amended`**. **Trigger: drift** — the owner inserted S115 (design captures on request in GitHub Actions; "Yes do 1 and 2") and S90, S92, S91 moved down one priority.
+
+- **S89 and S115 get turn caps (12, 8), Goal conditions and `/goal` commands** (rule 8); each goal's path list equals its scope files. S89 AC 2 widened so CI keeps running the design specs (without capturing) in their own job: today only `pnpm e2e` catches a broken one (CI red at `2b4de06`), and S115 runs them only on request. S89 AC 4 already holds at HEAD (owner's `5470524`). S115 notes: pass the spec path, not the bare ID (`S10` also matches `S106`/`S109`).
+- **Next 3 startable:** S5, S99, S100 (S112–S114 wait on S51, `blocked` on the owner's `pnpm dev` check; S72 on S5; S74 on S73; S108 on S106 / S107). S5 and S99–S103 need live MLB recordings (`BT_USE_LIVE_MLB=1`) that a cloud session can't make (statsapi unreachable here); S89 and S115 are the first stories a cloud session can finish end to end.
+- **Weigh next time:** the owner's answer on S89's design-spec job; S90–S92 still lack Goal conditions and `/goal` commands (write them when they enter the next 3).
+
+**Earlier review:** 2026-11-04 at HEAD `ac18059`, verdict **`amended`**. **Trigger: design intake** — S96's checkpoint added game-shell A5 and game-rooms A6. Both are **unratified drafts** (no `Ratified by:`, open questions, manifests pending, no PNGs; frames only in Figma section "V"), so the intake took nothing from them (rule 18). Count: 3 of 6 since the last review (S95, S111, S75). One fresh-context reviewer, not two (a single draft surface pair, nothing ratified, no frontend ADR change); see [AUDIT](./AUDIT.md).
 
 - **S97 stays gated on S96**, ACs unchanged. Notes for the intake that follows ratification: the drafts' open questions and choices that would re-scope AC 1–3 (the player's link, list mode at medium/desktop, the mark needs the clip title as well as `?play=`); the player files are inside its fence; a video's `playId` is a pitch's, and the pitch → at-bat lookup lives privately in `videoPlayLinks` (export it once, ADR-025); one at-bat inning label, not a third inline spelling.
 - **Stale notes refreshed:** S98 (S95's `withGameExtras` is the one rank point; unused `fetchGameContent` rank calls), S106 (S75 done; play metrics at `mlb.ts:149`), S5 (ADR-029 exists; S94's GraphQL helper is a GET builder, so S5 reuses `getJson` or adds one POST sender). Baseline's video play links row corrected (S95 done).
@@ -474,7 +480,7 @@ This section keeps only the *forward-looking* scheduling state: what is due next
 - **New (2026-11-02): amendments rename frames, and stories keep citing the old names.** game-rooms A5 superseded A4's `live-hidden-nonotice-*` and standings-search-settings A6 superseded A2's `search-playing-mobile`; S75, S106 and S5 still cited the old names until the 2026-11-02 intake. Each intake should grep every `todo` note for each superseded frame name.
 - **New (2026-11-02): the entry bundle is the next budget squeeze.** 199,901 of 200,000 bytes after S19; **S110** (route splitting) is inserted ahead of S75 and S71. Answered (owner, 2026-11-02): load on demand rather than raise the budget (*"Lazy loading would be better, with chunked JS files."*), and S110 cites Pillar: Dependable (*"yes"*).
 
-- **New (2026-10-30, after S93–S102): S89–S92 have no Goal condition or `/goal` command** (rule 8), so `/goal S<N> done` stops at CLAUDE.md step 2. Their fences hold `scripts/` paths (S89 `scripts/backlog-vault/`, S90 `scripts/pitch-model/`), so the standard "no files under scripts/" wording would contradict them; write each when it enters the next 3.
+- **New (2026-10-30, after S93–S102): S89–S92 have no Goal condition or `/goal` command** (S89 and S115 given theirs by the 2026-11-04 review at `daf8331`; S90–S92 still open) (rule 8), so `/goal S<N> done` stops at CLAUDE.md step 2. Their fences hold `scripts/` paths (S89 `scripts/backlog-vault/`, S90 `scripts/pitch-model/`), so the standard "no files under scripts/" wording would contradict them; write each when it enters the next 3.
 - **Answered (2026-10-30): the gameday config feed is not ingested.** It is mlb.com's Gameday app configuration, not game data; the owner agreed to leave it out (*"Ok, agreed"*). Its one useful fact — player of the game exists from 2024, regular season and postseason only — is a note on S99.
 - **New (2026-10-30): the generated Next line names a story that can't start.** It skips design gates but not `Depends on`, and names **S68**, which depends on S67 (parked for the owner's design match). Seven `todo` stories above S48 wait the same way. A `scripts/backlog-vault/` change (outside every story fence; a process change) would make it skip unmet dependencies.
 - **New (2026-10-30): `scripts/review-debt.sh` missed S45's gate change.** It said "not due" at `65ddcfe` because it compares only the root `verify` line; S45 changed `functions/package.json`'s `test` / `test:coverage`. Workspace `test*` / `lint` / `build` scripts and `docs/v3/LAWS.md` move the gate too: check them by hand until a `scripts/` fix.
@@ -4681,7 +4687,7 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 **Acceptance criteria** (checks `scripts/verify-S89.sh` performs)
 
 1. `ci.yml` runs `pnpm verify` (with the API spec checks), the Playwright flows, and Lighthouse as separate jobs that start together; Lighthouse still runs alone on its runner, so nothing else shares the machine it times.
-2. `pnpm e2e` runs only `e2e/flows/` (and the harness's own checks), not the design captures; `pnpm design:capture <spec>` still takes them.
+2. `pnpm e2e` runs only `e2e/flows/` (and the harness's own checks), not the design captures; `pnpm design:capture <spec>` still takes them; and CI still runs every `e2e/design/` spec, without `BT_DESIGN_CAPTURE` (so nothing is written to the tree), in its own job beside the others, so a capture spec that breaks still fails CI.
 3. The flows run with more than one Playwright worker; each test that signs in or changes data gets its own state, so no flow depends on another's order (a run with `--repeat-each=2` passes).
 4. **Lighthouse starts when the app is ready, not after a timeout** (owner, 2026-10-29, asked whether S89 should also fix it: *"Yes"*): in CI, `lhci` no longer logs "Timed out waiting for the server to start listening" — it sees the server's ready line (or `lighthouserc.json` waits on a check that does), so no run waits out `startServerReadyTimeout`.
 5. Law P11 still holds: the vault test that reads `ci.yml` finds a step running `pnpm verify`.
@@ -4696,6 +4702,23 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 **Reuse check**
 
 **Reuse check** (ADR-025): before writing code, search `e2e/` (`helpers.ts`, `playwright.config.ts`) and `scripts/backlog-vault/ci-law.test.ts` for what this story needs; record what was reused, or why nothing fit, in the story's ledger notes.
+
+**Notes (2026-11-04 backlog review, at `daf8331`):**
+
+- **AC 2 widened: the design specs keep a CI job.** Today a broken capture spec is caught only because `pnpm e2e` runs every spec under `e2e/`: CI was red at `2b4de06` (run 41922387588) on S97's list-mode captures, fixed by `040d44b`. Once the captures leave `pnpm e2e`, the only other runner is S115's on-request workflow, so a spec could rot until someone asks for its captures. They are most of the work: run 41924153620 ran 384 tests on 1 worker, 321 of its log lines under `e2e/design/S*` and 21 under `e2e/flows/`; the "Main flows" step took 3m34s of the 7m51s job. Running them as a separate parallel job keeps them checked without holding up the flows. Without `BT_DESIGN_CAPTURE` the helper writes to Playwright's output folder (`e2e/design/helpers.ts:89`), never `docs/v3/design-checks/`. If the owner would rather drop this job and rely on S115, AC 2 goes back to its first wording.
+- **AC 4 already holds at HEAD.** The owner's `5470524` fixed the ready pattern (Vite's colour codes between "Local" and ":") and made `lighthouse:serve` start the preview only once the API listens; run 41924153620's log has no "Timed out waiting for the server" line, and the Lighthouse step took 1m14s. The grader still checks it (it must stay true when Lighthouse moves into its own job); rule 9's red-first proof comes from AC 1–3.
+- **AC 3's shared state.** The flows sign in as the one dev account `dev:test-user` (`e2e/design/helpers.ts:28`, `web/src/session/session.ts:31`) against one `pnpm dev` server and its Postgres; the flows don't delete the account (S79's delete runs only in its design spec), but settings changes are shared. Give each test that signs in its own uid (the `dev:<uid>` token takes any uid, `functions/src/adapters/fixtures/auth.ts:18`) rather than serializing.
+- **P11 holds by shape:** `scripts/backlog-vault/ci-law.test.ts` collects every `run:` line in the file, so `pnpm verify` in its own job still passes it.
+
+**Turn cap:** 12 — assumes three CI jobs split from the one, a `testIgnore`/project change in `e2e/playwright.config.ts` plus a design-spec CI job, per-test dev uids in the two flow specs, and no Lighthouse change beyond keeping AC 4 true. (Added with the Goal condition and `/goal` command by the 2026-11-04 backlog review: rule 8 requires them, and the story was inserted without them.)
+
+**Goal condition:** scripts/verify-S89.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/ci.yml, lighthouserc.json, e2e/, package.json, scripts/backlog-vault/, docs/v3/LAWS.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no other files under scripts/ or test/ are modified, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S89. Work item 0 first: if scripts/verify-S89.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before changing CI. Then: scripts/verify-S89.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/ci.yml, lighthouserc.json, e2e/, package.json, scripts/backlog-vault/, docs/v3/LAWS.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no other files under scripts/ or test/ are modified except creating scripts/verify-S89.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
 
 **Status:** `todo`
 
@@ -5882,9 +5905,27 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 **Notes:**
 
 - A run that commits uses the workflow's token, which by GitHub's rule triggers no further workflow runs; the owner's design match still happens in a session (`scripts/audit.sh story <ID> --design-match -`).
-- Turn cap, Goal condition and `/goal` command are the next backlog review's to add (rule 8), as for S89.
+- Turn cap, Goal condition and `/goal` command added by the 2026-11-04 backlog review (below).
 
 **Reuse check** (ADR-025): before writing the workflow, read `.github/workflows/ci.yml` (S62, S89) for its install, Playwright and Node setup steps and reuse them; record what was reused in the story's ledger notes.
+
+**Notes (2026-11-04 backlog review, at `daf8331`):**
+
+- **No gap with S89.** S89 AC 2 takes the captures out of `pnpm e2e` and (as amended by this review) keeps every design spec running in a CI job without `BT_DESIGN_CAPTURE`, which writes nothing to the tree. S115 is the only place `BT_DESIGN_CAPTURE=1` runs in Actions, and only on request. If the owner drops S89's design-spec job, S115 becomes the only CI runner of those specs and does not catch a broken one until asked.
+- **Run exactly the story's spec.** `pnpm design:capture <args>` passes its arguments to `playwright test`, which reads them as patterns on the file path: `S10` also matches `S106.spec.ts` and `S109.spec.ts` (both exist), and `S1` matches every `S1*`. The workflow passes `e2e/design/<story>.spec.ts` (after checking the input is `S\d+`), so a run captures and commits only that story. Playwright exits nonzero with "No tests found" when the file is missing, which AC 3 can lean on, but check the file first for a clear message.
+- **"Starts the app as `pnpm dev` does":** the Playwright config's `webServer` already runs `pnpm dev` (`e2e/playwright.config.ts`), which starts Postgres with `docker compose up -d --wait postgres` and seeds it; GitHub's Ubuntu runners have Docker, so no separate step is needed.
+- **AC 2's commit** needs `permissions: contents: write` on that job only (default read elsewhere). Commit only `docs/v3/design-checks/<story>/`.
+- **Personal data (ADR-028):** captures show only the dev account (`e2e/design/helpers.ts` header: no other personal data reaches a screenshot); the uploaded artifact adds no store.
+
+**Turn cap:** 8 — assumes one new workflow file reusing `ci.yml`'s checkout, pnpm, Node and Playwright install steps, an input check, and the artifact upload and optional commit; no product code.
+
+**Goal condition:** scripts/verify-S115.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/, e2e/, package.json, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S115. Work item 0 first: if scripts/verify-S115.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing the workflow. Then: scripts/verify-S115.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/, e2e/, package.json, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S115.sh, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
 
 **Status:** `todo`
 

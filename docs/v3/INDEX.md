@@ -12,12 +12,12 @@
 
 Assembled, in this order and around the stories, into BACKLOG.md.
 
-- [00 Baseball Theater v3 — Checkable backlog](<backlog/frame/00 Baseball Theater v3 — Checkable backlog.md>) — 92 KB
+- [00 Baseball Theater v3 — Checkable backlog](<backlog/frame/00 Baseball Theater v3 — Checkable backlog.md>) — 93 KB
   - `127–145` Verify-script contract
   - `146–159` Story status
-  - `160–410` Backlog reviews
-  - `411–430` Doc parity reviews
-  - `431–435` Goal command for multiple stories
+  - `160–416` Backlog reviews
+  - `417–436` Doc parity reviews
+  - `437–441` Goal command for multiple stories
   - Rules, by number:
     - `10–10` 1. Acceptance criteria map to commands, tests, or file invariants (exit codes / assertions).
     - `11–11` 2. Vague phrases (“works correctly”, “handles errors gracefully”) are forbidden until rewrit…

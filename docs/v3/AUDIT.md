@@ -14099,3 +14099,38 @@ Design intake review (`.claude/skills/design-intake-review/SKILL.md`), one fresh
 **For the parity review:** nothing.
 
 **Owner questions:** A7's three open questions, asked at S107's ratification; none new.
+
+---
+
+## 2026-11-04 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-04T22:35:54Z` |
+| HEAD at review | `daf8331` (tree dirty) |
+| Trigger | drift: S115 inserted by the owner (daf8331); S90, S92, S91 re-prioritized |
+| Stories `done` since last review | none |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context backlog review, one reviewer, focused stage. Read: S89, S115, S98 (shape), S5, S99, S100, S112, S113 notes; `.github/workflows/ci.yml`, `e2e/playwright.config.ts`, `lighthouserc.json`, `package.json` scripts (`e2e`, `design:capture`, `lighthouse`, `lighthouse:serve`, `dev`), `e2e/design/helpers.ts`, `e2e/flows/main.spec.ts`, `scripts/backlog-vault/ci-law.test.ts`, LAWS P8/P11; CI runs 41922387588 (failed) and 41924153620 (green, step timings).
+
+**Rule 8: S89 and S115 had no turn cap, Goal condition or `/goal` command** (both `turn_cap: null`; S115's note said the next review adds them). Added in S98's form; each goal's path list equals its `scope_files`. S89 cap **12** (three CI jobs from one, a `testIgnore`/project change, a design-spec job, per-test dev uids in two flow specs). S115 cap **8** (one workflow reusing ci.yml's setup steps, input check, artifact upload, optional commit). S89's fence holds `scripts/backlog-vault/`, so its goal says "no other files under scripts/" (as S81's does).
+
+**S89 / S115 overlap and gap.** No overlap: S115 is the only `BT_DESIGN_CAPTURE=1` run in Actions. Gap found: today a broken design spec fails CI only because `pnpm e2e` runs every spec under `e2e/` (run 41922387588 red at `2b4de06` on S97's list-mode captures, fixed by `040d44b`). After S89 AC 2 as written, nothing in CI would run the design specs except S115 on request. **Amended S89 AC 2:** CI still runs every `e2e/design/` spec without `BT_DESIGN_CAPTURE` (helpers write to Playwright's output folder then, `e2e/design/helpers.ts:89`) in its own parallel job. Evidence for the cost: run 41924153620 ran 384 tests on 1 worker, "Main flows" 3m34s of a 7m51s job, 321 log lines under `e2e/design/S*` vs 21 under `e2e/flows/`. This is an AC change on a story the owner inserted; asked below, and reversible.
+
+**S89 checks at HEAD.** AC 1: ci.yml has one `build` job (true, red-first possible). AC 2: `e2e` = `playwright test --config e2e/playwright.config.ts`, `testDir: "."`, no testIgnore (red-first). AC 3: `workers: 1`, `fullyParallel: false`; flows sign in as `dev:test-user` (`web/src/session/session.ts:31`); `dev:<uid>` takes any uid (`functions/src/adapters/fixtures/auth.ts:18`): note added. **AC 4 already holds**: the owner's `5470524` fixed the ready pattern and serve ordering; run 41924153620 has no "Timed out waiting for the server" line, Lighthouse step 1m14s. Kept as a guard; red-first comes from AC 1–3 (noted). AC 5: `ci-law.test.ts` reads every `run:` line, so a split job passes (noted). Dependency S62 `done`.
+
+**S115 checks at HEAD.** Dependency S89 `todo` (correct gate). Found: `pnpm design:capture S10` would also run `S106.spec.ts` and `S109.spec.ts` (Playwright treats args as path patterns; both files exist): note tells the workflow to pass `e2e/design/<story>.spec.ts`. `pnpm dev` starts Postgres via `docker compose`; Playwright's `webServer` runs it, GitHub runners have Docker. AC 2 needs `contents: write` on that job only. AC 4 checkable by grep of the workflow. Personal data: captures show only the dev account; no new store.
+
+**Next 3 startable (check 2):** S5 (90; deps S70, S61, S68, S81 done; designs S34, S56 done; turn cap 16; fence includes `e2e/design/`, `openapi/`, `packages/ports/`; owner answered 2026-11-03), S99 (105; no deps; cap 12; `fixtures/raw/potg-823823.json` absent, created by AC 1), S100 (106; no deps; cap 12; `fixtures/raw/rulesettings-823823.json` absent, created by AC 1). S112–S114 (77–79) wait on S51 `blocked`. Paths named in their notes exist: `functions/src/adapters/fixtures/bundled.ts`, `functions/src/scripts/record-fixtures.ts`, `functions/src/adapters/http/mlb.ts`, `packages/mlb-api/src/live.ts`, `functions/src/mappers/live.ts`.
+
+**Priority challenge.** S5 and S99–S103 each need a live MLB recording (`BT_USE_LIVE_MLB=1`); statsapi.mlb.com is unreachable from this cloud session (curl status 000), and S5 also needs a design capture (Playwright + Docker, absent here). So the next three startable stories cannot finish in a cloud session, while S89 then S115 (113, 114) can, and S115 is what unparks S97 and S106 (both blocked waiting for captures). Arguably S89/S115 should sit above S5 and S99–S105; not changed, since the order is the owner's and the owner placed S115 at 114 today. Asked below.
+
+**Duplication / personal-data sweeps.** No story done since the last review (2b4de06); only `040d44b` (a spec fix) and `daf8331` (notes) landed. Nothing to sweep; S89/S115 add no store.
+
+**Other.** S90–S92 still lack Goal conditions and `/goal` commands (frame note updated). Parity: the 2026-11-04 parity review's queued items (ARCHITECTURE Phase A table lacks win probability added, `docs/v3/ARCHITECTURE.md:1400`; Search floating player play link) still wait on the owner; not in this review's scope to change.
+
+**Owner questions:** (1) Keep S89's widened AC 2 (a CI job that runs the design specs without capturing, so a broken one still turns CI red), or drop it and rely on S115 on request? (2) Move S89 and S115 above S5 and S99–S105, since those need live MLB recordings a cloud session can't make?
