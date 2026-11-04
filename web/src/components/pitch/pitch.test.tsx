@@ -161,6 +161,22 @@ describe("PitchSequence", () =>
 		expect(onSelect).not.toHaveBeenCalled();
 		expect(screen.getByTestId("pitch-detail-grid")).toBeInTheDocument();
 	});
+
+	it("each row ends in a chevron: up on the open pitch, down on the rest (owner, 2026-11-04)", () =>
+	{
+		const second: PitchEvent = {
+			...BARE,
+			pitchNumber: 2,
+			playId: "p2",
+		};
+		wrap(<PitchSequence pitches={[BARE, second]} selectedPitchNumber={2} onSelectPitch={() => undefined} variant="mobile" />);
+		const chevrons = screen.getAllByTestId("pitch-chevron");
+		expect(chevrons).toHaveLength(2);
+		// Newest first: pitch 2 (open) then pitch 1.
+		expect(chevrons.map((c) => c.getAttribute("data-open"))).toEqual(["true", "false"]);
+		expect(chevrons[0]!.querySelector(".tabler-icon-chevron-up")).not.toBeNull();
+		expect(chevrons[1]!.querySelector(".tabler-icon-chevron-down")).not.toBeNull();
+	});
 });
 
 describe("MatchupCards", () =>

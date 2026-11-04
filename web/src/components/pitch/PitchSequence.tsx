@@ -5,6 +5,7 @@ import {
 import {
 	Box, Group, SimpleGrid, Stack, Text, UnstyledButton,
 } from "@mantine/core";
+import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import type { KeyboardEvent } from "react";
 import type { LayoutVariant } from "../../layout/variant.js";
 import { pitchDotColor, speedLabel } from "./utils.js";
@@ -45,7 +46,8 @@ function pitchDetail(pitch: PitchEvent): { label: string;
  * the current at-bat and Plays (S41) inside each expanded at-bat. Selection belongs to
  * the room, so a zone dot and a row select the same pitch. Rows are buttons; Up / Down
  * move the selection. Mobile lists the detail as rows; medium / desktop as a
- * four-column grid (`variant` from the layout host). Each call is `pitchCallLabel`'s, so
+ * four-column grid (`variant` from the layout host). Each row ends in the frames' chevron,
+ * up on the open pitch and down on the rest (owner, 2026-11-04). Each call is `pitchCallLabel`'s, so
  * with Hide Scores on an in-play pitch reads "IN PLAY" rather than say runs scored (S75).
  */
 export function PitchSequence({
@@ -113,6 +115,13 @@ export function PitchSequence({
 								<Group gap={12} wrap="nowrap">
 									{pitch.pitchData ? <Text fz={13} c="var(--bt-muted)">{speedLabel(pitch.pitchData.startSpeed)}</Text> : null}
 									<Text fz={13} fw={700}>{callOf(pitch)}</Text>
+									{/* The frames' chevron (owner, 2026-11-04: pitch rows were "missing the up and down arrows"). */}
+									<Box c="var(--bt-accent)" aria-hidden data-testid="pitch-chevron" data-open={open} style={{
+										display: "flex",
+									}}
+									>
+										{open ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+									</Box>
 								</Group>
 							</Group>
 						</UnstyledButton>
