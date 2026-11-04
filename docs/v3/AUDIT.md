@@ -14030,3 +14030,41 @@ export const label = game.abbreviation + " @ ";  1176ms
 2. When one at-bat has several clips, one `Video:` line per clip or one per at-bat? (Until answered, one per at-bat as drawn.)
 3. Should the play link show on cards when Hide Scores is on? No hidden frame draws it.
 4. Should Search's floating player get the play link too? If yes, that's a separate amendment and story, not S97.
+
+---
+
+## 2026-11-04 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-04T21:37:43Z` |
+| HEAD at review | `8e3bce9` (tree dirty) |
+| Trigger | 6 stories done since: S94, S95, S111, S75, S98, S96 |
+| Stories `done` since last review | S94, S95, S111, S75, S98, S96 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context doc parity review, run by one reviewer in two stages (stage 1 read and proposed; stage 2 verified each quote against its source and applied the edits).
+
+Source checks (all hold):
+- S94 Feature: More MLB game data: the FEATURES theme row names the GraphQL game content (video play links, recap and related articles) that S94 adds.
+- S95 Feature: Video play links: the theme row names the same three routes S95 uses (content `guid`, GraphQL `playIdRef`, ABS challenge).
+- S111 Feature: Daily scoreboard by date: the scoreboard carry row already records the opening-day rule with the owner's 2026-11-02 answer.
+- S75 Feature: Settings (favorites, hide scores, playback prefs): the Settings row describes Hide Scores in the rooms; it omitted the Runs view (edited below).
+- S98 Feature: Impact curation: per-game impact sort by effect on the outcome is what S98 delivers; the Phase A row was out of date (edited below).
+- S96 Feature: Video play links: the design story for the link the theme row asks for; FEATURES did not record the ratified result (edited below).
+- Next todo stories S112/S113/S114 cite pillars approved by the owner 2026-11-02 ("yes those are good pillars to use"). d86edde (owner-directed, after the approval) added a stage target to S114 and production setup notes to S113/S114; the Sources were not changed and still fit Dependable. S97, S5, S72, S74 citations not stale.
+
+Edits (docs/v3/FEATURES.md only, each recording a decision the owner already made):
+1. Impact curation, Phase A row: ranks a clip of a play by MLB's win probability added, key moments and lead changes first among ties (owner, 2026-10-30, "Yes" to ranking by it, recorded in S98); clips with no play or games without play metrics keep the keyword score, after them. Inputs now include MLB play metrics.
+2. Video play links theme row: records the ratified S96 design (game-shell A5, game-rooms A6): `Play · Top 6th →` link on card, list row and player; opens the Plays room on that at-bat with a bar (owner, 2026-11-04: "Keep"); every at-bat with a video shows `Video: <clip title>` (owner, 2026-11-04: "It should show this for any play that has a video, even if you didn’t get there from the video").
+3. Game → Videos carry row: no video thumbnail has a play icon (owner, 2026-11-04: "No thumbnails should have a play icon"; game-shell A5).
+4. Settings row: Hide Scores also hides the Runs view's score after each scoring play, descriptions stay (game-rooms A3, owner: "The Runs view can stay as is", kept with the score hidden as drawn).
+
+Question for the owner (does not block): should a video played from Search's floating player also link to its play? A5 records that this was asked and not answered. (a) yes: record under Video play links and the next backlog review gives it a story (likely a small standings-search-settings amendment); (b) no: FEATURES scopes the link to a game's Videos room; (c) later.
+
+For the next backlog review:
+- ARCHITECTURE "Heuristic bootstrap (Phase A)" lists runs, late innings, event type and keywords but not win probability added (S98); outside parity's write scope.
+- The Search floating player play-link gap above, once the owner answers.
