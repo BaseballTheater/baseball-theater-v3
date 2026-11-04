@@ -11,7 +11,7 @@
 		"preinstall": "npx only-allow pnpm",
 		"dev": "docker compose up -d --wait postgres && pnpm db:seed && concurrently -n api,web -c blue,green \"pnpm --filter @bt/functions dev\" \"pnpm --filter @bt/web dev\"",
 		"db:seed": "pnpm --filter @bt/functions exec tsx src/scripts/db-seed.ts",
-		"build": "pnpm lint && pnpm typecheck && pnpm -r --filter=!baseball-theater-v3 run build",
+		"build": "pnpm lint && pnpm -r --filter=!baseball-theater-v3 run build",
 		"typecheck": "pnpm -r --filter=!baseball-theater-v3 run typecheck",
 		"lint": "pnpm backlog:check && eslint .",
 		"lint:fix": "eslint . --fix",
@@ -24,7 +24,7 @@
 		"test:tools": "vitest run --config tools/vitest.config.js",
 		"dup:check": "jscpd --config .jscpd.json",
 		"comments:stale": "node tools/comments-stale/comments-stale.js",
-		"verify": "pnpm lint && pnpm dup:check && pnpm test:coverage && pnpm build && pnpm size",
+		"verify": "pnpm build && pnpm dup:check && pnpm test:coverage && pnpm size",
 		"mlb:scan-drift": "pnpm --filter @bt/functions exec tsx src/scripts/scan-drift.ts",
 		"api:spec": "pnpm --filter @bt/functions exec tsx src/scripts/generate-openapi.ts",
 		"api:breaking": "pnpm --filter @bt/functions exec tsx src/scripts/api-breaking.ts",
@@ -40,7 +40,7 @@
 		"design:review": "node e2e/design-review.ts",
 		"e2e": "playwright test --config e2e/playwright.config.ts",
 		"lighthouse": "cd e2e && lhci autorun --config=../lighthouserc.json",
-		"lighthouse:serve": "concurrently -k -n api,web \"pnpm --filter @bt/functions exec tsx src/local-server.ts\" \"pnpm --filter @bt/web exec vite preview --port 4173 --strictPort\""
+		"lighthouse:serve": "concurrently -k -n api,web \"pnpm --filter @bt/functions exec tsx src/local-server.ts\" \"node scripts/wait-for-port.ts 8787 && pnpm --filter @bt/web exec vite preview --port 4173 --strictPort\""
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.22.0",

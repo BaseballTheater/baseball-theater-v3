@@ -13,9 +13,9 @@ pnpm verify
 
 This is the truth signal. Exit code **0** means:
 
-1. ESLint passes for the whole repo
-2. Vitest passes in all packages **with coverage thresholds**
-3. Typecheck + package builds succeed (`pnpm build`, which also re-runs lint)
+1. ESLint passes for the whole repo (`pnpm build` runs `pnpm lint` first, so it runs once)
+2. Typecheck + package builds succeed (each package's `build` runs `tsc --noEmit`)
+3. Vitest passes in all packages **with coverage thresholds**
 
 Exit code **non-zero** means the change is not done. Do not claim success.
 
@@ -23,7 +23,7 @@ Exit code **non-zero** means the change is not done. Do not claim success.
 
 | Check                    | How                                                           |
 | ------------------------ | ------------------------------------------------------------- |
-| Lint                     | `pnpm lint`                                                   |
+| Lint                     | `pnpm lint` (first step of `pnpm build`)                      |
 | Unit / integration tests | `pnpm test:coverage` (domain, functions, web projects)        |
 | Coverage floors          | Per-package Vitest thresholds                                 |
 | Types + production build | `pnpm build`                                                  |

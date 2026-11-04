@@ -28,8 +28,9 @@ jobs:
             - name: Install
               run: pnpm install --frozen-lockfile
 
-            # The one gate (S62; law P11): lint, dup:check, test:coverage, build and
-            # size — every law pnpm verify holds also holds here.
+            # The one gate (S62; law P11): build (lint, then each package's typecheck
+            # and build), dup:check, test:coverage and size — every law pnpm verify
+            # holds also holds here.
             - name: Verify
               run: pnpm verify
 
