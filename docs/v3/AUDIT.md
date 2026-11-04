@@ -14134,3 +14134,37 @@ Fresh-context backlog review, one reviewer, focused stage. Read: S89, S115, S98 
 **Other.** S90–S92 still lack Goal conditions and `/goal` commands (frame note updated). Parity: the 2026-11-04 parity review's queued items (ARCHITECTURE Phase A table lacks win probability added, `docs/v3/ARCHITECTURE.md:1400`; Search floating player play link) still wait on the owner; not in this review's scope to change.
 
 **Owner questions:** (1) Keep S89's widened AC 2 (a CI job that runs the design specs without capturing, so a broken one still turns CI red), or drop it and rely on S115 on request? (2) Move S89 and S115 above S5 and S99–S105, since those need live MLB recordings a cloud session can't make?
+
+---
+
+## 2026-11-04 — doc parity review (`continue`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-04T22:38:23Z` |
+| HEAD at review | `bdba2c9` (tree clean) |
+| Trigger | S115 added (daf8331); S89's ACs changed (bdba2c9); both cite Pillar: Delightful |
+| Stories `done` since last review | none (no story done since 4599c77) |
+| Verdict | `continue` |
+
+**Findings / amendments**
+
+**1. Citation honesty**
+
+- **S89 — Pillar: Delightful, still covered.** Approval quoted in the line matches `00111f4` (2026-10-29: "It's more about perf and customer benefit"; asked Delightful or Dependable: "Delightful"). Since then: AC 4 added the same day on the owner's "Yes" (`5ab10a7`), and `bdba2c9` widened AC 2 so CI keeps running the `e2e/design/` specs (without capturing) in their own parallel job. Gap and Impact are unchanged; the widening serves the same purpose the owner approved (faster checks on every change) and keeps an existing check rather than adding a new aim, so the approval still covers it. No FEATURES row fits CI speed: "Robust core" (FEATURES:95) is the product loop, and the owner already kept process stories off product features where a pillar was asked for.
+- **S115 — Pillar: Delightful, approval real.** `daf8331`'s message records the question (Delightful as S89, or Dependable) and the answer "Delightful (Recommended)"; `bdba2c9` added only turn cap, Goal condition and `/goal` (no Gap/Impact/AC change), so no re-scope.
+- **Does INTENT's Delightful cover developer tooling?** Yes: INTENT:14 says the pillar "applies to developers as well", with local setup as its example. S51 and S112 cite it the same way for dev setup; S89 (CI turnaround) and S115 (captures without the owner's machine) are developer experience in the same sense. No INTENT edit needed.
+- **Possible feature fit for S115 (for the owner, not changed):** FEATURES' Visual design row (FEATURES:101) says built screens "are photographed paired with their ratified designs in the ledger" and count as done only on the owner's match verdict; S81 (the capture harness) cites Feature: Visual design. S115 runs that same capture harness in GitHub Actions, so rule 19's "feature whenever one applies" could point at Visual design instead. The owner was offered only two pillars, not this feature, so the line is left as approved. Question for the owner: keep "Pillar: Delightful", or cite "Feature: Visual design" (as S81 does)? Either is honest; nothing blocks S89 (next of the two) meanwhile.
+- **Next 3 todo by priority (S5, S99, S100):** S5 cites Feature: Highlight search (free-text) and is the search page querying highlights; S99 and S100 cite Feature: More MLB game data and ingest MLB fields (player of the game, ABS settings). All fit.
+- **Open questions:** no story has an `Open:` Source line (grep of `docs/v3/backlog/stories/`).
+
+**2. Doc reflects reality**
+
+No story flipped to `done` since the last parity review (4599c77), so FEATURES' shipped descriptions are unchanged by this drift. Neither S89 nor S115 contradicts INTENT, FEATURES or ADR-026: S115 takes captures on request; the owner's verdict still decides a match (FEATURES:101).
+
+**3. For the next backlog review**
+
+Nothing new: no features added this review, and no FEATURES item newly unserved.
+
+**Edits:** none.
