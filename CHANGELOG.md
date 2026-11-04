@@ -35,6 +35,7 @@ explicitly where that's the case. For what's still ahead, see
 
 ## A game's videos are easy to browse
 
+- **Before, nothing showed how a video should lead to the play it shows. Now there's an approved design for it, ready to build: a small "Play · Top 6th →" link on each clip that has a play, the Plays room opening right on that at-bat, and a "Video:" line on every play that has a clip. Video thumbnails also lose their play icon.** Details: S96 — game-shell A5 and game-rooms A6, ratified by the owner; built by S97. _(2026-11-04)_
 - **Before, "biggest moments first" was a guess from each clip's title, so any home run beat a game-saving
   catch or a big two-out single. Now the clips are ordered by how much their play actually changed each team's
   chance of winning, by MLB's own numbers: in the Cubs–Marlins sample game, Griffin Conine's two-run homer

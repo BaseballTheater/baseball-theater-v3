@@ -140,6 +140,9 @@ for s in $SURFACES; do
 		case "$f" in
 			"$V/$s/RATIFIED.md") bad 4 "$s: S96 changed RATIFIED.md" ;;
 			"$V/$s/amendments/"A[0-9]*.md) [ "$f" = "$mine" ] || bad 4 "$s: S96 changed an earlier amendment, $f" ;;
+			# Frames in amendments/ are S96's own or sealed by another amendment's manifest
+			# (checked by hash below); in a case pattern `*` also matches `/`, so this comes first.
+			"$V/$s/amendments/"*) ;;
 			"$V/$s/"*.png) bad 4 "$s: S96 changed a sealed frame, $f" ;;
 		esac
 	done <<< "$(printf '%s\n' "$changed" | grep "^$V/$s/")"

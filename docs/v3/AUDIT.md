@@ -13915,3 +13915,83 @@ export const label = game.abbreviation + " @ ";  1059ms
 ```
 
 </details>
+
+---
+
+## 2026-11-04 — S96 completed
+
+**Design: video play link**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-04T21:05:03Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `48799dd` (tree dirty) |
+| Grader | `scripts/verify-S96.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: game-shell and game-rooms each have their next free amendments/A<N>.md headed '(S96)', naming what it adds/overrides/repeals, with ## Frames, ## Decisions (owner's words quoted), ## Open questions = None., and a SHA-256 manifest of exactly its own frames
+check 2 PASS: frames at mobile, medium and desktop: the play link on a video card in grid and in list (game-shell), and the Plays room opened on that play with its inning chosen and its at-bat open and marked (game-rooms) — named <screen>[-<state>]-<pairing>.png and listed in ## Frames
+check 3 PASS: each amendment's ratification record names who ratified, the date, and quotes the owner's in-session go-ahead
+check 4 PASS: no sealed file in those surfaces changed (each RATIFIED.md manifest still verifies, RATIFIED.md and earlier amendments untouched by S96)
+check 5 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**5/5 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S96 check results ---
+check 1 PASS: game-shell and game-rooms each have their next free amendments/A<N>.md headed '(S96)', naming what it adds/overrides/repeals, with ## Frames, ## Decisions (owner's words quoted), ## Open questions = None., and a SHA-256 manifest of exactly its own frames
+check 2 PASS: frames at mobile, medium and desktop: the play link on a video card in grid and in list (game-shell), and the Plays room opened on that play with its inning chosen and its at-bat open and marked (game-rooms) — named <screen>[-<state>]-<pairing>.png and listed in ## Frames
+check 3 PASS: each amendment's ratification record names who ratified, the date, and quotes the owner's in-session go-ahead
+check 4 PASS: no sealed file in those surfaces changed (each RATIFIED.md manifest still verifies, RATIFIED.md and earlier amendments untouched by S96)
+check 5 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S96: 5/5 checks passed ---
+verify-S96: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  1176ms
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 909ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  477ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  428ms
+ ✓ |tools| size-limit/size-limit.test.js (2 tests) 153ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 91ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 97ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 86ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 56ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 19ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  13:09:51
+   Duration  8.50s (transform 99ms, setup 0ms, collect 4.24s, tests 2.65s, environment 1ms, prepare 445ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/claude/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154304,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
