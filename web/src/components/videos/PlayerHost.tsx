@@ -3,6 +3,7 @@ import { LazyPlayerDialog } from "./LazyPlayerDialog.js";
 import type { PlayerGame } from "./PlayerDialog.js";
 import { PlayerStage } from "./PlayerStage.js";
 import type { Video } from "./VideoCard.js";
+import type { PlayLink } from "./playLink.js";
 
 /**
  * Puts the player where the reader's Video Player setting says (S70): `PlayerDialog`
@@ -15,13 +16,15 @@ import type { Video } from "./VideoCard.js";
  * `useScoresHidden`) goes to whichever one shows, for the recap clip's title (S75).
  */
 export function PlayerHost({
-	video, first, onClose, game, fromGamePk, scoresHidden,
+	video, first, onClose, game, fromGamePk, scoresHidden, playLink,
 }: { video: Video | null;
 	first: Video | undefined;
 	onClose: () => void;
 	game?: PlayerGame;
 	fromGamePk?: number;
-	scoresHidden?: boolean; })
+	scoresHidden?: boolean;
+	/** The playing clip's play link (S97), for the dialog's top-left slot. */
+	playLink?: PlayLink | null; })
 {
 	const { videoPlayer } = useSettings();
 	if (videoPlayer === "stage")
@@ -29,5 +32,5 @@ export function PlayerHost({
 		const shown = video ?? first;
 		return shown ? <PlayerStage video={shown} autoPlay={video !== null} scoresHidden={scoresHidden} /> : null;
 	}
-	return video ? <LazyPlayerDialog video={video} onClose={onClose} game={game} fromGamePk={fromGamePk} scoresHidden={scoresHidden} /> : null;
+	return video ? <LazyPlayerDialog video={video} onClose={onClose} game={game} fromGamePk={fromGamePk} scoresHidden={scoresHidden} playLink={playLink} /> : null;
 }

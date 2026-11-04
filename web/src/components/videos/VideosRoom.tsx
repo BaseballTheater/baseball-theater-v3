@@ -14,6 +14,7 @@ import type { LayoutVariant } from "../../layout/variant.js";
 import { useScoresHidden } from "../../settings/useScoresHidden.js";
 import { ViewState } from "../ViewState.js";
 import { PlayerHost } from "./PlayerHost.js";
+import { videoPlayLink } from "./playLink.js";
 import { FilterPill, QuickFilters } from "./QuickFilters.js";
 import { VideoCard } from "./VideoCard.js";
 import type { Video } from "./VideoCard.js";
@@ -209,7 +210,14 @@ export function VideosRoom({ game, variant }: { game: GamePayload;
 
 	return (
 		<Stack gap="md">
-			<PlayerHost video={playing} first={game.highlights[0]} onClose={() => setPlaying(null)} fromGamePk={game.gamePk} scoresHidden={scoresHidden} />
+			<PlayerHost
+				video={playing}
+				first={game.highlights[0]}
+				onClose={() => setPlaying(null)}
+				fromGamePk={game.gamePk}
+				scoresHidden={scoresHidden}
+				playLink={playing ? videoPlayLink(playing, game) : null}
+			/>
 			<Text size="xs" fw={700} tt="uppercase">Videos</Text>
 			<TextInput
 				aria-label="Search videos"
@@ -262,7 +270,9 @@ export function VideosRoom({ game, variant }: { game: GamePayload;
 			{videos.length === 0 ? <ViewState kind="empty" message="No videos match." /> : null}
 			{groupHighlights(videos).map(({ group, highlights }) =>
 			{
-				const cards = highlights.map((video) => <VideoCard key={video.id} video={video} layout={layout} onPlay={setPlaying} scoresHidden={scoresHidden} />);
+				const cards = highlights.map((video) => (
+					<VideoCard key={video.id} video={video} layout={layout} onPlay={setPlaying} scoresHidden={scoresHidden} playLink={videoPlayLink(video, game)} />
+				));
 				const open = !collapsed.has(group);
 				const Chevron = open ? IconChevronDown : IconChevronRight;
 				return (

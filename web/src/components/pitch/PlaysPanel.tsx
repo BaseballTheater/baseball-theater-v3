@@ -1,6 +1,6 @@
 import type { AtBat } from "@bt/domain";
 import {
-	defaultPlaysInning, inningHalves, linescoreCells, ordinal, scoreAfterLabel, scoringPlays,
+	defaultPlaysInning, inningHalves, linescoreCells, ordinal, scoreAfterLabel, scoringPlays, atBatOfPlay, highlightTitle, videosByAtBat,
 } from "@bt/domain";
 import {
 	Accordion, Badge, Box, Group, Stack, Text, UnstyledButton,
@@ -10,6 +10,7 @@ import {
 	Fragment, useEffect, useRef, useState,
 } from "react";
 import { flushSync } from "react-dom";
+import { useSearchParams } from "react-router-dom";
 import type { GamePayload } from "../../api/game.js";
 import { useScoresHidden } from "../../settings/useScoresHidden.js";
 import { HiddenValue } from "../HiddenValue.js";
@@ -171,11 +172,18 @@ export function PlaysPanel({ game }: { game: GamePayload })
 	const latest = defaultPlaysInning(plays);
 	const [view, setView] = useState<View | null>(null);
 	const scoresHidden = useScoresHidden(game);
+	// A video's play link opens the room on that play (S97; game-rooms A6): its inning, its
+	// at-bat open and marked. An unknown `?play=` opens the room as usual.
+	const [params] = useSearchParams();
+	const arrival = atBatOfPlay(plays, params.get("play"));
+	// `Video: <clip title>` above every at-bat with a clip, however the room was reached (A6):
+	// one line per at-bat, the first clip in the game's order.
+	const videoLines = new Map([...videosByAtBat(game.highlights, plays)].map(([index, videos]) => [index, highlightTitle(videos[0]!, scoresHidden)]));
 	if (latest === null)
 	{
 		return <Text c="dimmed">No pitch-level play data for this game yet.</Text>;
 	}
-	const shown = view ?? latest;
+	const shown = view ?? arrival?.about.inning ?? latest;
 	const away = game.teams.away.abbreviation;
 	const home = game.teams.home.abbreviation;
 	const { innings } = linescoreCells(game.linescore, game.linescore?.scheduledInnings ?? 9);
@@ -225,7 +233,9 @@ export function PlaysPanel({ game }: { game: GamePayload })
 							tagged={shown === "runs"}
 							end={end}
 							scoresHidden={scoresHidden}
-							defaultOpen={view === null ? rows.at(-1)!.about.atBatIndex : null}
+							defaultOpen={view === null ? (arrival?.about.atBatIndex ?? rows.at(-1)!.about.atBatIndex) : null}
+							marked={arrival?.about.atBatIndex ?? null}
+							videoLines={videoLines}
 						/>
 					)}
 				</Stack>
@@ -272,14 +282,24 @@ function afterScroll(then: () => void): () => void
  * succession, starting after the top of screen animation is completed").
  */
 function PlaysAccordion({
-	plays, sections, tagged, end, defaultOpen, scoresHidden,
+	plays, sections, tagged, end, defaultOpen, scoresHidden, marked = null, videoLines = new Map<number, string>(),
 }: { plays: readonly AtBat[];
 	sections: Section[];
 	tagged: boolean;
 	end: RowEnd;
 	defaultOpen: number | null;
-	scoresHidden: boolean; })
+	scoresHidden: boolean;
+	/** The at-bat a video's play link opened (S97): a bar down its left edge, scrolled into view. */
+	marked?: number | null;
+	/** Each at-bat's `Video: <clip title>` line, by `atBatIndex` (S97; game-rooms A6). */
+	videoLines?: ReadonlyMap<number, string>; })
 {
+	useEffect(() =>
+	{
+		if (marked !== null) document.getElementById(`at-bat-${marked}`)?.scrollIntoView?.({
+			block: "start",
+		});
+	}, [marked]);
 	const [open, setOpen] = useState<string | null>(defaultOpen === null ? null : String(defaultOpen));
 	// 0 while the old at-bat snaps shut; the open animation otherwise.
 	const [duration, setDuration] = useState(OPEN_MS);
@@ -357,18 +377,29 @@ function PlaysAccordion({
 					{section.plays.map((atBat) =>
 					{
 						const value = String(atBat.about.atBatIndex);
+						const video = videoLines.get(atBat.about.atBatIndex);
 						return (
-							<Accordion.Item id={`at-bat-${value}`} key={value} value={value}>
-								<Accordion.Control aria-label={atBatLabel(atBat)}>
-									{open === value ? <OpenHeader atBat={atBat} /> : <ClosedRow atBat={atBat} tagged={tagged} end={end} />}
-								</Accordion.Control>
-								<Accordion.Panel onTransitionEnd={() => replay(value)}>
-									{/* Only the open at-bat is mounted, so a closed one's replay stops with it. */}
-									{open === value ? (
-										<AtBatViewer plays={plays} atBat={atBat} autoplay={autoplay?.value === open ? autoplay.token : 0} scoresHidden={scoresHidden} />
-									) : null}
-								</Accordion.Panel>
-							</Accordion.Item>
+							<Fragment key={value}>
+								{video ? <Text fz={12} c="var(--bt-primary-light)" data-testid="video-line">Video: {video}</Text> : null}
+								<Accordion.Item
+									id={`at-bat-${value}`}
+									value={value}
+									data-marked={marked === atBat.about.atBatIndex || undefined}
+									style={marked === atBat.about.atBatIndex ? {
+										borderLeft: "3px solid var(--bt-primary-light)",
+									} : undefined}
+								>
+									<Accordion.Control aria-label={atBatLabel(atBat)}>
+										{open === value ? <OpenHeader atBat={atBat} /> : <ClosedRow atBat={atBat} tagged={tagged} end={end} />}
+									</Accordion.Control>
+									<Accordion.Panel onTransitionEnd={() => replay(value)}>
+										{/* Only the open at-bat is mounted, so a closed one's replay stops with it. */}
+										{open === value ? (
+											<AtBatViewer plays={plays} atBat={atBat} autoplay={autoplay?.value === open ? autoplay.token : 0} scoresHidden={scoresHidden} />
+										) : null}
+									</Accordion.Panel>
+								</Accordion.Item>
+							</Fragment>
 						);
 					})}
 				</Fragment>

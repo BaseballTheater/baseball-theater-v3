@@ -46,7 +46,8 @@ function game(plays: AtBat[] = PLAYS): GamePayload
 
 function wrap(node: ReactNode)
 {
-	return render(<MantineProvider>{node}</MantineProvider>);
+	// The room reads `?play=` (S97), so it renders inside a router as the app does.
+	return render(<MantineProvider><MemoryRouter>{node}</MemoryRouter></MantineProvider>);
 }
 
 /** Renders `/game/823823/plays` and returns the Plays tab panel. */

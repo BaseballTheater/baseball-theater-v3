@@ -4,6 +4,7 @@ import {
 import { Link } from "react-router-dom";
 import { highlightTitle } from "@bt/domain";
 import type { Video } from "./VideoCard.js";
+import type { PlayLink } from "./playLink.js";
 import { VideoPlayer } from "./VideoPlayer.js";
 
 /** The game a clip belongs to, as the dialog's link names it (`NYY @ BOS, Sep 21`). */
@@ -24,7 +25,8 @@ export type PlayerGame = {
  * played from that game's own page (owner, 2026-10-21: "All videos which have enough
  * context to associate them to a game should show a link to the game unless they are
  * already being played from the game"): the caller passes `game` when it knows it and
- * `fromGamePk` when it is that game's page.
+ * `fromGamePk` when it is that game's page; there the slot shows the clip's play link instead
+ * (S97; game-shell A5), when it has one.
  *
  * With scores hidden the recap clip is titled "Recap (score hidden)" (`highlightTitle`,
  * S75); only the game page passes `scoresHidden`, so Search and the digest keep MLB's title.
@@ -33,12 +35,14 @@ export type PlayerGame = {
  * is transparent, so the overlay behind it is the dimmed page the frames draw.
  */
 export function PlayerDialog({
-	video, onClose, game, fromGamePk, scoresHidden = false,
+	video, onClose, game, fromGamePk, scoresHidden = false, playLink,
 }: { video: Video;
 	onClose: () => void;
 	game?: PlayerGame;
 	fromGamePk?: number;
-	scoresHidden?: boolean; })
+	scoresHidden?: boolean;
+	/** The clip's play link (S97; game-shell A5): shown top left when no game link holds that slot. */
+	playLink?: PlayLink | null; })
 {
 	const title = highlightTitle(video, scoresHidden);
 	const link = game && game.gamePk !== fromGamePk ? game : null;
@@ -71,6 +75,10 @@ export function PlayerDialog({
 				{link ? (
 					<Anchor component={Link} to={`/game/${link.gamePk}`} c="var(--bt-primary-light)" onClick={onClose}>
 						Go to game: {link.label} →
+					</Anchor>
+				) : playLink ? (
+					<Anchor component={Link} to={playLink.to} c="var(--bt-primary-light)" onClick={onClose} data-testid="player-play-link">
+						{playLink.label}
 					</Anchor>
 				) : <span />}
 				<UnstyledButton onClick={onClose} aria-label="Close video" c="var(--bt-light)" style={{

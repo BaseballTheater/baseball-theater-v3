@@ -95,3 +95,33 @@ export function videoPlayLinks(
 		};
 	});
 }
+
+/**
+ * The at-bat a play id names (S97): the at-bat whose pitch it is, through the one
+ * pitch → at-bat lookup. Undefined for an id no pitch carries — an unknown `?play=`, or a
+ * video with no play.
+ */
+export function atBatOfPlay(plays: readonly AtBat[], playId: string | null | undefined): AtBat | undefined
+{
+	if (!playId) return undefined;
+	const index = atBatIndexByPitch(plays).get(playId);
+	return index === undefined ? undefined : plays.find((atBat) => atBat.about.atBatIndex === index);
+}
+
+/**
+ * The videos of each at-bat, keyed by `atBatIndex`, in the order given (S97; game-rooms A6's
+ * `Video: <clip title>` above every at-bat with a clip). A video counts toward the at-bat its
+ * `playId`'s pitch is in; one with no play, or a play no pitch carries, counts toward none.
+ */
+export function videosByAtBat<V extends Pick<MediaHighlight, "playId">>(videos: readonly V[], plays: readonly AtBat[]): Map<number, V[]>
+{
+	const atBatOfPitch = atBatIndexByPitch(plays);
+	const out = new Map<number, V[]>();
+	for (const video of videos)
+	{
+		const index = video.playId ? atBatOfPitch.get(video.playId) : undefined;
+		if (index === undefined) continue;
+		out.set(index, [...(out.get(index) ?? []), video]);
+	}
+	return out;
+}

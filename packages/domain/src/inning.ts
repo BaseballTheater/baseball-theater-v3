@@ -3,6 +3,7 @@
  * label for the Live status and the scoreboard's live row (ADR-025); views render it.
  * The short forms are the ratified frames' (`Bot 7th · 1 Out`, game-rooms Live).
  */
+import type { AtBat } from "./plays.js";
 import type { LinescoreSummary } from "./types.js";
 
 const HALF: Readonly<Record<string, string>> = {
@@ -33,4 +34,14 @@ export function inningLabel(linescore: Pick<LinescoreSummary, "currentInning" | 
 	if (!linescore?.currentInning) return null;
 	const half = (linescore.inningState && HALF[linescore.inningState]) ?? (linescore.isTopInning === false ? "Bot" : "Top");
 	return `${half} ${ordinal(linescore.currentInning)}`;
+}
+
+/**
+ * An at-bat's half and inning as the video play link spells it, `Top 6th` / `Bot 3rd` (S97;
+ * game-shell A5's `Play · Top 6th →`). The at-bat's own form of `inningLabel`, which reads a
+ * linescore; the one spelling for an at-bat's inning wherever a link or label needs it (ADR-025).
+ */
+export function atBatInningLabel(atBat: Pick<AtBat, "about">): string
+{
+	return `${atBat.about.halfInning === "top" ? "Top" : "Bot"} ${ordinal(atBat.about.inning)}`;
 }

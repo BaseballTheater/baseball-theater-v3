@@ -28,6 +28,8 @@ function game(highlights?: GamePayload["highlights"]): GamePayload
 	const snapshot = JSON.parse(readFileSync(join(FIXTURES, "game-823823.json"), "utf8")) as GamePayload;
 	return {
 		...snapshot,
+		// The API always sends plays (a required field); none here, so no card gets a play link (S97).
+		plays: [],
 		highlights: highlights ?? rankHighlightsByImpact(snapshot.highlights) as GamePayload["highlights"],
 	};
 }
