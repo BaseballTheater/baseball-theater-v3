@@ -170,6 +170,7 @@ explicitly where that's the case. For what's still ahead, see
 
 ## Watching a game live, pitch by pitch
 
+- **Before, the Live room showed the bases, the count and every pitch, but not who was likely to win. Now, on a tablet or computer, a chart beside the field shows how each at-bat swung the home team's chances and where they stand now; with Hide Scores on it stays put but hides the line. Each pitch row also shows an up or down arrow, as the approved design draws it.** Details: S106 — `winProbabilitySeries` in `packages/domain` (S93's play metrics), `WinProbabilityCard` (one SVG, no chart library) in `LiveRoom`; the pitch chevrons in `PitchSequence` (owner, during the design match); design matched by the owner. _(2026-11-04)_
 - **Before, the Live page said the outs three times and the count twice: in words beside the dots that already
   showed them, and again on a line underneath. Now the inning shows once, as "Top 3rd", and the count and outs
   show only as the dots, so there is less to read.** Details: S109 — `LiveStatus` reads `inningLabel` alone;

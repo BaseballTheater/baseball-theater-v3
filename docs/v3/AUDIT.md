@@ -14330,3 +14330,98 @@ export const label = game.abbreviation + " @ ";  1096ms
 ```
 
 </details>
+
+---
+
+## 2026-11-04 — S106 completed
+
+**Live win-probability chart**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-04T23:56:59Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `2737a56` (tree dirty) |
+| Grader | `scripts/verify-S106.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: winProbabilitySeries(game) in packages/domain: the home team's chance after each at-bat with play metrics, in order, each with its inning, plus the current value; on 823823 one point per measured at-bat ending at 0 or 100; none without metrics (unit tests named 'S106 AC 1')
+check 2 PASS: medium and desktop: the card under the status card, beside the zone — 'Win probability (HOME)', the current percent top right, the line with the area under it, a dashed 50% line, the innings along the bottom; no card at mobile (RTL named 'S106 AC 2')
+check 3 PASS: Hide Scores on: same title and size, '–' and 'Hidden with scores', no line or value (RTL named 'S106 AC 3')
+check 4 PASS: no play metrics: no card, the room as S64 built it (RTL named 'S106 AC 4')
+check 5 PASS: a newer game in the cache with another at-bat's metrics adds that point without a reload (RTL named 'S106 AC 5')
+check 6 PASS: one chart component, no new charting dependency, pnpm size within 200 KB; the story's files have no team logo and no useMediaQuery / hiddenFrom / visibleFrom outside web/src/layout/
+check 7 PASS: design captures live-medium (768), live-desktop (1200) and live-hidden-status-medium (768) saved by e2e/design/S106.spec.ts under docs/v3/design-checks/S106/
+check 8 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**8/8 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with its ratified frame
+
+| Frame | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/game-rooms/amendments/live-desktop.png` | `9db6af041bb2684daed79b9c94ff34c840dba679700fa2645eb96769c1778c90` | `docs/v3/design-checks/S106/live-desktop.png` | `8d4293ea674be0dcbd4381bfb04abb8914ec3aaee397b7fa4fe3e91d2adba09c` |
+| `docs/v3/visual/game-rooms/amendments/live-hidden-status-medium.png` | `12f48be96f72b8a59ad4613fb60486c21fe389c00aa916fa4e7c7ba2844d445f` | `docs/v3/design-checks/S106/live-hidden-status-medium.png` | `d067f5e365ed057a70af2cd2542d642d500b49572c8f72143871b0dce1a98d33` |
+| `docs/v3/visual/game-rooms/amendments/live-medium.png` | `6f3df37d78320d74d0a1f954c761c79a3a617a6231d259d9847cf839e388d41f` | `docs/v3/design-checks/S106/live-medium.png` | `ab7ac0c142ebea17698408fdb9567419cc15275662d4884a3beecd412c8a84a1` |
+Owner: "Owner, 2026-11-04, shown the CI captures beside the ratified frames (with the pitch-row chevrons the owner asked for: "The accordion of pitches is missing the up and down arrows"): "Both yes""
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S106 check results ---
+check 1 PASS: winProbabilitySeries(game) in packages/domain: the home team's chance after each at-bat with play metrics, in order, each with its inning, plus the current value; on 823823 one point per measured at-bat ending at 0 or 100; none without metrics (unit tests named 'S106 AC 1')
+check 2 PASS: medium and desktop: the card under the status card, beside the zone — 'Win probability (HOME)', the current percent top right, the line with the area under it, a dashed 50% line, the innings along the bottom; no card at mobile (RTL named 'S106 AC 2')
+check 3 PASS: Hide Scores on: same title and size, '–' and 'Hidden with scores', no line or value (RTL named 'S106 AC 3')
+check 4 PASS: no play metrics: no card, the room as S64 built it (RTL named 'S106 AC 4')
+check 5 PASS: a newer game in the cache with another at-bat's metrics adds that point without a reload (RTL named 'S106 AC 5')
+check 6 PASS: one chart component, no new charting dependency, pnpm size within 200 KB; the story's files have no team logo and no useMediaQuery / hiddenFrom / visibleFrom outside web/src/layout/
+check 7 PASS: design captures live-medium (768), live-desktop (1200) and live-hidden-status-medium (768) saved by e2e/design/S106.spec.ts under docs/v3/design-checks/S106/
+check 8 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S106: 8/8 checks passed ---
+verify-S106: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  723ms
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 718ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  367ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  349ms
+ ✓ |tools| size-limit/size-limit.test.js (2 tests) 116ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 78ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 72ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 55ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 77ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 12ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  16:00:41
+   Duration  6.50s (transform 79ms, setup 0ms, collect 3.30s, tests 1.90s, environment 1ms, prepare 354ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/claude/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154288,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
