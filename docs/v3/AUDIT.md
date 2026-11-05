@@ -14781,3 +14781,33 @@ Fresh-context doc parity review, one reviewer. Read: INTENT, FEATURES (whole), t
 
 - No features added this review. FEATURES items still unserved by any startable story, unchanged from earlier reviews: Standings (S4 blocked), Update / changelist UX (S28, S73 blocked), Savant deep links, Multi-source knowledge, AI game companion, Inning / game insight pipeline, Whole-game record. Nothing new to slice.
 - Carried: ARCHITECTURE Phase A table (ARCHITECTURE:1400) still lacks win probability added (S98); outside parity scope.
+
+---
+
+## 2026-11-05 — backlog review answers (2026-11-04)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-04 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-05T22:30:44Z` |
+| HEAD at capture | `348e174` (tree clean) |
+| Applied in | `348e174` — S114: the owner's database answer, previews and staging copy baseball data and no fans' data |
+
+**Answers and what was applied**
+
+Owner, 2026-11-05, on the 2026-11-04 question "Should the staging and preview databases start with no fans' data, or be copies of production?": "No user data, copied baseball data". Applied to S114 as AC 9; S114 back to todo.
+
+---
+
+## 2026-11-05 — doc parity review answers (2026-11-04)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-04 doc parity review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-05T22:30:44Z` |
+| HEAD at capture | `348e174` (tree dirty) |
+| Applied in | `348e174` — S114: the owner's database answer, previews and staging copy baseball data and no fans' data |
+
+**Answers and what was applied**
+
+Owner, 2026-11-05, on the 2026-11-04 question "Should the staging and preview databases start with no fans' data, or be copies of production?": "No user data, copied baseball data". Applied to S114 as AC 9; S114 back to todo.
