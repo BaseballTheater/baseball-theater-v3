@@ -14526,3 +14526,85 @@ export const label = game.abbreviation + " @ ";  762ms
 ```
 
 </details>
+
+---
+
+## 2026-11-04 — S51 completed
+
+**`pnpm dev` on Postgres in Docker**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-05T01:12:49Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `2de30ce` (tree dirty) |
+| Grader | `scripts/verify-S51.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: compose.yaml runs postgres pinned to Neon's major version (18); README names Docker as the one prerequisite
+check 2 PASS: the root dev script starts that Postgres, runs pnpm db:seed, then wrangler dev (workerd) with Hyperdrive's localConnectionString pointing at it; seeding twice on PGlite leaves row counts unchanged (test)
+check 3 PASS: the Worker composition imports no in-memory repository and wires Postgres repositories; a test composes it on PGlite and serves through it
+check 4 PASS: README lists what local cannot represent (Hyperdrive pooling and caching, Neon wake-up, edge-cache distribution, Durable Object placement and eviction) and checks them on a preview deploy against a Neon branch, never production
+check 5 PASS: CLAUDE.md no longer says the local default is fixtures + in-memory repos; it names Postgres in Docker
+check 6 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**6/6 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S51 check results ---
+check 1 PASS: compose.yaml runs postgres pinned to Neon's major version (18); README names Docker as the one prerequisite
+check 2 PASS: the root dev script starts that Postgres, runs pnpm db:seed, then wrangler dev (workerd) with Hyperdrive's localConnectionString pointing at it; seeding twice on PGlite leaves row counts unchanged (test)
+check 3 PASS: the Worker composition imports no in-memory repository and wires Postgres repositories; a test composes it on PGlite and serves through it
+check 4 PASS: README lists what local cannot represent (Hyperdrive pooling and caching, Neon wake-up, edge-cache distribution, Durable Object placement and eviction) and checks them on a preview deploy against a Neon branch, never production
+check 5 PASS: CLAUDE.md no longer says the local default is fixtures + in-memory repos; it names Postgres in Docker
+check 6 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S51: 6/6 checks passed ---
+verify-S51: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  792ms
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 733ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  373ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  355ms
+ ✓ |tools| size-limit/size-limit.test.js (2 tests) 139ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 97ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 77ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 67ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 77ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 13ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  17:16:30
+   Duration  6.71s (transform 66ms, setup 0ms, collect 3.32s, tests 2.04s, environment 1ms, prepare 371ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/claude/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154292,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

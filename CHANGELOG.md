@@ -81,6 +81,7 @@ explicitly where that's the case. For what's still ahead, see
 
 ## The backend runs the way it will in production
 
+- **Before, running Baseball Theater on a developer's machine kept its data in memory, which doesn't behave like the real database. Now `pnpm dev` starts the same database engine and version production uses, fills it with the recorded games, and runs the app against it, with Docker as the one thing to install.** Details: S51 — Postgres 18 in Docker (`compose.yaml`), `pnpm db:seed`, the Worker on Hyperdrive's `localConnectionString`; checked coming up for real on a GitHub runner (design-capture run 41934225471), accepted by the owner. _(2026-11-04)_
 - **Before, Baseball Theater could only guess which plays mattered from the words in a clip's title. Now it
   keeps MLB's own measure of every at-bat: how much it swung each team's chance of winning, and whether MLB counts
   it as a key moment, a lead change, a home run, a hard hit, a high-leverage spot or an ABS challenge. Nothing on
