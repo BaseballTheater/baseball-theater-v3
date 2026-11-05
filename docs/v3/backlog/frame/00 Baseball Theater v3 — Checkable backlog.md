@@ -171,7 +171,14 @@ scripts/audit.sh review --trigger "…" --since "S23, S21, S13" --verdict amende
 
 This section keeps only the *forward-looking* scheduling state: what is due next, and the drift the next review has to weigh.
 
-**Last review:** 2026-11-04 at HEAD `daf8331`, verdict **`amended`**. **Trigger: drift** — the owner inserted S115 (design captures on request in GitHub Actions; "Yes do 1 and 2") and S90, S92, S91 moved down one priority.
+**Last review:** 2026-11-04 at HEAD `b166679`, verdict **`amended`**. **Trigger: count** — 6 stories done since the last review (S89, S115, S106, S97, S51, S112). Fresh-context subagent; see [AUDIT](./AUDIT.md).
+
+- **S114 `blocked` on the owner, ACs 7–8 added, cap 18 → 20.** Which data the staging and preview Neon branches start from (a branch of production copies fans' data into places ADR-028 doesn't list and deletion doesn't reach); AC 7 turns the Worker's `dev:` sign-in off outside local dev (it is wired unconditionally today, so a deployed site would let anyone sign in as anyone); AC 8 sets live MLB, the app origin and the session-key secret per environment. Notes: preview crons, one Hyperdrive config per environment, wrangler env blocks restate bindings.
+- **S113 notes:** AC 2 already holds at HEAD (S51); it means the repositories, not the in-memory export store and mailer the launch checklist replaces; reuse `migratePostgres` / `openPostgres`; `reapplyDeletions` has no command yet.
+- **Next 3 startable:** S113, S5, S99 (S114 on the owner and S113; S72 on S5; S74 on S73; S108 on S106 / S107). After S113, S5 and S99–S105 need live MLB recordings a cloud session can't make.
+- **Weigh next time:** the owner's answers on S114; the at-bat inning spelled three ways — `atBatInningLabel` (`packages/domain/src/inning.ts:44`, "Top 6th", S97) says it is the one spelling, but `PlaysPanel.tsx:35` ("Top"/"Bottom" N) and `:53` `inningTag` ("Top"/"Bot" N, from S41) map the half inline (ADR-025): no open story's purpose covers `PlaysPanel`, so slice a small consolidation when one next touches it, or as its own story.
+
+**Earlier review:** 2026-11-04 at HEAD `daf8331`, verdict **`amended`**. **Trigger: drift** — the owner inserted S115 (design captures on request in GitHub Actions; "Yes do 1 and 2") and S90, S92, S91 moved down one priority.
 
 - **S89 and S115 get turn caps (12, 8), Goal conditions and `/goal` commands** (rule 8); each goal's path list equals its scope files. S89 AC 2 widened so CI keeps running the design specs (without capturing) in their own job: today only `pnpm e2e` catches a broken one (CI red at `2b4de06`), and S115 runs them only on request. S89 AC 4 already holds at HEAD (owner's `5470524`). S115 notes: pass the spec path, not the bare ID (`S10` also matches `S106`/`S109`).
 - **Next 3 startable:** S5, S99, S100 (S112–S114 wait on S51, `blocked` on the owner's `pnpm dev` check; S72 on S5; S74 on S73; S108 on S106 / S107). S5 and S99–S103 need live MLB recordings (`BT_USE_LIVE_MLB=1`) that a cloud session can't make (statsapi unreachable here); S89 and S115 are the first stories a cloud session can finish end to end.

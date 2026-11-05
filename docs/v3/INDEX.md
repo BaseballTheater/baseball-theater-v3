@@ -12,12 +12,12 @@
 
 Assembled, in this order and around the stories, into BACKLOG.md.
 
-- [00 Baseball Theater v3 — Checkable backlog](<backlog/frame/00 Baseball Theater v3 — Checkable backlog.md>) — 93 KB
+- [00 Baseball Theater v3 — Checkable backlog](<backlog/frame/00 Baseball Theater v3 — Checkable backlog.md>) — 94 KB
   - `127–145` Verify-script contract
   - `146–159` Story status
-  - `160–416` Backlog reviews
-  - `417–436` Doc parity reviews
-  - `437–441` Goal command for multiple stories
+  - `160–423` Backlog reviews
+  - `424–443` Doc parity reviews
+  - `444–448` Goal command for multiple stories
   - Rules, by number:
     - `10–10` 1. Acceptance criteria map to commands, tests, or file invariants (exit codes / assertions).
     - `11–11` 2. Vague phrases (“works correctly”, “handles errors gracefully”) are forbidden until rewrit…
@@ -480,7 +480,6 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 | Priority | Story | Status | Depends on | Design |
 |---|---|---|---|---|
 | 78 | [S113](backlog/stories/S113.md) Production database (Neon) | `todo` | S51 | — |
-| 79 | [S114](backlog/stories/S114.md) Cloudflare deploy | `todo` | S113 | — |
 | 90 | [S5](backlog/stories/S5.md) Search page queries highlights fixture | `todo` | S70, S61, S68, S81 | S34, S56 |
 | 91 | [S72](backlog/stories/S72.md) Search chips: date / team / tag | `todo` | S5, S69, S81 | S34 |
 | 94 | [S74](backlog/stories/S74.md) Offline reading + prefetch | `todo` | S73, S68, S75, S76, S81 | S55, S57 |
@@ -495,6 +494,7 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 | 115 | [S90](backlog/stories/S90.md) Next-pitch model (train + evaluate) | `todo` | S63 | — |
 | 116 | [S92](backlog/stories/S92.md) Design: next-pitch odds (owner-ratified) | `todo` | S64 | — |
 | 117 | [S91](backlog/stories/S91.md) Next-pitch odds in Live (paid) | `todo` | S90, S64 | S92 |
+| 79 | [S114](backlog/stories/S114.md) Cloudflare deploy | `blocked` | S113 | — |
 | 89 | [S4](backlog/stories/S4.md) Standings fixture API + page | `blocked` | S81 | S34 |
 | 92 | [S73](backlog/stories/S73.md) Installable PWA + update notice | `blocked` | S55, S60, S6, S81 | S55, S56 |
 | 93 | [S28](backlog/stories/S28.md) Version sunset path + stale-client upgrade | `blocked` | S26, S25, S73, S81 | S31 |

@@ -14690,3 +14690,42 @@ export const label = game.abbreviation + " @ ";  996ms
 ```
 
 </details>
+
+---
+
+## 2026-11-04 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-05T06:20:05Z` |
+| HEAD at review | `b166679` (tree dirty) |
+| Trigger | 6 stories done since last review |
+| Stories `done` since last review | S89, S115, S106, S97, S51, S112 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context backlog review (subagent), scheduled by count. Read: S113, S114, S5 notes (whole), S91 fence, frame 00 "Backlog reviews", frame 01 "Current baseline", ADR-028 (ARCHITECTURE.md:1314–1355), the last two review entries and the 2026-11-04 parity entry; `wrangler.jsonc`, `functions/src/worker.ts`, `functions/src/worker-app.ts`, `functions/src/adapters/fixtures/auth.ts`, `functions/src/services/accounts.ts`, `functions/src/adapters/postgres/{migrate,connect}.ts`, `functions/src/services/account-deletion.ts`, `functions/src/adapters/http/mlb.ts`; the code diff `bdba2c9..b166679` and the S97 / S106 checkpoint commits (`e81b2e0`, `48799dd`, `809bdf4`, `75cef00`).
+
+**Last review's questions.** (1) S89's design-spec job: moot, S89 shipped with it (its ledger check 2). (2) Move S89 / S115 above S5: moot, both done. No answers entry needed.
+
+**Next 3 by priority (check 2).**
+
+- **S113 (78)** — depends on S51 `done` (also S50, S77 `done`). Paths: `wrangler.jsonc` exists, `hyperdrive` id is the `0000…` placeholder, no `env` block (AC 3 red-first holds); root `package.json` has `db:seed` but no `db:migrate` (AC 1 red-first holds); `functions/src/adapters/postgres/migrate.ts` (`migratePostgres`, `MIGRATIONS_FOLDER`, `migratedPglite`), `connect.ts:22` `openPostgres`, `account-deletion.ts:90` `reapplyDeletions` exist; `README.md` exists. **Finding: AC 2 already holds at HEAD** — since S51 `createWorkerApp(env, scopedDatabase)` builds every repository on Postgres and `worker.ts:27,39` opens each request / tick with `inDatabaseScope(env.HYPERDRIVE, …)`; the Gap's "the deployed Worker isn't composed on it" is stale. **Finding: AC 2's no-fallback grep would hit** `InMemoryExportStore` / `InMemoryMailer` (`auth.ts:81–82`), which are launch-checklist items (S114 AC 6), not repositories. Note added clarifying AC 2 covers the repositories and deletion log (no AC text changed). Note added: wrangler env blocks don't inherit `hyperdrive` / `durable_objects` / `vars`, and an env renames the Worker unless `name` is set. Cap 14 holds.
+- **S114 (79)** — depends on S113 `todo` (correct gate). `.github/workflows/` holds `ci.yml`, `design-capture.yml`; no deploy workflow (red-first holds). **Finding (security): the Worker composes `createDevAuth`, whose provider list always includes `dev` (`auth.ts:60`; `accounts.ts:107` accepts `Bearer dev:<uid>` whenever `deps.dev` is wired)**, while `auth.ts`'s own comment says "never in production". Deployed as written, `stage.baseball.theater` would let anyone sign in as any uid. The Logto adapter is an unsliced Later theme. **Added AC 7**: no deployed env accepts `dev:` sign-in (wired only when `BT_LOCAL` is "1"). **Finding: `createMlbClient` serves the bundled fixtures unless `BT_USE_LIVE_MLB=1`, and `BT_SESSION_KEY` falls back to a random key per isolate** — nothing in S114's ACs sets them. **Added AC 8**: per-env `BT_USE_LIVE_MLB=1`, `BT_APP_ORIGIN`, `BT_SESSION_KEY` from a Worker secret. Cap 18 → 20 (Goal condition and `/goal` updated to match; no AC loosened). **Personal-data finding (ADR-028): AC 1–2 say "a Neon branch (not production)" but not its parent; a branch of production copies `users`, `identity_links`, `account_settings`, `deletion_log` into preview and staging branches that ADR-028's inventory doesn't list and `deleteFor` doesn't reach.** Per the sweep's rule that is an owner amendment, so **S114 is parked `blocked`** on the owner's answer; S113 does not depend on it. Notes added: preview Workers would run the every-minute ingest cron (`tickAllowed` true deployed) — give previews no crons; only `bt-production` exists as a Hyperdrive config, so staging and previews need their own (or share staging's); env blocks restate bindings and routes.
+- **S5 (90)** — deps S70, S61, S68, S81 `done`; designs S34, S56 `done`; prefer-after S24, S25 `done`. Paths exist: `web/src/api/client.ts`, `web/src/api/generated.types.test.ts`, `web/src/api/generated/bt-api.v1.ts`, `openapi/bt-api.v1.json`, `packages/domain/src/api-routes.ts`, `web/src/components/videos/LazyPlayerDialog.tsx`, `DayDigest.tsx:16` `gameLabel`, `e2e/design/helpers.ts`; `fixtures/search-*.json` absent (created by the story). `graphContentRequest` `mlb.ts:62`, `MlbRequest` `:49` unchanged; **`getJson` moved :261 → :278** (S112): note refreshed. No owner question is open on S5 (the 2026-11-03 answer stands; the caller's "blocked on MLB search" is out of date). Cap 16 holds. Still needs a live MLB recording, impossible from a cloud session; captures can now go through S115.
+
+With S114 parked, the next 3 startable are S113, S5, S99 (S99: no deps, `todo`, cap 12; checked by the previous review, no code in its paths changed since).
+
+**Priority challenge.** S113 → S114 stays first (owner's order, 2026-11-02). Parking S114 costs nothing now since it waits on S113 anyway. After S113 every startable story (S5, S99–S105) needs live MLB recordings; a cloud session can only do S113. Nothing obsolete found; S89 / S115 done made the last review's reorder question moot. Class of underestimate: deploy stories (S113 / S114) were sliced before checking what the Worker composition actually wires (dev auth, fixtures default, per-isolate session key).
+
+**Duplication sweep (ADR-025).** `pnpm dup:check` (jscpd): 206 files, 0 clones. Read: `packages/domain/src/win-probability.ts` (S106; the only `currentPercent` rounding, `WinProbabilityCard.tsx` only formats), `web/src/components/videos/playLink.ts` (S97; uses domain `atBatInningLabel` / `atBatOfPlay`), `overlay-mlb.ts`, `dev-seed.ts`, `seed-refresh.ts` (S112), `PitchSequence.tsx` (`75cef00`). Grep `halfInning === "top"`: **hit** — `PlaysPanel.tsx:35` ("Top"/"Bottom" N) and `:53` `inningTag` ("Top"/"Bot" N), from S41, map the half inline while `atBatInningLabel` (`packages/domain/src/inning.ts:44`) claims to be the one spelling. No open story's purpose covers `PlaysPanel` (only S91's fence includes it); recorded in the frame note's "Weigh next time" for a small consolidation slice rather than bolted onto an unrelated story.
+
+**Personal-data sweep (ADR-028).** Code added since `bdba2c9`: no new table, field, browser key or outside service; new `console.*` lines (`db-seed.ts`, `seed-refresh.ts`) log dates, counts and file paths only. Next 3: S113 adds no table (production tables are S50's labeled ones); S5 adds no store (its own note); S114: the Neon-branch finding above (blocked).
+
+**Baseline.** "As of" names S112; S89, S115, S106, S97, S51, S112 each appear in frame 01. No S113 / S114 row needed until done.
+
+**Parity:** queued nothing for this review (2026-11-04 entry). A parity review is also due by count (`pnpm parity:debt`); no Source line edited here.
+
+**Owner questions:** (1) Should staging and preview databases start with no fans' data (schema-only Neon branches plus the dev seed), or be copies of production (then an ADR-028 amendment)? (2) Keep AC 7 (no `dev:` sign-in on deployed sites, so nobody can sign in there until Logto), and should a Logto story be sliced to land before the production release? (3) Who creates the staging Hyperdrive config, and do previews get their own (workflow-created per PR) or share staging's?

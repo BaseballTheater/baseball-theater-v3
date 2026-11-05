@@ -227,7 +227,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 76 | [S51](#s51--representative-local-dev-pnpm-dev-on-postgres-in-docker) | `pnpm dev` on Postgres in Docker | `done` |
 | 77 | [S112](#s112--dev-seed-the-last-month-of-the-season-and-the-postseason-refreshable-by-date-range) | Dev seed (season end + postseason) | `done` |
 | 78 | [S113](#s113--production-database-neon-through-hyperdrive-migrated-composed-into-the-worker) | Production database (Neon) | `todo` |
-| 79 | [S114](#s114--cloudflare-deploy-preview-staging-and-production-through-github-actions) | Cloudflare deploy | `todo` |
+| 79 | [S114](#s114--cloudflare-deploy-preview-staging-and-production-through-github-actions) | Cloudflare deploy | `blocked` |
 | 80 | [S93](#s93--ingest-mlb-play-metrics-win-probability-key-moments-abs-challenges) | Ingest play metrics | `done` |
 | 81 | [S75](#s75--hide-scores-in-the-game-rooms-and-the-recap-video-title) | Hide Scores in the rooms | `done` |
 | 82 | [S71](#s71--day-highlights-digest-best-of-date) | Day highlights digest | `done` |
@@ -285,7 +285,14 @@ scripts/audit.sh review --trigger "…" --since "S23, S21, S13" --verdict amende
 
 This section keeps only the *forward-looking* scheduling state: what is due next, and the drift the next review has to weigh.
 
-**Last review:** 2026-11-04 at HEAD `daf8331`, verdict **`amended`**. **Trigger: drift** — the owner inserted S115 (design captures on request in GitHub Actions; "Yes do 1 and 2") and S90, S92, S91 moved down one priority.
+**Last review:** 2026-11-04 at HEAD `b166679`, verdict **`amended`**. **Trigger: count** — 6 stories done since the last review (S89, S115, S106, S97, S51, S112). Fresh-context subagent; see [AUDIT](./AUDIT.md).
+
+- **S114 `blocked` on the owner, ACs 7–8 added, cap 18 → 20.** Which data the staging and preview Neon branches start from (a branch of production copies fans' data into places ADR-028 doesn't list and deletion doesn't reach); AC 7 turns the Worker's `dev:` sign-in off outside local dev (it is wired unconditionally today, so a deployed site would let anyone sign in as anyone); AC 8 sets live MLB, the app origin and the session-key secret per environment. Notes: preview crons, one Hyperdrive config per environment, wrangler env blocks restate bindings.
+- **S113 notes:** AC 2 already holds at HEAD (S51); it means the repositories, not the in-memory export store and mailer the launch checklist replaces; reuse `migratePostgres` / `openPostgres`; `reapplyDeletions` has no command yet.
+- **Next 3 startable:** S113, S5, S99 (S114 on the owner and S113; S72 on S5; S74 on S73; S108 on S106 / S107). After S113, S5 and S99–S105 need live MLB recordings a cloud session can't make.
+- **Weigh next time:** the owner's answers on S114; the at-bat inning spelled three ways — `atBatInningLabel` (`packages/domain/src/inning.ts:44`, "Top 6th", S97) says it is the one spelling, but `PlaysPanel.tsx:35` ("Top"/"Bottom" N) and `:53` `inningTag` ("Top"/"Bot" N, from S41) map the half inline (ADR-025): no open story's purpose covers `PlaysPanel`, so slice a small consolidation when one next touches it, or as its own story.
+
+**Earlier review:** 2026-11-04 at HEAD `daf8331`, verdict **`amended`**. **Trigger: drift** — the owner inserted S115 (design captures on request in GitHub Actions; "Yes do 1 and 2") and S90, S92, S91 moved down one priority.
 
 - **S89 and S115 get turn caps (12, 8), Goal conditions and `/goal` commands** (rule 8); each goal's path list equals its scope files. S89 AC 2 widened so CI keeps running the design specs (without capturing) in their own job: today only `pnpm e2e` catches a broken one (CI red at `2b4de06`), and S115 runs them only on request. S89 AC 4 already holds at HEAD (owner's `5470524`). S115 notes: pass the spec path, not the bare ID (`S10` also matches `S106`/`S109`).
 - **Next 3 startable:** S5, S99, S100 (S112–S114 wait on S51, `blocked` on the owner's `pnpm dev` check; S72 on S5; S74 on S73; S108 on S106 / S107). S5 and S99–S103 need live MLB recordings (`BT_USE_LIVE_MLB=1`) that a cloud session can't make (statsapi unreachable here); S89 and S115 are the first stories a cloud session can finish end to end.
@@ -452,7 +459,7 @@ This section keeps only the *forward-looking* scheduling state: what is due next
 
 **Earlier reviews** (2026-10-20 at `1967ae3` — S54 fenced for `tools/`, S48 AC 8 (ingest's final check), S56 Search-title note; 2026-10-19 at `adf4f24` — ADR-023–027 and the first design intake: guardrail, design and UI stories S52–S74 inserted, rooms re-scoped, guardrails and design first; 2026-10-18 at `52a0d0f` — off Firebase onto Cloudflare/Postgres/Logto (ADR-017–022): S42–S51 inserted, S7/S9 superseded, S8/S18/S19 re-scoped; 2026-10-14 at `71526bf` — S39/S40/S41 inserted for ratified work, rooms re-scoped, `openapi/` fenced; 2026-10-09 at `77244af` — S9 re-scoped, then emulator-only `pnpm dev` on the owner's answer; 2026-10-04 at `5dd9404` — `blocked` on Q1–Q5, answered 2026-10-08 and applied in `5f370be`; 2026-09-16 at `2a357ad` — S29 split: guard kept, generated DAL deferred behind a trigger; 2026-09-14 at `f74767c` — rule-18 design gate, parking, S18 ahead of the gated UI band; 2026-09-13 at `5827d36` — the V3 fence amendment and the end-to-end walk of the notes process; 2026-09-13 at `38a52aa` — the S27/S29 counterfactual and the S25-before-S29 re-order; 2026-09-10 at `c98e435` and before): see [AUDIT](./AUDIT.md).
 
-**Review debt (generated from [AUDIT](./AUDIT.md)):** 6 of 6 stories `done` since the last backlog review (2026-11-04, verdict `amended`): S89, S115, S106, S97, S51, S112. **A review is due before the next story starts.**
+**Review debt (generated from [AUDIT](./AUDIT.md)):** 0 of 6 stories `done` since the last backlog review (2026-11-04, verdict `amended`). A drift event makes a review due regardless of this count.
 
 **Next review due:** by count after **6** stories land since the last review, or immediately on any drift event. In particular:
 - ~~**When S41 enters the next 3:** confirm S2 actually shipped the reusable boxed-linescore component and the `823823` fixture pair S41 binds to.~~ Confirmed 2026-10-29 (see S41's notes).
@@ -2002,6 +2009,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 - **The ADR now exists.** The "ADR." bullet above is stale: ADR-029 (ARCHITECTURE.md:1356) records the owner's decision and answers open question 3, so there is nothing left to raise about it.
 - **The GraphQL helper S94 left is a GET, not a POST.** S94 landed first, as `graphContentRequest` (`functions/src/adapters/http/mlb.ts:62`), returning an `MlbRequest` (`{ url, headers }`, `:49`) that the client's private `getJson(url, headers)` (`:261`) sends as a GET with the persisted query in the URL; the recorder records the same request. ADR-029's "one small GraphQL POST helper" doesn't exist yet. Build S5's search request as another `MlbRequest` builder sent through the same `getJson` if `fastball-gateway.mlb.com` answers a GET; if it needs a POST body, add the POST beside `getJson` once and have both builders go through the one sender, rather than a second fetch path (ADR-025).
+- **Line drift (2026-11-04 backlog review, at `b166679`):** the client's private `getJson(url, headers)` is now at `functions/src/adapters/http/mlb.ts:278` (S112 added a request above it); `graphContentRequest` (`:62`) and `MlbRequest` (`:49`) are unchanged. No owner question is open on S5: the 2026-11-03 answer stands, and AC 8's team fields are the one thing to check before recording (stop and report if the result has none). It still needs a live MLB recording, which a cloud session can't make (statsapi and the GraphQL gateway are unreachable there); its design captures can now run through S115's `design-capture.yml`.
 - **Draft play link in Search's player.** S96's draft game-shell A5 asks (open question 2) whether a search result with a play should also get the play link in Search's floating player. Nothing is ratified; AC 9 stays as written. If the owner says yes, that surface needs its own amendment and the intake that follows it re-scopes this story.
 
 **Reuse check**
@@ -5814,6 +5822,13 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 - **Human-judged:** creating the Neon project and Hyperdrive config, and migrating them, are the owner's actions (CLAUDE.md: never touch production Neon branches); the story ships the commands, config shape and runbook, and records the owner's confirmation in the commit.
 - **Owner-provided setup (2026-11-02):** Neon project `old-sun-72319473` (Postgres 18, AWS us-east-2), database `neondb`, role `neondb_owner`; production Hyperdrive config `bt-production`, id `db27b03ce9734c3f928241ce8ee855f6`. The connection string lives only in Cloudflare.
 
+**Notes (2026-11-04 backlog review, at `b166679`, after S51 and S112):**
+
+- **AC 2 already holds at HEAD; the Gap's "isn't composed on it" is stale.** Since S51 the Worker builds every repository on Postgres: `workerApp` → `createWorkerApp(env, scopedDatabase)` (`functions/src/worker-app.ts`), and `functions/src/worker.ts:27,39` opens each request and cron tick through `inDatabaseScope(env.HYPERDRIVE, …)`. Keep AC 2 as a guard; red-first (rule 9) comes from AC 1 (no `db:migrate` script in `package.json` at HEAD), AC 3 (no `env` block; `wrangler.jsonc`'s `hyperdrive` id is the `0000…` placeholder) and AC 4.
+- **AC 2 means the repositories.** `createDevAccountData` (`functions/src/adapters/fixtures/auth.ts:81–82`) still builds `InMemoryExportStore` and `InMemoryMailer`: they are not repositories, and their R2 and Cloudflare Email adapters are launch-checklist items S114 AC 6 lists, not this story's. The grader's no-fallback grep targets the repository and deletion-log classes (`InMemory*Repository`, `InMemoryDeletionLog`) in the Worker's composition, not every `InMemory` name.
+- **Reuse:** `migratePostgres` and `MIGRATIONS_FOLDER` (`functions/src/adapters/postgres/migrate.ts`), `openPostgres` (`connect.ts:22`, used by `db-seed.ts:42`) and `migratedPglite` for AC 1's idempotency test. AC 4's restore step needs a command for `reapplyDeletions` (`functions/src/services/account-deletion.ts:90`): nothing runs it from a shell today; a script under `functions/src/scripts/` plus a root `package.json` script is inside the fence.
+- **Wrangler environments don't inherit bindings.** In a `production` env block, `hyperdrive`, `durable_objects` and `vars` must be restated (they are non-inheritable); Durable Object `migrations` stay top-level. An env block also renames the deployed Worker (`baseball-theater-production`) unless it sets `name`: pick deliberately, since S114 deploys it and its Durable Objects live under that name.
+
 **Reuse check**
 
 **Reuse check** (ADR-025): before writing code, search `functions/src/adapters/postgres/`, `functions/src/worker-app.ts`, S51's composition for what this story needs; record what was reused, or why nothing fit, in the story's ledger notes.
@@ -5854,7 +5869,9 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 4. Secrets (Cloudflare API token, Neon credentials) come from GitHub secrets, never the repo (grep).
 5. Before the first production deploy the workflow runs `pnpm db:migrate` against the target database (S113).
 6. `README.md` documents previews, staging, releasing, rolling back (`wrangler rollback`), and the launch checklist the Later theme carries (legal check of ageing-out copies, `support@baseball.theater` routing, the R2 `ExportStore` and Cloudflare Email `Mailer` adapters) as items still to finish before a public launch.
-7. This file's S114 **Status** (story heading and top table) is `done`.
+7. No deployed environment (preview, staging, production) accepts a `dev:` sign-in: the Worker wires `DevIdentityProvider` only when `BT_LOCAL` is `"1"` (workerd test: `Bearer dev:test-user` is refused without it and accepted with it). (Added by the 2026-11-04 backlog review: `createWorkerApp` composes `createDevAuth`, whose provider list always has `dev`, `functions/src/adapters/fixtures/auth.ts:60`, `functions/src/services/accounts.ts:107`.)
+8. Every deployed environment serves live MLB (`BT_USE_LIVE_MLB` is `"1"` in its `vars`), sets `BT_APP_ORIGIN` to its own address, and gets `BT_SESSION_KEY` from a Worker secret, never `vars` or the repo (`wrangler.jsonc` and workflow check). (Added by the 2026-11-04 backlog review: without the first the deploy serves the bundled fixtures, `createMlbClient` in `functions/src/worker-app.ts`; without the last each isolate signs sessions with its own random key.)
+9. This file's S114 **Status** (story heading and top table) is `done`.
 
 **Notes:**
 
@@ -5862,21 +5879,30 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 - **Owner-provided setup (2026-11-02):** Cloudflare account `b2854b217ff2a0f38e8863600a82fb63`; `baseball.theater` DNS is on Cloudflare; GitHub secrets `CLOUDFLARE_API_TOKEN`, `NEON_API_KEY`, variables `CLOUDFLARE_ACCOUNT_ID`, `NEON_PROJECT_ID` (`old-sun-72319473`) and environment `production` exist. Production Hyperdrive config: S113.
 - The Later theme's other launch items (legal check, support mailbox, R2 and Email adapters, the Worker log settings) stay in the theme; this story lists them in the README checklist rather than building them.
 
+**Notes (2026-11-04 backlog review, at `b166679`): `blocked` on the owner's answers, ACs 7–8 added.**
+
+- **Parked until the owner answers which data the staging and preview databases start from.** AC 1–2 say only "a Neon branch (not production)". A Neon branch is a copy of its parent: branched from production, every preview and the long-lived staging branch holds fans' accounts, settings and deletion log, places ADR-028's inventory (ARCHITECTURE.md:1314–1355) doesn't list and account deletion (S77's `deleteFor`) never reaches. ADR-028 makes an unlisted store the owner's amendment, not a new row. The alternative is branches with no production data (Neon's schema-only branches, or a parent that never held fans' data), loaded by `pnpm db:migrate` and the dev seed (S112). The owner's 2026-11-02 wording, "a long-lived `staging` copy of the database", reads either way. Set `status: todo` once answered; S113 doesn't depend on it.
+- **AC 7, sign-in on deployed sites.** Until the Logto adapter (Later theme in the Live data plane frame note, ADR-019) is sliced and built, the only sign-in the Worker has is the dev stand-in, which takes `Bearer dev:<any uid>` as that user, so `stage.baseball.theater` would let anyone read or delete anyone's settings. AC 7 turns it off outside local dev; signing in then fails on deployed sites until Logto lands. Whether the production release also waits for a Logto story is asked with this review.
+- **AC 8, the deployed Worker's vars.** `createMlbClient` serves the bundled fixtures unless `BT_USE_LIVE_MLB` is `"1"`; `BT_SESSION_KEY` falls back to a random key per isolate (`worker-app.ts`), which on Workers signs users out whenever a request lands on another isolate. Secrets go in with `wrangler secret put` per environment (or `secrets` on the deploy action), from GitHub secrets (AC 4).
+- **Preview Workers and the cron.** `wrangler.jsonc` triggers the ingest cron every minute and `tickAllowed` is always true deployed, so each open PR's preview would poll MLB on ADR-002's cadence and keep its Neon branch awake. Give the preview env `"triggers": { "crons": [] }` unless a PR needs live ingest; tear down a PR's Worker and Neon branch when it closes.
+- **Hyperdrive per environment.** A Worker's `HYPERDRIVE` binding names one Hyperdrive config, and only `bt-production` exists (S113's note). Staging needs its own config on the staging branch, and a per-PR branch needs one per preview (created and deleted by the workflow through the Cloudflare API, which needs the token's Hyperdrive edit permission) or previews share staging's. Which, and who creates `bt-staging`, is asked with this review.
+- **Wrangler environments don't inherit bindings** (S113's note): `preview` and `staging` env blocks restate `hyperdrive`, `durable_objects` and `vars`, and each needs its own `routes` / custom domain (`stage.baseball.theater`, `baseball.theater`).
+
 **Reuse check**
 
 **Reuse check** (ADR-025): before writing code, search `.github/workflows/ci.yml`, `wrangler.jsonc`, S113's migrate command for what this story needs; record what was reused, or why nothing fit, in the story's ledger notes.
 
-**Turn cap:** 18 — assumes preview, staging and production deploy jobs, wrangler environments and docs (16 before the staging target was added).
+**Turn cap:** 20 — assumes preview, staging and production deploy jobs, wrangler environments and docs (16 before the staging target was added; 18 → 20 by the 2026-11-04 backlog review for AC 7's dev sign-in switch and AC 8's per-environment vars and secret).
 
-**Goal condition:** scripts/verify-S114.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, functions/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 18 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+**Goal condition:** scripts/verify-S114.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, functions/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 20 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 
 **`/goal` command**
 
 ```text
-/goal docs/v3/BACKLOG.md S114. Work item 0 first: if scripts/verify-S114.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S114.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, functions/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S114.sh, or stop after 18 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+/goal docs/v3/BACKLOG.md S114. Work item 0 first: if scripts/verify-S114.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S114.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, functions/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S114.sh, or stop after 20 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `todo`
+**Status:** `blocked`
 
 ### S115 — Design captures on request in GitHub Actions
 
