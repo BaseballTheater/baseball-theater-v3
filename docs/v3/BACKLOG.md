@@ -229,6 +229,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 78 | [S113](#s113--production-database-neon-through-hyperdrive-migrated-composed-into-the-worker) | Production database (Neon) | `done` |
 | 79 | [S114](#s114--cloudflare-deploy-preview-staging-and-production-through-github-actions) | Cloudflare deploy | `todo` |
 | 80 | [S93](#s93--ingest-mlb-play-metrics-win-probability-key-moments-abs-challenges) | Ingest play metrics | `done` |
+| 80 | [S116](#s116--sign-in-with-logto-email-one-time-code-on-the-deployed-sites) | Logto sign-in | `todo` |
 | 81 | [S75](#s75--hide-scores-in-the-game-rooms-and-the-recap-video-title) | Hide Scores in the rooms | `done` |
 | 82 | [S71](#s71--day-highlights-digest-best-of-date) | Day highlights digest | `done` |
 | 83 | [S45](#s45--api-runs-as-a-worker-on-the-local-workers-runtime) | Worker entry + local Workers runtime + Workers tests | `done` |
@@ -5864,7 +5865,7 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 
 **Acceptance criteria** (checks `scripts/verify-S114.sh` performs)
 
-1. A GitHub Actions workflow builds and runs `pnpm verify`, then deploys a preview Worker per pull request against a Neon branch (not production), and posts its address (workflow file; a dry run with `wrangler deploy --dry-run` in CI).
+1. A GitHub Actions workflow builds and runs `pnpm verify`, then deploys a preview Worker per pull request against the staging database (never production): previews and staging bind the same `bt-staging` Hyperdrive config on the Neon `staging` branch, which the workflow creates when it's missing (AC 5) (owner, 2026-11-05: "Previews share staging db"), and posts its address (workflow file; a dry run with `wrangler deploy --dry-run` in CI).
 2. Every push to `main` deploys a staging Worker to `stage.baseball.theater` against a long-lived Neon `staging` branch (not production), with `pnpm db:migrate` run against that branch first (workflow file check).
 3. Production deploys only from `main`, to `baseball.theater`, behind the GitHub environment `production` that requires the owner's approval; the workflow never deploys production without it (workflow file check).
 4. Secrets (Cloudflare API token, Neon credentials) come from GitHub secrets, never the repo (grep).
@@ -5885,6 +5886,8 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 
 - **Answered 2026-11-05, now AC 9** (owner: "No user data, copied baseball data"). Previews and staging get production's baseball data and none of its fans' data. A Neon branch of production copies every table, so the copy can't be a plain branch of production: fill a branch that never held fans' data (a schema-only branch migrated by `pnpm db:migrate`) with production's non-personal tables. The review's question, as it was asked:
 - **Parked until the owner answers which data the staging and preview databases start from.** AC 1–2 say only "a Neon branch (not production)". A Neon branch is a copy of its parent: branched from production, every preview and the long-lived staging branch holds fans' accounts, settings and deletion log, places ADR-028's inventory (ARCHITECTURE.md:1314–1355) doesn't list and account deletion (S77's `deleteFor`) never reaches. ADR-028 makes an unlisted store the owner's amendment, not a new row. The alternative is branches with no production data (Neon's schema-only branches, or a parent that never held fans' data), loaded by `pnpm db:migrate` and the dev seed (S112). The owner's 2026-11-02 wording, "a long-lived `staging` copy of the database", reads either way. Set `status: todo` once answered; S113 doesn't depend on it.
+- **Answered 2026-11-05: sign-in stays off until Logto, and Logto comes before production.** Asked whether it's OK that nobody can sign in on the deployed sites until Logto is built, and whether a Logto story should land before the production release, the owner: "Yes it is ok re: logto, and add a logto story ahead of production". AC 7 stands; **S116** builds Logto sign-in, and the first production release (AC 3's approval) waits for it.
+- **Answered 2026-11-05: previews share staging's database, now in AC 1.** Owner: "Previews share staging db". So there's one Hyperdrive config, `bt-staging`, and no per-PR Neon branch or config to create and tear down. Every bootstrapping step is idempotent (AC 5), so the workflow creates `bt-staging` when it's missing; the Cloudflare token then needs Hyperdrive edit permission. A preview whose PR adds a migration migrates the shared staging database before the PR merges (AC 5 runs `pnpm db:migrate` on every deploy); keep migrations additive so staging still serves `main` meanwhile.
 - **AC 7, sign-in on deployed sites.** Until the Logto adapter (Later theme in the Live data plane frame note, ADR-019) is sliced and built, the only sign-in the Worker has is the dev stand-in, which takes `Bearer dev:<any uid>` as that user, so `stage.baseball.theater` would let anyone read or delete anyone's settings. AC 7 turns it off outside local dev; signing in then fails on deployed sites until Logto lands. Whether the production release also waits for a Logto story is asked with this review.
 - **AC 8, the deployed Worker's vars.** `createMlbClient` serves the bundled fixtures unless `BT_USE_LIVE_MLB` is `"1"`; `BT_SESSION_KEY` falls back to a random key per isolate (`worker-app.ts`), which on Workers signs users out whenever a request lands on another isolate. Secrets go in with `wrangler secret put` per environment (or `secrets` on the deploy action), from GitHub secrets (AC 4).
 - **Preview Workers and the cron.** `wrangler.jsonc` triggers the ingest cron every minute and `tickAllowed` is always true deployed, so each open PR's preview would poll MLB on ADR-002's cadence and keep its Neon branch awake. Give the preview env `"triggers": { "crons": [] }` unless a PR needs live ingest; tear down a PR's Worker and Neon branch when it closes.
@@ -5913,7 +5916,7 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 
 **Impact:** Before S115, a story's design screenshots could only be taken on the owner's own computer. S115 impact: anyone can ask GitHub to take them, so a story built in the cloud reaches its design match without waiting for that computer.
 
-**Source:** Pillar: Delightful — developers too: a story built anywhere gets its design screenshots without the owner's computer (as S89 cites it). Asked which pillar S115 should cite, Delightful (as S89) or Dependable. Approved by owner 2026-11-04: "Delightful (Recommended)"
+**Source:** Feature: Visual design
 
 **Depends on:** **S89** (it moves the design captures out of `pnpm e2e`, so a capture run is its own command).
 
@@ -5957,6 +5960,42 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 ```
 
 **Status:** `done`
+
+### S116 — Sign in with Logto (email one-time code) on the deployed sites
+
+**Gap:** The only sign-in BT has is the local dev stand-in (`Bearer dev:<uid>`), and S114 AC 7 turns it off on every deployed site, so nobody can sign in on staging or production. ADR-019 chose Logto Cloud for sign-in (email, passwordless, no passkeys at launch) behind the identity ports that already exist: `IdentityProvider.completeSignIn` takes a Logto ID token, `IdentityAdmin` lists, disables and deletes accounts, and the web `Session.signIn()` is the one entry point the header's "Sign in" calls (`web/src/session/session.ts`). No adapter implements them for Logto yet. Inserted by the owner, 2026-11-05 (asked whether a Logto story should be sliced to land before the production release: *"Yes it is ok re: logto, and add a logto story ahead of production"*).
+
+**Impact:** Before S116, the deployed Baseball Theater had no way to sign in, so settings and account features only worked on a developer's machine. S116 impact: fans sign in on the real site with a one-time code sent to their email, and Baseball Theater can launch with accounts.
+
+**Source:** Feature: Modern membership
+
+**Depends on:** **S114** (the deployed environments, their `vars` and Worker secrets, and AC 7's rule that the dev sign-in exists only locally). The first production release (S114 AC 3) waits for this story (owner, 2026-11-05).
+
+**Scope files:** `functions/`, `web/`, `wrangler.jsonc`, `package.json`, `pnpm-lock.yaml`, `README.md`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`
+
+**Work**
+
+0. Write `scripts/verify-S116.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** writing any product code (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S116.sh` performs)
+
+1. A Logto `IdentityProvider` adapter under `functions/src/adapters/` completes a sign-in from a Logto ID token as the port describes: it checks the signature against the tenant's JWKS (`<endpoint>/oidc/jwks`), that the issuer is `<endpoint>/oidc`, that the audience is the web app's ID and that the token hasn't expired, and returns `{ provider: "logto", subject: sub, email, emailVerified: email_verified }`. It refuses a bad signature, issuer, audience, an expired token, and a token without an email (tests sign tokens with a locally made key and serve its JWKS from a fetch stand-in; no network).
+2. The Worker offers the Logto provider in every environment whose `vars` name `LOGTO_ENDPOINT` and `LOGTO_APP_ID`, and the dev provider only where S114 AC 7 allows it: a valid Logto ID token signs in through the existing sign-in route and gets BT's own session, and a `dev:` token is refused (workerd test).
+3. The web app's `AuthClient` (ADR-019) is the only module that imports Logto's browser SDK (grep). On a deployed site `Session.signIn()` sends the user to Logto's hosted sign-in with the `email` scope, a callback route finishes it and hands the ID token to BT once, and `signOut()` ends both BT's session and Logto's; locally the dev sign-in is unchanged (RTL tests with a stand-in client).
+4. A Logto `IdentityAdmin` adapter lists, disables (`PATCH /api/users/{id}/is-suspended`) and deletes (`DELETE /api/users/{id}`) accounts through the Management API, with machine-to-machine credentials from Worker secrets; account deletion (S77) deletes a user's Logto account through it (tests with a fetch stand-in).
+5. The Logto endpoint and app ID are `vars` per environment in `wrangler.jsonc`; the machine-to-machine secret is a Worker secret from GitHub secrets, never the repo (grep). `README.md` documents the owner's Logto setup: the tenant, the single-page app and its redirect and sign-out URIs for staging and production, email sign-in with a one-time code (and a link in the same email if Logto offers it), and the machine-to-machine app with Management API access. Any step a workflow performs is idempotent (owner, 2026-11-05: "All the bootstrapping should be like that").
+6. This file's S116 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- **No BT sign-in screen to design.** Logto's hosted page is the sign-in screen (`web/src/layout/AppHeader.tsx`: "BT has no sign-in screen of its own; Logto's provides it"); the header's "Sign in" is ratified in shell-scoreboard A2. How Logto's hosted page is branded is configured in Logto's console, the owner's call.
+- **Still open from ADR-019:** whether Logto can send the code and a link in one email (FEATURES, Modern membership: *"Code if I have to choose, both if possible in a single email"*). Check it when this story starts and build the code at least.
+- **Personal data (ADR-028):** Logto holds each fan's email and account. The identity link and `IdentityAdmin.deleteAccount` are how deletion reaches it; check that the data classification manifest and `personalDataStores` cover the Logto account before this ships.
+- Inserted applying the owner's answer to the 2026-11-04 backlog review's question 2. Its turn cap, Goal condition and `/goal` command come from the next backlog review, which also checks these ACs against HEAD.
+
+**Reuse check** (ADR-025): before writing code, read `packages/ports/src/auth.ts` (the ports and their Logto notes), `functions/src/services/accounts.ts` (`signIn`, the provider list), `functions/src/adapters/fixtures/auth.ts` (`createDevAuth`), `web/src/session/` and `functions/src/services/account-deletion.ts`; reuse the sign-in route and session issuing as they are, and record what was reused in the story's ledger notes.
+
+**Status:** `todo`
 
 ---
 
