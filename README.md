@@ -79,6 +79,34 @@ Useful routes:
 - `/game/744834` — game (impact-sorted videos)
 - `/standings`, `/search`, `/settings` — stubs
 
+## Production database (Neon)
+
+Production keeps its data in Neon Postgres (ADR-018), which the Worker reaches through
+Hyperdrive: `wrangler.jsonc`'s `production` env binds `HYPERDRIVE` to the `bt-production`
+config. The owner does all of this by hand. **Agents never touch production**: no migrations,
+restores or deploys against it, and no production connection string in the repo (CLAUDE.md).
+
+**One-time setup** (done 2026-11-02; repeat it only to rebuild from scratch):
+
+1. Create the Neon project (Postgres 18, the major version `compose.yaml` runs) and keep its
+   default branch as the production branch. Copy that branch's connection string from the Neon
+   console (`sslmode=require`). It stays in your shell and in Cloudflare only.
+2. Create the Hyperdrive config for it:
+   `npx wrangler hyperdrive create bt-production --connection-string="<connection string>"`.
+3. Put the id it prints in `wrangler.jsonc` under `env.production.hyperdrive` (today
+   `db27b03ce9734c3f928241ce8ee855f6`).
+4. Create the tables: `BT_DATABASE_URL="<connection string>" pnpm db:migrate`. It applies every
+   committed migration the database hasn't had, and running it again changes nothing. Run it the
+   same way before deploying anything that adds a migration.
+
+**Restoring a backup** (a Neon point-in-time restore or branch reset): restore, then run
+`BT_DATABASE_URL="<connection string>" pnpm db:reapply-deletions`. The deletion log survives
+the restore, since its entries are only ever added and they hold just a uid and a time. This
+step deletes every logged account again from every personal-data store (ADR-028, S77), so a
+restore never brings back a fan who deleted their account. Run it before the app takes traffic
+again. The production tables are exactly the ones the data classification manifest labels
+(`functions/src/services/data-classification.ts`).
+
 ## Scripts
 
 | Command              | What                                             |
@@ -87,6 +115,7 @@ Useful routes:
 | `pnpm dev`           | Postgres in Docker + Worker on workerd + Vite    |
 | `pnpm db:seed`       | Migrate and seed the local Postgres (idempotent) |
 | `pnpm seed:refresh`  | Record the dev seed from live MLB (see above)    |
+| `pnpm db:migrate`    | Migrate the database `BT_DATABASE_URL` names     |
 | `pnpm test`          | Vitest (all packages)                            |
 | `pnpm test:coverage` | Coverage + thresholds                            |
 | `pnpm lint`          | ESLint                                           |

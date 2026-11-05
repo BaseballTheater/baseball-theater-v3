@@ -38,8 +38,8 @@
 	"cache": {
 		"enabled": true
 	},
-	// Postgres through Hyperdrive (ADR-018, S50). `id` names the Hyperdrive config, created when
-	// the owner sets up Neon for the deploy; this placeholder is not a real one. Locally,
+	// Postgres through Hyperdrive (ADR-018, S50). This top-level `id` is a placeholder that no
+	// deploy uses: the production env below names the real config (S113). Locally,
 	// `wrangler dev` and the Workers tests connect to `localConnectionString` instead: a local
 	// Postgres (S51's Docker), never a hosted database. No credential for one is committed.
 	"hyperdrive": [
@@ -49,6 +49,30 @@
 			"localConnectionString": "postgres://bt:bt@localhost:5432/bt"
 		}
 	],
+	// The production Worker (S113). Environments don't inherit bindings, so the env restates the
+	// Durable Objects and its own Hyperdrive config: `bt-production`, which the owner created on
+	// 2026-11-02 for the Neon project `old-sun-72319473` (Postgres 18). Its connection string lives
+	// only in Cloudflare. The env names its Worker on purpose, apart from the top-level config's
+	// local one, so a deploy without `--env production` can never replace production. The Durable
+	// Object `migrations` stay top-level. S114 adds the routes, vars and secrets and deploys it;
+	// agents never deploy to production (CLAUDE.md).
+	"env": {
+		"production": {
+			"name": "baseball-theater-production",
+			"durable_objects": {
+				"bindings": [
+					{ "name": "GAME_INGEST", "class_name": "GameIngestObject" },
+					{ "name": "GAME_HUB", "class_name": "GameHubObject" }
+				]
+			},
+			"hyperdrive": [
+				{
+					"binding": "HYPERDRIVE",
+					"id": "db27b03ce9734c3f928241ce8ee855f6"
+				}
+			]
+		}
+	},
 	// No anonymous usage telemetry from local runs.
 	"send_metrics": false,
 	"observability": {
