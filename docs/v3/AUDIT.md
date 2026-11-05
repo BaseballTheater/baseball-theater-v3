@@ -14608,3 +14608,85 @@ export const label = game.abbreviation + " @ ";  792ms
 ```
 
 </details>
+
+---
+
+## 2026-11-04 — S112 completed
+
+**Dev seed (season end + postseason)**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-05T06:05:26Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `db9d123` (tree dirty) |
+| Grader | `scripts/verify-S112.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: pnpm seed:refresh --start= --end= records every day in the range and its games (hydrated) through HttpMlbStatsClient into one gzipped file at a git-ignored path; no dates means the last season's final regular-season month through its last postseason game (test against a recorded fetch stand-in, named 'S112 AC 1')
+check 2 PASS: pnpm dev (db:seed) loads the seed file into the local Postgres through the repositories, twice changing nothing (PGlite test named 'S112 AC 2'); without the file it starts as before and prints the command that makes one
+check 3 PASS: the dev composition serves a seeded, final game and its day from the store on a refresh-on-read, asking MLB nothing (test named 'S112 AC 3')
+check 4 PASS: README documents pnpm seed:refresh: its dates and defaults, size and time to expect, where the file goes, and that CI and pnpm verify never use it
+check 5 PASS: no test reads the seed file or the network: tests name no default seed path and give every HttpMlbStatsClient a fetch stand-in
+check 6 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**6/6 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S112 check results ---
+check 1 PASS: pnpm seed:refresh --start= --end= records every day in the range and its games (hydrated) through HttpMlbStatsClient into one gzipped file at a git-ignored path; no dates means the last season's final regular-season month through its last postseason game (test against a recorded fetch stand-in, named 'S112 AC 1')
+check 2 PASS: pnpm dev (db:seed) loads the seed file into the local Postgres through the repositories, twice changing nothing (PGlite test named 'S112 AC 2'); without the file it starts as before and prints the command that makes one
+check 3 PASS: the dev composition serves a seeded, final game and its day from the store on a refresh-on-read, asking MLB nothing (test named 'S112 AC 3')
+check 4 PASS: README documents pnpm seed:refresh: its dates and defaults, size and time to expect, where the file goes, and that CI and pnpm verify never use it
+check 5 PASS: no test reads the seed file or the network: tests name no default seed path and give every HttpMlbStatsClient a fetch stand-in
+check 6 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S112: 6/6 checks passed ---
+verify-S112: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  996ms
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 941ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  455ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  483ms
+ ✓ |tools| size-limit/size-limit.test.js (2 tests) 157ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 119ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 105ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 114ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 99ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 16ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  22:10:32
+   Duration  8.80s (transform 100ms, setup 0ms, collect 4.48s, tests 2.63s, environment 1ms, prepare 505ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/claude/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154288,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

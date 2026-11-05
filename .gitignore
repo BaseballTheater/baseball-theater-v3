@@ -21,6 +21,9 @@ service-account*.json
 .wrangler/
 .dev.vars
 
+# The dev seed: real MLB days and games recorded by `pnpm seed:refresh` (S112), loaded by `pnpm dev`
+.dev-seed/
+
 # IDE / OS
 .DS_Store
 .idea/

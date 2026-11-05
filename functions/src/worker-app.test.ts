@@ -7,7 +7,7 @@
 import { DEFAULT_SETTINGS } from "@bt/domain";
 import { sql } from "drizzle-orm";
 import {
-	describe, expect, it,
+	afterEach, describe, expect, it, vi,
 } from "vitest";
 import {
 	inDatabaseScope, scopedDatabase, withDatabase,
@@ -15,6 +15,9 @@ import {
 import { migratedPglite } from "./adapters/postgres/migrate.js";
 import type { PostgresDb } from "./adapters/postgres/repos.js";
 import { handleApiRequest } from "./handlers/api.js";
+import { getOrRefreshGame, getOrRefreshSchedule } from "./services/ingest.js";
+import { loadDevSeed, recordDevSeed } from "./services/dev-seed.js";
+import { recordedClient } from "./test/recorded-mlb.js";
 import { createWorkerApp } from "./worker-app.js";
 
 async function count(db: PostgresDb, table: string): Promise<number>
@@ -68,5 +71,64 @@ describe("the Worker composition on Postgres (S51)", () =>
 		const response = await withDatabase(db, () => inDatabaseScope(undefined, () => handleApiRequest(new Request("http://bt.test/api/v1/schedule?date=2024-07-04"), app.context)));
 		expect(response.status).toBe(200);
 		expect(await count(db, "schedule_days")).toBe(1);
+	});
+});
+
+describe("the dev composition on a loaded dev seed (S112)", () =>
+{
+	afterEach(() =>
+	{
+		vi.restoreAllMocks();
+	});
+
+	it("S112 AC 3: a refresh-on-read of a seeded, final game and its day finds them current in the store, asking MLB nothing", async () =>
+	{
+		const { db } = await migratedPglite();
+		const app = createWorkerApp({}, db);
+		const { seed: recorded } = await recordDevSeed(recordedClient().mlb, {
+			start: "2026-09-04",
+			end: "2026-09-05",
+		});
+		// A real seed differs from the committed fixtures: it holds days they don't (here
+		// 2026-09-04 lists 2026-09-05's games) and later recordings of games they do (823823
+		// with one clip fewer). A refresh through the fixtures would replace both.
+		const seed = {
+			...recorded,
+			days: recorded.days.map((d) => d.date === "2026-09-04" ? {
+				...d,
+				games: recorded.days[1]!.games,
+			} : d),
+			games: recorded.games.map((g) => ({
+				...g,
+				highlights: g.highlights.slice(1),
+			})),
+		};
+		await loadDevSeed(app.ingest, seed);
+		const day = await app.ingest.schedules.getByDate("2026-09-05");
+		const game = await app.ingest.games.getByPk(823823);
+		expect(game?.status.codedGameState).toBe("F");
+
+		const network = vi.spyOn(globalThis, "fetch");
+		const refreshedGame = await getOrRefreshGame(app.ingest, 823823, {
+			force: true,
+		});
+		const refreshedDay = await getOrRefreshSchedule(app.ingest, "2026-09-05", {
+			force: true,
+		});
+		const seededOnly = await getOrRefreshSchedule(app.ingest, "2026-09-04", {
+			force: true,
+		});
+		expect(network).not.toHaveBeenCalled();
+		expect(refreshedGame?.version).toBe(game?.version);
+		expect(refreshedGame?.plays).toEqual(game?.plays);
+		expect(refreshedDay.version).toBe(day?.version);
+		expect(refreshedDay.games).toEqual(day?.games);
+		expect(seededOnly.games.length).toBeGreaterThan(0);
+		expect(refreshedGame?.highlights).toEqual(game?.highlights);
+
+		// Served through the API from the store, as `pnpm dev` would.
+		const served = await handleApiRequest(new Request("http://bt.test/api/v1/games/823823"), app.context);
+		expect(served.status).toBe(200);
+		expect(network).not.toHaveBeenCalled();
 	});
 });

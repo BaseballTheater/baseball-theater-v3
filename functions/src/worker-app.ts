@@ -15,6 +15,8 @@ import {
 } from "./adapters/fixtures/auth.js";
 import { createBundledFixtureClient } from "./adapters/fixtures/bundled.js";
 import { HttpMlbStatsClient } from "./adapters/http/mlb.js";
+import type { MlbOverlaySource } from "./adapters/overlay-mlb.js";
+import { overlayMlbClient, storeOverlay } from "./adapters/overlay-mlb.js";
 import { scopedDatabase } from "./adapters/postgres/connect.js";
 import type { HyperdriveBinding } from "./adapters/postgres/connect.js";
 import type { PostgresDb } from "./adapters/postgres/repos.js";
@@ -60,14 +62,20 @@ export type WorkerApp = {
 	ingest: IngestDeps;
 };
 
-/** Fixtures are the default so local dev and tests never touch the network; `BT_USE_LIVE_MLB=1` opts in. */
-export function createMlbClient(env: WorkerEnv): MlbStatsClient
+/**
+ * Fixtures are the default so local dev and tests never touch the network; `BT_USE_LIVE_MLB=1`
+ * opts in. On fixtures, what the store already holds (the committed fixtures and the dev seed,
+ * S112) is answered from the store: a refresh-on-read of a seeded game stamps it unchanged
+ * instead of asking MLB, and a seeded day isn't replaced by the fixtures' empty answer.
+ */
+export function createMlbClient(env: WorkerEnv, store?: MlbOverlaySource): MlbStatsClient
 {
 	if (env.BT_USE_LIVE_MLB === "1")
 	{
 		return new HttpMlbStatsClient();
 	}
-	return createBundledFixtureClient();
+	const fixtures = createBundledFixtureClient();
+	return store ? overlayMlbClient(fixtures, store) : fixtures;
 }
 
 /**
@@ -77,10 +85,15 @@ export function createMlbClient(env: WorkerEnv): MlbStatsClient
  */
 export function createWorkerApp(env: WorkerEnv, db: PostgresDb): WorkerApp
 {
+	const schedules = new PostgresScheduleRepository(db);
+	const games = new PostgresGameRepository(db);
 	const ingest: IngestDeps = {
-		mlb: createMlbClient(env),
-		schedules: new PostgresScheduleRepository(db),
-		games: new PostgresGameRepository(db),
+		mlb: createMlbClient(env, storeOverlay({
+			schedules,
+			games,
+		})),
+		schedules,
+		games,
 		projections: new PostgresGameProjectionRepository(db),
 		// One coordinator per isolate: stale out-of-window reads refresh single-flighted.
 		refresh: new RefreshCoordinator(),

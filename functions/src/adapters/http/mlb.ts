@@ -245,6 +245,23 @@ export class HttpMlbStatsClient implements MlbStatsClient
 		}
 	}
 
+	/**
+	 * The season's last regular-season day (MLB's `regularSeasonEndDate`), or null when MLB has not
+	 * published it. Not on the port: only the dev seed's default range (S112) needs it, and the
+	 * domain's `SeasonCalendar` carries just what the scoreboard uses.
+	 */
+	async fetchRegularSeasonEndDate(season: number): Promise<string | null>
+	{
+		try
+		{
+			return parseSeasonsResponse(await this.getJson(seasonsUrl(season, this.baseUrl))).seasons[0]?.regularSeasonEndDate ?? null;
+		}
+		catch
+		{
+			return null;
+		}
+	}
+
 	private async fetchContent(gamePk: number): Promise<GameContentResponse | undefined>
 	{
 		const url = `${this.baseUrl}/api/v1/game/${gamePk}/content?language=en`;

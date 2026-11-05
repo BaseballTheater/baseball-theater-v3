@@ -81,6 +81,7 @@ explicitly where that's the case. For what's still ahead, see
 
 ## The backend runs the way it will in production
 
+- **Before, a developer running Baseball Theater locally saw a handful of recorded games. Now one command records the end of last season and the whole postseason from MLB, real and complete, and the local app loads it on start and serves it without going back to MLB; the same command records any date range.** Details: S112 — `pnpm seed:refresh` (`recordDevSeed` through `HttpMlbStatsClient`, default range from S111's season calendar) into the git-ignored `.dev-seed/seed.json.gz`; `pnpm db:seed` loads it (`loadDevSeed`, idempotent); the local Worker answers stored days and games from Postgres (`overlayMlbClient` / `storeOverlay`). _(2026-11-04)_
 - **Before, running Baseball Theater on a developer's machine kept its data in memory, which doesn't behave like the real database. Now `pnpm dev` starts the same database engine and version production uses, fills it with the recorded games, and runs the app against it, with Docker as the one thing to install.** Details: S51 — Postgres 18 in Docker (`compose.yaml`), `pnpm db:seed`, the Worker on Hyperdrive's `localConnectionString`; checked coming up for real on a GitHub runner (design-capture run 41934225471), accepted by the owner. _(2026-11-04)_
 - **Before, Baseball Theater could only guess which plays mattered from the words in a clip's title. Now it
   keeps MLB's own measure of every at-bat: how much it swung each team's chance of winning, and whether MLB counts

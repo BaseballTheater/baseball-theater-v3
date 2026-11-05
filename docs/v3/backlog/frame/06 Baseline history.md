@@ -2,6 +2,7 @@
 
 Every earlier **As of** line of the [Current baseline](#current-baseline), newest first (rule 17). When a change moves the baseline's **As of** line on, the line it replaces goes to the top of this list, unchanged.
 
+- 2026-11-04 — **S51** done: `pnpm dev` runs on Postgres in Docker, seeded from the fixtures; its human check is the owner-accepted design-capture run 41934225471.
 - 2026-11-04 — **S97** done: a video with a play links to it in the Plays room (cards, list rows, the player), which opens on that at-bat; every play with a clip shows its `Video:` line; design matched by the owner.
 - 2026-11-04 — **S106** done: the Live room's Win probability card at medium and desktop, design matched by the owner.
 - 2026-11-04 — **S115** done: a story's design captures can be taken on request in GitHub Actions (`design-capture.yml`).

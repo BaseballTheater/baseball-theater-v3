@@ -32,6 +32,28 @@ tick run) with `--var`, or in a git-ignored `functions/.dev.vars`. The data live
 (`pnpm --filter @bt/functions start`, used by Lighthouse CI) runs on PGlite in-process instead,
 so it needs no Docker; tests run on PGlite too.
 
+### The dev seed (end of season + postseason)
+
+The committed fixtures are a handful of games. For real, complete data, record the dev seed once:
+
+```bash
+pnpm seed:refresh                                       # last finished season's final month + its postseason
+pnpm seed:refresh --start=2026-09-01 --end=2026-09-30   # or any date range (both dates, inclusive)
+```
+
+It asks live MLB (through the same HTTP client ingest uses) for every day in the range and each
+game those days list, hydrated with plays, video content and play metrics, and writes one
+gzipped file to `.dev-seed/seed.json.gz` (git-ignored; `--out=<file>` writes elsewhere). With no
+dates it takes the most recent season whose postseason is over: 30 days before its regular
+season's last day through its last postseason game. That default is about 450 games: expect
+roughly 45 MB gzipped (around 300 MB of JSON) and several minutes to record, depending on MLB;
+games MLB won't serve are left out and listed. The next `pnpm dev` loads the file into the local
+Postgres after the fixtures (`pnpm db:seed`; loading it again writes nothing), and without one it
+prints the command above. Once loaded, the local Worker answers seeded days and games from the
+database without asking MLB again, so it needs no network. Re-run the command to refresh the
+file. CI and `pnpm verify` never use the seed: they run on the committed fixtures, and the
+seed's tests record through a stand-in for MLB into a temporary directory.
+
 ### What local can't represent
 
 Local runs the deployed code on the same database engine, but some things exist only on
@@ -64,6 +86,7 @@ Useful routes:
 | `pnpm verify`        | **Single health gate** (lint + coverage + build) |
 | `pnpm dev`           | Postgres in Docker + Worker on workerd + Vite    |
 | `pnpm db:seed`       | Migrate and seed the local Postgres (idempotent) |
+| `pnpm seed:refresh`  | Record the dev seed from live MLB (see above)    |
 | `pnpm test`          | Vitest (all packages)                            |
 | `pnpm test:coverage` | Coverage + thresholds                            |
 | `pnpm lint`          | ESLint                                           |
