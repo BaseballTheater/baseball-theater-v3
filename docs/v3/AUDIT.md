@@ -14893,3 +14893,33 @@ export const label = game.abbreviation + " @ ";  1272ms
 ```
 
 </details>
+
+---
+
+## 2026-11-05 — backlog review answers (2026-11-04)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-04 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-05T22:55:21Z` |
+| HEAD at capture | `9fc32ea` (tree clean) |
+| Applied in | `9fc32ea` — Owner's answers to the 2026-11-04 reviews: S116 Logto sign-in before production, previews share staging, S115 cites Visual design, Search's player links its play |
+
+**Answers and what was applied**
+
+Owner, 2026-11-05. Q2 (sign-in off on deployed sites until Logto; a Logto story before production): "Yes it is ok re: logto, and add a logto story ahead of production". Added S116, which depends on S114; S114 notes the production release waits for it. Q3 (staging Hyperdrive config; previews own or shared): "Previews share staging db". Applied in S114 AC 1.
+
+---
+
+## 2026-11-05 — doc parity review answers (2026-11-04)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-04 doc parity review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-05T22:55:21Z` |
+| HEAD at capture | `9fc32ea` (tree dirty) |
+| Applied in | `9fc32ea` — Owner's answers to the 2026-11-04 reviews: S116 Logto sign-in before production, previews share staging, S115 cites Visual design, Search's player links its play |
+
+**Answers and what was applied**
+
+Owner, 2026-11-05. Q1 (S115: Pillar: Delightful or Feature: Visual design): "Visual design". S115 Source changed. Q3 (Search floating player links its play): "Yes". Recorded in FEATURES, Video play links.
