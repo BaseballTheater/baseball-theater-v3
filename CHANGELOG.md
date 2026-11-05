@@ -35,6 +35,7 @@ explicitly where that's the case. For what's still ahead, see
 
 ## A game's videos are easy to browse
 
+- **Before, a video didn't say which play it showed. Now a clip with a play carries a small "Play · Top 6th →" link, on its card, in the list and in the player, and following it opens the Plays room right on that at-bat, marked. Every play that has a clip says so with a "Video:" line, and thumbnails no longer show a play icon.** Details: S97 — `videoPlayLink` from S95's links, the `?play=` arrival in `PlaysPanel`; built to game-shell A5 and game-rooms A6; design matched by the owner. _(2026-11-04)_
 - **Before, nothing showed how a video should lead to the play it shows. Now there's an approved design for it, ready to build: a small "Play · Top 6th →" link on each clip that has a play, the Plays room opening right on that at-bat, and a "Video:" line on every play that has a clip. Video thumbnails also lose their play icon.** Details: S96 — game-shell A5 and game-rooms A6, ratified by the owner; built by S97. _(2026-11-04)_
 - **Before, "biggest moments first" was a guess from each clip's title, so any home run beat a game-saving
   catch or a big two-out single. Now the clips are ordered by how much their play actually changed each team's

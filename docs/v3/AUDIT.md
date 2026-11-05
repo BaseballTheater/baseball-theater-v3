@@ -14425,3 +14425,104 @@ export const label = game.abbreviation + " @ ";  723ms
 ```
 
 </details>
+
+---
+
+## 2026-11-04 — S97 completed
+
+**Video → play link (UI)**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-05T00:01:39Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `0b3a3d4` (tree dirty) |
+| Grader | `scripts/verify-S97.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: a video with a playId shows 'Play · <half> <inning> →' on its own line under its meta line, grid and list; none without; 20 on 823823; choosing it navigates without opening the player (RTL named 'S97 AC 1')
+check 2 PASS: the floating player shows the play link top left when its clip has a playId and no game link holds that slot; choosing it closes the player and opens the play (RTL named 'S97 AC 2')
+check 3 PASS: no play icon on any Videos room thumbnail, grid and list, scores shown and hidden; every still keeps its duration (RTL named 'S97 AC 3')
+check 4 PASS: /game/:gamePk/plays?play=<playId> chooses the play's inning, opens and marks its at-bat with the bar, scrolls it into view; an unknown play opens as usual (RTL named 'S97 AC 4')
+check 5 PASS: 'Video: <clip title>' above every at-bat with a video, with or without ?play=; one line per distinct at-bat on 823823 (RTL named 'S97 AC 5')
+check 6 PASS: the 11 design captures from e2e/design/S97.spec.ts under docs/v3/design-checks/S97/ at their pairing widths
+check 7 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**7/7 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with its ratified frame
+
+| Frame | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/game-shell/amendments/game-videos-grid-playlink-desktop.png` | `13927de4e053eb535575989f9f0f0d4933c4c7f744d94280f98993412fd660e0` | `docs/v3/design-checks/S97/game-videos-grid-playlink-desktop.png` | `16ca2724bc8fddf03a9e3fe73bc1d96b434385ba63eef59dd52f073639bcd1f1` |
+| `docs/v3/visual/game-shell/amendments/game-videos-grid-playlink-medium.png` | `80e9d18b7dfe7ca299211dc88e38b1a6d70e2a758813f0bf6486eb3ad814c843` | `docs/v3/design-checks/S97/game-videos-grid-playlink-medium.png` | `81bfd698996feb8521fe5a51fcc8291bb00023ae7df8ecf1a57a74cbdda6b80a` |
+| `docs/v3/visual/game-shell/amendments/game-videos-grid-playlink-mobile.png` | `2321eaea51e31274138b0c667cbfd9354ba0aa523c18d2aa3f2059422e1b1cdf` | `docs/v3/design-checks/S97/game-videos-grid-playlink-mobile.png` | `5949b65f331542da4cc77c8814de9f58887916309f35b7d5961f1af0a036fbd0` |
+| `docs/v3/visual/game-shell/amendments/game-videos-list-playlink-desktop.png` | `f58bed2754ae9f1f4d6451d2a62f28d2305ff5d2bd59698bb54159c499c29cad` | `docs/v3/design-checks/S97/game-videos-list-playlink-desktop.png` | `185a1d42ed3688fef01c142bdf4f41de23cb4fa81712c5d6ab36f26550411fbe` |
+| `docs/v3/visual/game-shell/amendments/game-videos-list-playlink-medium.png` | `fa007b2a26f0f262a00caf44064ab1429f9e57601abe39fc471525c52890e75b` | `docs/v3/design-checks/S97/game-videos-list-playlink-medium.png` | `05413d59e12a90acb9f019fc53f8bcc39c457f01c8de8987ac31b7304292c4e9` |
+| `docs/v3/visual/game-shell/amendments/game-videos-list-playlink-mobile.png` | `60040b9387816ad542f9bbdd07f35997d81fb5cadd0ca7daafb7ef7c58dac69b` | `docs/v3/design-checks/S97/game-videos-list-playlink-mobile.png` | `6f89d9ac4509b473a0fbf471cf50c45680c7c6578abed1e3719d317762972849` |
+| `docs/v3/visual/game-rooms/amendments/plays-opened-desktop.png` | `157b259cf577dbaeb48693b84d6bdbd4d47e371b7e453c980bc1349675934798` | `docs/v3/design-checks/S97/plays-opened-desktop.png` | `483c066f7bdccda1f1b1e9f469cdd6a83b7c0b32571adec2aabbad6f84766ce1` |
+| `docs/v3/visual/game-rooms/amendments/plays-opened-medium.png` | `7d931d3918a38f7aec89580a3a995e422b12297192b834d115167434b2634b16` | `docs/v3/design-checks/S97/plays-opened-medium.png` | `0febb82d3644c53b1e9a5cbcb1ef91ec1c2e4bdffe3c2ab49159b89c9bdc5a69` |
+| `docs/v3/visual/game-rooms/amendments/plays-opened-mobile.png` | `450280c71b470e0059d2f50962e87a991fce9cd0769088d209acac89a0943d17` | `docs/v3/design-checks/S97/plays-opened-mobile.png` | `26b354315c01c300a8fd7c29f4bf59789261cc94e3e0c8545300339cc76c5ccd` |
+| `docs/v3/visual/game-shell/amendments/video-player-dialog-playlink-medium.png` | `dbdd9f2613a4fd3759c14751136bf464087fa9fff34e1ebd99ceba8f013f25d9` | `docs/v3/design-checks/S97/video-player-dialog-playlink-medium.png` | `afd432c32c851178921c962fee78aa64e62db5ba68ef86ffd45bc32bac1cca21` |
+| `docs/v3/visual/game-shell/amendments/video-player-dialog-playlink-mobile.png` | `eb32ae0ab24f72f8ede6442a32d01025b555f9bd4549c477729e0358cb1d8a4d` | `docs/v3/design-checks/S97/video-player-dialog-playlink-mobile.png` | `c26384e35dd9c61c4fe04a47d713d9be1c8502e0e7a73358059fa8f583ef1792` |
+Owner: "Owner, 2026-11-04, shown the CI captures beside the ratified frames (game-shell A5, game-rooms A6): "Both yes""
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S97 check results ---
+check 1 PASS: a video with a playId shows 'Play · <half> <inning> →' on its own line under its meta line, grid and list; none without; 20 on 823823; choosing it navigates without opening the player (RTL named 'S97 AC 1')
+check 2 PASS: the floating player shows the play link top left when its clip has a playId and no game link holds that slot; choosing it closes the player and opens the play (RTL named 'S97 AC 2')
+check 3 PASS: no play icon on any Videos room thumbnail, grid and list, scores shown and hidden; every still keeps its duration (RTL named 'S97 AC 3')
+check 4 PASS: /game/:gamePk/plays?play=<playId> chooses the play's inning, opens and marks its at-bat with the bar, scrolls it into view; an unknown play opens as usual (RTL named 'S97 AC 4')
+check 5 PASS: 'Video: <clip title>' above every at-bat with a video, with or without ?play=; one line per distinct at-bat on 823823 (RTL named 'S97 AC 5')
+check 6 PASS: the 11 design captures from e2e/design/S97.spec.ts under docs/v3/design-checks/S97/ at their pairing widths
+check 7 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S97: 7/7 checks passed ---
+verify-S97: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  762ms
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 742ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  370ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  369ms
+ ✓ |tools| size-limit/size-limit.test.js (2 tests) 116ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 87ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 77ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 86ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 84ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 13ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  16:05:33
+   Duration  6.67s (transform 65ms, setup 0ms, collect 3.37s, tests 2.01s, environment 1ms, prepare 355ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/claude/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154288,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

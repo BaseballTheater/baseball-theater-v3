@@ -2,6 +2,7 @@
 
 Every earlier **As of** line of the [Current baseline](#current-baseline), newest first (rule 17). When a change moves the baseline's **As of** line on, the line it replaces goes to the top of this list, unchanged.
 
+- 2026-11-04 — **S106** done: the Live room's Win probability card at medium and desktop, design matched by the owner.
 - 2026-11-04 — **S115** done: a story's design captures can be taken on request in GitHub Actions (`design-capture.yml`).
 - 2026-11-04 — **S89** done: CI runs verify, the flows (four workers, each twice), the design specs and Lighthouse as parallel jobs, with one `ci-passed` gate.
 - 2026-11-04 — **S96** done: the owner ratified the video play-link designs (game-shell A5, game-rooms A6), with no play icon on any thumbnail; S97 can build them.
