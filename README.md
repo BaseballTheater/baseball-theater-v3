@@ -83,10 +83,13 @@ Useful routes:
 
 Production keeps its data in Neon Postgres (ADR-018), which the Worker reaches through
 Hyperdrive: `wrangler.jsonc`'s `production` env binds `HYPERDRIVE` to the `bt-production`
-config. The owner does all of this by hand. **Agents never touch production**: no migrations,
-restores or deploys against it, and no production connection string in the repo (CLAUDE.md).
+config. Every bootstrapping step is safe to repeat (owner, 2026-11-05: "It should be idempotent so it
+can happen with every deployment. All the bootstrapping should be like that."), so deploys run them
+each time rather than anyone remembering to. **Agents never touch production**: no migrations,
+restores or deploys against it, and no production connection string in the repo (CLAUDE.md);
+production changes go out only through the deploy the owner approves (S114).
 
-**One-time setup** (done 2026-11-02; repeat it only to rebuild from scratch):
+**One-time setup** (done by the owner 2026-11-02; repeat it only to rebuild from scratch):
 
 1. Create the Neon project (Postgres 18, the major version `compose.yaml` runs) and keep its
    default branch as the production branch. Copy that branch's connection string from the Neon
@@ -95,9 +98,11 @@ restores or deploys against it, and no production connection string in the repo 
    `npx wrangler hyperdrive create bt-production --connection-string="<connection string>"`.
 3. Put the id it prints in `wrangler.jsonc` under `env.production.hyperdrive` (today
    `db27b03ce9734c3f928241ce8ee855f6`).
-4. Create the tables: `BT_DATABASE_URL="<connection string>" pnpm db:migrate`. It applies every
-   committed migration the database hasn't had, and running it again changes nothing. Run it the
-   same way before deploying anything that adds a migration.
+4. Nothing else by hand: the tables come from `pnpm db:migrate`, which every deploy runs against
+   its own database before the new Worker takes traffic (S114). It applies every committed
+   migration the database hasn't had, and running it again changes nothing, so the first deploy
+   creates the tables and later ones apply only what's new. To run it yourself (to check a
+   database, say): `BT_DATABASE_URL="<connection string>" pnpm db:migrate`.
 
 **Restoring a backup** (a Neon point-in-time restore or branch reset): restore, then run
 `BT_DATABASE_URL="<connection string>" pnpm db:reapply-deletions`. The deletion log survives

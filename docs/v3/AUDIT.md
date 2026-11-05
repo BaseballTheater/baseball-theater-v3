@@ -14811,3 +14811,85 @@ Owner, 2026-11-05, on the 2026-11-04 question "Should the staging and preview da
 **Answers and what was applied**
 
 Owner, 2026-11-05, on the 2026-11-04 question "Should the staging and preview databases start with no fans' data, or be copies of production?": "No user data, copied baseball data". Applied to S114 as AC 9; S114 back to todo.
+
+---
+
+## 2026-11-05 — S113 completed
+
+**Production database (Neon)**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-05T22:41:08Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `9bded5f` (tree dirty) |
+| Grader | `scripts/verify-S113.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: pnpm db:migrate applies the committed migrations to the database BT_DATABASE_URL names (no committed default), twice changing nothing (PGlite test named 'S113 AC 1')
+check 2 PASS: the Worker composes Postgres through the HYPERDRIVE binding with no in-memory repository or deletion log (grep), served in workerd against a PGlite stand-in (worker.workerd.test.ts)
+check 3 PASS: wrangler.jsonc's production env names Hyperdrive config db27b03ce9734c3f928241ce8ee855f6 and restates its bindings; no postgres:// URL outside localhost is committed
+check 4 PASS: README documents the owner's one-time setup (Neon project and production branch, Hyperdrive config and its id, pnpm db:migrate against it), the restore step that re-applies deletions (a command for reapplyDeletions), and that agents never touch production
+check 5 PASS: the tables a migration creates are exactly the manifest's labeled postgresTables (test named 'S113 AC 5'); README says the deletion log survives a restore and is re-applied
+check 6 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**6/6 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S113 check results ---
+check 1 PASS: pnpm db:migrate applies the committed migrations to the database BT_DATABASE_URL names (no committed default), twice changing nothing (PGlite test named 'S113 AC 1')
+check 2 PASS: the Worker composes Postgres through the HYPERDRIVE binding with no in-memory repository or deletion log (grep), served in workerd against a PGlite stand-in (worker.workerd.test.ts)
+check 3 PASS: wrangler.jsonc's production env names Hyperdrive config db27b03ce9734c3f928241ce8ee855f6 and restates its bindings; no postgres:// URL outside localhost is committed
+check 4 PASS: README documents the owner's one-time setup (Neon project and production branch, Hyperdrive config and its id, pnpm db:migrate against it), the restore step that re-applies deletions (a command for reapplyDeletions), and that agents never touch production
+check 5 PASS: the tables a migration creates are exactly the manifest's labeled postgresTables (test named 'S113 AC 5'); README says the deletion log survives a restore and is re-applied
+check 6 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S113: 6/6 checks passed ---
+verify-S113: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  1272ms
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 1080ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  541ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  534ms
+ ✓ |tools| size-limit/size-limit.test.js (2 tests) 174ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 130ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 72ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 101ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 73ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 18ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  14:47:19
+   Duration  9.70s (transform 97ms, setup 0ms, collect 4.81s, tests 2.99s, environment 1ms, prepare 548ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/claude/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154293,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
