@@ -227,7 +227,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 76 | [S51](#s51--representative-local-dev-pnpm-dev-on-postgres-in-docker) | `pnpm dev` on Postgres in Docker | `done` |
 | 77 | [S112](#s112--dev-seed-the-last-month-of-the-season-and-the-postseason-refreshable-by-date-range) | Dev seed (season end + postseason) | `done` |
 | 78 | [S113](#s113--production-database-neon-through-hyperdrive-migrated-composed-into-the-worker) | Production database (Neon) | `blocked` |
-| 79 | [S114](#s114--cloudflare-deploy-preview-staging-and-production-through-github-actions) | Cloudflare deploy | `blocked` |
+| 79 | [S114](#s114--cloudflare-deploy-preview-staging-and-production-through-github-actions) | Cloudflare deploy | `todo` |
 | 80 | [S93](#s93--ingest-mlb-play-metrics-win-probability-key-moments-abs-challenges) | Ingest play metrics | `done` |
 | 81 | [S75](#s75--hide-scores-in-the-game-rooms-and-the-recap-video-title) | Hide Scores in the rooms | `done` |
 | 82 | [S71](#s71--day-highlights-digest-best-of-date) | Day highlights digest | `done` |
@@ -265,7 +265,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 116 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
 | 117 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
 
-**Next (generated):** **90 / S5** — the lowest **Priority** `todo` story not waiting on a design.
+**Next (generated):** **79 / S114** — the lowest **Priority** `todo` story not waiting on a design.
 
 **Before starting it:** confirm no [backlog review](#backlog-reviews) is due — the review-debt line in that section counts stories, but a drift event makes one due regardless.
 
@@ -5871,7 +5871,8 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 6. `README.md` documents previews, staging, releasing, rolling back (`wrangler rollback`), and the launch checklist the Later theme carries (legal check of ageing-out copies, `support@baseball.theater` routing, the R2 `ExportStore` and Cloudflare Email `Mailer` adapters) as items still to finish before a public launch.
 7. No deployed environment (preview, staging, production) accepts a `dev:` sign-in: the Worker wires `DevIdentityProvider` only when `BT_LOCAL` is `"1"` (workerd test: `Bearer dev:test-user` is refused without it and accepted with it). (Added by the 2026-11-04 backlog review: `createWorkerApp` composes `createDevAuth`, whose provider list always has `dev`, `functions/src/adapters/fixtures/auth.ts:60`, `functions/src/services/accounts.ts:107`.)
 8. Every deployed environment serves live MLB (`BT_USE_LIVE_MLB` is `"1"` in its `vars`), sets `BT_APP_ORIGIN` to its own address, and gets `BT_SESSION_KEY` from a Worker secret, never `vars` or the repo (`wrangler.jsonc` and workflow check). (Added by the 2026-11-04 backlog review: without the first the deploy serves the bundled fixtures, `createMlbClient` in `functions/src/worker-app.ts`; without the last each isolate signs sessions with its own random key.)
-9. This file's S114 **Status** (story heading and top table) is `done`.
+9. The preview and staging databases hold the baseball data copied from production and no fan's data: only the Postgres tables `DATA_CLASSIFICATION` (`functions/src/services/data-classification.ts`) does not label `personal` are copied, and no personal or deletion-log row is ever written to a preview or staging branch, not even for a moment (workflow check; a test copies between two PGlite databases holding both kinds of row and finds every baseball row copied and every personal table empty). (Owner, 2026-11-05: "No user data, copied baseball data".)
+10. This file's S114 **Status** (story heading and top table) is `done`.
 
 **Notes:**
 
@@ -5879,8 +5880,9 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 - **Owner-provided setup (2026-11-02):** Cloudflare account `b2854b217ff2a0f38e8863600a82fb63`; `baseball.theater` DNS is on Cloudflare; GitHub secrets `CLOUDFLARE_API_TOKEN`, `NEON_API_KEY`, variables `CLOUDFLARE_ACCOUNT_ID`, `NEON_PROJECT_ID` (`old-sun-72319473`) and environment `production` exist. Production Hyperdrive config: S113.
 - The Later theme's other launch items (legal check, support mailbox, R2 and Email adapters, the Worker log settings) stay in the theme; this story lists them in the README checklist rather than building them.
 
-**Notes (2026-11-04 backlog review, at `b166679`): `blocked` on the owner's answers, ACs 7–8 added.**
+**Notes (2026-11-04 backlog review, at `b166679`): ACs 7–8 added; `blocked` on the owner's database answer until 2026-11-05 (AC 9).**
 
+- **Answered 2026-11-05, now AC 9** (owner: "No user data, copied baseball data"). Previews and staging get production's baseball data and none of its fans' data. A Neon branch of production copies every table, so the copy can't be a plain branch of production: fill a branch that never held fans' data (a schema-only branch migrated by `pnpm db:migrate`) with production's non-personal tables. The review's question, as it was asked:
 - **Parked until the owner answers which data the staging and preview databases start from.** AC 1–2 say only "a Neon branch (not production)". A Neon branch is a copy of its parent: branched from production, every preview and the long-lived staging branch holds fans' accounts, settings and deletion log, places ADR-028's inventory (ARCHITECTURE.md:1314–1355) doesn't list and account deletion (S77's `deleteFor`) never reaches. ADR-028 makes an unlisted store the owner's amendment, not a new row. The alternative is branches with no production data (Neon's schema-only branches, or a parent that never held fans' data), loaded by `pnpm db:migrate` and the dev seed (S112). The owner's 2026-11-02 wording, "a long-lived `staging` copy of the database", reads either way. Set `status: todo` once answered; S113 doesn't depend on it.
 - **AC 7, sign-in on deployed sites.** Until the Logto adapter (Later theme in the Live data plane frame note, ADR-019) is sliced and built, the only sign-in the Worker has is the dev stand-in, which takes `Bearer dev:<any uid>` as that user, so `stage.baseball.theater` would let anyone read or delete anyone's settings. AC 7 turns it off outside local dev; signing in then fails on deployed sites until Logto lands. Whether the production release also waits for a Logto story is asked with this review.
 - **AC 8, the deployed Worker's vars.** `createMlbClient` serves the bundled fixtures unless `BT_USE_LIVE_MLB` is `"1"`; `BT_SESSION_KEY` falls back to a random key per isolate (`worker-app.ts`), which on Workers signs users out whenever a request lands on another isolate. Secrets go in with `wrangler secret put` per environment (or `secrets` on the deploy action), from GitHub secrets (AC 4).
@@ -5902,7 +5904,7 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 /goal docs/v3/BACKLOG.md S114. Work item 0 first: if scripts/verify-S114.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S114.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, functions/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S114.sh, or stop after 20 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `blocked`
+**Status:** `todo`
 
 ### S115 — Design captures on request in GitHub Actions
 
