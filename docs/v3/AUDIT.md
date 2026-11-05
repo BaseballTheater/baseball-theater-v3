@@ -14729,3 +14729,55 @@ With S114 parked, the next 3 startable are S113, S5, S99 (S99: no deps, `todo`, 
 **Parity:** queued nothing for this review (2026-11-04 entry). A parity review is also due by count (`pnpm parity:debt`); no Source line edited here.
 
 **Owner questions:** (1) Should staging and preview databases start with no fans' data (schema-only Neon branches plus the dev seed), or be copies of production (then an ADR-028 amendment)? (2) Keep AC 7 (no `dev:` sign-in on deployed sites, so nobody can sign in there until Logto), and should a Logto story be sliced to land before the production release? (3) Who creates the staging Hyperdrive config, and do previews get their own (workflow-created per PR) or share staging's?
+
+---
+
+## 2026-11-04 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-05T06:23:12Z` |
+| HEAD at review | `5100989` (tree dirty) |
+| Trigger | 6 stories done since ab1bcf3 (S89, S115, S106, S97, S51, S112); S114's ACs changed (5100989) and it cites a pillar |
+| Stories `done` since last review | S89, S115, S106, S97, S51, S112 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context doc parity review, one reviewer. Read: INTENT, FEATURES (whole), the Gap/Impact/Source of S89, S115, S106, S97, S51, S112, S113, S114, S5, S72; `git diff ab1bcf3 HEAD` on story notes and product docs (only status flips plus 5100989's S113/S114/S5 notes; no product doc changed); 5100989's S114 diff; the 2026-11-04 parity entries and the 2026-11-04 backlog review entry (5100989); ARCHITECTURE:29, :755, :1659–1662 (local dev).
+
+**1. Citation honesty**
+
+- **S106 — Feature: Game → Live play / linescore context.** FEATURES:57 lists the win-probability chart in Live and records its return (owner, 2026-10-30: "Bring back win probability charts"). S106 builds that card. Holds.
+- **S97 — Feature: Video play links.** FEATURES:98 describes the card, list row and player link (`Play · Top 6th →`) S97 ships. Holds.
+- **S89 — Pillar: Delightful.** Approval matches `00111f4` (checked by the last parity review); `git diff ab1bcf3 HEAD` changes only its status. Holds; no feature fits CI speed.
+- **S51 / S112 — Pillar: Delightful.** Only status changed since the last review; INTENT:14 says Delightful "applies to developers as well", with local setup its example. Holds.
+- **S115 — Pillar: Delightful.** Approval real (`daf8331`: "Delightful (Recommended)"); only status changed. The question the last parity review raised is still unanswered: FEATURES:101 (Visual design) says built screens "are photographed paired with their ratified designs", and S81 (the capture harness) cites that feature, so rule 19's "a feature whenever one applies" may point S115 there. The owner was offered two pillars, not this feature; left as approved and asked again below. Not blocking: S115 is done.
+- **S114 — Pillar: Dependable, approval still covers it.** 5100989 added AC 7 (no `dev:` sign-in on deployed sites) and AC 8 (live MLB, app origin and session-key secret per environment), raised the cap and parked the story. Gap and Impact unchanged. Both ACs make the approved deploy behave as the approval described ("keep the live app trustworthy"): without AC 8 the deployed app would serve bundled fixtures and sign users out across isolates; without AC 7 anyone could sign in as anyone (also Secure, but in service of the same deploy). No new aim, so the 2026-11-02 approval ("yes those are good pillars to use") still covers it.
+- **S113 — Pillar: Dependable.** 5100989 added notes only (AC 2 already holds; envs restate bindings). Holds; FEATURES has no feature for hosting (it "does not describe … deploy targets", FEATURES:8).
+- **Next todo by priority: S113 (above), S5, S72.** S5 cites Highlight search (free-text); its notes carry the owner's 2026-11-02 "MLB's own search on every query" answer that FEATURES:61 records. S72 cites Highlight search (date + tag) and builds the ratified `search-*` chips (date, team, tag). Both hold.
+- **Open questions:** no story's Source line is `Open:` (grep of `docs/v3/backlog/stories/`).
+
+**2. Doc reflects reality**
+
+- **INTENT's local-dev row was behind S51.** INTENT:62 said "Local Workers runtime + fixtures"; S51 shipped Postgres in Docker as the `pnpm dev` default, as ARCHITECTURE:29 and :755 already say. Edited (below).
+- **INTENT's hosting row didn't record where the app ships.** The owner's 2026-11-02 answers (in S114's Gap, d86edde) settle the addresses and release path. Edited (below). The cutover's timing and shape (FEATURES open question 1) stay open.
+- **S114's parked question touches FEATURES "Delete your data"** (FEATURES:94, :245: personal data can't be stored without automation to delete it; only copies BT can't delete on demand age out). Neon branches of production would hold fans' accounts and settings outside ADR-028's inventory. No recorded decision settles it; S114 is already `blocked` on the owner (5100989), and S113 (next) doesn't depend on it, so this review does not block. Asked below in product terms.
+- S89, S112: developer-only; no FEATURES/INTENT statement affected. S106, S97: FEATURES already describes what shipped (rows 57, 98).
+- FEATURES' build checklist leaves "Download and delete your data from Settings" unticked though S79 is done: correct for now, since the R2 export store and the email adapter are still launch items (S114 AC 6), so the launch item isn't finished.
+- No contradiction found between FEATURES/INTENT and VISUAL-DESIGN or ARCHITECTURE in what these stories touched.
+
+**Edits (docs/v3/INTENT.md only, each recording a decision the owner already made):**
+1. Hosting / runtime row: production is `baseball.theater`, shipped first to `stage.baseball.theater` (owner, 2026-11-02: "baseball.theater (though we will first ship to stage.baseball.theater)"); every merge to `main` deploys to staging, production released behind the owner's approval (owner, 2026-11-02: "Yes, agreed."); S114.
+2. Local dev row: adds Postgres in Docker (Neon's major version; S51; owner, 2026-10-18: "I want whatever is the most standard in the industry that will work locally and be representative").
+
+**Questions for the owner (none blocks S113):**
+1. S115: keep "Pillar: Delightful", or cite "Feature: Visual design" as S81 does? (Repeated from the last parity review.)
+2. Staging and preview databases: empty of fans' data (schema plus the dev seed), or copies of production (then ADR-028's inventory and the Delete your data promise must cover them)? Same question as the backlog review's (1), asked once.
+3. Should a video played from Search's floating player also link to its play? (Repeated from the 2026-11-04 parity review; unanswered.)
+
+**3. For the next backlog review**
+
+- No features added this review. FEATURES items still unserved by any startable story, unchanged from earlier reviews: Standings (S4 blocked), Update / changelist UX (S28, S73 blocked), Savant deep links, Multi-source knowledge, AI game companion, Inning / game insight pipeline, Whole-game record. Nothing new to slice.
+- Carried: ARCHITECTURE Phase A table (ARCHITECTURE:1400) still lacks win probability added (S98); outside parity scope.
