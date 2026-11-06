@@ -30,7 +30,9 @@ async function main(): Promise<void>
 	// Without BT_SESSION_KEY the key is random per process, so issued sessions stop verifying after a restart.
 	const { db } = await migratedPglite();
 	setNodeDatabase(db);
+	// Local dev, so `dev:` sign-in is wired (S114 AC 7), as under `pnpm dev`.
 	const app = createWorkerApp({
+		BT_LOCAL: "1",
 		BT_USE_LIVE_MLB: process.env.BT_USE_LIVE_MLB,
 		BT_SESSION_KEY: process.env.BT_SESSION_KEY,
 		BT_APP_ORIGIN: process.env.BT_APP_ORIGIN,

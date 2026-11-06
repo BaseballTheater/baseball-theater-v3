@@ -1,8 +1,9 @@
 /**
  * `BT_DATABASE_URL=… pnpm db:migrate` (S113): applies the committed Drizzle migrations to the
- * database the connection string names, the production Neon branch included. The owner runs it
- * against production (README's one-time setup and every deploy that adds a migration); agents
- * never do (CLAUDE.md). There is no default: the connection string lives only in the caller's
+ * database the connection string names, the production Neon branch included. Every deploy runs it
+ * against its own database before the new Worker takes traffic (S114, `.github/workflows/deploy.yml`,
+ * with BT_DATABASE_URL from `pnpm deploy:bootstrap`); agents never run it against a hosted database
+ * (CLAUDE.md). There is no default: the connection string lives only in the caller's
  * environment and in Cloudflare's Hyperdrive config, never in the repo. Running it again
  * changes nothing.
  */

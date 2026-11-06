@@ -14,6 +14,19 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## Baseball Theater can go live
+
+- **Before, the app ran only on a developer's machine. Now every proposed change can be tried at its own web
+  address before it's merged, every merged change goes live at `stage.baseball.theater` for a final look, and
+  the owner releases to `baseball.theater` with one approval (and can roll back in one command). The test sites
+  never hold fans' accounts or settings, and none of them accepts the developer's pretend sign-in.** Details:
+  S114 — `.github/workflows/deploy.yml` (preview Worker per pull request, staging on every push to `main`,
+  production behind the GitHub environment `production`), `wrangler.jsonc` envs `preview` / `staging` /
+  `production`, `pnpm deploy:bootstrap` (`functions/src/deploy/bootstrap.ts`: the schema-only Neon `staging`
+  branch and the `bt-staging` / `bt-production` Hyperdrive configs found or created by name, Worker secrets from
+  GitHub secrets), `pnpm db:migrate` + `pnpm db:reapply-deletions` before every deploy, `dev:` sign-in only when
+  `BT_LOCAL` is `"1"`. Not yet run on GitHub. _(2026-11-06)_
+
 ## The scoreboard opens on the right day
 
 - **Before, Baseball Theater always opened on a fixed sample day from 2024. Now it opens on today during the

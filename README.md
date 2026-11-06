@@ -94,39 +94,97 @@ production changes go out only through the deploy the owner approves (S114).
 1. Create the Neon project (Postgres 18, the major version `compose.yaml` runs) and keep its
    default branch as the production branch. Copy that branch's connection string from the Neon
    console (`sslmode=require`). It stays in your shell and in Cloudflare only.
-2. Create the Hyperdrive config for it:
-   `npx wrangler hyperdrive create bt-production --connection-string="<connection string>"`.
-3. Put the id it prints in `wrangler.jsonc` under `env.production.hyperdrive` (today
-   `db27b03ce9734c3f928241ce8ee855f6`).
-4. Nothing else by hand: the tables come from `pnpm db:migrate`, which every deploy runs against
-   its own database before the new Worker takes traffic (S114). It applies every committed
-   migration the database hasn't had, and running it again changes nothing, so the first deploy
-   creates the tables and later ones apply only what's new. To run it yourself (to check a
-   database, say): `BT_DATABASE_URL="<connection string>" pnpm db:migrate`.
+2. Nothing else by hand. Every deploy (S114) finds the Hyperdrive config `bt-production` by name, and
+   creates it on that branch's connection string only if it is missing, so its id is resolved at
+   deploy time and never pasted into `wrangler.jsonc` (today it is `db27b03ce9734c3f928241ce8ee855f6`,
+   made by hand on 2026-11-02 with `npx wrangler hyperdrive create bt-production`). The tables come
+   from `pnpm db:migrate`, which every deploy runs against its own database before the new Worker
+   takes traffic. It applies every committed migration the database hasn't had, and running it again
+   changes nothing, so the first deploy creates the tables and later ones apply only what's new. To
+   run it yourself (to check a database, say): `BT_DATABASE_URL="<connection string>" pnpm db:migrate`.
 
-**Restoring a backup** (a Neon point-in-time restore or branch reset): restore, then run
-`BT_DATABASE_URL="<connection string>" pnpm db:reapply-deletions`. The deletion log survives
-the restore, since its entries are only ever added and they hold just a uid and a time. This
-step deletes every logged account again from every personal-data store (ADR-028, S77), so a
-restore never brings back a fan who deleted their account. Run it before the app takes traffic
-again. The production tables are exactly the ones the data classification manifest labels
+**Restoring a backup** (a Neon point-in-time restore or branch reset): restore, then deploy
+again (re-run the last production deploy in GitHub Actions). Every deploy runs
+`pnpm db:reapply-deletions` after migrating and before the new Worker takes traffic, so no one has
+to remember it; to run it by hand, `BT_DATABASE_URL="<connection string>" pnpm db:reapply-deletions`.
+The deletion log survives the restore, since its entries are only ever added and they hold just a
+uid and a time. This step deletes every logged account again from every personal-data store
+(ADR-028, S77), so a restore never brings back a fan who deleted their account. The production tables are exactly the ones the data classification manifest labels
 (`functions/src/services/data-classification.ts`).
+
+## Deploying (Cloudflare Workers)
+
+`.github/workflows/deploy.yml` deploys the app as a Cloudflare Worker (ADR-017, S114). Agents never
+deploy: it runs only on GitHub, with keys only GitHub holds.
+
+- **Previews.** Every pull request gets its own Worker, `baseball-theater-pr-<number>` on workers.dev,
+  once `pnpm verify` passes, and the workflow posts its address on the pull request. Previews share
+  staging's database (owner, 2026-11-05: "Previews share staging db") through the `bt-staging`
+  Hyperdrive config, so a pull request that adds a migration migrates staging before it merges: keep
+  migrations additive, so staging still serves `main` meanwhile. Previews run no cron (they read MLB
+  on request only). Closing the pull request deletes its Worker.
+- **Staging.** Every push to `main` deploys `stage.baseball.theater` on the Neon `staging` branch.
+  The branch is created schema-only from production the first time (production's tables, none of its
+  rows) and filled only by `pnpm db:migrate`, so it never holds a fan's data. Copying production's
+  baseball data into it is a separate step the owner runs by hand (S117); no deploy copies data.
+- **Releasing.** After staging, the same run waits on the GitHub environment `production`; once the
+  owner approves it there, it deploys `baseball.theater`. Nothing deploys production without that
+  approval. Rejecting it (or leaving it) keeps production where it is.
+- **Rolling back.** `npx wrangler rollback --env production` (from `functions/`, with
+  `--config ../wrangler.jsonc`) returns production to its previous version in seconds; add a version
+  id to pick an older one (`npx wrangler deployments list --env production` lists them). A rollback
+  doesn't undo a migration, which is another reason they stay additive.
+
+**What every deploy does**, in order, each step safe to repeat: `pnpm deploy:bootstrap <env>` finds
+the env's Neon branch (production's default branch, or `staging`, created schema-only if missing),
+finds its Hyperdrive config by name (`bt-production`, or `bt-staging` for staging and previews) or
+creates it, and writes the Worker config with that config's id; then `pnpm db:migrate` and
+`pnpm db:reapply-deletions` run on that database; then `wrangler deploy` pushes the Worker and every
+Worker secret from GitHub secrets (`--secrets-file`), so none is ever set by hand with
+`wrangler secret put`. Every deployed env serves live MLB, names its own address as `BT_APP_ORIGIN`,
+and refuses `dev:` sign-in (no `BT_LOCAL`); sign-in works there once Logto lands (S116).
+
+**What the workflow reads from GitHub** (the owner sets these up once; the automation never does):
+
+| Name                        | Kind        | What                                                                                                               |
+| --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
+| `CLOUDFLARE_API_TOKEN`      | secret      | Workers Scripts edit, Hyperdrive edit, Workers custom domains / routes and DNS edit on the `baseball.theater` zone |
+| `CLOUDFLARE_ACCOUNT_ID`     | variable    | the Cloudflare account                                                                                             |
+| `NEON_API_KEY`              | secret      | creates and reads branches and connection strings in the project                                                   |
+| `NEON_PROJECT_ID`           | variable    | `old-sun-72319473`                                                                                                 |
+| `BT_SESSION_KEY_STAGING`    | secret      | signs sessions on staging and previews                                                                             |
+| `BT_SESSION_KEY_PRODUCTION` | secret      | signs sessions on production                                                                                       |
+| `production`                | environment | the owner as required reviewer                                                                                     |
+
+### Launch checklist
+
+Still to finish before a public launch (the _Cloudflare deploy_ Later theme):
+
+- [ ] A legal check of the copies ADR-028 lets age out (the Neon restore window, Patreon's records, provider log
+      retention): it accepts them only "If that's legal", to be confirmed and recorded before launch.
+- [ ] `support@baseball.theater` routed to the owner's inbox, with a test message received (the failed-deletion
+      message links to it).
+- [ ] The R2 `ExportStore` adapter (with its 14-day lifecycle rule), so data downloads outlive an isolate.
+- [ ] The Cloudflare Email `Mailer` adapter, so download links are actually emailed.
+- [ ] Worker log settings that carry no personal fields.
+- [ ] Logto sign-in (S116), before the first production release.
 
 ## Scripts
 
-| Command              | What                                             |
-| -------------------- | ------------------------------------------------ |
-| `pnpm verify`        | **Single health gate** (lint + coverage + build) |
-| `pnpm dev`           | Postgres in Docker + Worker on workerd + Vite    |
-| `pnpm db:seed`       | Migrate and seed the local Postgres (idempotent) |
-| `pnpm seed:refresh`  | Record the dev seed from live MLB (see above)    |
-| `pnpm db:migrate`    | Migrate the database `BT_DATABASE_URL` names     |
-| `pnpm test`          | Vitest (all packages)                            |
-| `pnpm test:coverage` | Coverage + thresholds                            |
-| `pnpm lint`          | ESLint                                           |
-| `pnpm build`         | lint → typecheck → build                         |
-| `pnpm api:spec`      | Regenerate the OpenAPI spec (see below)          |
-| `pnpm api:breaking`  | Breaking-change gate against the baseline        |
+| Command                 | What                                             |
+| ----------------------- | ------------------------------------------------ |
+| `pnpm verify`           | **Single health gate** (lint + coverage + build) |
+| `pnpm dev`              | Postgres in Docker + Worker on workerd + Vite    |
+| `pnpm db:seed`          | Migrate and seed the local Postgres (idempotent) |
+| `pnpm seed:refresh`     | Record the dev seed from live MLB (see above)    |
+| `pnpm db:migrate`       | Migrate the database `BT_DATABASE_URL` names     |
+| `pnpm deploy:bootstrap` | A deploy's bootstrapping (GitHub Actions only)   |
+| `pnpm test`             | Vitest (all packages)                            |
+| `pnpm test:coverage`    | Coverage + thresholds                            |
+| `pnpm lint`             | ESLint                                           |
+| `pnpm build`            | lint → typecheck → build                         |
+| `pnpm api:spec`         | Regenerate the OpenAPI spec (see below)          |
+| `pnpm api:breaking`     | Breaking-change gate against the baseline        |
 
 Loop / agent automation: [docs/v3/LOOP.md](./docs/v3/LOOP.md) · backlog [docs/v3/BACKLOG.md](./docs/v3/BACKLOG.md) · conventions `CLAUDE.md`.
 

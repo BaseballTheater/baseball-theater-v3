@@ -1,10 +1,11 @@
 /**
- * `BT_DATABASE_URL=… pnpm db:reapply-deletions` (S113): the restore runbook's last step. After a
- * backup restore (a Neon point-in-time restore or branch reset), deletes again every account the
+ * `BT_DATABASE_URL=… pnpm db:reapply-deletions` (S113): run by every deploy right after
+ * `pnpm db:migrate` (S114), so after a backup restore (a Neon point-in-time restore or branch
+ * reset) the next deploy deletes again every account the
  * deletion log names, from every registered personal-data store, so a restore never brings a
  * deleted fan back (ADR-028, S77's `reapplyDeletions`). The deletion log itself survives the
- * restore: entries are only ever added. Like `pnpm db:migrate`, the owner runs it against
- * production; agents never do. Running it again changes nothing.
+ * restore: entries are only ever added. Like `pnpm db:migrate`, only the deploy workflow runs it
+ * against a hosted database; agents never do. Running it again changes nothing.
  *
  * The registry here is the Postgres stores (users and their identity links, settings); the
  * download store and mailer are still in-memory until their R2 and Cloudflare Email adapters

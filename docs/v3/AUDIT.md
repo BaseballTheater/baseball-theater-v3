@@ -15063,3 +15063,95 @@ Fresh-context doc parity review, one reviewer. Read: INTENT (whole); FEATURES:8,
 - S114's Impact still says "every change can be previewed at its own address against a copy of the database"; after 79709f4 staging is schema-only and starts empty until S117's copy runs (AC 9). Story text, outside parity scope.
 - S116 lets people sign in on previews and staging (S116 AC 5, owner: "Yes to Logto"), which writes account and settings rows into the staging database; S114 AC 9 says "The staging branch never holds a fan's data". Check whether AC 9 means production fans' data only, and whether account deletion and ADR-028's inventory need to say anything about staging-only test accounts.
 - No features added this review. FEATURES items still unserved by any startable story, unchanged from the last review: Standings (S4 blocked), Update / changelist UX (S28, S73 blocked), Savant deep links, Multi-source knowledge, AI game companion, Inning / game insight pipeline, Whole-game record.
+
+---
+
+## 2026-11-06 — S114 completed
+
+**Cloudflare deploy**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-06T04:19:34Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `051415f` (tree dirty) |
+| Grader | `scripts/verify-S114.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: the deploy workflow runs pnpm verify and a wrangler --dry-run, then deploys a preview Worker per pull request on the bt-staging Hyperdrive config (never production) and posts its address (workflow; test 'S114 AC 1')
+check 2 PASS: every push to main deploys the staging Worker to stage.baseball.theater on the Neon staging branch, after pnpm db:migrate (workflow, wrangler.jsonc env.staging)
+check 3 PASS: production deploys only from main, to baseball.theater, in the GitHub environment 'production', after staging (workflow, wrangler.jsonc env.production)
+check 4 PASS: the Cloudflare token and Neon key come from GitHub secrets; no credential is committed (grep)
+check 5 PASS: every deploy runs pnpm db:migrate then pnpm db:reapply-deletions before wrangler deploy; Hyperdrive configs are found by name (bt-production, bt-staging) or created, with no real id in wrangler.jsonc; a second bootstrap creates nothing (test 'S114 AC 5')
+check 6 PASS: README documents previews, staging, releasing, rolling back (wrangler rollback) and the launch checklist (legal check, support@baseball.theater, R2 ExportStore, Cloudflare Email Mailer)
+check 7 PASS: the Worker wires the dev sign-in only when BT_LOCAL is "1" (workerd test 'S114 AC 7')
+check 8 PASS: each deployed env has BT_USE_LIVE_MLB "1" and its own BT_APP_ORIGIN in vars, no BT_SESSION_KEY in vars; every deploy pushes every Worker secret from GitHub secrets (test 'S114 AC 8')
+check 9 PASS: the staging branch is created schema-only from production, never a plain branch, and no deploy copies data (test 'S114 AC 9'; workflow grep)
+check 10 PASS: backlog Status is done (story heading and Story status table)
+check 11 PASS: the story changed nothing outside its fence (.github/workflows/, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, functions/, docs/v3/, CHANGELOG.md, scripts/verify-S114.sh)
+```
+
+**11/11 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S114 check results ---
+check 1 PASS: the deploy workflow runs pnpm verify and a wrangler --dry-run, then deploys a preview Worker per pull request on the bt-staging Hyperdrive config (never production) and posts its address (workflow; test 'S114 AC 1')
+check 2 PASS: every push to main deploys the staging Worker to stage.baseball.theater on the Neon staging branch, after pnpm db:migrate (workflow, wrangler.jsonc env.staging)
+check 3 PASS: production deploys only from main, to baseball.theater, in the GitHub environment 'production', after staging (workflow, wrangler.jsonc env.production)
+check 4 PASS: the Cloudflare token and Neon key come from GitHub secrets; no credential is committed (grep)
+check 5 PASS: every deploy runs pnpm db:migrate then pnpm db:reapply-deletions before wrangler deploy; Hyperdrive configs are found by name (bt-production, bt-staging) or created, with no real id in wrangler.jsonc; a second bootstrap creates nothing (test 'S114 AC 5')
+check 6 PASS: README documents previews, staging, releasing, rolling back (wrangler rollback) and the launch checklist (legal check, support@baseball.theater, R2 ExportStore, Cloudflare Email Mailer)
+check 7 PASS: the Worker wires the dev sign-in only when BT_LOCAL is "1" (workerd test 'S114 AC 7')
+check 8 PASS: each deployed env has BT_USE_LIVE_MLB "1" and its own BT_APP_ORIGIN in vars, no BT_SESSION_KEY in vars; every deploy pushes every Worker secret from GitHub secrets (test 'S114 AC 8')
+check 9 PASS: the staging branch is created schema-only from production, never a plain branch, and no deploy copies data (test 'S114 AC 9'; workflow grep)
+check 10 PASS: backlog Status is done (story heading and Story status table)
+check 11 PASS: the story changed nothing outside its fence (.github/workflows/, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, functions/, docs/v3/, CHANGELOG.md, scripts/verify-S114.sh)
+--- verify-S114: 11/11 checks passed ---
+verify-S114: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 82ms
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 1132ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  578ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  551ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1126ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  1044ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 91ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 80ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 21ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 68ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  04:22:24
+   Duration  3.80s (transform 113ms, setup 0ms, collect 5.34s, tests 2.77s, environment 1ms, prepare 555ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154292,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

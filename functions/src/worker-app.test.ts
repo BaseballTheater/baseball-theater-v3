@@ -31,7 +31,10 @@ describe("the Worker composition on Postgres (S51)", () =>
 	it("PGlite: serves the schedule, a game and a signed-in account, and stores them in Postgres", async () =>
 	{
 		const { db } = await migratedPglite();
-		const app = createWorkerApp({}, db);
+		// Local dev's composition: `dev:` sign-in is wired only there (S114 AC 7).
+		const app = createWorkerApp({
+			BT_LOCAL: "1",
+		}, db);
 		const get = (path: string, headers: Record<string, string> = {}) => handleApiRequest(new Request(`http://bt.test${path}`, {
 			headers,
 		}), app.context);

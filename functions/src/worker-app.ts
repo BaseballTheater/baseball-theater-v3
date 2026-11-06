@@ -32,6 +32,7 @@ import type { GameIngestNamespace } from "./game-ingest-object.js";
 import type { ApiContext } from "./handlers/api.js";
 import { APP_ORIGIN_SECRET } from "./services/data-downloads.js";
 import { logApiUsage } from "./services/api-usage.js";
+import type { AuthDeps } from "./services/accounts.js";
 import type { IngestDeps } from "./services/ingest.js";
 import { RefreshCoordinator } from "./services/refresh.js";
 import { SESSION_KEY_SECRET } from "./services/session.js";
@@ -44,7 +45,10 @@ export type WorkerEnv = {
 	BT_SESSION_KEY?: string;
 	/** Where download emails link (default: the Vite dev server). */
 	BT_APP_ORIGIN?: string;
-	/** `"1"` marks local dev (`pnpm dev` sets it): the cron tick then runs only with `BT_INGEST_TICK=1`. */
+	/**
+	 * `"1"` marks local dev (`pnpm dev` and the Workers tests set it): the cron tick then runs only
+	 * with `BT_INGEST_TICK=1`, and `dev:` sign-in is wired (S114 AC 7). No deployed env sets it.
+	 */
 	BT_LOCAL?: string;
 	/** `"1"` lets the cron tick ingest in local dev (ADR-002 cadence; off by default, as `local-server.ts`). */
 	BT_INGEST_TICK?: string;
@@ -104,7 +108,8 @@ export function createWorkerApp(env: WorkerEnv, db: PostgresDb): WorkerApp
 			[APP_ORIGIN_SECRET]: env.BT_APP_ORIGIN,
 		},
 	});
-	const auth = createDevAuth(secrets, new PostgresUserRepository(db));
+	const devAuth = createDevAuth(secrets, new PostgresUserRepository(db));
+	const auth = devSignInAllowed(env) ? devAuth : withoutDevSignIn(devAuth);
 	const settings = new PostgresSettingsRepository(db);
 	const account = createDevAccountData({
 		users: auth.users,
@@ -124,6 +129,23 @@ export function createWorkerApp(env: WorkerEnv, db: PostgresDb): WorkerApp
 		},
 		ingest,
 	};
+}
+
+/**
+ * Whether `Bearer dev:<uid>` signs in (S114 AC 7): only in local dev, where `pnpm dev` and the
+ * Workers tests set `BT_LOCAL` to `"1"`. No deployed environment sets it (`wrangler.jsonc`), so
+ * preview, staging and production refuse a `dev:` token until Logto sign-in lands (S116).
+ */
+export function devSignInAllowed(env: WorkerEnv): boolean
+{
+	return env.BT_LOCAL === "1";
+}
+
+/** The same auth with the `dev:` provider left out, so a `dev:` token is just an unknown bearer. */
+function withoutDevSignIn(auth: AuthDeps): AuthDeps
+{
+	const { dev: _dev, ...rest } = auth;
+	return rest;
 }
 
 /**

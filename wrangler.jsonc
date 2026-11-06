@@ -38,10 +38,12 @@
 	"cache": {
 		"enabled": true
 	},
-	// Postgres through Hyperdrive (ADR-018, S50). This top-level `id` is a placeholder that no
-	// deploy uses: the production env below names the real config (S113). Locally,
-	// `wrangler dev` and the Workers tests connect to `localConnectionString` instead: a local
-	// Postgres (S51's Docker), never a hosted database. No credential for one is committed.
+	// Postgres through Hyperdrive (ADR-018, S50). No deploy uses this top-level binding or any
+	// `id` in this file: each deploy finds its env's config by name (`bt-production`, `bt-staging`)
+	// and writes the id it resolves into the config it deploys (S114, `pnpm deploy:bootstrap`), so
+	// the zeros below are placeholders. Locally, `wrangler dev` and the Workers tests connect to
+	// `localConnectionString` instead: a local Postgres (S51's Docker), never a hosted database.
+	// No credential for one is committed.
 	"hyperdrive": [
 		{
 			"binding": "HYPERDRIVE",
@@ -49,16 +51,25 @@
 			"localConnectionString": "postgres://bt:bt@localhost:5432/bt"
 		}
 	],
-	// The production Worker (S113). Environments don't inherit bindings, so the env restates the
-	// Durable Objects and its own Hyperdrive config: `bt-production`, which the owner created on
-	// 2026-11-02 for the Neon project `old-sun-72319473` (Postgres 18). Its connection string lives
-	// only in Cloudflare. The env names its Worker on purpose, apart from the top-level config's
-	// local one, so a deploy without `--env production` can never replace production. The Durable
-	// Object `migrations` stay top-level. S114 adds the routes, vars and secrets and deploys it;
-	// agents never deploy to production (CLAUDE.md).
+	// The deployed Workers (S113, S114), deployed only by `.github/workflows/deploy.yml`; agents
+	// never deploy (CLAUDE.md). Environments don't inherit bindings, so each env restates the
+	// Durable Objects, its Hyperdrive binding and its vars, and names its own Worker, apart from the
+	// top-level config's local one, so a deploy without `--env` can never replace a deployed one.
+	// The Durable Object `migrations` stay top-level. Every deployed env serves live MLB and names
+	// its own address as BT_APP_ORIGIN; BT_SESSION_KEY is a Worker secret that every deploy pushes
+	// from GitHub secrets (`--secrets-file`), never a var. None sets BT_LOCAL, so none accepts a
+	// `dev:` sign-in (S114 AC 7).
 	"env": {
-		"production": {
-			"name": "baseball-theater-production",
+		// One Worker per pull request (`baseball-theater-pr-<N>` on workers.dev, its name and
+		// BT_APP_ORIGIN set at deploy time) on staging's database, `bt-staging` (owner, 2026-11-05:
+		// "Previews share staging db"). No cron: a preview reads MLB through on request only, so
+		// open pull requests don't each poll on ADR-002's cadence.
+		"preview": {
+			"name": "baseball-theater-preview",
+			"workers_dev": true,
+			"triggers": {
+				"crons": []
+			},
 			"durable_objects": {
 				"bindings": [
 					{ "name": "GAME_INGEST", "class_name": "GameIngestObject" },
@@ -68,9 +79,60 @@
 			"hyperdrive": [
 				{
 					"binding": "HYPERDRIVE",
-					"id": "db27b03ce9734c3f928241ce8ee855f6"
+					"id": "00000000000000000000000000000000"
 				}
-			]
+			],
+			"vars": {
+				"BT_USE_LIVE_MLB": "1"
+			}
+		},
+		// Every push to main, at stage.baseball.theater, on the Neon `staging` branch through
+		// `bt-staging`: a schema-only branch that never holds a fan's data (S114 AC 9).
+		"staging": {
+			"name": "baseball-theater-staging",
+			"workers_dev": false,
+			"routes": [{ "pattern": "stage.baseball.theater", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{ "name": "GAME_INGEST", "class_name": "GameIngestObject" },
+					{ "name": "GAME_HUB", "class_name": "GameHubObject" }
+				]
+			},
+			"hyperdrive": [
+				{
+					"binding": "HYPERDRIVE",
+					"id": "00000000000000000000000000000000"
+				}
+			],
+			"vars": {
+				"BT_USE_LIVE_MLB": "1",
+				"BT_APP_ORIGIN": "https://stage.baseball.theater"
+			}
+		},
+		// baseball.theater, after staging and only once the owner approves the GitHub environment
+		// `production`. Its Hyperdrive config is `bt-production`, which the owner created on
+		// 2026-11-02 for the Neon project `old-sun-72319473` (Postgres 18); its connection string
+		// lives only in Cloudflare.
+		"production": {
+			"name": "baseball-theater-production",
+			"workers_dev": false,
+			"routes": [{ "pattern": "baseball.theater", "custom_domain": true }],
+			"durable_objects": {
+				"bindings": [
+					{ "name": "GAME_INGEST", "class_name": "GameIngestObject" },
+					{ "name": "GAME_HUB", "class_name": "GameHubObject" }
+				]
+			},
+			"hyperdrive": [
+				{
+					"binding": "HYPERDRIVE",
+					"id": "00000000000000000000000000000000"
+				}
+			],
+			"vars": {
+				"BT_USE_LIVE_MLB": "1",
+				"BT_APP_ORIGIN": "https://baseball.theater"
+			}
 		}
 	},
 	// No anonymous usage telemetry from local runs.
