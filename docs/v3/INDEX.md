@@ -484,6 +484,7 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 |---|---|---|---|---|
 | 79 | [S114](backlog/stories/S114.md) Cloudflare deploy | `todo` | S113 | — |
 | 80 | [S116](backlog/stories/S116.md) Logto sign-in | `todo` | S114 | — |
+| 80 | [S117](backlog/stories/S117.md) Baseball-data copy to staging | `todo` | S114 | — |
 | 90 | [S5](backlog/stories/S5.md) Search page queries highlights fixture | `todo` | S70, S61, S68, S81 | S34, S56 |
 | 91 | [S72](backlog/stories/S72.md) Search chips: date / team / tag | `todo` | S5, S69, S81 | S34 |
 | 94 | [S74](backlog/stories/S74.md) Offline reading + prefetch | `todo` | S73, S68, S75, S76, S81 | S55, S57 |
