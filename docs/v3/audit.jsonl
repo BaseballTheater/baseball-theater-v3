@@ -246,3 +246,5 @@
 {"line":14817,"date":"2026-11-05","kind":"completed","story":"S113","heading":"## 2026-11-05 — S113 completed"}
 {"line":14899,"date":"2026-11-05","kind":"answers","review":"backlog","answers":"2026-11-04","heading":"## 2026-11-05 — backlog review answers (2026-11-04)"}
 {"line":14914,"date":"2026-11-05","kind":"answers","review":"parity","answers":"2026-11-04","heading":"## 2026-11-05 — doc parity review answers (2026-11-04)"}
+{"line":14929,"date":"2026-11-05","kind":"skip","review":"backlog","heading":"## 2026-11-05 — backlog review skipped"}
+{"line":14944,"date":"2026-11-05","kind":"skip","review":"backlog","heading":"## 2026-11-05 — backlog review skipped"}

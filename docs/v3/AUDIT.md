@@ -14923,3 +14923,33 @@ Owner, 2026-11-05. Q2 (sign-in off on deployed sites until Logto; a Logto story 
 **Answers and what was applied**
 
 Owner, 2026-11-05. Q1 (S115: Pillar: Delightful or Feature: Visual design): "Visual design". S115 Source changed. Q3 (Search floating player links its play): "Yes". Recorded in FEATURES, Video play links.
+
+---
+
+## 2026-11-05 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-06T02:14:20Z` |
+| HEAD at capture | `7021372` (tree clean) |
+| Change | `9bded5f` — Backlog (owner-directed): migrations and all bootstrapping run, idempotently, on every deploy |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-05, asked whether the owner-directed bootstrapping changes (9bded5f: migrate on every deploy, all bootstrapping idempotent; 7021372: bootstrapping steps as idempotent constants run on every deploy) need a backlog review: "Skip"
+
+---
+
+## 2026-11-05 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-06T02:14:20Z` |
+| HEAD at capture | `7021372` (tree dirty) |
+| Change | `7021372` — Backlog (owner-directed): bootstrapping steps become idempotent constants run on every deploy |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-05, asked whether the owner-directed bootstrapping changes (9bded5f: migrate on every deploy, all bootstrapping idempotent; 7021372: bootstrapping steps as idempotent constants run on every deploy) need a backlog review: "Skip"
