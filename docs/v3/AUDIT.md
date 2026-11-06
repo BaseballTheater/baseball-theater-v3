@@ -15344,3 +15344,18 @@ Fresh-context review at `b781f36`. Scope: S118 (added), S114 (Impact changed, ci
 **Answers and what was applied**
 
 Owner, 2026-11-06. Q1, separate Logto tenant for staging and previews: "We will use a staging one or a fake shim". Applied in S116 AC 5: staging and previews never use production's tenant (a staging Logto tenant or a fake identity shim), so staging's accounts are test accounts and S114 AC 9 holds; production's Logto vars and machine-to-machine secret appear only in env.production and the production job; README's manual setup lists the staging tenant or the shim. Notes: a shim on a deployed site conflicts with S114 AC 7 / AC 2 as they stand, so choosing it means asking first; the aside about limiting staging sign-in to the owner's addresses was not answered. Turn cap 22 -> 23 (second tenant's vars and secret kept apart per environment). S116 back to `todo`. Q2, whether holding off the merge is enough: "It is enough, because the actual production release gate is changing the DNS away from the elastic beanstalk destination". Recorded in S116's notes (no Logto check in the production job; README:190's launch-checklist line to be reworded by S116, whose fence holds README). Caveat recorded and raised with the owner: `wrangler.jsonc:119` attaches `baseball.theater` as a Workers custom domain, and `wrangler deploy` in CI overrides an existing DNS record for it, so the first production deploy would itself move the DNS off Elastic Beanstalk.
+
+---
+
+## 2026-11-06 — doc parity review answers (2026-11-06)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-06 doc parity review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-06T23:04:17Z` |
+| HEAD at capture | `73ba87e` (tree clean) |
+| Applied in | `73ba87e` — Owner's answer to the 2026-11-06 doc parity review: S117 cites the Delightful pillar |
+
+**Answers and what was applied**
+
+Owner, 2026-11-06. Carried question, which pillar or feature S117 (copy production's baseball data into staging, by hand) cites: "Delightful, bc it makes testing much faster in stage". Applied: S117's **Source:** is now "Pillar: Delightful — developers too: staging that already holds production's games, schedules and videos makes testing on stage.baseball.theater much faster", quoting the owner's approval (frontmatter `source: pillar`); the S117 note's "waits on its Source" bullet records the answer, so S117 may start.
