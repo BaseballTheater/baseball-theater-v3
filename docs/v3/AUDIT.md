@@ -14991,3 +14991,18 @@ Owner, 2026-11-05, asked whether the owner-directed bootstrapping changes (9bded
 **Questions for the owner (non-blocking):** (1) Should preview deploys offer Logto sign-in, which registers each PR's address with Logto, or should previews have no sign-in? (2) Should S114's AC 9 (the baseball-data copy) become its own story to keep S114 smaller?
 
 Verdict **amended**: S114 and S116 notes edited, `pnpm backlog:build`, `pnpm backlog:check` passes.
+
+---
+
+## 2026-11-05 — backlog review answers (2026-11-05)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-05 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-06T03:25:14Z` |
+| HEAD at capture | `79709f4` (tree clean) |
+| Applied in | `79709f4` — Owner's answers to the 2026-11-05 scoped review: Logto on previews, and the baseball-data copy becomes S117, run by hand |
+
+**Answers and what was applied**
+
+Owner, 2026-11-05. Previews and Logto sign-in: "Yes to Logto", applied in S116 AC 5 with cleanup on PR close. Split the baseball-data copy out of S114: "Its own story, before production launch, but it should be a manual step (to allow for local iteration not getting stomped)", now S117, with S114 AC 9 narrowed to the no-fans-data guarantee.
