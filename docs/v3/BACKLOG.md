@@ -228,6 +228,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 77 | [S112](#s112--dev-seed-the-last-month-of-the-season-and-the-postseason-refreshable-by-date-range) | Dev seed (season end + postseason) | `done` |
 | 78 | [S113](#s113--production-database-neon-through-hyperdrive-migrated-composed-into-the-worker) | Production database (Neon) | `done` |
 | 79 | [S114](#s114--cloudflare-deploy-preview-staging-and-production-through-github-actions) | Cloudflare deploy | `done` |
+| 79 | [S118](#s118--branch-flow-stage-deploys-staging-main-deploys-production) | Stage and main branch flow | `todo` |
 | 80 | [S93](#s93--ingest-mlb-play-metrics-win-probability-key-moments-abs-challenges) | Ingest play metrics | `done` |
 | 80 | [S116](#s116--sign-in-with-logto-email-one-time-code-on-the-deployed-sites) | Logto sign-in | `todo` |
 | 80 | [S117](#s117--copy-productions-baseball-data-into-staging-on-request-with-no-fans-data) | Baseball-data copy to staging | `todo` |
@@ -267,7 +268,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 116 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
 | 117 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
 
-**Next (generated):** **80 / S116** — the lowest **Priority** `todo` story not waiting on a design.
+**Next (generated):** **79 / S118** — the lowest **Priority** `todo` story not waiting on a design.
 
 **Before starting it:** confirm no [backlog review](#backlog-reviews) is due — the review-debt line in that section counts stories, but a drift event makes one due regardless.
 
@@ -6066,6 +6067,51 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 - Its turn cap, Goal condition and `/goal` command come from the next backlog review, which also checks these ACs against HEAD (as S115's and S116's did).
 
 **Reuse check** (ADR-025): before writing code, read `functions/src/services/data-classification.ts` (the manifest), `functions/src/adapters/postgres/repos.ts` (the version-guarded upserts), `functions/src/adapters/postgres/migrate.ts` and `connect.ts` (`migrateDatabaseAt`, `openPostgres`), and S114's workflow; record what was reused in the story's ledger notes.
+
+**Status:** `todo`
+
+### S118 — Branch flow: stage deploys staging, main deploys production
+
+**Gap:** S114 deploys staging on every push to `main` and holds production behind the GitHub environment `production`'s required approval, and every agent rule (CLAUDE.md, the run-stories skill) commits and pushes straight to `main`. The owner wants a `stage` branch between the work and production (2026-11-06): *"in the short term, I would like to have all of my commits merge into stage. ... Instead of committing directly to main, we commit to stage, and the stage branch pushes to the stage site. And then whenever I want to bring something forward, I can merge an individual commit to main, or I could merge the whole branch of stage to main. But basically, main would deploy to production when it gets an update, and stage would deploy to stage when it gets an update."* Asked whether production should still wait on an approval and whether a small follow-up story should make the change: *"Okay, no, we don't need that approval step. We can just deploy when we merge into main. And as far as the small follow-up story, then yes, you can do that."* Long-term the owner wants pull-request previews → `stage` → `main`; S114's per-PR previews keep working for pull requests into `stage`.
+
+**Impact:** Before S118, every change agents pushed went to `main`, and production waited for the owner to click an approval. After it, agents' work lands on `stage` and goes live at `stage.baseball.theater`; the owner releases to `baseball.theater` simply by merging `stage` (or a single commit) into `main`, with no extra approval click.
+
+**Source:** Pillar: Dependable — a staging branch the owner releases from by hand keeps unreviewed work off the live app, the same reason S114 cites. Asked "Can the new story cite the Dependable pillar, the same reason S114 uses?" Approved by owner 2026-11-06: "Yes"
+
+**Depends on:** **S114** (the deploy workflow, its previews, staging and production jobs).
+
+**Scope files:** `.github/workflows/deploy.yml`, `.github/workflows/ci.yml`, `.github/workflows/design-capture.yml`, `README.md`, `CLAUDE.md`, `.claude/skills/run-stories/SKILL.md`, `docs/v3/LOOP.md`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md` (plus the generated `docs/v3/INDEX.md` and `docs/v3/audit.jsonl`). No script under `scripts/` hardcodes `main` for a push or a `gh run` check (grep at `3a908b6`: only two tests that `git init -b main` a throwaway repo), so none is in the fence; the verify, backlog-review, doc-parity-review and design-intake-review skills say nothing about `main` either.
+
+**Work**
+
+0. Write `scripts/verify-S118.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** changing any workflow or rule text (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S118.sh` performs)
+
+1. `.github/workflows/deploy.yml`: a push to `stage` deploys staging (`stage.baseball.theater`); a push to `main` deploys production (`baseball.theater`) on its own — its job does not need the staging job and waits on no required approval (the job may still name `environment: production` for its secrets and variables; README and this story say the owner removes that environment's required reviewers in GitHub settings); a push to `main` no longer deploys staging. Pull-request previews are unchanged and work for pull requests into `stage` or `main`. The bootstrap, `pnpm db:migrate`, `pnpm db:reapply-deletions`, `wrangler deploy` order and the idempotent bootstrapping from S114 are unchanged (workflow check).
+2. `.github/workflows/ci.yml` runs on pushes to, and pull requests into, both `stage` and `main`. `.github/workflows/design-capture.yml` hardcodes no `main` (it commits back to whichever branch it runs on, `stage` by default once it is the default branch) (workflow check; grep).
+3. `CLAUDE.md`, `.claude/skills/run-stories/SKILL.md` and `docs/v3/LOOP.md` say agents commit and push to `stage`, check GitHub Actions on `stage` before pushing (`gh run list --branch stage --limit 1`), and never push to, merge into or open a release to `main`: merging `stage` into `main` is the owner's release step, because a push to `main` deploys production. Each quotes the owner. No rule text tells an agent to push `main` (grep).
+4. `README.md`'s deploy section describes the flow: `stage` deploys staging, `main` deploys production; releasing is the owner merging `stage` into `main` (the whole branch is the smooth path; cherry-picking a single commit works but conflicts in `docs/v3/AUDIT.md`, `CHANGELOG.md` and the generated backlog files are likely); and the GitHub settings the owner sets: default branch `stage`, the `production` environment with no required reviewers and deployment branches limited to `main` (grep).
+5. This file's S118 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- **The owner sets the GitHub settings, not an agent** (CLAUDE.md: agents don't change repo settings): default branch `stage`; environment `production` with its required reviewers removed and its deployment branches limited to `main` (so only `main` can reach production's secrets). Until the reviewers are removed, a push to `main` still waits for the owner's click; until the default branch is `stage`, `gh workflow run` defaults to `main`.
+- **Changing CI and deploy workflows needs the owner's go-ahead** (CLAUDE.md): this story is that go-ahead for the three workflows it names, nothing more. Agents still never push `main` or deploy production.
+- S114's grader is frozen at its shipping commit (`3a908b6`); its checks that staging runs on `main` and production needs staging held at that commit and are not re-run at HEAD.
+- `docs/v3/INTENT.md`'s Hosting row still says every merge to `main` deploys staging and production waits on approval; INTENT is the doc-parity review's to edit, so this story leaves it and the next parity review picks it up.
+
+**Reuse check** (ADR-025): before writing, read S114's `deploy.yml` jobs and `verify-S114.sh`'s workflow parser; reuse the jobs as they are and change only their triggers and `needs`.
+
+**Turn cap:** 12 — assumes three workflow edits, the rule text in CLAUDE.md, the run-stories skill and LOOP.md, README's deploy section and the grader; no product code.
+
+**Goal condition:** scripts/verify-S118.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/deploy.yml, .github/workflows/ci.yml, .github/workflows/design-capture.yml, README.md, CLAUDE.md, .claude/skills/run-stories/SKILL.md, docs/v3/LOOP.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S118.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S118. Work item 0 first: if scripts/verify-S118.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before changing any workflow or rule text. Then: scripts/verify-S118.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/deploy.yml, .github/workflows/ci.yml, .github/workflows/design-capture.yml, README.md, CLAUDE.md, .claude/skills/run-stories/SKILL.md, docs/v3/LOOP.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S118.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
 
 **Status:** `todo`
 
