@@ -15329,3 +15329,18 @@ Fresh-context review at `b781f36`. Scope: S118 (added), S114 (Impact changed, ci
 - ARCHITECTURE.md:631, :773 and :817 still describe Firebase-era deploys and call staging vs previews "still open", which S114 and S118 have settled; decide whether ADR text needs an owner-ratified amendment or a superseded note.
 
 **Carried question for the owner (asked 2026-11-06, unanswered):** S117 (copy production's baseball data into staging, by hand) was split out of S114, which cites the Dependable pillar with your approval. Does that approval cover S117, or should it cite something else?
+
+---
+
+## 2026-11-06 — backlog review answers (2026-11-06)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-06 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-06T23:03:39Z` |
+| HEAD at capture | `9b23041` (tree clean) |
+| Applied in | `9b23041` — Owner's answers to the 2026-11-06 backlog review: staging signs in on its own tenant or a shim, and DNS is the release gate |
+
+**Answers and what was applied**
+
+Owner, 2026-11-06. Q1, separate Logto tenant for staging and previews: "We will use a staging one or a fake shim". Applied in S116 AC 5: staging and previews never use production's tenant (a staging Logto tenant or a fake identity shim), so staging's accounts are test accounts and S114 AC 9 holds; production's Logto vars and machine-to-machine secret appear only in env.production and the production job; README's manual setup lists the staging tenant or the shim. Notes: a shim on a deployed site conflicts with S114 AC 7 / AC 2 as they stand, so choosing it means asking first; the aside about limiting staging sign-in to the owner's addresses was not answered. Turn cap 22 -> 23 (second tenant's vars and secret kept apart per environment). S116 back to `todo`. Q2, whether holding off the merge is enough: "It is enough, because the actual production release gate is changing the DNS away from the elastic beanstalk destination". Recorded in S116's notes (no Logto check in the production job; README:190's launch-checklist line to be reworded by S116, whose fence holds README). Caveat recorded and raised with the owner: `wrangler.jsonc:119` attaches `baseball.theater` as a Workers custom domain, and `wrangler deploy` in CI overrides an existing DNS record for it, so the first production deploy would itself move the DNS off Elastic Beanstalk.
