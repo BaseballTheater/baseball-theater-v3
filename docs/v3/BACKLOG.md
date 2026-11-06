@@ -6064,7 +6064,7 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 
 **Impact:** Before S117, staging started empty and only filled in as people browsed it. S117 impact: when the owner asks, staging gets every game, schedule and video production has, with no fan's account or settings, and nothing overwrites it in between.
 
-**Source:** Open: S117 was split out of S114, which cites Pillar: Dependable with the owner's approval; does that approval cover S117, or should it cite something else? Raised 2026-11-05
+**Source:** Pillar: Delightful — developers too: staging that already holds production's games, schedules and videos makes testing on `stage.baseball.theater` much faster. Asked whether S114's Dependable approval covers S117, or it should cite something else. Approved by owner 2026-11-06: "Delightful, bc it makes testing much faster in stage"
 
 **Depends on:** **S114** (the staging branch, its Hyperdrive config and the schema-only rule, S114 AC 9). Lands before the production launch (owner, 2026-11-05).
 
@@ -6093,7 +6093,7 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 
 **Notes (2026-11-06 backlog review, at `a3b095e`):**
 
-- **Still waits on the owner for its Source** (rule 19; asked by the 2026-11-06 doc parity review, unanswered). Don't start it until the `**Source:**` line cites something the owner approved; the ACs below don't depend on the answer.
+- **Still waits on the owner for its Source** (rule 19; asked by the 2026-11-06 doc parity review, unanswered). Don't start it until the `**Source:**` line cites something the owner approved; the ACs below don't depend on the answer. (Answered 2026-11-06: Pillar: Delightful, "Delightful, bc it makes testing much faster in stage"; it may start.)
 - **Ground truth.** `DATA_CLASSIFICATION` (`functions/src/services/data-classification.ts:45`) has `postgresTables` labeled `none` / `personal` / `retained`; every `none` table (`schedule_days`, `games`, `game_projections`, `replay_artifacts`) has a `version` column (`functions/src/adapters/postgres/schema.ts:22–52`) that its upsert compares, so AC 2's version-guarded writes exist for all of them. `migrateDatabaseAt` (`functions/src/adapters/postgres/migrate.ts:31`) and `openPostgres` (`connect.ts:22`) exist; so does `migratedPglite` (`migrate.ts:45`) for AC 1–3's two-database tests. Drizzle's own migrations record isn't a `public` table and isn't copied. Depends on S114: `done`.
 - **Reuse the deploy bootstrap for AC 4–5.** A `workflow_dispatch` job gets both connection strings the way deploys do: `findOrCreateBranch` and `branchConnectionString` (`functions/src/deploy/bootstrap.ts:165`, :224) with `STAGING_BRANCH` (:35), reading production's default branch only to read from it. AC 5's refusal reuses what already marks production: the project's default branch (`bootstrap.ts:168`) and `HYPERDRIVE_CONFIG.production` (`bt-production`, :31). `NEON_API_KEY` is a repository secret (the `preview` job reads it with no environment, `deploy.yml:78`), so the dispatch job doesn't need the `production` environment, whose deployment branches the owner limits to `main` (README.md:171). Mask both connection strings as `deploy-bootstrap.ts:85–86` does, and log hosts and row counts only.
 - **Run it on `stage`.** With the branch flow (2026-11-06), `stage` is the branch staging's schema comes from, so the dispatch checks out `stage` (the default branch once the owner sets it); AC 3's "migrates the target first" then applies `stage`'s migrations, the ones staging already runs.
