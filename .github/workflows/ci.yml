@@ -1,9 +1,11 @@
 name: CI
 
 on:
+    # S118: agents push to stage (staging), the owner merges stage into main (production); both
+    # are checked, and so is every pull request, whichever branch it targets.
     pull_request:
     push:
-        branches: [main]
+        branches: [stage, main]
 
 concurrency:
     group: ci-${{ github.ref }}

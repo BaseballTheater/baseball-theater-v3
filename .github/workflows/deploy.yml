@@ -4,10 +4,14 @@ name: Deploy
 # - Every pull request gets its own preview Worker on workers.dev, on staging's database (owner,
 #   2026-11-05: "Previews share staging db"), and its address is posted on the pull request. It is
 #   deleted when the pull request closes.
-# - Every push to main deploys staging at stage.baseball.theater, on the Neon `staging` branch: a
+# - Every push to stage deploys staging at stage.baseball.theater, on the Neon `staging` branch: a
 #   schema-only branch that never holds a fan's data.
-# - Production at baseball.theater deploys from main only, after staging, in the GitHub environment
-#   `production`, whose required reviewer is the owner: nothing deploys it without that approval.
+# - Every push to main deploys production at baseball.theater, on its own (S118; owner, 2026-11-06:
+#   "main would deploy to production when it gets an update, and stage would deploy to stage when it
+#   gets an update", and "we don't need that approval step. We can just deploy when we merge into
+#   main"). Agents work on stage; merging stage into main is the owner's release step. The job still
+#   names the GitHub environment `production` for its secrets; the owner sets that environment to no
+#   required reviewers and to deploy from main only (README).
 # Every deploy first runs `pnpm deploy:bootstrap` (find or create the Neon branch and the Hyperdrive
 # config by name, write the Worker config and secrets), then `pnpm db:migrate` and
 # `pnpm db:reapply-deletions` on its own database, and only then `wrangler deploy`, which pushes
@@ -19,7 +23,7 @@ on:
     pull_request:
         types: [opened, synchronize, reopened, closed]
     push:
-        branches: [main]
+        branches: [stage, main]
 
 permissions:
     contents: read
@@ -145,9 +149,9 @@ jobs:
                       echo "$output"; exit 1
                   fi
 
-    # Every push to main: stage.baseball.theater on the Neon staging branch (bt-staging).
+    # Every push to stage: stage.baseball.theater on the Neon staging branch (bt-staging).
     staging:
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/stage'
         needs: [verify]
         runs-on: ubuntu-latest
         timeout-minutes: 20
@@ -194,11 +198,11 @@ jobs:
             - name: Deploy staging
               run: pnpm --filter @bt/functions exec wrangler deploy --config "${{ steps.bootstrap.outputs.config }}" --env staging --secrets-file "${{ steps.bootstrap.outputs.secrets_file }}"
 
-    # baseball.theater, from main only, after staging, and only once the owner approves the
-    # `production` environment. Rolling back is `wrangler rollback` (README).
+    # baseball.theater, on every push to main, once verify passes: the owner's merge of stage into
+    # main is the release, with no approval wait (S118). Rolling back is `wrangler rollback` (README).
     production:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        needs: [verify, staging]
+        needs: [verify]
         runs-on: ubuntu-latest
         timeout-minutes: 20
         concurrency:

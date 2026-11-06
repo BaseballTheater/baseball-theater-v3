@@ -2,6 +2,7 @@
 
 Every earlier **As of** line of the [Current baseline](#current-baseline), newest first (rule 17). When a change moves the baseline's **As of** line on, the line it replaces goes to the top of this list, unchanged.
 
+- 2026-11-06 — **S114** done: `.github/workflows/deploy.yml` deploys a preview Worker per pull request and staging (`stage.baseball.theater`) on every push to `main`, both on the schema-only Neon `staging` branch through `bt-staging`, and production (`baseball.theater`) only after the owner approves; every deploy bootstraps idempotently, migrates and re-applies deletions first, and no deployed Worker accepts `dev:` sign-in.
 - 2026-11-05 — **S113** done: `pnpm db:migrate` migrates any database by connection string (idempotent, run by every deploy per S114), `wrangler.jsonc`'s `production` env names the owner's `bt-production` Hyperdrive config, and README holds the setup and restore runbook.
 - 2026-11-04 — **S112** done: `pnpm seed:refresh` records the last finished season's final month and postseason (or any range) into a git-ignored dev seed, which `pnpm dev` loads into the local Postgres.
 - 2026-11-04 — **S51** done: `pnpm dev` runs on Postgres in Docker, seeded from the fixtures; its human check is the owner-accepted design-capture run 41934225471.

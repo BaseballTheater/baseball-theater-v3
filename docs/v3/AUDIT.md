@@ -15155,3 +15155,85 @@ export const label = game.abbreviation + " @ ";  1044ms
 ```
 
 </details>
+
+---
+
+## 2026-11-06 — S118 completed
+
+**Stage and main branch flow**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-06T05:23:12Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `7a3fa0f` (tree dirty) |
+| Grader | `scripts/verify-S118.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: deploy.yml: a push to stage deploys staging and a push to main deploys production on its own (no needs on staging); main no longer deploys staging; previews, bootstrap, migrate, reapply-deletions and deploy steps are S114's unchanged
+check 2 PASS: ci.yml runs on pushes to and pull requests into both stage and main; design-capture.yml hardcodes no main
+check 3 PASS: CLAUDE.md, the run-stories skill and LOOP.md say agents commit and push to stage, check gh run list --branch stage first, and never push, merge into or release to main, quoting the owner; no rule text says to push main
+check 4 PASS: README's deploy section: stage deploys staging, main deploys production, releasing is the owner merging stage into main (cherry-picks risk AUDIT.md/CHANGELOG.md conflicts), and the GitHub settings (default branch stage, production with no required reviewers, deployment branches main)
+check 5 PASS: backlog Status is done (story heading and Story status table)
+check 6 PASS: the story changed nothing outside its fence (the three workflows, README.md, CLAUDE.md, the run-stories skill, docs/v3/LOOP.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, scripts/verify-S118.sh)
+```
+
+**6/6 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S118 check results ---
+check 1 PASS: deploy.yml: a push to stage deploys staging and a push to main deploys production on its own (no needs on staging); main no longer deploys staging; previews, bootstrap, migrate, reapply-deletions and deploy steps are S114's unchanged
+check 2 PASS: ci.yml runs on pushes to and pull requests into both stage and main; design-capture.yml hardcodes no main
+check 3 PASS: CLAUDE.md, the run-stories skill and LOOP.md say agents commit and push to stage, check gh run list --branch stage first, and never push, merge into or release to main, quoting the owner; no rule text says to push main
+check 4 PASS: README's deploy section: stage deploys staging, main deploys production, releasing is the owner merging stage into main (cherry-picks risk AUDIT.md/CHANGELOG.md conflicts), and the GitHub settings (default branch stage, production with no required reviewers, deployment branches main)
+check 5 PASS: backlog Status is done (story heading and Story status table)
+check 6 PASS: the story changed nothing outside its fence (the three workflows, README.md, CLAUDE.md, the run-stories skill, docs/v3/LOOP.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, scripts/verify-S118.sh)
+--- verify-S118: 6/6 checks passed ---
+verify-S118: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 972ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  471ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  496ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 156ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1026ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  960ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 90ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 73ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 16ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 69ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  05:25:21
+   Duration  3.33s (transform 108ms, setup 0ms, collect 4.73s, tests 2.55s, environment 1ms, prepare 529ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154294,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

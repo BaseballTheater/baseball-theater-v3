@@ -87,7 +87,7 @@ config. Every bootstrapping step is safe to repeat (owner, 2026-11-05: "It shoul
 can happen with every deployment. All the bootstrapping should be like that."), so deploys run them
 each time rather than anyone remembering to. **Agents never touch production**: no migrations,
 restores or deploys against it, and no production connection string in the repo (CLAUDE.md);
-production changes go out only through the deploy the owner approves (S114).
+production changes go out only when the owner merges `stage` into `main` (S114, S118).
 
 **One-time setup** (done by the owner 2026-11-02; repeat it only to rebuild from scratch):
 
@@ -117,19 +117,33 @@ uid and a time. This step deletes every logged account again from every personal
 `.github/workflows/deploy.yml` deploys the app as a Cloudflare Worker (ADR-017, S114). Agents never
 deploy: it runs only on GitHub, with keys only GitHub holds.
 
+**Two branches, two sites** (S118; owner, 2026-11-06: "main would deploy to production when it gets
+an update, and stage would deploy to stage when it gets an update"):
+
+- A push to `stage` deploys staging, `stage.baseball.theater`. Agents commit and push here, and only
+  here.
+- A push to `main` deploys production, `baseball.theater`, on its own, with no approval wait (owner,
+  same day: "we don't need that approval step. We can just deploy when we merge into main"). Agents
+  never push to it, merge into it or open a release to it.
+- Pull requests into either branch get a preview (below) and CI.
+
 - **Previews.** Every pull request gets its own Worker, `baseball-theater-pr-<number>` on workers.dev,
   once `pnpm verify` passes, and the workflow posts its address on the pull request. Previews share
   staging's database (owner, 2026-11-05: "Previews share staging db") through the `bt-staging`
   Hyperdrive config, so a pull request that adds a migration migrates staging before it merges: keep
-  migrations additive, so staging still serves `main` meanwhile. Previews run no cron (they read MLB
+  migrations additive, so staging still serves `stage` meanwhile. Previews run no cron (they read MLB
   on request only). Closing the pull request deletes its Worker.
-- **Staging.** Every push to `main` deploys `stage.baseball.theater` on the Neon `staging` branch.
+- **Staging.** Every push to `stage` deploys `stage.baseball.theater` on the Neon `staging` branch.
   The branch is created schema-only from production the first time (production's tables, none of its
   rows) and filled only by `pnpm db:migrate`, so it never holds a fan's data. Copying production's
   baseball data into it is a separate step the owner runs by hand (S117); no deploy copies data.
-- **Releasing.** After staging, the same run waits on the GitHub environment `production`; once the
-  owner approves it there, it deploys `baseball.theater`. Nothing deploys production without that
-  approval. Rejecting it (or leaving it) keeps production where it is.
+- **Releasing.** The owner merges `stage` into `main`; that push deploys `baseball.theater` once
+  `pnpm verify` passes. Merging the whole branch (`git checkout main && git merge stage && git push`,
+  or a pull request from `stage` into `main`) is the smooth path. Cherry-picking a single commit onto
+  `main` works too, but expect conflicts: every story's commit also touches `docs/v3/AUDIT.md`,
+  `CHANGELOG.md` and the generated backlog files (`docs/v3/BACKLOG.md`, `docs/v3/INDEX.md`,
+  `docs/v3/audit.jsonl`), and a picked commit lands without the ones before it; rebuild the generated
+  files with `pnpm backlog:build` while resolving. Only the owner releases.
 - **Rolling back.** `npx wrangler rollback --env production` (from `functions/`, with
   `--config ../wrangler.jsonc`) returns production to its previous version in seconds; add a version
   id to pick an older one (`npx wrangler deployments list --env production` lists them). A rollback
@@ -154,7 +168,13 @@ and refuses `dev:` sign-in (no `BT_LOCAL`); sign-in works there once Logto lands
 | `NEON_PROJECT_ID`           | variable    | `old-sun-72319473`                                                                                                 |
 | `BT_SESSION_KEY_STAGING`    | secret      | signs sessions on staging and previews                                                                             |
 | `BT_SESSION_KEY_PRODUCTION` | secret      | signs sessions on production                                                                                       |
-| `production`                | environment | the owner as required reviewer                                                                                     |
+| `production`                | environment | no required reviewers; deployment branches limited to `main`, so only `main` reaches production's secrets          |
+
+**GitHub settings the owner sets** (S118; agents never change repo settings):
+
+- Default branch: `stage`, so pull requests, `gh workflow run` and new clones start there.
+- Environment `production`: no required reviewers (a push to `main` deploys without a wait), and
+  deployment branches limited to `main`, so no other branch can deploy production or read its secrets.
 
 ### Launch checklist
 

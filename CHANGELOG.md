@@ -16,6 +16,13 @@ explicitly where that's the case. For what's still ahead, see
 
 ## Baseball Theater can go live
 
+- **Before, every change went straight to the branch that becomes the live site, and releasing meant clicking an
+  approval. Now changes land on a `stage` branch and go live at `stage.baseball.theater` first; the owner puts
+  them on `baseball.theater` simply by merging `stage` into `main`, and nothing reaches the live site any other
+  way.** Details: S118 — `.github/workflows/deploy.yml` deploys staging on a push to `stage` and production on a
+  push to `main` (no longer gated on staging or an approval); `ci.yml` runs on both branches; CLAUDE.md, the
+  run-stories skill, `docs/v3/LOOP.md` and README say agents push only to `stage`. The owner sets the default
+  branch to `stage` and removes the `production` environment's required reviewers in GitHub. _(2026-11-06)_
 - **Before, the app ran only on a developer's machine. Now every proposed change can be tried at its own web
   address before it's merged, every merged change goes live at `stage.baseball.theater` for a final look, and
   the owner releases to `baseball.theater` with one approval (and can roll back in one command). The test sites
