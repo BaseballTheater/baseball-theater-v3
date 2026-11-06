@@ -79,7 +79,9 @@ function standIns(initial: { branches?: NeonBranch[];
 			const branch: NeonBranch = {
 				id: "br-staging",
 				name: body.branch.name,
-				init_source: body.branch.init_source,
+				// Neon takes `schema-only` on create but lists the branch back as `parent-schema`
+				// (seen on the first real staging deploy, 2026-11-06), so the stand-in does too.
+				init_source: body.branch.init_source === "schema-only" ? "parent-schema" : body.branch.init_source,
 				current_state: "init",
 			};
 			branches.push(branch);

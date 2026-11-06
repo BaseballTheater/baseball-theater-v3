@@ -148,6 +148,14 @@ export type NeonBranch = {
 };
 
 /**
+ * The `init_source` values that mean a branch began with production's tables and none of its rows.
+ * Neon takes `schema-only` when a branch is created but lists that same branch back as
+ * `parent-schema` (seen on the first real staging deploy, 2026-11-06), so both count: refusing
+ * `parent-schema` made every staging deploy after the first fail on the branch it had made itself.
+ */
+const SCHEMA_ONLY_SOURCES = new Set(["schema-only", "parent-schema"]);
+
+/**
  * The branch `env` deploys on. Production's is the project's default branch (README: the owner kept
  * it as the production branch). Previews' and staging's is {@link STAGING_BRANCH}, created when
  * missing as a **schema-only** branch of production: production's tables with none of its rows,
@@ -166,7 +174,7 @@ export async function findOrCreateBranch(api: NeonApi, env: DeployEnv): Promise<
 	const staging = branches.find((branch) => branch.name === STAGING_BRANCH);
 	if (staging)
 	{
-		if (staging.id === production.id || (staging.init_source !== undefined && staging.init_source !== "schema-only"))
+		if (staging.id === production.id || (staging.init_source !== undefined && !SCHEMA_ONLY_SOURCES.has(staging.init_source)))
 		{
 			throw new Error(`Neon: the ${STAGING_BRANCH} branch began as a copy of production's data (init_source ${staging.init_source ?? "default"}); staging never holds a fan's data, so delete it and deploy again to recreate it schema-only`);
 		}
