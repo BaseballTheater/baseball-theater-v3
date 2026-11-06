@@ -395,7 +395,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `165–167` Fails
   - `168–170` Open decisions
   - `171–174` Missing
-- [INTENT.md — Baseball Theater v3 — Intent](INTENT.md) — 8 KB
+- [INTENT.md — Baseball Theater v3 — Intent](INTENT.md) — 9 KB
   - `10–22` Pillars
   - `23–36` Document set
   - `37–67` Open decisions (fill as we go)

@@ -15287,3 +15287,45 @@ Fresh-context backlog review, one reviewer, at `a3b095e` on `stage`. Trigger: S1
 **Questions for the owner (block S116):**
 1. Should staging and pull-request previews sign people in through a separate Logto tenant from production's, so their accounts are test accounts that never mix with real fans' (and may staging sign-in be limited to your own addresses)? Or should one tenant serve every environment, which needs ADR-028 to say how deleting an account on production also reaches staging's copy?
 2. Is your holding off merging `stage` into `main` until S116 is done enough to keep production from launching without sign-in, or should the production deploy job refuse to run until Logto is configured?
+
+---
+
+## 2026-11-06 — doc parity review (`blocked`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-06T21:52:12Z` |
+| HEAD at review | `b781f36` (tree dirty) |
+| Trigger | S118 added; S114's Impact changed (pillar-cited) |
+| Stories `done` since last review | S114, S118 |
+| Verdict | `blocked` |
+
+**Findings / amendments**
+
+Fresh-context review at `b781f36`. Scope: S118 (added), S114 (Impact changed, cites a pillar), and the next 3 open stories by priority: S117 (80), S5 (90), S72 (91).
+
+**1. Citation honesty**
+
+- **S118 — Pillar: Dependable, holds.** No FEATURES row covers how releases reach production (FEATURES.md:8: "It does not describe frameworks, repos, or deploy targets"), so a pillar is the right kind of citation. The approval is the owner's in the session that inserted S118 (`7a3fa0f`, quoted in the note: asked "Can the new story cite the Dependable pillar, the same reason S114 uses?" — "Yes"). The note has not been re-scoped since `7a3fa0f` beyond its status flip in `130a5f0`. Its rationale ("a staging branch the owner releases from by hand keeps unreviewed work off the live app") matches the owner's Gap quotes.
+- **S114 — Pillar: Dependable, holds.** The only Gap/Impact/AC change since `051415f` besides `status: done` is the 2026-11-06 backlog review's Impact correction (`34768b6`): previews run against staging's fans-data-free database rather than "a copy of the database" (AC 9, the owner's 2026-11-05 "No user data, copied baseball data"), plus a pointer to S118's no-approval release. Both narrow what reaches fans' data or record a later owner decision; neither changes what S114 is for, so the 2026-11-02 approval ("yes those are good pillars to use") still covers it. Its Source rationale ("release only with the owner's approval") describes S114 as it shipped at `3a908b6` (AC 3, the `production` environment's required approval); S118 carries the change, so the shipped story's Source is left as its historical record.
+- **S117 — Open, next up (priority 80).** Unchanged since the 2026-11-06 parity review (`051415f`) asked the owner whether S114's Dependable approval covers it; still unanswered, so it is carried, not re-asked as new. It is the next `todo` story, hence `blocked`.
+- **S5 — Feature: Highlight search (free-text), holds** (FEATURES.md:61; Gap "Search stub; FEATURES carries highlight search", Impact: searching finds real highlight videos by title or description).
+- **S72 — Feature: Highlight search (date + tag), holds** (FEATURES.md:60; Impact narrows results by date, team or kind of play).
+- **Open stories:** S117 only (`grep -l "Source:\*\* Open" docs/v3/backlog/stories/`).
+
+**2. Doc reflects reality**
+
+- **Amended — INTENT Hosting row (INTENT.md:48)** contradicted S118 and shipped `deploy.yml`: it said "every merge to `main` deploys to staging and production is released behind the owner's approval" (owner, 2026-11-02). Rewritten to the owner's 2026-11-06 decision, quoted from S118's Gap: work lands on `stage`, which deploys `stage.baseball.theater`; the owner releases by merging `stage` (or one commit) into `main`, which deploys production with no separate approval ("we commit to stage, and the stage branch pushes to the stage site. ... main would deploy to production when it gets an update"; "we don't need that approval step. We can just deploy when we merge into main"). The superseded 2026-11-02 wording is kept in the row as history.
+- FEATURES names no deploy target or branch (FEATURES.md:8), so S114/S118 leave nothing in it stale.
+- Noted, not mine to edit: ARCHITECTURE.md:773 (the superseded Firebase-era CI row, "on `main`: deploy to Firebase") and :631/:817 ("multi-env (dev/staging/prod)" / "staging project vs preview channels" still open). ARCHITECTURE is owner/backlog-review territory.
+
+**3. Coverage**
+
+- No FEATURES item was added this review. No new unserved feature found in the scope above.
+
+**For the next backlog review**
+
+- ARCHITECTURE.md:631, :773 and :817 still describe Firebase-era deploys and call staging vs previews "still open", which S114 and S118 have settled; decide whether ADR text needs an owner-ratified amendment or a superseded note.
+
+**Carried question for the owner (asked 2026-11-06, unanswered):** S117 (copy production's baseball data into staging, by hand) was split out of S114, which cites the Dependable pillar with your approval. Does that approval cover S117, or should it cite something else?
