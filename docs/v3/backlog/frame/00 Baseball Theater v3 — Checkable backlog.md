@@ -171,7 +171,13 @@ scripts/audit.sh review --trigger "…" --since "S23, S21, S13" --verdict amende
 
 This section keeps only the *forward-looking* scheduling state: what is due next, and the drift the next review has to weigh.
 
-**Last review:** 2026-11-04 at HEAD `b166679`, verdict **`amended`**. **Trigger: count** — 6 stories done since the last review (S89, S115, S106, S97, S51, S112). Fresh-context subagent; see [AUDIT](./AUDIT.md).
+**Last review:** 2026-11-05 at HEAD `25595b3`, verdict **`amended`**. **Trigger: owner request**, scope limited by the owner to S114 and S116 (owner, 2026-11-05: "Do the backlog review so the stories that need stuff get that stuff, but if possible, limit the scope to that"). Fresh-context subagent; see [AUDIT](./AUDIT.md). It examined no other story. The ledger counts it as a review, so the story count restarts here (1 of 6 since `b166679`: S113); the drift listed under the 2026-11-04 entry below and under **Pending drift** is still the next full review's to weigh.
+
+- **S116 gets a turn cap (20), Goal condition and `/goal` command**; its fence gains `.github/workflows/` (AC 5 runs in the deploy workflow) and `openapi/bt-api.v1.json` (AC 2's sign-in route; `web/` already holds `web/src/api/generated/`). AC 2 corrected: HEAD has no sign-in route, so the story adds one. AC 3 tightened: every `signIn()` asks Logto for a fresh sign-in, so "Sign in again" before deleting sends a new code (ADR-028), and Logto's browser keys go through `web/src/storage/`.
+- **S114 cap 20 → 26** for the owner's 2026-11-05 ACs (1, 5, 8, 9); its fence already covers them. AC 9 tightened to copy only `none` tables, since the deletion log is `retained`, not `personal`.
+- **Asked of the owner:** whether previews offer Logto sign-in (each preview address would be registered with Logto), and whether S114's AC 9 should be its own story.
+
+**Earlier review:** 2026-11-04 at HEAD `b166679`, verdict **`amended`**. **Trigger: count** — 6 stories done since the last review (S89, S115, S106, S97, S51, S112). Fresh-context subagent; see [AUDIT](./AUDIT.md).
 
 - **S114 `blocked` on the owner, ACs 7–8 added, cap 18 → 20.** Which data the staging and preview Neon branches start from (a branch of production copies fans' data into places ADR-028 doesn't list and deletion doesn't reach); AC 7 turns the Worker's `dev:` sign-in off outside local dev (it is wired unconditionally today, so a deployed site would let anyone sign in as anyone); AC 8 sets live MLB, the app origin and the session-key secret per environment. Notes: preview crons, one Hyperdrive config per environment, wrangler env blocks restate bindings.
 - **S113 notes:** AC 2 already holds at HEAD (S51); it means the repositories, not the in-memory export store and mailer the launch checklist replaces; reuse `migratePostgres` / `openPostgres`; `reapplyDeletions` has no command yet.

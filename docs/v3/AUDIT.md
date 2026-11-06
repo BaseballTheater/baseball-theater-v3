@@ -14953,3 +14953,41 @@ Owner, 2026-11-05, asked whether the owner-directed bootstrapping changes (9bded
 **What changed, and the owner's answer**
 
 Owner, 2026-11-05, asked whether the owner-directed bootstrapping changes (9bded5f: migrate on every deploy, all bootstrapping idempotent; 7021372: bootstrapping steps as idempotent constants run on every deploy) need a backlog review: "Skip"
+
+---
+
+## 2026-11-05 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-06T03:17:30Z` |
+| HEAD at review | `25595b3` (tree dirty) |
+| Trigger | owner request: give S114 and S116 what they need to start (scope limited by the owner to S114 and S116) |
+| Stories `done` since last review | S113 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+**Scope limited by the owner to S114 and S116** (owner, 2026-11-05: "Do the backlog review so the stories that need stuff get that stuff, but if possible, limit the scope to that"). No other story was examined or changed; the coverage, prioritization, duplication and personal-data checks ran only over these two stories and the code they touch. INTENT, FEATURES and every `**Source:**` line untouched.
+
+**S116 — Logto sign-in (check 2 at HEAD `25595b3`):**
+- Depends on S114: `todo` (as intended; S116 follows it). Design: none needed (Logto's hosted page; `web/src/layout/AppHeader.tsx:12`).
+- Paths read: `packages/ports/src/auth.ts` (`IdentityProvider.completeSignIn` takes the Logto ID token; `IdentityAdmin` list/disable/delete with the Management API routes AC 4 names — consistent), `functions/src/services/accounts.ts` (`signIn`, `authenticate` with `deps.dev` at :107), `functions/src/adapters/fixtures/auth.ts` (`createDevAuth` always wires `dev`; `DevIdentityAdmin`), `functions/src/worker-app.ts:107-109`, `web/src/session/session.ts`, `web/src/session/SessionProvider.tsx` (`signIn` stores `dev:test-user`; no-op in PROD), `web/src/pages/settings/AccountData.tsx:207`, `functions/src/services/account-deletion.ts:23`, `web/src/storage/storage.ts`, ADR-028 inventory (ARCHITECTURE.md Logto and Browser rows).
+- **Finding (AC 2 wrong at HEAD):** "the existing sign-in route" does not exist. `functions/src/handlers/api.ts`'s route table has no route taking a credential; dev sign-in re-signs in per request via `authenticate`. AC 2 corrected to add a sign-in route in the API route table returning BT's session token. A new route regenerates `openapi/bt-api.v1.json` (`COMMITTED_SPEC`, `functions/src/services/openapi.ts:373`), which was outside the fence: added. `web/` already holds `web/src/api/generated/` (pending-drift rule of 2026-11-02).
+- **Finding (fence):** AC 5 sets redirect/sign-out URIs and pushes the M2M secret "on every deploy" (a workflow check), but `.github/workflows/` was outside the fence: added; the owner's "Agreed on all points" is the go-ahead for those workflow steps only.
+- **Finding (ADR-028, AC 3 tightened):** deletion requires a sign-in under 10 minutes old (`RECENT_SIGN_IN_SECONDS`) and ADR-028 requires "a fresh emailed code through Logto"; "Sign in again" calls the same `Session.signIn()`, which on Logto would come back on Logto's own session with no code. AC 3 now requires `prompt=login` on every sign-in (RTL test).
+- **Finding (personal-data sweep, AC 3 tightened):** Logto's browser SDK writes its own `localStorage`/`sessionStorage` keys, which bypass `web/src/storage/` (ADR-028 Browser row; `bt/no-browser-storage`). AC 3 now requires them labeled personal and cleared on sign-out and deletion, lint rule not disabled. Logto's own row (account, email → `IdentityAdmin.deleteAccount`) already exists in the inventory; AC 4 wires deletion to it.
+- Every AC maps to a check: AC 1 unit tests with a local key and fetch stand-in; AC 2 workerd test; AC 3 grep + RTL; AC 4 fetch-stand-in tests; AC 5 grep, workflow check, fetch-stand-in test run twice, README; AC 6 status.
+- Added turn cap 20, Goal condition and `/goal` (path list equals `scope_files`, "except creating scripts/verify-S116.sh" as S114/S115 do).
+
+**S114 — Cloudflare deploy (check 2 at HEAD `25595b3`):**
+- Depends on S113: `done` (`9746831`). `pnpm db:migrate`, `pnpm db:reapply-deletions` exist (`package.json:15-16`, `functions/src/scripts/`); `wrangler.jsonc` `env.production` pastes Hyperdrive id `db27b03ce9734c3f928241ce8ee855f6` (AC 5 replaces it); README *Production database (Neon)* step 3 says to paste it and the restore runbook runs `db:reapply-deletions` by hand (AC 5 automates both); `BT_USE_LIVE_MLB`, `BT_SESSION_KEY`, `BT_APP_ORIGIN`, `BT_LOCAL` read in `functions/src/worker-app.ts:42-48,73,102-104` (ACs 7-8); workflows today: `ci.yml`, `design-capture.yml`.
+- Fence checked against ACs 1, 5, 8, 9, 10 as edited 2026-11-05: everything they require (workflow, `wrangler.jsonc`, README, a copy command under `functions/src/scripts/` with its PGlite test, a `package.json` script) is inside the existing path list; Goal condition and `/goal` path lists unchanged.
+- **Finding (AC 9 tightened):** `DATA_CLASSIFICATION` has `none`, `personal` and `retained` (the deletion log, `RETAINED_ALLOWED`). "tables ... does not label `personal` are copied" would copy the deletion log, contradicting the same AC's "no ... deletion-log row". Now: only `none` tables; the test also finds the deletion log empty. Matches the owner's "No user data, copied baseball data".
+- **Turn cap 20 → 26** (frontmatter, note, Goal condition, `/goal`): idempotent bootstrapping and Hyperdrive lookup by name replacing S113's pasted id and README steps (AC 5), `bt-staging` created when missing (AC 1), every secret pushed each deploy (AC 8), AC 9's schema-only branch, copy and PGlite test.
+- Notes added: Neon `init_source: "schema-only"` branch for AC 9; S116 extends this story's workflow.
+
+**Questions for the owner (non-blocking):** (1) Should preview deploys offer Logto sign-in, which registers each PR's address with Logto, or should previews have no sign-in? (2) Should S114's AC 9 (the baseball-data copy) become its own story to keep S114 smaller?
+
+Verdict **amended**: S114 and S116 notes edited, `pnpm backlog:build`, `pnpm backlog:check` passes.
