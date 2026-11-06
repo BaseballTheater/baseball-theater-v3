@@ -15021,3 +15021,45 @@ Owner, 2026-11-05. Previews and Logto sign-in: "Yes to Logto", applied in S116 A
 **Answers and what was applied**
 
 Owner, 2026-11-05, clarifying the S117 answer ("local iteration not getting stomped"): "if I make changes to data and schemas that's different from production, it'll need to have data in staging that isn't present in production". Applied as S117 AC 3: additive copy, matching columns only, staging-only rows/tables/columns kept.
+
+---
+
+## 2026-11-06 — doc parity review (`continue`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-06T04:06:02Z` |
+| HEAD at review | `a34c643` (tree clean) |
+| Trigger | S117 added; S114's ACs changed (7021372, 79709f4) and it cites a pillar |
+| Stories `done` since last review | — |
+| Verdict | `continue` |
+
+**Findings / amendments**
+
+Fresh-context doc parity review, one reviewer. Read: INTENT (whole); FEATURES:8, :94, :229, :236–245, :262–264 (deploy scope, Delete your data, sign-in, launch checklist); the S114, S116 and S117 notes; `git log -p 3adde65..HEAD` on S114.md (7021372, 374e0db, 79709f4, 966aad5); the 2026-11-04 parity entry (AUDIT.md:14735) and the 2026-11-05 answers entries (:14787–14926). No product doc changed since 3adde65; the only story-note changes are S114 (ACs 5 and 9, notes, cap) and the new S117.
+
+**1. Citation honesty** (named: S114, S117; next 3 todo by priority: S114 79, S116 80, S117 80)
+
+- **S114 — Pillar: Dependable, approval still covers it.** Since 3adde65: AC 5 makes every bootstrapping step idempotent and run on every deploy (owner, 2026-11-05: "It should be idempotent so it can happen with every deployment. All the bootstrapping should be like that."; 7021372); AC 9 narrows from copying baseball data into staging to only guaranteeing staging is schema-only and never holds fans' data, the copy moving to S117 (owner, 2026-11-05: "Its own story, before production launch, but it should be a manual step (to allow for local iteration not getting stomped)"; 79709f4). Gap unchanged. Neither change adds an aim: idempotent deploys and migrations on every deploy are the same "keep the live app trustworthy" the 2026-11-02 approval ("yes those are good pillars to use") covered, and AC 9 only removed work. No feature applies (FEATURES:8: it "does not describe … deploy targets"). Holds.
+- **S116 — Feature: Modern membership.** FEATURES:229 describes Logto email one-time-code sign-in, no passkeys at launch; S116's Gap and Impact build exactly that. Unchanged since the last review. Holds.
+- **S117 — Open.** Its line asks whether S114's Dependable approval covers it. It does not by itself: the 2026-11-02 approval named S112, S113 and S114, and S117 has a different aim (staging data that looks like production's, for the owner's own iteration and final look), so rule 19 needs the owner's answer. No FEATURES row fits (deploy targets and environments are out of FEATURES' scope, FEATURES:8). Asked below. Not blocking now: S117 depends on S114 (todo), so it can't start before the owner answers; S114 is next and doesn't depend on this answer.
+- **Open questions:** S117 is the only story whose Source is `Open:` (grep of `docs/v3/backlog/stories/`).
+
+**2. Doc reflects reality**
+
+- INTENT's Hosting / runtime row (INTENT:48) still matches S114: `baseball.theater`, first `stage.baseball.theater`, every merge to staging, production behind approval. The schema-only staging and the manual copy are deploy mechanics, below the level INTENT records; no edit.
+- FEATURES Delete your data (FEATURES:94, :245): S114 AC 9 (staging never a plain branch of production) and S117 AC 1 (copies only `none` tables, never `personal` or `retained`) keep fans' data out of a place ADR-028's inventory doesn't list. Consistent; no edit.
+- FEATURES' build checklist (FEATURES:262–264) leaves Logto sign-in, the Cloudflare + Neon cost shape and Download/delete unticked: correct, S114/S116 and the launch items are not done.
+- No contradiction found with VISUAL-DESIGN or ARCHITECTURE in what these stories touch.
+
+**Edits:** none.
+
+**Question for the owner (does not block S114):**
+1. S117 (copy production's baseball data into staging by hand, no fans' data): may its Source cite Pillar: Dependable, as S114 does, or another pillar (e.g. Delightful, for the developer experience of a realistic staging), or is there a feature in mind?
+
+**3. For the next backlog review**
+
+- S114's Impact still says "every change can be previewed at its own address against a copy of the database"; after 79709f4 staging is schema-only and starts empty until S117's copy runs (AC 9). Story text, outside parity scope.
+- S116 lets people sign in on previews and staging (S116 AC 5, owner: "Yes to Logto"), which writes account and settings rows into the staging database; S114 AC 9 says "The staging branch never holds a fan's data". Check whether AC 9 means production fans' data only, and whether account deletion and ADR-028's inventory need to say anything about staging-only test accounts.
+- No features added this review. FEATURES items still unserved by any startable story, unchanged from the last review: Standings (S4 blocked), Update / changelist UX (S28, S73 blocked), Savant deep links, Multi-source knowledge, AI game companion, Inning / game insight pipeline, Whole-game record.
