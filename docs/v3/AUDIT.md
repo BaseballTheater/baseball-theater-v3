@@ -15006,3 +15006,18 @@ Verdict **amended**: S114 and S116 notes edited, `pnpm backlog:build`, `pnpm bac
 **Answers and what was applied**
 
 Owner, 2026-11-05. Previews and Logto sign-in: "Yes to Logto", applied in S116 AC 5 with cleanup on PR close. Split the baseball-data copy out of S114: "Its own story, before production launch, but it should be a manual step (to allow for local iteration not getting stomped)", now S117, with S114 AC 9 narrowed to the no-fans-data guarantee.
+
+---
+
+## 2026-11-05 — backlog review answers (2026-11-05)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-05 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-06T04:01:22Z` |
+| HEAD at capture | `966aad5` (tree clean) |
+| Applied in | `966aad5` — S117: the copy only adds to staging, which can run ahead of production in schema and data |
+
+**Answers and what was applied**
+
+Owner, 2026-11-05, clarifying the S117 answer ("local iteration not getting stomped"): "if I make changes to data and schemas that's different from production, it'll need to have data in staging that isn't present in production". Applied as S117 AC 3: additive copy, matching columns only, staging-only rows/tables/columns kept.
