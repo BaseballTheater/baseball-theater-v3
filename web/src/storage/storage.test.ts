@@ -8,6 +8,7 @@ import {
 afterEach(() =>
 {
 	localStorage.clear();
+	sessionStorage.clear();
 	vi.restoreAllMocks();
 });
 
@@ -47,5 +48,28 @@ describe("browser storage", () =>
 		});
 		expect(readStored("bt.session")).toBeNull();
 		expect(() => writeStored("bt.session", "token-1")).not.toThrow();
+	});
+
+	it("S120 AC 5: the in-flight sign-in and its return path are the tab's own, and clearPersonalData clears both areas", () =>
+	{
+		for (const key of ["bt.signInReturnTo", "logto.signInSession", "logto.idToken", "logto.accessToken", "logto.refreshToken"] as const)
+		{
+			expect(STORAGE_KEYS[key]).toEqual({
+				personal: true,
+				area: "tab",
+			});
+		}
+		writeStored("logto.signInSession", "pkce-of-this-tab");
+		writeStored("bt.signInReturnTo", "/settings");
+		writeStored("bt.session", "token-1");
+		// Another tab's storage area is a different sessionStorage; the shared one never holds the sign-in.
+		expect(sessionStorage.getItem("logto.signInSession")).toBe("pkce-of-this-tab");
+		expect(sessionStorage.getItem("bt.signInReturnTo")).toBe("/settings");
+		expect(Object.keys(localStorage)).toEqual(["bt.session"]);
+		expect(readStored("logto.signInSession")).toBe("pkce-of-this-tab");
+
+		clearPersonalData();
+		expect(Object.keys(localStorage)).toEqual([]);
+		expect(Object.keys(sessionStorage)).toEqual([]);
 	});
 });

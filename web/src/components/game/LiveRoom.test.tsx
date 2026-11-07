@@ -423,7 +423,7 @@ describe("one status row (S109):", () =>
 			hideScores: true,
 			version: 1,
 		}))));
-		await hydrateSettings();
+		await hydrateSettings("test-user");
 		for (const variant of ["mobile", "medium"] as const)
 		{
 			const panel = await panelFor(variant, fixture());

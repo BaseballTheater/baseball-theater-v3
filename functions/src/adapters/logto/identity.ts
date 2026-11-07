@@ -7,11 +7,20 @@
  * an EC key (ES384 by default) and can be set to RSA, so both families verify.
  *
  * The keys are fetched once per isolate and fetched again when a token names a key id the cached
- * set doesn't hold, which is how a tenant's key rotation reaches a running Worker.
+ * set doesn't hold, which is how a tenant's key rotation reaches a running Worker. That refetch
+ * happens before any signature is checked, so anyone could otherwise make the Worker call Logto
+ * once per request: it runs at most once per {@link JWKS_REFETCH_COOLDOWN_MS} per isolate, an
+ * unknown key id inside the cooldown is refused without a fetch, and concurrent sign-ins share one
+ * in-flight fetch (S120).
+ *
+ * The token's `auth_time` (when Logto last made the user sign in; the web app asks with
+ * `max_age=0`, so OIDC requires it) becomes `authTime`, which account deletion's recent-sign-in
+ * check reads (S120).
  */
 // Types only (erased at build): the Web Crypto shapes, which Workers and Node share; the repo builds without the DOM lib.
 import type { webcrypto } from "node:crypto";
 import type { IdentityClaims, IdentityProvider } from "@bt/ports";
+import { CredentialRefusedError } from "../../services/accounts.js";
 
 type Fetch = (input: string, init?: RequestInit) => Promise<Response>;
 
@@ -28,8 +37,8 @@ export type LogtoSignInConfig = {
 /** One key of a JSON Web Key Set, as `<endpoint>/oidc/jwks` lists it. */
 type Jwk = webcrypto.JsonWebKey & { kid?: string };
 
-/** Why an ID token was refused; the sign-in route answers it as a refused sign-in. */
-export class IdTokenError extends Error
+/** Why an ID token was refused; the sign-in route answers it as a refused sign-in (401), unlike a failure to reach the tenant (503). */
+export class IdTokenError extends CredentialRefusedError
 {
 	constructor(reason: string)
 	{
@@ -103,6 +112,13 @@ const ALGORITHMS: Record<string, { import: webcrypto.EcKeyImportParams | webcryp
 /** A little clock slack for `exp`, so a token checked a moment after it was minted elsewhere isn't refused for drift. */
 const CLOCK_SKEW_SECONDS = 60;
 
+/**
+ * How long after a JWKS fetch a token naming an unknown key id is refused rather than refetched
+ * (S120). A minute bounds an isolate to one unprompted Logto call a minute, while a real key
+ * rotation reaches it within a minute of the first token signed with the new key.
+ */
+export const JWKS_REFETCH_COOLDOWN_MS = 60 * 1000;
+
 function base64UrlBytes(part: string): Uint8Array<ArrayBuffer>
 {
 	const base64 = part.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(part.length / 4) * 4, "=");
@@ -112,9 +128,30 @@ function base64UrlBytes(part: string): Uint8Array<ArrayBuffer>
 	return bytes;
 }
 
+/** A token part's bytes; a part that isn't base64url is the token's fault (401), never a 503. */
+function tokenBytes(part: string): Uint8Array<ArrayBuffer>
+{
+	try
+	{
+		return base64UrlBytes(part);
+	}
+	catch
+	{
+		throw new IdTokenError("a part is not base64url");
+	}
+}
+
 function base64UrlJson(part: string): Record<string, unknown>
 {
-	const value = JSON.parse(new TextDecoder().decode(base64UrlBytes(part))) as unknown;
+	let value: unknown;
+	try
+	{
+		value = JSON.parse(new TextDecoder().decode(tokenBytes(part))) as unknown;
+	}
+	catch
+	{
+		throw new IdTokenError("a part is not JSON");
+	}
 	if (value === null || typeof value !== "object") throw new IdTokenError("a part is not a JSON object");
 	return value as Record<string, unknown>;
 }
@@ -128,6 +165,10 @@ function trimEndpoint(endpoint: string): string
 export class LogtoIdentityProvider implements IdentityProvider
 {
 	private keys: Jwk[] | undefined;
+	/** When the cached keys were fetched (ms), for the refetch cooldown. */
+	private keysFetchedAt = 0;
+	/** The JWKS fetch under way, shared by every sign-in waiting on it. */
+	private inFlight: Promise<Jwk[]> | undefined;
 	private readonly endpoint: string;
 
 	constructor(private readonly config: LogtoSignInConfig)
@@ -150,9 +191,20 @@ export class LogtoIdentityProvider implements IdentityProvider
 		const alg = typeof header.alg === "string" ? ALGORITHMS[header.alg] : undefined;
 		if (!alg) throw new IdTokenError(`unsupported alg ${String(header.alg)}`);
 		const key = await this.keyFor(typeof header.kid === "string" ? header.kid : undefined);
-		const cryptoKey = await crypto.subtle.importKey("jwk", key, alg.import, false, ["verify"]);
 		const signed = new TextEncoder().encode(`${headerPart}.${payloadPart}`);
-		if (!await crypto.subtle.verify(alg.verify, cryptoKey, base64UrlBytes(signaturePart), signed)) throw new IdTokenError("bad signature");
+		let verified: boolean;
+		try
+		{
+			// A key that doesn't fit the `alg` the token claims is the token's fault, as a bad signature is.
+			const cryptoKey = await crypto.subtle.importKey("jwk", key, alg.import, false, ["verify"]);
+			verified = await crypto.subtle.verify(alg.verify, cryptoKey, tokenBytes(signaturePart), signed);
+		}
+		catch (error)
+		{
+			if (error instanceof IdTokenError) throw error;
+			throw new IdTokenError(`the key doesn't verify ${String(header.alg)}`);
+		}
+		if (!verified) throw new IdTokenError("bad signature");
 
 		const claims = base64UrlJson(payloadPart);
 		if (claims.iss !== this.issuer) throw new IdTokenError(`issuer ${String(claims.iss)} is not ${this.issuer}`);
@@ -168,28 +220,53 @@ export class LogtoIdentityProvider implements IdentityProvider
 			subject: claims.sub,
 			email: claims.email,
 			emailVerified: claims.email_verified === true,
+			// Signed by Logto, so a re-traded token keeps its original sign-in time (S120).
+			...typeof claims.auth_time === "number" && {
+				authTime: claims.auth_time,
+			},
 		};
 	}
 
-	/** The key `kid` names (or the only key when the token names none), refetching the set once when it's unknown. */
+	/**
+	 * The key `kid` names (or the only key when the token names none). When the cached set doesn't
+	 * hold it, the set is fetched again, unless the last fetch was inside the cooldown (S120).
+	 */
 	private async keyFor(kid: string | undefined): Promise<Jwk>
 	{
 		const pick = (keys: Jwk[]) => (kid === undefined ? (keys.length === 1 ? keys[0] : undefined) : keys.find((key) => key.kid === kid));
 		let key = this.keys ? pick(this.keys) : undefined;
-		if (!key)
+		if (!key && (!this.keys || this.nowMs() - this.keysFetchedAt >= JWKS_REFETCH_COOLDOWN_MS || this.inFlight))
 		{
-			this.keys = await this.fetchKeys();
-			key = pick(this.keys);
+			key = pick(await this.fetchKeys());
 		}
 		if (!key) throw new IdTokenError(`no published key ${kid ?? ""}`.trim());
 		return key;
 	}
 
-	private async fetchKeys(): Promise<Jwk[]>
+	private nowMs(): number
 	{
-		const response = await (this.config.fetch ?? fetch)(`${this.endpoint}/oidc/jwks`);
-		if (!response.ok) throw new Error(`Logto JWKS: ${response.status}`);
-		const body = await response.json() as { keys?: Jwk[] };
-		return body.keys ?? [];
+		return (this.config.now?.() ?? new Date()).getTime();
+	}
+
+	/** One fetch of the set at a time: a sign-in that arrives while one is under way waits for it. A failed fetch isn't cached. */
+	private fetchKeys(): Promise<Jwk[]>
+	{
+		if (this.inFlight) return this.inFlight;
+		const fetching = (async () =>
+		{
+			const response = await (this.config.fetch ?? fetch)(`${this.endpoint}/oidc/jwks`);
+			if (!response.ok) throw new Error(`Logto JWKS: ${response.status}`);
+			const body = await response.json() as { keys?: Jwk[] };
+			this.keys = body.keys ?? [];
+			this.keysFetchedAt = this.nowMs();
+			return this.keys;
+		})();
+		this.inFlight = fetching;
+		// Settled either way, the next unknown key id may fetch again (after the cooldown, if this one succeeded).
+		void fetching.then(() => undefined, () => undefined).finally(() =>
+		{
+			if (this.inFlight === fetching) this.inFlight = undefined;
+		});
+		return fetching;
 	}
 }

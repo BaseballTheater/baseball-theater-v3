@@ -10,7 +10,8 @@
  *   `email_verified`, which BT's sign-in needs (every account has an email, S82).
  * - **A fresh sign-in every time** (`prompt=login`). Without it, Logto would answer a second
  *   sign-in from its own session cookie with no new emailed code, and Settings' "Sign in again"
- *   before deleting an account must prove a recent sign-in with one (ADR-028).
+ *   before deleting an account must prove a recent sign-in with one (ADR-028). With it goes
+ *   `max_age=0`, so the ID token carries `auth_time`, the sign-in time BT's deletion checks (S120).
  * - **BT's storage.** The SDK's keys go through `web/src/storage/` (labeled personal in
  *   `STORAGE_KEYS`) rather than its own `localStorage`/`sessionStorage` keys, so sign-out and
  *   account deletion clear them with everything else (ADR-028). The ID token is forgotten as soon
@@ -87,6 +88,16 @@ export type LogtoSdkFactory = (config: LogtoConfig, storage: LogtoStorage) => Lo
 export type LogtoTarget = { endpoint: string;
 	appId: string; };
 
+/**
+ * Asked of Logto with every sign-in: `max_age=0` (S120). OIDC Core says an ID token answering a
+ * request with `max_age` MUST include `auth_time`, when the user last signed in, which BT's account
+ * deletion checks; `0` asks for a fresh sign-in, as `prompt=login` already does, so the fan sees
+ * the same emailed code.
+ */
+export const SIGN_IN_EXTRA_PARAMS = {
+	max_age: "0",
+} as const satisfies Record<string, string>;
+
 /** The SDK's config: the tenant, the app, and the `email` scope. */
 export function logtoConfig(target: LogtoTarget): LogtoConfig
 {
@@ -117,6 +128,8 @@ export function createAuthClient(target: LogtoTarget, origin: string, makeSdk: L
 				redirectUri: `${origin}${SIGN_IN_CALLBACK_PATH}`,
 				// Always a fresh emailed code, never Logto's remembered session (ADR-028's recent sign-in).
 				prompt: Prompt.Login,
+				// `max_age` makes OIDC put `auth_time` in the ID token; BT's deletion reads that, not when it issued its own session (S120).
+				extraParams: SIGN_IN_EXTRA_PARAMS,
 			});
 		},
 		async finishSignIn(callbackUrl)

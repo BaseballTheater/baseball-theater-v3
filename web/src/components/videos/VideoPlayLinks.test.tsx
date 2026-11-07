@@ -57,7 +57,7 @@ async function hideScores(on: boolean): Promise<void>
 		hideScores: on,
 		version: 1,
 	}))));
-	await hydrateSettings();
+	await hydrateSettings("test-user");
 }
 
 /** Renders the game page at `path` and resolves once `ready` (a test id, or the Plays room's inning sidebar) shows. */

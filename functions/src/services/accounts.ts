@@ -45,8 +45,23 @@ export type SignedIn = {
 /** The prefix of a local/CI bearer token that signs in as the named uid (ADR-013 local auth). */
 export const DEV_TOKEN_PREFIX = "dev:";
 
+/**
+ * A sign-in refused because of the credential itself (it doesn't verify, is malformed, or vouches
+ * for no email): the caller's to fix by signing in again, so the sign-in route answers 401. Any
+ * other error during a sign-in (the provider's keys can't be fetched, the database or the session
+ * key fails) is BT's, and the route answers 503 (S120). Provider adapters throw subclasses.
+ */
+export class CredentialRefusedError extends Error
+{
+	constructor(message: string)
+	{
+		super(message);
+		this.name = "CredentialRefusedError";
+	}
+}
+
 /** A sign-in BT refuses because the provider vouched for no email address (S82). */
-export class NoEmailError extends Error
+export class NoEmailError extends CredentialRefusedError
 {
 	constructor(provider: string)
 	{
@@ -57,7 +72,8 @@ export class NoEmailError extends Error
 
 /**
  * Finds or creates the BT user for a provider account and issues their
- * session. `newUid` names a first-time user; it defaults to a random UUID, and
+ * session, carrying the provider's sign-in time (`claims.authTime`) for
+ * deletion's recent-sign-in check (S120). `newUid` names a first-time user; it defaults to a random UUID, and
  * the dev provider passes the subject so `dev:test-user` is uid `test-user`.
  *
  * A sign-in with no email is refused before anything is read or written: every
@@ -90,10 +106,14 @@ export async function signIn(
 		await deps.users.upsert(user);
 		await deps.users.linkIdentity(claims.provider, claims.subject, uid);
 	}
+	// The provider's own sign-in time rides in the session for deletion's recent-sign-in check (S120).
 	const token = await deps.sessions.issue({
 		uid: user.uid,
 		role: user.role,
 		entitlements: user.entitlements,
+		...claims.authTime !== undefined && {
+			authTime: claims.authTime,
+		},
 	});
 	const session = await deps.sessions.verify(token);
 	if (!session) throw new Error("a freshly issued session failed to verify");
@@ -106,9 +126,11 @@ export async function signIn(
 /**
  * A sign-in hand-off (S116 AC 2): the provider checks `credential` (Logto's ID token) and BT
  * finds or creates the user and issues its own session, through the same {@link signIn} the dev
- * provider uses. Null when this deployment offers no provider sign-in; throws when the
- * credential doesn't verify or carries no email. A `dev:` token never signs in here: it isn't
- * a Logto ID token.
+ * provider uses. Null when this deployment offers no provider sign-in; throws a
+ * {@link CredentialRefusedError} when the credential doesn't verify or carries no email, and
+ * anything else when BT itself fails. A `dev:` token never signs in here: it isn't a Logto ID
+ * token. Trading the same ID token again issues a new session but keeps the token's `auth_time`,
+ * so it never makes a sign-in look recent (S120).
  */
 export async function completeProviderSignIn(deps: AuthDeps, credential: string): Promise<SignedIn | null>
 {

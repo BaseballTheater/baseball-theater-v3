@@ -351,6 +351,14 @@ export type BtSession = {
 	entitlements: Entitlements;
 	issuedAt: number;
 	expiresAt: number;
+	/**
+	 * When the identity provider last made the user sign in, as the provider signed it
+	 * (`IdentityClaims.authTime`, S120). Account deletion's recent-sign-in check reads this, not
+	 * `issuedAt`: a still-valid provider token can be traded for a new session without a new
+	 * sign-in. Absent on sessions issued before S120 or from a provider that didn't say, which
+	 * deletion treats as not recent.
+	 */
+	authTime?: number;
 };
 
 /**

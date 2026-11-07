@@ -18,6 +18,14 @@ export interface IdentityClaims
 	email: string;
 	/** Whether the provider confirmed the user controls `email`; relinking by email (ADR-019) trusts only verified addresses. */
 	emailVerified: boolean;
+	/**
+	 * When the provider last made the user prove who they are (Unix seconds), as it signed it:
+	 * Logto's ID-token `auth_time`; the dev provider's own sign-in time. Absent when the provider
+	 * didn't say. Account deletion's recent-sign-in check reads this, never when BT issued its
+	 * session, because the same provider credential can be traded for a new BT session without
+	 * a new sign-in (S120).
+	 */
+	authTime?: number;
 }
 
 /**

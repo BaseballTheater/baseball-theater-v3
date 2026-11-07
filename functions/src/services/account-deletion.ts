@@ -52,13 +52,25 @@ function nowSeconds(deps: AccountDataDeps): number
 }
 
 /**
+ * Whether the session's sign-in is recent enough to delete: the identity provider's own sign-in
+ * time (`authTime`, as the provider signed it) is within {@link RECENT_SIGN_IN_SECONDS}. Not when
+ * BT issued the session: a still-valid Logto ID token can be traded for a fresh session with no
+ * new emailed code (S120). A session without `authTime` (issued before S120, or a provider that
+ * didn't say) is never recent.
+ */
+function signedInRecently(deps: AccountDataDeps, session: BtSession): boolean
+{
+	return session.authTime !== undefined && nowSeconds(deps) - session.authTime <= RECENT_SIGN_IN_SECONDS;
+}
+
+/**
  * Deletes everything of `session.uid`'s, or says why not. Checks, in order: the
  * sign-in is recent, the phrase is exact. Throws when a store or provider
  * fails, so the same request can be retried.
  */
 export async function deleteAccount(deps: AccountDataDeps, session: BtSession, request: MeDeleteRequest): Promise<DeletionRefusal | null>
 {
-	if (nowSeconds(deps) - session.issuedAt > RECENT_SIGN_IN_SECONDS) return {
+	if (!signedInRecently(deps, session)) return {
 		status: 403,
 		error: "reauth_required",
 	};

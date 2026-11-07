@@ -1326,7 +1326,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponse"];
                 };
             };
-            /** @description `sign_in_refused`: the ID token doesn't verify, has expired, is for another app or tenant, or carries no email. */
+            /** @description `sign_in_refused`: the ID token doesn't verify, is malformed, has expired, is for another app or tenant, or carries no email. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1346,6 +1346,15 @@ export interface operations {
             };
             /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
             426: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description `sign_in_failed`: BT couldn't finish the sign-in for a reason of its own (the tenant's keys couldn't be fetched, or its database or session key failed); the token wasn't refused, so trying again later may succeed. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

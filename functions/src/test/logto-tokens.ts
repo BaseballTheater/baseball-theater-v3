@@ -9,7 +9,7 @@ export const TEST_LOGTO_ENDPOINT = "https://auth.bt.test";
 export const TEST_LOGTO_APP_ID = "test-spa-app";
 
 export type TestTenant = {
-	/** Signs `claims` over the default ID-token claims (issuer, audience, subject, email, a future expiry). */
+	/** Signs `claims` over the default ID-token claims (issuer, audience, subject, email, a sign-in time of now, a future expiry). */
 	sign(claims?: Record<string, unknown>, header?: Record<string, unknown>): Promise<string>;
 	/** Serves `<endpoint>/oidc/jwks` with the tenant's public key; any other URL is a 404. */
 	fetch(input: string): Promise<Response>;
@@ -56,6 +56,8 @@ export async function createTestTenant(endpoint = TEST_LOGTO_ENDPOINT, appId = T
 				email: "fan@example.test",
 				email_verified: true,
 				iat: now,
+				// The web app asks with `max_age=0`, so Logto includes when the user signed in (S120).
+				auth_time: now,
 				exp: now + 3600,
 				...claims,
 			}));

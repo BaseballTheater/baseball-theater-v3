@@ -80,7 +80,7 @@ async function opensFirst(room: OpensFirst): Promise<void>
 		opensFirst: room,
 		version: 1,
 	}))));
-	await hydrateSettings();
+	await hydrateSettings("test-user");
 }
 
 describe("GamePage Opens First (S6)", () =>

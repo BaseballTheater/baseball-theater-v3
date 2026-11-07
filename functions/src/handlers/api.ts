@@ -8,7 +8,9 @@ import {
 import type { AccountDataDeps } from "../services/account-deletion.js";
 import { deleteAccount } from "../services/account-deletion.js";
 import type { AuthDeps } from "../services/accounts.js";
-import { authenticateAccount, completeProviderSignIn } from "../services/accounts.js";
+import {
+	authenticateAccount, completeProviderSignIn, CredentialRefusedError,
+} from "../services/accounts.js";
 import {
 	clearDeletedCookie, hasDeletedCookie, setDeletedCookie,
 } from "../services/cookies.js";
@@ -362,11 +364,18 @@ export const API_ROUTER: readonly RouteEntry[] = [
 			{
 				signedIn = await completeProviderSignIn(ctx.auth, idToken);
 			}
-			catch
+			catch (error)
 			{
 				// A token that doesn't verify (or carries no email) is the caller's to fix by signing in again; nothing is logged.
-				return sendError(401, {
+				if (error instanceof CredentialRefusedError) return sendError(401, {
 					error: "sign_in_refused",
+				});
+				// Anything else is BT's (the tenant's keys can't be fetched, the database or the session key failed):
+				// not the fan's sign-in being refused (S120). Logged by the error's name only: a message can carry an
+				// account's subject (`linkIdentity`), which deletion couldn't follow into the logs (ADR-028).
+				console.error("sign-in failed:", error instanceof Error ? error.name : typeof error);
+				return sendError(503, {
+					error: "sign_in_failed",
 				});
 			}
 			return signedIn ? sendJson(200, "POST /api/v1/sign-in", {

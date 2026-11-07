@@ -222,7 +222,7 @@ Worker (`GET /api/v1/sign-in`), which reads them from that env's `vars` in `wran
 **What stays manual, in Logto's console** (the owner's, once):
 
 1. Production's tenant with the custom domain `auth.baseball.theater` (done), and in it a
-   **single-page** app (done: `b2f2q1wau5axo1psqexdo`, in `env.production`). Leave its redirect and
+   **single-page** app (done: `1b1sc2uclfqak0swrahef`, in `env.production`). Leave its redirect and
    sign-out URIs to the deploy.
 2. Email sign-in with a one-time code: an email connector (Logto Cloud's built-in one will do) and
    the verification-code email's wording and branding. The deploy turns on email-with-code sign-up and

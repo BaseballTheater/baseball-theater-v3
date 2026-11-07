@@ -27,8 +27,8 @@ function user(uid: string): UserProfile
 	};
 }
 
-/** A session issued just now, so the recent-sign-in check passes. */
-function sessionOf(uid: string): BtSession
+/** A session issued just now from a sign-in just now, so the recent-sign-in check passes unless `authTime` says otherwise (null: none). */
+function sessionOf(uid: string, authTime: number | null = Math.floor(Date.now() / 1000)): BtSession
 {
 	const issuedAt = Math.floor(Date.now() / 1000);
 	return {
@@ -37,6 +37,9 @@ function sessionOf(uid: string): BtSession
 		entitlements: entitlementsForTier("none"),
 		issuedAt,
 		expiresAt: issuedAt + 3600,
+		...authTime !== null && {
+			authTime,
+		},
 	};
 }
 
@@ -59,6 +62,29 @@ async function seeded()
 
 describe("deleteAccount", () =>
 {
+	it("S120 AC 1: the recent sign-in is the provider's authTime, not when BT issued the session", async () =>
+	{
+		const { users, deps } = await seeded();
+		const now = Math.floor(Date.now() / 1000);
+		const request = {
+			phrase: ACCOUNT_DELETION_PHRASE,
+		};
+		// Issued just now, but from a sign-in 11 minutes ago (a re-traded ID token): refused.
+		expect(await deleteAccount(deps, sessionOf("fan-1", now - 11 * 60), request)).toEqual({
+			status: 403,
+			error: "reauth_required",
+		});
+		// No authTime at all (a session from before S120): refused.
+		expect(await deleteAccount(deps, sessionOf("fan-1", null), request)).toEqual({
+			status: 403,
+			error: "reauth_required",
+		});
+		expect(await users.getByUid("fan-1")).not.toBeNull();
+		// A sign-in 9 minutes ago is recent.
+		expect(await deleteAccount(deps, sessionOf("fan-1", now - 9 * 60), request)).toBeNull();
+		expect(await users.getByUid("fan-1")).toBeNull();
+	});
+
 	it("a retry finishes a deletion that failed when a store threw once, with the same session", async () =>
 	{
 		const { users, deps } = await seeded();

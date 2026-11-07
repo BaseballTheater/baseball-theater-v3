@@ -246,10 +246,10 @@ describe("SessionProvider with Logto (S116)", () =>
 		const { result } = renderSession(createQueryClient(), loader);
 
 		await act(() => result.current.signIn());
-		expect(sdk().signIn).toHaveBeenCalledWith({
+		expect(sdk().signIn).toHaveBeenCalledWith(expect.objectContaining({
 			redirectUri: `${location.origin}/sign-in/callback`,
 			prompt: "login",
-		});
+		}));
 		// Nothing signed in yet: the browser would now be at Logto.
 		expect(result.current.status).toBe("signedOut");
 
@@ -292,5 +292,82 @@ describe("SessionProvider with Logto (S116)", () =>
 		expect(result.current.status).toBe("signedOut");
 		expect(getSessionToken()).toBeNull();
 		await expect(renderSession(createQueryClient(), async () => null).result.current.finishSignIn("x")).rejects.toThrow(/no Logto/);
+	});
+
+	it("S120 AC 5: the in-flight sign-in and its return path are kept in this tab's sessionStorage, never the shared localStorage", async () =>
+	{
+		stubSignInApi();
+		const { loader } = logto();
+		window.history.replaceState(null, "", "/standings");
+		const { result } = renderSession(createQueryClient(), loader);
+		await act(() => result.current.signIn());
+		expect(sessionStorage.getItem("bt.signInReturnTo")).toBe("/standings");
+		expect(sessionStorage.getItem("logto.signInSession")).toBe("pkce-state");
+		// Another tab starting its own sign-in has its own sessionStorage; nothing here is shared with it.
+		expect(Object.keys(localStorage)).toEqual([]);
+
+		let returnTo = "";
+		await act(async () =>
+		{
+			returnTo = await result.current.finishSignIn(`${location.origin}/sign-in/callback?code=c5&state=s5`);
+		});
+		expect(returnTo).toBe("/standings");
+		expect(sessionStorage.getItem("bt.signInReturnTo")).toBeNull();
+		// Only BT's own session is shared between tabs.
+		expect(Object.keys(localStorage)).toEqual(["bt.session"]);
+	});
+
+	it("S120 AC 6: on the callback, the startup load for the old token can't undo the new sign-in, however late it answers", async () =>
+	{
+		for (const late of ["401", "old account", "network error"] as const)
+		{
+			const signInApi = stubSignInApi();
+			let answerOld: (() => void) | undefined;
+			vi.stubGlobal("fetch", vi.fn(async (request: Request): Promise<Response> =>
+			{
+				if (new URL(request.url).pathname !== "/api/v1/me" || request.headers.get("Authorization") !== "Bearer bt-old") return signInApi(request);
+				// The old token's /me answers only when the test says so, after the hand-off.
+				return new Promise<Response>((resolve, reject) =>
+				{
+					answerOld = () =>
+					{
+						if (late === "network error") reject(new TypeError("offline"));
+						else resolve(late === "401" ? jsonResponse({
+							error: "unauthorized",
+						}, 401) : jsonResponse({
+							uid: "old-user",
+							email: "old@example.test",
+							role: "member",
+							entitlements: {},
+						}));
+					};
+				});
+			}));
+			setSessionToken("bt-old");
+			window.history.replaceState(null, "", "/sign-in/callback?code=c6&state=s6");
+			const client = {
+				signIn: vi.fn(async () => undefined),
+				finishSignIn: vi.fn(async () => "logto-id-token"),
+				signOut: vi.fn(async () => undefined),
+			};
+			const { result, unmount } = renderSession(createQueryClient(), async () => client);
+			await waitFor(() => expect(answerOld).toBeDefined());
+
+			await act(async () =>
+			{
+				await result.current.finishSignIn(`${location.origin}/sign-in/callback?code=c6&state=s6&late=${late}`);
+			});
+			expect(result.current.status === "signedIn" && result.current.account.uid).toBe("u1");
+
+			await act(async () =>
+			{
+				answerOld!();
+				await new Promise((resolve) => setTimeout(resolve, 10));
+			});
+			expect(getSessionToken(), late).toBe("bt-session-1");
+			expect(result.current.status === "signedIn" && result.current.account.uid, late).toBe("u1");
+			unmount();
+			setSessionToken(null);
+		}
 	});
 });

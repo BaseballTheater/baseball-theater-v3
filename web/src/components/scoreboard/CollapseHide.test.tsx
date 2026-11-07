@@ -98,7 +98,7 @@ async function renderScoreboard(settings: Partial<AccountSettings>, variant: Lay
 		...settings,
 		version: 1,
 	});
-	await hydrateSettings();
+	await hydrateSettings("test-user");
 	render(
 		<MantineProvider>
 			<QueryClientProvider client={createQueryClient()}>

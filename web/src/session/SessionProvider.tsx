@@ -31,26 +31,34 @@ import { getSessionToken, setSessionToken } from "./token.js";
  * Reads the account for the stored token. A 401 drops the token. If the server
  * can't be reached, this load counts as signed out but the token is kept, so
  * the next load can try again.
+ *
+ * Null when the stored token changed while the load was under way (S120): its
+ * answer is about a token that is no longer the session's, so it neither sets
+ * the state nor, on a 401, clears the newer token. On the sign-in callback the
+ * startup load runs with the old token and can finish after the hand-off has
+ * stored the new one.
  */
-async function loadSession(): Promise<SessionState>
+async function loadSession(): Promise<SessionState | null>
 {
+	const token = getSessionToken();
+	let next: SessionState = SIGNED_OUT;
+	let refused = false;
 	try
 	{
 		const account = await fetchMe();
-		if (!account)
-		{
-			setSessionToken(null);
-			return SIGNED_OUT;
-		}
-		return {
+		if (account) next = {
 			status: "signedIn",
 			account,
 		};
+		else refused = true;
 	}
 	catch
 	{
-		return SIGNED_OUT;
+		// Unreachable: signed out for now, the token kept.
 	}
+	if (getSessionToken() !== token) return null;
+	if (refused) setSessionToken(null);
+	return next;
 }
 
 /**
@@ -88,13 +96,20 @@ export function SessionProvider({ children, authClient = deployedAuthClient }: {
 		let current = true;
 		void loadSession().then((next) =>
 		{
-			if (current) setState(next);
+			if (current && next) setState(next);
 		});
 		return () =>
 		{
 			current = false;
 		};
 	}, []);
+
+	/** Loads the session for the token just stored and shows it, unless a newer token replaced it meanwhile. */
+	async function applySession(): Promise<void>
+	{
+		const next = await loadSession();
+		if (next) setState(next);
+	}
 
 	const session: Session = {
 		...state,
@@ -110,7 +125,7 @@ export function SessionProvider({ children, authClient = deployedAuthClient }: {
 			}
 			if (import.meta.env.PROD) return;
 			setSessionToken(DEV_SIGN_IN_TOKEN);
-			setState(await loadSession());
+			await applySession();
 			await queryClient.invalidateQueries({
 				queryKey: ACCOUNT_QUERY_KEY,
 			});
@@ -125,7 +140,7 @@ export function SessionProvider({ children, authClient = deployedAuthClient }: {
 					const client = await authClient();
 					if (!client) throw new Error("this deployment offers no Logto sign-in");
 					setSessionToken(await exchangeIdToken(await client.finishSignIn(callbackUrl)));
-					setState(await loadSession());
+					await applySession();
 					await queryClient.invalidateQueries({
 						queryKey: ACCOUNT_QUERY_KEY,
 					});

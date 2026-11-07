@@ -143,8 +143,8 @@ describe("the dev composition on a loaded dev seed (S112)", () =>
 
 describe("Logto accounts in the Worker composition (S116)", () =>
 {
-	/** Signs in with a Logto ID token, then deletes the account; answers the deletion's status and the user rows left. */
-	async function signInAndDelete(env: WorkerEnv)
+	/** Signs in with a Logto ID token (`claims` over the stand-in's defaults), then deletes the account; answers the deletion's status and the user rows left. */
+	async function signInAndDelete(env: WorkerEnv, claims: Record<string, unknown> = {})
 	{
 		const { db } = await migratedPglite();
 		const tenant = await createTestTenant();
@@ -161,10 +161,11 @@ describe("Logto accounts in the Worker composition (S116)", () =>
 		const signedIn = await call("/api/v1/sign-in", {
 			method: "POST",
 			body: JSON.stringify({
-				idToken: await tenant.sign(),
+				idToken: await tenant.sign(claims),
 			}),
 		});
 		const { token } = await signedIn.json() as { token: string };
+		expect(signedIn.status).toBe(200);
 		const deleted = await call("/api/v1/me/delete", {
 			method: "POST",
 			headers: {
@@ -215,5 +216,104 @@ describe("Logto accounts in the Worker composition (S116)", () =>
 		expect(result.links).toBe(0);
 		// The test account in staging's own tenant is left alone; nothing called the Management API.
 		expect(result.management.calls).toEqual([]);
+	});
+
+	it("S120 AC 1: re-trading a still-valid ID token whose sign-in is 11 minutes old, or one without auth_time, gets a session deletion refuses", async () =>
+	{
+		const elevenMinutesAgo = Math.floor(Date.now() / 1000) - 11 * 60;
+		for (const claims of [{
+			auth_time: elevenMinutesAgo,
+			iat: elevenMinutesAgo,
+		}, {
+			auth_time: undefined,
+		}])
+		{
+			const result = await signInAndDelete(logtoVars, claims);
+			expect(result.status).toBe(403);
+			expect(result.users).toBe(1);
+			expect(result.links).toBe(1);
+		}
+		// A sign-in from just now (the stand-in's default auth_time) deletes, as S116 AC 4 shows.
+		expect((await signInAndDelete(logtoVars)).status).toBe(200);
+	});
+});
+
+describe("POST /api/v1/sign-in failures (S120)", () =>
+{
+	const logtoVars: WorkerEnv = {
+		LOGTO_ENDPOINT: TEST_LOGTO_ENDPOINT,
+		LOGTO_APP_ID: TEST_LOGTO_APP_ID,
+	};
+
+	afterEach(() =>
+	{
+		vi.restoreAllMocks();
+	});
+
+	it("S120 AC 4: answers 401 only for a refused credential, and 503 sign_in_failed when BT itself fails", async () =>
+	{
+		const logged = vi.spyOn(console, "error").mockImplementation(() => undefined);
+		const tenant = await createTestTenant();
+		const other = await createTestTenant();
+		const { db, pglite } = await migratedPglite();
+		let jwks: "up" | "error" | "unreachable" = "up";
+		const app = createWorkerApp(logtoVars, db, {
+			fetch: async (input) =>
+			{
+				if (jwks === "unreachable") throw new TypeError("fetch failed");
+				return jwks === "error" ? new Response("unavailable", {
+					status: 503,
+				}) : tenant.fetch(input);
+			},
+		});
+		const signIn = async (idToken: string) =>
+		{
+			const response = await handleApiRequest(new Request("http://bt.test/api/v1/sign-in", {
+				method: "POST",
+				body: JSON.stringify({
+					idToken,
+				}),
+			}), app.context);
+			return {
+				status: response.status,
+				body: await response.json() as unknown,
+			};
+		};
+		const refused = {
+			status: 401,
+			body: {
+				error: "sign_in_refused",
+			},
+		};
+		const failed = {
+			status: 503,
+			body: {
+				error: "sign_in_failed",
+			},
+		};
+
+		// The tenant's keys can't be fetched: BT's failure, not the fan's.
+		jwks = "error";
+		expect(await signIn(await tenant.sign())).toEqual(failed);
+		jwks = "unreachable";
+		expect(await signIn(await tenant.sign())).toEqual(failed);
+
+		// The credential itself: a forged signature, no email, malformed parts.
+		jwks = "up";
+		expect(await signIn(await other.sign())).toEqual(refused);
+		expect(await signIn(await tenant.sign({
+			email: undefined,
+		}))).toEqual(refused);
+		expect(await signIn("not-a-jwt")).toEqual(refused);
+		expect(await signIn("%%%.%%%.%%%")).toEqual(refused);
+		expect(await signIn("eyJhbGciOiJFUzM4NCJ9.e30.!!")).toEqual(refused);
+		expect((await signIn(await tenant.sign())).status).toBe(200);
+
+		// The database fails: 503 too.
+		await pglite.close();
+		expect(await signIn(await tenant.sign())).toEqual(failed);
+		// Logged by error name only (ADR-028: no token, no account subject).
+		expect(logged.mock.calls.every((call) => call.join(" ").startsWith("sign-in failed:"))).toBe(true);
+		expect(logged).toHaveBeenCalledTimes(3);
 	});
 });
