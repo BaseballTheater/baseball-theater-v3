@@ -8,7 +8,7 @@ import {
 import type { AccountDataDeps } from "../services/account-deletion.js";
 import { deleteAccount } from "../services/account-deletion.js";
 import type { AuthDeps } from "../services/accounts.js";
-import { authenticateAccount } from "../services/accounts.js";
+import { authenticateAccount, completeProviderSignIn } from "../services/accounts.js";
 import {
 	clearDeletedCookie, hasDeletedCookie, setDeletedCookie,
 } from "../services/cookies.js";
@@ -124,6 +124,15 @@ async function readDeleteRequest(request: Request): Promise<MeDeleteRequest | nu
 	return typeof phrase === "string" ? {
 		phrase,
 	} : null;
+}
+
+/** The ID token of `POST /api/v1/sign-in`, or null when the body isn't `{ idToken }` (400). */
+async function readSignInRequest(request: Request): Promise<string | null>
+{
+	const body = await readJson(request);
+	if (body === null || typeof body !== "object") return null;
+	const { idToken } = body as Record<string, unknown>;
+	return typeof idToken === "string" && idToken ? idToken : null;
 }
 
 function notFound(): Response
@@ -325,6 +334,46 @@ export const API_ROUTER: readonly RouteEntry[] = [
 			return setDeletedCookie(sendJson(200, "POST /api/v1/me/delete", {
 				deleted: true,
 			}), request);
+		},
+	},
+	{
+		route: "GET /api/v1/sign-in",
+		handle: async (_url, _params, ctx) =>
+		{
+			// The web app reads its Logto tenant and app ID from here, so it keeps no copy of its own (S116).
+			const response = sendJson(200, "GET /api/v1/sign-in", {
+				logto: ctx.auth.logto?.config ?? null,
+			});
+			response.headers.set("Cache-Control", "no-store");
+			return response;
+		},
+	},
+	{
+		route: "POST /api/v1/sign-in",
+		handle: async (_url, _params, ctx, request) =>
+		{
+			const idToken = await readSignInRequest(request);
+			if (!idToken) return sendError(400, {
+				error: "invalid_body",
+				hint: "{ idToken }",
+			});
+			let signedIn: Awaited<ReturnType<typeof completeProviderSignIn>>;
+			try
+			{
+				signedIn = await completeProviderSignIn(ctx.auth, idToken);
+			}
+			catch
+			{
+				// A token that doesn't verify (or carries no email) is the caller's to fix by signing in again; nothing is logged.
+				return sendError(401, {
+					error: "sign_in_refused",
+				});
+			}
+			return signedIn ? sendJson(200, "POST /api/v1/sign-in", {
+				token: signedIn.token,
+			}) : sendError(404, {
+				error: "sign_in_unavailable",
+			});
 		},
 	},
 	{

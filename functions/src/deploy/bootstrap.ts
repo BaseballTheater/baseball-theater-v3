@@ -35,10 +35,25 @@ export const HYPERDRIVE_CONFIG: Record<DeployEnv, string> = {
 export const STAGING_BRANCH = "staging";
 
 /**
- * Every Worker secret, pushed from GitHub secrets on every deploy (S114 AC 8), so GitHub is their
- * one source and none is set once by hand. A later story adds its own (S116: Logto's).
+ * Every env's Worker secrets, pushed from GitHub secrets on every deploy (S114 AC 8), so GitHub is
+ * their one source and none is set once by hand.
  */
 export const WORKER_SECRETS = ["BT_SESSION_KEY"] as const;
+
+/**
+ * Production's alone (S116 AC 5): its one Logto machine-to-machine app, which deletes fans' Logto
+ * accounts (the Worker, `worker-app.ts`) and registers production's sign-in addresses (the
+ * deploy, `src/deploy/logto.ts`). Only the `production` job maps them, from the GitHub secrets of
+ * the same names (owner, 2026-11-07: "LOGTO_S2S_APP_ID and LOGTO_S2S_SECRET, go ahead"); staging
+ * and previews have no machine-to-machine app.
+ */
+export const PRODUCTION_WORKER_SECRETS = ["LOGTO_S2S_APP_ID", "LOGTO_S2S_SECRET"] as const;
+
+/** The Worker secrets `env`'s deploy pushes. */
+export function workerSecretNames(env: DeployEnv): readonly string[]
+{
+	return env === "production" ? [...WORKER_SECRETS, ...PRODUCTION_WORKER_SECRETS] : WORKER_SECRETS;
+}
 
 /** A preview's Worker, one per pull request, on workers.dev. */
 export function previewWorkerName(pullRequest: number): string
@@ -148,6 +163,14 @@ export type NeonBranch = {
 };
 
 /**
+ * The `init_source` values that mean a branch began with production's tables and none of its rows.
+ * Neon takes `schema-only` when a branch is created but lists that same branch back as
+ * `parent-schema` (seen on the first real staging deploy, 2026-11-06), so both count: refusing
+ * `parent-schema` made every staging deploy after the first fail on the branch it had made itself.
+ */
+const SCHEMA_ONLY_SOURCES = new Set(["schema-only", "parent-schema"]);
+
+/**
  * The branch `env` deploys on. Production's is the project's default branch (README: the owner kept
  * it as the production branch). Previews' and staging's is {@link STAGING_BRANCH}, created when
  * missing as a **schema-only** branch of production: production's tables with none of its rows,
@@ -166,7 +189,7 @@ export async function findOrCreateBranch(api: NeonApi, env: DeployEnv): Promise<
 	const staging = branches.find((branch) => branch.name === STAGING_BRANCH);
 	if (staging)
 	{
-		if (staging.id === production.id || (staging.init_source !== undefined && staging.init_source !== "schema-only"))
+		if (staging.id === production.id || (staging.init_source !== undefined && !SCHEMA_ONLY_SOURCES.has(staging.init_source)))
 		{
 			throw new Error(`Neon: the ${STAGING_BRANCH} branch began as a copy of production's data (init_source ${staging.init_source ?? "default"}); staging never holds a fan's data, so delete it and deploy again to recreate it schema-only`);
 		}
@@ -305,12 +328,17 @@ export function deployConfig(base: WranglerConfig, env: DeployEnv, target: Deplo
 	return out;
 }
 
-/** Every {@link WORKER_SECRETS} value from `source` (the job's env, mapped from GitHub secrets); a missing one fails the deploy. */
-export function workerSecrets(source: Record<string, string | undefined>): Record<string, string>
+/**
+ * Every one of `env`'s Worker secrets ({@link workerSecretNames}) from `source` (the job's env,
+ * mapped from GitHub secrets); a missing one fails the deploy. Only those names are taken, so a
+ * secret another env's job happens to carry never reaches this env's Worker.
+ */
+export function workerSecrets(source: Record<string, string | undefined>, env: DeployEnv): Record<string, string>
 {
-	const missing = WORKER_SECRETS.filter((name) => !source[name]);
+	const names = workerSecretNames(env);
+	const missing = names.filter((name) => !source[name]);
 	if (missing.length) throw new Error(`missing Worker secrets (set them as GitHub secrets): ${missing.join(", ")}`);
-	return Object.fromEntries(WORKER_SECRETS.map((name) => [name, source[name]!]));
+	return Object.fromEntries(names.map((name) => [name, source[name]!]));
 }
 
 /** Everything one env's deploy needs, found or created. */
@@ -346,7 +374,7 @@ export type BootstrapDeps = {
 export async function bootstrapDeploy(deps: BootstrapDeps, env: DeployEnv, pullRequest?: number): Promise<DeployPlan>
 {
 	if (env === "preview" && !pullRequest) throw new Error("a preview deploy names its pull request (--pr <number>)");
-	const secrets = workerSecrets(deps.secrets);
+	const secrets = workerSecrets(deps.secrets, env);
 	const created: string[] = [];
 	const branch = await findOrCreateBranch(deps.neon, env);
 	if (branch.created) created.push(`Neon branch ${branch.value.name} (schema-only)`);

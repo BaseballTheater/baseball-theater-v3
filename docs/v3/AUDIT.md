@@ -15155,3 +15155,532 @@ export const label = game.abbreviation + " @ ";  1044ms
 ```
 
 </details>
+
+---
+
+## 2026-11-06 — S118 completed
+
+**Stage and main branch flow**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-06T05:23:12Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `7a3fa0f` (tree dirty) |
+| Grader | `scripts/verify-S118.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: deploy.yml: a push to stage deploys staging and a push to main deploys production on its own (no needs on staging); main no longer deploys staging; previews, bootstrap, migrate, reapply-deletions and deploy steps are S114's unchanged
+check 2 PASS: ci.yml runs on pushes to and pull requests into both stage and main; design-capture.yml hardcodes no main
+check 3 PASS: CLAUDE.md, the run-stories skill and LOOP.md say agents commit and push to stage, check gh run list --branch stage first, and never push, merge into or release to main, quoting the owner; no rule text says to push main
+check 4 PASS: README's deploy section: stage deploys staging, main deploys production, releasing is the owner merging stage into main (cherry-picks risk AUDIT.md/CHANGELOG.md conflicts), and the GitHub settings (default branch stage, production with no required reviewers, deployment branches main)
+check 5 PASS: backlog Status is done (story heading and Story status table)
+check 6 PASS: the story changed nothing outside its fence (the three workflows, README.md, CLAUDE.md, the run-stories skill, docs/v3/LOOP.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, scripts/verify-S118.sh)
+```
+
+**6/6 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S118 check results ---
+check 1 PASS: deploy.yml: a push to stage deploys staging and a push to main deploys production on its own (no needs on staging); main no longer deploys staging; previews, bootstrap, migrate, reapply-deletions and deploy steps are S114's unchanged
+check 2 PASS: ci.yml runs on pushes to and pull requests into both stage and main; design-capture.yml hardcodes no main
+check 3 PASS: CLAUDE.md, the run-stories skill and LOOP.md say agents commit and push to stage, check gh run list --branch stage first, and never push, merge into or release to main, quoting the owner; no rule text says to push main
+check 4 PASS: README's deploy section: stage deploys staging, main deploys production, releasing is the owner merging stage into main (cherry-picks risk AUDIT.md/CHANGELOG.md conflicts), and the GitHub settings (default branch stage, production with no required reviewers, deployment branches main)
+check 5 PASS: backlog Status is done (story heading and Story status table)
+check 6 PASS: the story changed nothing outside its fence (the three workflows, README.md, CLAUDE.md, the run-stories skill, docs/v3/LOOP.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, scripts/verify-S118.sh)
+--- verify-S118: 6/6 checks passed ---
+verify-S118: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 972ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  471ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  496ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 156ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1026ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  960ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 90ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 73ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 16ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 69ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  05:25:21
+   Duration  3.33s (transform 108ms, setup 0ms, collect 4.73s, tests 2.55s, environment 1ms, prepare 529ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154294,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-06 — backlog review (`blocked`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-06T20:49:43Z` |
+| HEAD at review | `a3b095e` (tree dirty) |
+| Trigger | S118 inserted outside a review (owner-directed, 7a3fa0f); a3b095e bootstrap fix |
+| Stories `done` since last review | S114, S118 |
+| Verdict | `blocked` |
+
+**Findings / amendments**
+
+Fresh-context backlog review, one reviewer, at `a3b095e` on `stage`. Trigger: S118 inserted outside a review (owner-directed 2026-11-06, `7a3fa0f`, done in `130a5f0`); `a3b095e` (the Neon `parent-schema` fix to S114's bootstrap) weighed with it. Read: CLAUDE.md; the S114, S116, S117, S118 and S5 notes; ADR-019 (ARCHITECTURE.md:1123–1141) and ADR-028 (:1314–1355); the 2026-11-06 doc parity entry (AUDIT.md:15027–15066); `.github/workflows/deploy.yml` (whole), `wrangler.jsonc` (whole), README.md:118–190; `functions/src/deploy/bootstrap.ts` (exports, grep), `functions/src/scripts/deploy-bootstrap.ts`, `db-migrate.ts`, `db-reapply-deletions.ts`; `gh run list` for `main` and `stage`.
+
+**Next 3 by priority:** S116 (80), S117 (80), S5 (90).
+
+**1. Coverage**
+
+- **Parity item 1 (S114's Impact says "a copy of the database"):** amended. S114's Impact now says previews run on staging's database, which holds no fans' data and starts empty until S117's copy, and that releasing is now a merge of `stage` into `main`; the correction is dated in the line. (S114's CHANGELOG entry already says it right.)
+- **Parity item 2 (S116 puts accounts in the staging database that S114 AC 9 says never holds a fan's data):** a real conflict, and the owner's call → `blocked`. S116 AC 5 offers Logto sign-in on previews and staging (owner, 2026-11-05: "Yes to Logto"), so signing in there writes `users`, `identity_links` and `account_settings` rows to the staging branch. ADR-028's inventory (ARCHITECTURE.md:1338–1350) lists "BT database: …" with no second database. With one Logto tenant for every environment, a fan's real account works on staging, and production's deletion (`deleteAccount`, `functions/src/services/account-deletion.ts:59–73`) deletes the Logto account and production's rows but never staging's: a store deletion can't reach, which the personal-data sweep says is an ADR-028 amendment for the owner, not a new row. With a separate tenant for staging and previews, staging's accounts are its own test accounts, which staging's own deletion reaches. Asked below; S116 parked `blocked` with the reasoning in its notes.
+- **S118's worker's note (README's launch checklist says Logto precedes the first production release):** README.md:190 still says so, and it is now the only thing holding production back: a push to `main` deploys production with no approval (`deploy.yml:201–249`). `origin/main` is at `3a908b6`; its Deploy run (42163225535) was cancelled while waiting on the old approval. Asked below whether the owner holding off is enough; recorded as pending drift.
+- No ADR changed and no workspace package was added since `a34c643`. No later theme promoted.
+
+**2. Ground truth**
+
+- **S116** (Depends on S114: `done`). Paths present at HEAD: `packages/ports/src/auth.ts`, `functions/src/services/accounts.ts:107` (`dev:` inside `authenticate`), `functions/src/services/account-deletion.ts:23` (`RECENT_SIGN_IN_SECONDS`) and :73 (admins by provider), `functions/src/adapters/fixtures/auth.ts:42`/:115 (`DevIdentityAdmin`, `identityAdmins: [DevIdentityAdmin]`), `functions/src/worker-app.ts:111–114` (dev auth and account data composed) and :137 (`devSignInAllowed`), `functions/src/deploy/bootstrap.ts:41` (`WORKER_SECRETS = ["BT_SESSION_KEY"]`, comment names "S116: Logto's"), `web/src/session/{session.ts,SessionProvider.tsx,token.ts}`, `web/src/storage/storage.ts`, `web/src/layout/AppHeader.tsx:12`, `web/src/pages/settings/AccountData.tsx:207`, `openapi/bt-api.v1.json`; `pnpm api:spec` is a root script. No Logto adapter or sign-in route (grep `logto` in `functions/src/adapters/`: none) — what AC 1–2 create. **Against S118's flow:** AC 5's Logto steps now go in three deploy jobs (`preview` :67, `staging` :153 on push to `stage`, `production` :203 on push to `main`), and its PR-close cleanup extends the existing `preview-teardown` job (:119), whose `env` has only the Cloudflare token and account, so it needs the Logto machine-to-machine secret too; secrets map per env as `BT_SESSION_KEY_STAGING`/`_PRODUCTION` do (:80, :169, :219) and README's table (:163–171) gains the rows. The fence (`.github/workflows/`, `wrangler.jsonc`, `functions/`, `web/`, README, CHANGELOG, spec) holds all of it. Turn cap 20 → 22 (the PR-close cleanup the owner's 2026-11-05 answer added after the cap was set, and three deploy jobs rather than two); Goal condition and `/goal` line updated to 22. Depends-on aside rewritten: the production release is now the owner's merge, not "S114 AC 3"'s approval (no other story ID added to the line).
+- **S117** (Depends on S114: `done`; Source `Open:`, asked by the parity review, unanswered). `DATA_CLASSIFICATION` (`data-classification.ts:45`) has `postgresTables`; every `none` table (`schedule_days`, `games`, `game_projections`, `replay_artifacts`) has a `version` column (`schema.ts:22–52`), so AC 2's version-guarded writes exist; `migrateDatabaseAt` (`migrate.ts:31`), `migratedPglite` (:45), `openPostgres` (`connect.ts:22`) exist. AC 4–5 can reuse `findOrCreateBranch` / `branchConnectionString` (`bootstrap.ts:165`, :224), `STAGING_BRANCH` (:35), the default-branch check (:168) and `HYPERDRIVE_CONFIG.production` (:31); `NEON_API_KEY` is a repository secret (`deploy.yml:78`, read with no environment), so the dispatch job needs no `production` environment. Amended: its turn cap (16), Goal condition and `/goal` command, which it lacked (CLAUDE.md step 2 would have stopped on it); notes on running the dispatch from `stage`, the reuse, and that its one new `workflow_dispatch` workflow is the go-ahead the owner's "manual step" gives.
+- **S5** (Depends on S70, S61, S68, S81: all `done`; Design S34, S56: `done`; Prefer after S24, S25: `done`). `packages/domain/src/api-routes.ts`, `web/src/api/client.ts`, `web/src/api/generated.types.test.ts`, `functions/src/adapters/repository-contract.ts`, `web/src/components/videos/LazyPlayerDialog.tsx` exist; `graphContentRequest` (`functions/src/adapters/http/mlb.ts:62`), `MlbRequest` (:49), `getJson` (:278) unchanged since the 2026-11-04 line-drift note; `DayDigest.tsx:16` `gameLabel` still private (the ADR-025 note stands); no `fixtures/search-*.json` yet (S5 records it). Still needs a live MLB recording, which a cloud session can't make. Cap 16 and fence unchanged; nothing S114/S118 did touches it.
+
+**3. Prioritization challenge**
+
+- With S116 parked and S117 waiting on its Source, both 80s need the owner; the next startable stories are S5 (live recording) and S99–S102 (no dependencies). No re-prioritization: S116 is still the production gate the owner asked for, and S117 is before launch by the owner's word. Recorded as pending drift.
+- Nothing obsolete or quietly done. The class of work underestimated since the last review is deploy plumbing meeting real services: S114's bootstrap failed on its first real run on Neon's `parent-schema` label (`a3b095e`), which no stand-in knew. S116's Logto Management API and S117's two-branch copy will meet the same; their notes say to check the real API's answers when they start.
+- **Baseline** (`01 Current baseline.md`, Cloudflare runtime + deploy row): "Not yet run on GitHub" was stale; it now records the failed first staging deploy (run 42215601297), the `a3b095e` fix not yet re-run, and S116 parked. The **As of** line (S118) stands: no story flipped since.
+
+**Duplication sweep (ADR-025).** Code added since `a34c643`: `functions/src/deploy/bootstrap.ts`, `functions/src/scripts/deploy-bootstrap.ts`, the `db-migrate.ts` / `db-reapply-deletions.ts` edits, `worker-app.ts`, the workflows. One hit: the preview Worker name is built by `previewWorkerName` (`bootstrap.ts:44–46`) and again in shell in `preview-teardown` (`deploy.yml:143`). S116 extends that job, so its notes say to read the name from the one TypeScript place rather than add a third copy. Searched `bt-staging`, `"staging"`, `baseball-theater-pr-` across `functions/src`, `.github`, `wrangler.jsonc`: Hyperdrive names and the staging branch live only in `bootstrap.ts`. The three scripts' env-var checks are argument handling, not BT data. Nothing in `packages/domain` touched.
+
+**Personal-data sweep (ADR-028).** S114/S118 code: `deploy-bootstrap.ts` masks the connection string and its password (:85–86) and logs hosts only; `db-migrate.ts` and `db-reapply-deletions.ts` log hosts and counts; no email or personal field in any new `console.*`. Next 3: S116 adds Logto (inventory row "Logto | account, email | `IdentityAdmin.deleteAccount`") and Logto's browser keys (AC 3 routes them through `web/src/storage/`), and the staging accounts above, which no inventory row covers → asked. S117 reads and writes only `none` tables, adds no store, and must log hosts and counts only (in its notes). S5 adds no store (its 2026-11-02 note stands).
+
+**Also found:** S118's **Scope files** line puts grep asides in backticks, so `parse.ts:336` wrote `main`, `gh run`, `3a908b6`, `git init -b main` into its `scope_files`; harmless for a `done` story, recorded as pending drift with the Depends-on-aside class. S118 left two stale `wrangler.jsonc` comments (:89, :112) outside its fence; S116's notes carry the fix. INTENT's Hosting row (S118's note) is the parity review's, now due.
+
+**Amendments:** S116 (`status: blocked`, notes, cap 22, Depends-on aside), S117 (notes, reuse check, cap 16, Goal condition, `/goal`), S114 (Impact corrected), `01 Current baseline.md` (deploy row), `00 …Checkable backlog.md` (pending drift).
+
+**Questions for the owner (block S116):**
+1. Should staging and pull-request previews sign people in through a separate Logto tenant from production's, so their accounts are test accounts that never mix with real fans' (and may staging sign-in be limited to your own addresses)? Or should one tenant serve every environment, which needs ADR-028 to say how deleting an account on production also reaches staging's copy?
+2. Is your holding off merging `stage` into `main` until S116 is done enough to keep production from launching without sign-in, or should the production deploy job refuse to run until Logto is configured?
+
+---
+
+## 2026-11-06 — doc parity review (`blocked`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-06T21:52:12Z` |
+| HEAD at review | `b781f36` (tree dirty) |
+| Trigger | S118 added; S114's Impact changed (pillar-cited) |
+| Stories `done` since last review | S114, S118 |
+| Verdict | `blocked` |
+
+**Findings / amendments**
+
+Fresh-context review at `b781f36`. Scope: S118 (added), S114 (Impact changed, cites a pillar), and the next 3 open stories by priority: S117 (80), S5 (90), S72 (91).
+
+**1. Citation honesty**
+
+- **S118 — Pillar: Dependable, holds.** No FEATURES row covers how releases reach production (FEATURES.md:8: "It does not describe frameworks, repos, or deploy targets"), so a pillar is the right kind of citation. The approval is the owner's in the session that inserted S118 (`7a3fa0f`, quoted in the note: asked "Can the new story cite the Dependable pillar, the same reason S114 uses?" — "Yes"). The note has not been re-scoped since `7a3fa0f` beyond its status flip in `130a5f0`. Its rationale ("a staging branch the owner releases from by hand keeps unreviewed work off the live app") matches the owner's Gap quotes.
+- **S114 — Pillar: Dependable, holds.** The only Gap/Impact/AC change since `051415f` besides `status: done` is the 2026-11-06 backlog review's Impact correction (`34768b6`): previews run against staging's fans-data-free database rather than "a copy of the database" (AC 9, the owner's 2026-11-05 "No user data, copied baseball data"), plus a pointer to S118's no-approval release. Both narrow what reaches fans' data or record a later owner decision; neither changes what S114 is for, so the 2026-11-02 approval ("yes those are good pillars to use") still covers it. Its Source rationale ("release only with the owner's approval") describes S114 as it shipped at `3a908b6` (AC 3, the `production` environment's required approval); S118 carries the change, so the shipped story's Source is left as its historical record.
+- **S117 — Open, next up (priority 80).** Unchanged since the 2026-11-06 parity review (`051415f`) asked the owner whether S114's Dependable approval covers it; still unanswered, so it is carried, not re-asked as new. It is the next `todo` story, hence `blocked`.
+- **S5 — Feature: Highlight search (free-text), holds** (FEATURES.md:61; Gap "Search stub; FEATURES carries highlight search", Impact: searching finds real highlight videos by title or description).
+- **S72 — Feature: Highlight search (date + tag), holds** (FEATURES.md:60; Impact narrows results by date, team or kind of play).
+- **Open stories:** S117 only (`grep -l "Source:\*\* Open" docs/v3/backlog/stories/`).
+
+**2. Doc reflects reality**
+
+- **Amended — INTENT Hosting row (INTENT.md:48)** contradicted S118 and shipped `deploy.yml`: it said "every merge to `main` deploys to staging and production is released behind the owner's approval" (owner, 2026-11-02). Rewritten to the owner's 2026-11-06 decision, quoted from S118's Gap: work lands on `stage`, which deploys `stage.baseball.theater`; the owner releases by merging `stage` (or one commit) into `main`, which deploys production with no separate approval ("we commit to stage, and the stage branch pushes to the stage site. ... main would deploy to production when it gets an update"; "we don't need that approval step. We can just deploy when we merge into main"). The superseded 2026-11-02 wording is kept in the row as history.
+- FEATURES names no deploy target or branch (FEATURES.md:8), so S114/S118 leave nothing in it stale.
+- Noted, not mine to edit: ARCHITECTURE.md:773 (the superseded Firebase-era CI row, "on `main`: deploy to Firebase") and :631/:817 ("multi-env (dev/staging/prod)" / "staging project vs preview channels" still open). ARCHITECTURE is owner/backlog-review territory.
+
+**3. Coverage**
+
+- No FEATURES item was added this review. No new unserved feature found in the scope above.
+
+**For the next backlog review**
+
+- ARCHITECTURE.md:631, :773 and :817 still describe Firebase-era deploys and call staging vs previews "still open", which S114 and S118 have settled; decide whether ADR text needs an owner-ratified amendment or a superseded note.
+
+**Carried question for the owner (asked 2026-11-06, unanswered):** S117 (copy production's baseball data into staging, by hand) was split out of S114, which cites the Dependable pillar with your approval. Does that approval cover S117, or should it cite something else?
+
+---
+
+## 2026-11-06 — backlog review answers (2026-11-06)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-06 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-06T23:03:39Z` |
+| HEAD at capture | `9b23041` (tree clean) |
+| Applied in | `9b23041` — Owner's answers to the 2026-11-06 backlog review: staging signs in on its own tenant or a shim, and DNS is the release gate |
+
+**Answers and what was applied**
+
+Owner, 2026-11-06. Q1, separate Logto tenant for staging and previews: "We will use a staging one or a fake shim". Applied in S116 AC 5: staging and previews never use production's tenant (a staging Logto tenant or a fake identity shim), so staging's accounts are test accounts and S114 AC 9 holds; production's Logto vars and machine-to-machine secret appear only in env.production and the production job; README's manual setup lists the staging tenant or the shim. Notes: a shim on a deployed site conflicts with S114 AC 7 / AC 2 as they stand, so choosing it means asking first; the aside about limiting staging sign-in to the owner's addresses was not answered. Turn cap 22 -> 23 (second tenant's vars and secret kept apart per environment). S116 back to `todo`. Q2, whether holding off the merge is enough: "It is enough, because the actual production release gate is changing the DNS away from the elastic beanstalk destination". Recorded in S116's notes (no Logto check in the production job; README:190's launch-checklist line to be reworded by S116, whose fence holds README). Caveat recorded and raised with the owner: `wrangler.jsonc:119` attaches `baseball.theater` as a Workers custom domain, and `wrangler deploy` in CI overrides an existing DNS record for it, so the first production deploy would itself move the DNS off Elastic Beanstalk.
+
+---
+
+## 2026-11-06 — doc parity review answers (2026-11-06)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-06 doc parity review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-06T23:04:17Z` |
+| HEAD at capture | `73ba87e` (tree clean) |
+| Applied in | `73ba87e` — Owner's answer to the 2026-11-06 doc parity review: S117 cites the Delightful pillar |
+
+**Answers and what was applied**
+
+Owner, 2026-11-06. Carried question, which pillar or feature S117 (copy production's baseball data into staging, by hand) cites: "Delightful, bc it makes testing much faster in stage". Applied: S117's **Source:** is now "Pillar: Delightful — developers too: staging that already holds production's games, schedules and videos makes testing on stage.baseball.theater much faster", quoting the owner's approval (frontmatter `source: pillar`); the S117 note's "waits on its Source" bullet records the answer, so S117 may start.
+
+---
+
+## 2026-11-07 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T01:12:34Z` |
+| HEAD at capture | `1663fb0` (tree clean) |
+| Change | `1663fb0` — Owner-directed: S116 narrowed to production URI automation; previews have no sign-in |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Does this S116 change need a backlog review, or should I log a skip? ... I'd lean toward skip." (and again: "Does the S116 change need a backlog review, or should I log a skip? I'd skip it."): "Agreed and yes" — "Agreed" answers the skip question.
+
+---
+
+## 2026-11-07 — S119 completed
+
+**Production at next.baseball.theater**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-07T01:18:45Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `b2e867d` (tree dirty) |
+| Grader | `scripts/verify-S119.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: wrangler.jsonc env.production is routed to the custom domain next.baseball.theater with BT_APP_ORIGIN https://next.baseball.theater; nothing in wrangler.jsonc or .github/workflows/ claims baseball.theater or www.baseball.theater; staging and previews unchanged
+check 2 PASS: no https://baseball.theater left in functions/, web/, wrangler.jsonc or .github/workflows/; bootstrap.test.ts expects https://next.baseball.theater and passes (test 'S114 AC 8')
+check 3 PASS: README's deploy section: production at next.baseball.theater until the owner's cutover, the cutover as an owner step (wrangler.jsonc custom domain + BT_APP_ORIGIN, replaces the Elastic Beanstalk DNS record), rollback (DNS back / wrangler rollback); launch checklist has DNS cutover from Elastic Beanstalk
+check 4 PASS: backlog Status is done (story heading and Story status table)
+check 5 PASS: the story changed nothing outside its fence (wrangler.jsonc, .github/workflows/deploy.yml, README.md, functions/, web/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, scripts/verify-S119.sh)
+```
+
+**5/5 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S119 check results ---
+check 1 PASS: wrangler.jsonc env.production is routed to the custom domain next.baseball.theater with BT_APP_ORIGIN https://next.baseball.theater; nothing in wrangler.jsonc or .github/workflows/ claims baseball.theater or www.baseball.theater; staging and previews unchanged
+check 2 PASS: no https://baseball.theater left in functions/, web/, wrangler.jsonc or .github/workflows/; bootstrap.test.ts expects https://next.baseball.theater and passes (test 'S114 AC 8')
+check 3 PASS: README's deploy section: production at next.baseball.theater until the owner's cutover, the cutover as an owner step (wrangler.jsonc custom domain + BT_APP_ORIGIN, replaces the Elastic Beanstalk DNS record), rollback (DNS back / wrangler rollback); launch checklist has DNS cutover from Elastic Beanstalk
+check 4 PASS: backlog Status is done (story heading and Story status table)
+check 5 PASS: the story changed nothing outside its fence (wrangler.jsonc, .github/workflows/deploy.yml, README.md, functions/, web/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, scripts/verify-S119.sh)
+--- verify-S119: 5/5 checks passed ---
+verify-S119: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 713ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  351ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  351ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 93ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 845ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  794ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 78ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 80ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 18ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 40ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  01:20:29
+   Duration  2.54s (transform 76ms, setup 0ms, collect 3.50s, tests 1.98s, environment 1ms, prepare 363ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154286,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-07 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T01:47:39Z` |
+| HEAD at capture | `0c9eb7b` (tree clean) |
+| Change | `b2e867d` — Backlog: S119 production deploys to next.baseball.theater until the owner's DNS cutover |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Should I log skips for the backlog and doc parity reviews that S119 triggered, or run them? I'd skip both.": "1. Skip"
+
+---
+
+## 2026-11-07 — doc parity review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a doc parity review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T01:47:39Z` |
+| HEAD at capture | `0c9eb7b` (tree dirty) |
+| Change | `b2e867d` — Backlog: S119 production deploys to next.baseball.theater until the owner's DNS cutover |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Should I log skips for the backlog and doc parity reviews that S119 triggered, or run them? I'd skip both.": "1. Skip"
+
+---
+
+## 2026-11-07 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T02:57:06Z` |
+| HEAD at capture | `38a6692` (tree clean) |
+| Change | `38a6692` — Owner-directed: S116 back to todo — fence gains packages/domain, production's Logto tenant ID is rnrngs |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Should I log a skip for the review, or run a backlog review first?" after S116's fence was widened to packages/domain/src/ and packages/domain/vitest.config.ts with the owner's "Yes it's okay": "Skip"
+
+---
+
+## 2026-11-07 — S116 completed
+
+**Logto sign-in**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-07T03:14:00Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `195097f` (tree dirty) |
+| Grader | `scripts/verify-S116.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: a Logto IdentityProvider under functions/src/adapters/ checks the ID token against <endpoint>/oidc/jwks, issuer <endpoint>/oidc, audience the app ID and expiry, returns { provider: "logto", subject, email, emailVerified }, and refuses a bad signature, issuer, audience, expired token or missing email (tests 'S116 AC 1')
+check 2 PASS: the Worker offers Logto where LOGTO_ENDPOINT and LOGTO_APP_ID are in vars and the dev provider only under BT_LOCAL; a sign-in route in the API route table (and openapi/bt-api.v1.json, up to date with pnpm api:spec) trades a Logto ID token for BT's session token, and a dev: token is refused (workerd test 'S116 AC 2')
+check 3 PASS: web: only the AuthClient imports Logto's browser SDK; deployed signIn() goes to Logto with the email scope and prompt login, a callback hands the ID token to BT once, signOut() ends both sessions, local dev sign-in unchanged; Logto's browser keys go through web/src/storage/ (labeled personal) and are gone after sign-out and deletion; bt/no-browser-storage disabled nowhere (RTL tests 'S116 AC 3'; grep)
+check 4 PASS: a Logto IdentityAdmin lists, suspends (PATCH /api/users/{id}/is-suspended) and deletes (DELETE /api/users/{id}) through the Management API with machine-to-machine credentials; deletion reaches it; the Worker composes it only where the secret is set, and deleting without it still succeeds (tests 'S116 AC 4')
+check 5 PASS: LOGTO_ENDPOINT/LOGTO_APP_ID are per-env vars, production's (https://auth.baseball.theater, b2f2q1wau5axo1psqexdo) only in env.production and the production job; previews and their jobs carry no Logto value; staging reads no machine-to-machine secret; the production job alone pushes LOGTO_S2S_APP_ID/LOGTO_S2S_SECRET and sets the redirect and sign-out URIs from BT_APP_ORIGIN idempotently (test 'S116 AC 5' runs it twice); README documents the manual Logto setup
+check 6 PASS: backlog Status is done (story heading and Story status table)
+check 7 PASS: the story changed nothing outside its fence (.github/workflows/, functions/, web/, packages/domain/src/, packages/domain/vitest.config.ts, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, openapi/bt-api.v1.json, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, scripts/verify-S116.sh)
+```
+
+**7/7 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S116 check results ---
+check 1 PASS: a Logto IdentityProvider under functions/src/adapters/ checks the ID token against <endpoint>/oidc/jwks, issuer <endpoint>/oidc, audience the app ID and expiry, returns { provider: "logto", subject, email, emailVerified }, and refuses a bad signature, issuer, audience, expired token or missing email (tests 'S116 AC 1')
+check 2 PASS: the Worker offers Logto where LOGTO_ENDPOINT and LOGTO_APP_ID are in vars and the dev provider only under BT_LOCAL; a sign-in route in the API route table (and openapi/bt-api.v1.json, up to date with pnpm api:spec) trades a Logto ID token for BT's session token, and a dev: token is refused (workerd test 'S116 AC 2')
+check 3 PASS: web: only the AuthClient imports Logto's browser SDK; deployed signIn() goes to Logto with the email scope and prompt login, a callback hands the ID token to BT once, signOut() ends both sessions, local dev sign-in unchanged; Logto's browser keys go through web/src/storage/ (labeled personal) and are gone after sign-out and deletion; bt/no-browser-storage disabled nowhere (RTL tests 'S116 AC 3'; grep)
+check 4 PASS: a Logto IdentityAdmin lists, suspends (PATCH /api/users/{id}/is-suspended) and deletes (DELETE /api/users/{id}) through the Management API with machine-to-machine credentials; deletion reaches it; the Worker composes it only where the secret is set, and deleting without it still succeeds (tests 'S116 AC 4')
+check 5 PASS: LOGTO_ENDPOINT/LOGTO_APP_ID are per-env vars, production's (https://auth.baseball.theater, b2f2q1wau5axo1psqexdo) only in env.production and the production job; previews and their jobs carry no Logto value; staging reads no machine-to-machine secret; the production job alone pushes LOGTO_S2S_APP_ID/LOGTO_S2S_SECRET and sets the redirect and sign-out URIs from BT_APP_ORIGIN idempotently (test 'S116 AC 5' runs it twice); README documents the manual Logto setup
+check 6 PASS: backlog Status is done (story heading and Story status table)
+check 7 PASS: the story changed nothing outside its fence (.github/workflows/, functions/, web/, packages/domain/src/, packages/domain/vitest.config.ts, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, openapi/bt-api.v1.json, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, scripts/verify-S116.sh)
+--- verify-S116: 7/7 checks passed ---
+verify-S116: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 773ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  368ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  403ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 100ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 100ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 899ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  823ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 91ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 17ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 49ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  03:16:10
+   Duration  2.83s (transform 81ms, setup 0ms, collect 3.87s, tests 2.16s, environment 1ms, prepare 390ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154775,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-07 — S4 completed
+
+**Standings fixture API + page**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-07T05:52:45Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `6e715e4` (tree dirty) |
+| Grader | `scripts/verify-S4.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: fixtures/standings-2026-09-05.json exists and is valid JSON; fixtures/standings-2024-07-04.json does not exist
+check 2 PASS: the fixture has >=2 divisions, each with a name or id and a teams list; each team has a name string and numeric wins and losses
+check 3 PASS: GET /api/v1/standings?date=2026-09-05 returns 200 with >=2 divisions of such records (functions test); the route is in the route table with its response type
+check 4 PASS: a web test renders StandingsPage and finds a team name from the fixture
+check 5 PASS: that web test file exits 0 run alone through pnpm --filter @bt/web exec vitest run
+check 6 PASS: the standings UI files have no <img, mlbstatic or /logos/
+check 7 PASS: the standings UI files call no useMediaQuery / hiddenFrom / visibleFrom
+check 8 PASS: each division table shows TeamSwatch, name, abbreviation, W, L, PCT and GB with — for the leader; headings from divisionName (RTL: AL East)
+check 9 PASS: loading, empty and error use ViewState (a test per state)
+check 10 PASS: design match: e2e/design/S4.spec.ts names standings-mobile/-medium/-desktop; docs/v3/design-checks/S4/ holds them at 390 / 768 / 1200
+check 11 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**11/11 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with its ratified frame
+
+| Frame | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/standings-search-settings/standings-desktop.png` | `c36237e7078f967d026c56377fd90bf497186c6e8e95c05eb9e5c6bb44182ed7` | `docs/v3/design-checks/S4/standings-desktop.png` | `815082d9295467dfab38f9f503ae8682f6eb298efd21b8bb64a740eeeae3c7da` |
+| `docs/v3/visual/standings-search-settings/standings-medium.png` | `a5db812bdd9c59090d3b0077481df772f2665c545da81b559d70d2f4200fbd71` | `docs/v3/design-checks/S4/standings-medium.png` | `664cd4ced057294067835f22fdbc2b7f742d341c0d9e5dea5007a3ec409737ab` |
+| `docs/v3/visual/standings-search-settings/standings-mobile.png` | `6b2b0c808ac46b8984add44dde391c127a335c528bcb5e8a85b267b6ccfacccb` | `docs/v3/design-checks/S4/standings-mobile.png` | `f1b2955c98fa68f0e6acade2f1268aa28f3b36ecd94140b1c0bf5108dcb98910` |
+Owner: ""All the screenshots look good" (owner, 2026-11-07, this session, covering S4, S73 and S28; shown side by side via pnpm design:review S4 with the coordinator noting bold team names vs the frame's regular weight, some gray-looking team-color dots, all six divisions vs the frame's AL only, and "Sign in" in the header)"
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S4 check results ---
+check 1 PASS: fixtures/standings-2026-09-05.json exists and is valid JSON; fixtures/standings-2024-07-04.json does not exist
+check 2 PASS: the fixture has >=2 divisions, each with a name or id and a teams list; each team has a name string and numeric wins and losses
+check 3 PASS: GET /api/v1/standings?date=2026-09-05 returns 200 with >=2 divisions of such records (functions test); the route is in the route table with its response type
+check 4 PASS: a web test renders StandingsPage and finds a team name from the fixture
+check 5 PASS: that web test file exits 0 run alone through pnpm --filter @bt/web exec vitest run
+check 6 PASS: the standings UI files have no <img, mlbstatic or /logos/
+check 7 PASS: the standings UI files call no useMediaQuery / hiddenFrom / visibleFrom
+check 8 PASS: each division table shows TeamSwatch, name, abbreviation, W, L, PCT and GB with — for the leader; headings from divisionName (RTL: AL East)
+check 9 PASS: loading, empty and error use ViewState (a test per state)
+check 10 PASS: design match: e2e/design/S4.spec.ts names standings-mobile/-medium/-desktop; docs/v3/design-checks/S4/ holds them at 390 / 768 / 1200
+check 11 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S4: 11/11 checks passed ---
+verify-S4: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 1145ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  606ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  536ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 77ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1071ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  979ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 93ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 63ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 16ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 66ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  05:55:37
+   Duration  3.30s (transform 97ms, setup 0ms, collect 4.74s, tests 2.69s, environment 1ms, prepare 510ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154775,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

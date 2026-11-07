@@ -79,7 +79,9 @@ Use the S1 prompt in BACKLOG. Watch stalls/overreach. Do not walk away on the fi
 
 ## 7 — Reviewer pass
 
-Before accepting loop output onto `main`:
+Loop output lands on `stage`, never `main` (S118; owner, 2026-11-06: "Instead of committing directly to main, we commit to stage, and the stage branch pushes to the stage site."): agents commit and push to `stage`, which deploys `stage.baseball.theater`, and never push or merge into `main`, because a push to `main` deploys production; merging `stage` into `main` is the owner's release step.
+
+Before accepting loop output onto `stage`:
 
 1. Ensure `pnpm verify` is green on the branch
 2. Run a **fresh-context** review (no prior loop transcript):

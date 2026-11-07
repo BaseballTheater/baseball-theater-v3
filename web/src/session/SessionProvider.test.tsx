@@ -9,7 +9,10 @@ import {
 import { createQueryClient } from "../api/queryClient.js";
 import { jsonResponse } from "../test/jsonResponse.js";
 import { stubMeApi } from "../test/meApi.js";
+import type { AuthClientLoader } from "./SessionProvider.js";
 import { SessionProvider } from "./SessionProvider.js";
+import type { LogtoSdk } from "./AuthClient.js";
+import { createAuthClient } from "./AuthClient.js";
 import {
 	ACCOUNT_QUERY_KEY, DEV_SIGN_IN_TOKEN, useSession,
 } from "./session.js";
@@ -27,11 +30,13 @@ vi.mock("../storage/storage.js", async (importOriginal) =>
 	};
 });
 
-function renderSession(queryClient = createQueryClient())
+function renderSession(queryClient = createQueryClient(), authClient?: AuthClientLoader)
 {
 	const wrapper = ({ children }: { children: ReactNode }) => (
 		<QueryClientProvider client={queryClient}>
-			<SessionProvider>{children}</SessionProvider>
+			<SessionProvider {...authClient && {
+				authClient,
+			}}>{children}</SessionProvider>
 		</QueryClientProvider>
 	);
 	return renderHook(() => useSession(), {
@@ -109,14 +114,18 @@ describe("SessionProvider", () =>
 		expect(queryClient.getQueryState([...ACCOUNT_QUERY_KEY, "settings"])?.isInvalidated).toBe(true);
 	});
 
-	it("does nothing on signIn() in a production build, until the Logto hand-off replaces it", async () =>
+	it("S116 AC 3: does nothing on signIn() in a production build whose Worker offers no Logto (previews)", async () =>
 	{
 		vi.stubEnv("PROD", true);
-		const fetchMock = stubMeApi();
+		const fetchMock = vi.fn(async (request: Request) => (new URL(request.url).pathname === "/api/v1/sign-in" ? jsonResponse({
+			logto: null,
+		}) : jsonResponse({}, 401)));
+		vi.stubGlobal("fetch", fetchMock);
 		const { result } = renderSession();
 		await act(() => result.current.signIn());
 		expect(result.current.status).toBe("signedOut");
-		expect(fetchMock).not.toHaveBeenCalled();
+		expect(getSessionToken()).toBeNull();
+		expect(fetchMock.mock.calls.map(([request]) => new URL(request.url).pathname)).toEqual(["/api/v1/sign-in"]);
 	});
 
 	it("sign-out clears the session and every personal browser key, and removes account queries, keeping game data", async () =>
@@ -143,8 +152,145 @@ describe("SessionProvider", () =>
 		});
 	});
 
+	it("S116 AC 3: locally (no Logto) signIn() is still the dev sign-in and signOut() ends no other session", async () =>
+	{
+		stubMeApi();
+		const authClient = vi.fn(async () => null);
+		const { result } = renderSession(createQueryClient(), authClient);
+		await act(() => result.current.signIn());
+		expect(getSessionToken()).toBe(DEV_SIGN_IN_TOKEN);
+		act(() => result.current.signOut());
+		await waitFor(() => expect(authClient).toHaveBeenCalledTimes(2));
+		expect(result.current.status).toBe("signedOut");
+	});
+
 	it("useSession outside the provider is an error", () =>
 	{
 		expect(() => renderHook(() => useSession())).toThrow("SessionProvider");
+	});
+});
+
+describe("SessionProvider with Logto (S116)", () =>
+{
+	/** A stand-in Logto SDK on the real AuthClient, keeping what the real SDK would in the storage it is given. */
+	function logto()
+	{
+		let sdk: LogtoSdk | undefined;
+		const client = createAuthClient({
+			endpoint: "https://auth.bt.test",
+			appId: "spa",
+		}, location.origin, (_config, storage) =>
+		{
+			sdk = {
+				signIn: vi.fn(async () => storage.setItem("signInSession", "pkce-state")),
+				handleSignInCallback: vi.fn(async () =>
+				{
+					await storage.removeItem("signInSession");
+					await storage.setItem("idToken", "logto-id-token");
+					await storage.setItem("accessToken", "logto-access-token");
+				}),
+				getIdToken: () => storage.getItem("idToken"),
+				// Left a no-op so sign-out is what has to clear the tokens.
+				clearAllTokens: vi.fn(async () => undefined),
+				signOut: vi.fn(async () => undefined),
+			};
+			return sdk;
+		});
+		return {
+			loader: async () => client,
+			sdk: () => sdk!,
+		};
+	}
+
+	/** The API for a Logto sign-in: the ID token trades for BT's session, which /me accepts. */
+	function stubSignInApi()
+	{
+		const fetchMock = vi.fn(async (request: Request): Promise<Response> =>
+		{
+			const path = new URL(request.url).pathname;
+			if (path === "/api/v1/sign-in" && request.method === "POST")
+			{
+				const body = await request.json() as { idToken: string };
+				return body.idToken === "logto-id-token" ? jsonResponse({
+					token: "bt-session-1",
+				}) : jsonResponse({
+					error: "sign_in_refused",
+				}, 401);
+			}
+			if (path === "/api/v1/me") return request.headers.get("Authorization") === "Bearer bt-session-1" ? jsonResponse({
+				uid: "u1",
+				email: "fan@example.test",
+				role: "member",
+				entitlements: {},
+			}) : jsonResponse({
+				error: "unauthorized",
+			}, 401);
+			return new Promise<Response>(() => undefined);
+		});
+		vi.stubGlobal("fetch", fetchMock);
+		return fetchMock;
+	}
+
+	afterEach(() =>
+	{
+		localStorage.clear();
+		sessionStorage.clear();
+		window.history.replaceState(null, "", "/");
+	});
+
+	it("S116 AC 3: signIn() goes to Logto with prompt login, the callback hands the ID token to BT once, and sign-out ends both sessions and clears every key", async () =>
+	{
+		const fetchMock = stubSignInApi();
+		const { loader, sdk } = logto();
+		window.history.replaceState(null, "", "/settings");
+		const { result } = renderSession(createQueryClient(), loader);
+
+		await act(() => result.current.signIn());
+		expect(sdk().signIn).toHaveBeenCalledWith({
+			redirectUri: `${location.origin}/sign-in/callback`,
+			prompt: "login",
+		});
+		// Nothing signed in yet: the browser would now be at Logto.
+		expect(result.current.status).toBe("signedOut");
+
+		const callback = `${location.origin}/sign-in/callback?code=c1&state=s1`;
+		let returnTo = "";
+		await act(async () =>
+		{
+			// The callback route's effect may run twice; BT gets the token once.
+			const [first, second] = await Promise.all([result.current.finishSignIn(callback), result.current.finishSignIn(callback)]);
+			returnTo = first;
+			expect(second).toBe(first);
+		});
+		expect(returnTo).toBe("/settings");
+		expect(result.current.status).toBe("signedIn");
+		expect(getSessionToken()).toBe("bt-session-1");
+		expect(fetchMock.mock.calls.filter(([request]) => new URL(request.url).pathname === "/api/v1/sign-in")).toHaveLength(1);
+		expect(sdk().handleSignInCallback).toHaveBeenCalledOnce();
+
+		act(() => result.current.signOut());
+		await waitFor(() => expect(sdk().signOut).toHaveBeenCalledWith(`${location.origin}/settings`));
+		expect(result.current.status).toBe("signedOut");
+		// BT's session, Logto's keys and the sign-in's return path: nothing is left in either storage.
+		expect(Object.keys(localStorage)).toEqual([]);
+		expect(Object.keys(sessionStorage)).toEqual([]);
+	});
+
+	it("S116 AC 3: a refused ID token leaves the browser signed out", async () =>
+	{
+		stubSignInApi();
+		const client = {
+			signIn: vi.fn(async () => undefined),
+			finishSignIn: vi.fn(async () => "a-forged-token"),
+			signOut: vi.fn(async () => undefined),
+		};
+		const { result } = renderSession(createQueryClient(), async () => client);
+		await act(async () =>
+		{
+			await expect(result.current.finishSignIn(`${location.origin}/sign-in/callback?code=bad`)).rejects.toThrow(/401/);
+		});
+		expect(result.current.status).toBe("signedOut");
+		expect(getSessionToken()).toBeNull();
+		await expect(renderSession(createQueryClient(), async () => null).result.current.finishSignIn("x")).rejects.toThrow(/no Logto/);
 	});
 });

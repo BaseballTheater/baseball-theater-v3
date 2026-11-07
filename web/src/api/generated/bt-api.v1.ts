@@ -158,6 +158,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sign-in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How this deployment signs fans in: its Logto tenant's address and the web app's ID, or `logto: null` where it offers no Logto sign-in (local dev, previews, and staging until its own tenant exists). */
+        get: operations["getSignInConfig"];
+        put?: never;
+        /** Finishes a sign-in: takes the ID token Logto's hosted sign-in gave the web app (checked against the tenant's keys, issuer, the app's ID and expiry), finds or creates the BT account linked to it, and answers with BT's own session token, sent from then on as `Authorization: Bearer <token>`. */
+        post: operations["signIn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/standings": {
         parameters: {
             query?: never;
@@ -685,6 +703,23 @@ export interface components {
         };
         /** @description The signed-in user's settings document (ADR-027); the house defaults until they first save. */
         SettingsResponse: components["schemas"]["AccountSettings"];
+        /** @description How this deployment signs fans in (S116; ADR-019): its Logto tenant's address and the web app's ID, read from the Worker's `vars` (`LOGTO_ENDPOINT`, `LOGTO_APP_ID`) so the web app keeps no second copy. `logto` is null where the Worker offers no Logto sign-in: local dev (which signs in as `dev:`), previews, and staging until its own tenant exists. */
+        SignInConfigResponse: {
+            logto: {
+                /** @description The single-page app's ID, the ID token's audience. */
+                appId: string;
+                /** @description The tenant's address, e.g. `https://auth.baseball.theater`. */
+                endpoint: string;
+            } | null;
+        };
+        /** @description A sign-in hand-off: the ID token Logto's hosted sign-in gave the web app, sent once. */
+        SignInRequest: {
+            idToken: string;
+        };
+        /** @description A finished sign-in: BT's own session token, which the web app sends as `Authorization: Bearer`. */
+        SignInResponse: {
+            token: string;
+        };
         StandingsDivision: {
             divisionId: number | null;
             leagueId: number | null;
@@ -1218,6 +1253,95 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScoreboardDefaultDateResponse"];
+                };
+            };
+            /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
+            426: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    getSignInConfig: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignInConfigResponse"];
+                };
+            };
+            /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
+            426: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    signIn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignInRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignInResponse"];
+                };
+            };
+            /** @description The body is not JSON with a non-empty `idToken`. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description `sign_in_refused`: the ID token doesn't verify, has expired, is for another app or tenant, or carries no email. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description `sign_in_unavailable`: this deployment offers no Logto sign-in. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
                 };
             };
             /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */

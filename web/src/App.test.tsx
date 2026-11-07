@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { render } from "@testing-library/react";
+import { cleanup, render } from "@testing-library/react";
 import {
 	afterEach, beforeEach, describe, expect, it, vi,
 } from "vitest";
@@ -26,6 +26,11 @@ describe("App theme (S39)", () =>
 
 	afterEach(() =>
 	{
+		// Vitest globals are off, so Testing Library never unmounts on its own. Left mounted,
+		// the whole app outlives the file, and a Mantine modal's scroll-lock timer fired after
+		// jsdom was torn down ("window is not defined"), failing CI on `stage` (2026-11-06).
+		// Unmounting runs Mantine's effect cleanup, which clears that timer.
+		cleanup();
 		vi.unstubAllGlobals();
 	});
 

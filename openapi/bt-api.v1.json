@@ -992,6 +992,48 @@
 				"$ref": "#/components/schemas/AccountSettings",
 				"description": "The signed-in user's settings document (ADR-027); the house defaults until they first save."
 			},
+			"SignInConfigResponse": {
+				"additionalProperties": false,
+				"description": "How this deployment signs fans in (S116; ADR-019): its Logto tenant's address and the web app's ID, read from the Worker's `vars` (`LOGTO_ENDPOINT`, `LOGTO_APP_ID`) so the web app keeps no second copy. `logto` is null where the Worker offers no Logto sign-in: local dev (which signs in as `dev:`), previews, and staging until its own tenant exists.",
+				"properties": {
+					"logto": {
+						"anyOf": [
+							{
+								"additionalProperties": false,
+								"properties": {
+									"appId": {
+										"description": "The single-page app's ID, the ID token's audience.",
+										"type": "string"
+									},
+									"endpoint": {
+										"description": "The tenant's address, e.g. `https://auth.baseball.theater`.",
+										"type": "string"
+									}
+								},
+								"required": ["endpoint", "appId"],
+								"type": "object"
+							},
+							{ "type": "null" }
+						]
+					}
+				},
+				"required": ["logto"],
+				"type": "object"
+			},
+			"SignInRequest": {
+				"additionalProperties": false,
+				"description": "A sign-in hand-off: the ID token Logto's hosted sign-in gave the web app, sent once.",
+				"properties": { "idToken": { "type": "string" } },
+				"required": ["idToken"],
+				"type": "object"
+			},
+			"SignInResponse": {
+				"additionalProperties": false,
+				"description": "A finished sign-in: BT's own session token, which the web app sends as `Authorization: Bearer`.",
+				"properties": { "token": { "type": "string" } },
+				"required": ["token"],
+				"type": "object"
+			},
 			"StandingsDivision": {
 				"additionalProperties": false,
 				"properties": {
@@ -1456,6 +1498,68 @@
 					}
 				},
 				"summary": "The day the scoreboard opens on: today (MLB's day, America/New_York) during a season, and the last postseason game's day from then until the next season's first spring training game."
+			}
+		},
+		"/api/v1/sign-in": {
+			"get": {
+				"operationId": "getSignInConfig",
+				"parameters": [],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/SignInConfigResponse" } }
+						},
+						"description": "OK"
+					},
+					"426": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
+					}
+				},
+				"summary": "How this deployment signs fans in: its Logto tenant's address and the web app's ID, or `logto: null` where it offers no Logto sign-in (local dev, previews, and staging until its own tenant exists)."
+			},
+			"post": {
+				"operationId": "signIn",
+				"parameters": [],
+				"requestBody": {
+					"content": { "application/json": { "schema": { "$ref": "#/components/schemas/SignInRequest" } } },
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/SignInResponse" } }
+						},
+						"description": "OK"
+					},
+					"400": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "The body is not JSON with a non-empty `idToken`."
+					},
+					"401": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`sign_in_refused`: the ID token doesn't verify, has expired, is for another app or tenant, or carries no email."
+					},
+					"404": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`sign_in_unavailable`: this deployment offers no Logto sign-in."
+					},
+					"426": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
+					}
+				},
+				"summary": "Finishes a sign-in: takes the ID token Logto's hosted sign-in gave the web app (checked against the tenant's keys, issuer, the app's ID and expiry), finds or creates the BT account linked to it, and answers with BT's own session token, sent from then on as `Authorization: Bearer <token>`."
 			}
 		},
 		"/api/v1/standings": {

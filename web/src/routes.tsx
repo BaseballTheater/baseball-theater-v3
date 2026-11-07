@@ -10,6 +10,8 @@ import { useAccountDeleted } from "./api/accountDeleted.js";
 import { useScoreboardDefaultDate } from "./api/scoreboardDate.js";
 import { DeletedAccountPage } from "./pages/settings/DeletedAccountPage.js";
 import { useSession } from "./session/session.js";
+import { SignInCallback } from "./session/SignInCallback.js";
+import { SIGN_IN_CALLBACK_PATH } from "@bt/domain";
 
 /**
  * Signed out on `/settings`: if this browser's account was just deleted, A5's
@@ -84,6 +86,7 @@ export function AppRoutes({ variant }: { variant: LayoutVariant })
 				<Route path="/standings" element={<StandingsPage />} />
 				<Route path="/search" element={<SearchPage />} />
 				<Route path="/settings" element={<SignedInOnly><SettingsPage variant={variant} /></SignedInOnly>} />
+				<Route path={SIGN_IN_CALLBACK_PATH} element={<SignInCallback />} />
 			</Routes>
 		</Suspense>
 	);

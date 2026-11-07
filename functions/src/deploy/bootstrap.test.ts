@@ -79,7 +79,9 @@ function standIns(initial: { branches?: NeonBranch[];
 			const branch: NeonBranch = {
 				id: "br-staging",
 				name: body.branch.name,
-				init_source: body.branch.init_source,
+				// Neon takes `schema-only` on create but lists the branch back as `parent-schema`
+				// (seen on the first real staging deploy, 2026-11-06), so the stand-in does too.
+				init_source: body.branch.init_source === "schema-only" ? "parent-schema" : body.branch.init_source,
 				current_state: "init",
 			};
 			branches.push(branch);
@@ -127,6 +129,8 @@ function standIns(initial: { branches?: NeonBranch[];
 		rebase: (path) => `../../${path}`,
 		secrets: {
 			BT_SESSION_KEY: "from-github",
+			LOGTO_S2S_APP_ID: "m2m-from-github",
+			LOGTO_S2S_SECRET: "gh-secret",
 		},
 		prepareCopy: async (url) =>
 		{
@@ -311,17 +315,23 @@ describe("S114 AC 8: Worker secrets from GitHub on every deploy", () =>
 		expect(workerSecrets({
 			BT_SESSION_KEY: "k",
 			OTHER: "ignored",
-		})).toEqual({
+		}, "staging")).toEqual({
 			BT_SESSION_KEY: "k",
 		});
-		expect(() => workerSecrets({})).toThrow(/missing Worker secrets[^]*BT_SESSION_KEY/);
+		expect(() => workerSecrets({}, "staging")).toThrow(/missing Worker secrets[^]*BT_SESSION_KEY/);
 		const { deps, writes } = standIns();
-		for (const env of ["staging", "production"] as const)
-		{
-			expect((await bootstrapDeploy(deps, env)).secrets).toEqual({
-				BT_SESSION_KEY: "from-github",
-			});
-		}
+		// Staging's Worker never gets production's machine-to-machine secret, even from a job that carried it (S116 AC 5).
+		expect((await bootstrapDeploy(deps, "staging")).secrets).toEqual({
+			BT_SESSION_KEY: "from-github",
+		});
+		expect((await bootstrapDeploy(deps, "production")).secrets).toEqual({
+			BT_SESSION_KEY: "from-github",
+			LOGTO_S2S_APP_ID: "m2m-from-github",
+			LOGTO_S2S_SECRET: "gh-secret",
+		});
+		expect(() => workerSecrets({
+			BT_SESSION_KEY: "k",
+		}, "production")).toThrow(/missing Worker secrets[^]*LOGTO_S2S_APP_ID, LOGTO_S2S_SECRET/);
 		const before = writes().length;
 		await expect(bootstrapDeploy({
 			...deps,
@@ -340,7 +350,8 @@ describe("S114 AC 8: Worker secrets from GitHub on every deploy", () =>
 			expect(vars).not.toHaveProperty("BT_LOCAL");
 		}
 		expect(WRANGLER.env!.staging!.vars!.BT_APP_ORIGIN).toBe("https://stage.baseball.theater");
-		expect(WRANGLER.env!.production!.vars!.BT_APP_ORIGIN).toBe("https://baseball.theater");
+		// Production serves next.baseball.theater until the owner cuts baseball.theater over from Elastic Beanstalk (S119).
+		expect(WRANGLER.env!.production!.vars!.BT_APP_ORIGIN).toBe("https://next.baseball.theater");
 	});
 });
 

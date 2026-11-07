@@ -6,16 +6,25 @@
  * The session is the account `GET /api/v1/me` returns for the stored bearer
  * token (`token.ts`). The server answers 401 when there is no valid session,
  * which reads as signed out.
+ *
+ * Signing in is Logto's wherever the deployment offers it (S116): the `AuthClient`
+ * (the one module that loads Logto's SDK, imported on demand so it stays out of
+ * the first download) goes to Logto's hosted sign-in, and the callback route hands
+ * the ID token to BT for BT's own session token. Locally it stays the dev sign-in.
  */
 import { useQueryClient } from "@tanstack/react-query";
 import {
 	useEffect, useState, type ReactNode,
 } from "react";
-import { fetchMe } from "../api/client.js";
+import { signOutReturnUri } from "@bt/domain";
+import { exchangeIdToken, fetchMe } from "../api/client.js";
+import type { AuthClient } from "./AuthClient.js";
 import {
 	ACCOUNT_QUERY_KEY, DEV_SIGN_IN_TOKEN, SessionContext, SIGNED_OUT, type Session, type SessionState,
 } from "./session.js";
-import { clearPersonalData } from "../storage/storage.js";
+import {
+	clearPersonalData, readStored, writeStored,
+} from "../storage/storage.js";
 import { getSessionToken, setSessionToken } from "./token.js";
 
 /**
@@ -44,7 +53,28 @@ async function loadSession(): Promise<SessionState>
 	}
 }
 
-export function SessionProvider({ children }: { children: ReactNode })
+/**
+ * This deployment's `AuthClient`, or null where it offers no Logto sign-in. A production
+ * build asks the Worker (`AuthClient.ts`); a development build signs in as `dev:` and never
+ * loads Logto's SDK. Tests pass their own.
+ */
+export type AuthClientLoader = () => Promise<AuthClient | null>;
+
+const deployedAuthClient: AuthClientLoader = async () =>
+{
+	if (!import.meta.env.PROD) return null;
+	const { loadAuthClient } = await import("./AuthClient.js");
+	return loadAuthClient();
+};
+
+/**
+ * Each callback URL's hand-off, so the ID token goes to BT once even when the callback
+ * route's effect runs twice (React's development double-run, or a re-render).
+ */
+const handOffs = new Map<string, Promise<string>>();
+
+export function SessionProvider({ children, authClient = deployedAuthClient }: { children: ReactNode;
+	authClient?: AuthClientLoader; })
 {
 	const queryClient = useQueryClient();
 	// With no stored token there is nothing to ask the server, so start signed out.
@@ -70,6 +100,14 @@ export function SessionProvider({ children }: { children: ReactNode })
 		...state,
 		async signIn()
 		{
+			const client = await authClient();
+			if (client)
+			{
+				// The callback returns here once Logto is done (`finishSignIn`).
+				writeStored("bt.signInReturnTo", `${location.pathname}${location.search}`);
+				await client.signIn();
+				return;
+			}
 			if (import.meta.env.PROD) return;
 			setSessionToken(DEV_SIGN_IN_TOKEN);
 			setState(await loadSession());
@@ -77,14 +115,41 @@ export function SessionProvider({ children }: { children: ReactNode })
 				queryKey: ACCOUNT_QUERY_KEY,
 			});
 		},
+		finishSignIn(callbackUrl)
+		{
+			let handOff = handOffs.get(callbackUrl);
+			if (!handOff)
+			{
+				handOff = (async () =>
+				{
+					const client = await authClient();
+					if (!client) throw new Error("this deployment offers no Logto sign-in");
+					setSessionToken(await exchangeIdToken(await client.finishSignIn(callbackUrl)));
+					setState(await loadSession());
+					await queryClient.invalidateQueries({
+						queryKey: ACCOUNT_QUERY_KEY,
+					});
+					const returnTo = readStored("bt.signInReturnTo") ?? "/";
+					writeStored("bt.signInReturnTo", null);
+					return returnTo;
+				})();
+				handOffs.set(callbackUrl, handOff);
+			}
+			return handOff;
+		},
 		signOut()
 		{
 			setSessionToken(null);
-			// Every personal browser key, not just the token (ADR-028).
+			// Every personal browser key, Logto's included, not just the token (ADR-028).
 			clearPersonalData();
 			setState(SIGNED_OUT);
 			queryClient.removeQueries({
 				queryKey: ACCOUNT_QUERY_KEY,
+			});
+			// Then Logto's own session, where Logto signed in: a navigation, back to this page when Logto accepts it.
+			void authClient().then((client) => client?.signOut(signOutReturnUri(location.origin, location.pathname))).catch(() =>
+			{
+				// BT's session is already over; a Logto session left behind only skips the email on the next sign-in, which asks for a fresh code anyway.
 			});
 		},
 	};

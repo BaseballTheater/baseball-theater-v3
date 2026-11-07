@@ -70,7 +70,7 @@ Then go back to step 2.
 
 ## 5. Stop
 
-Stop when `N` stories have been started, nothing is eligible, a review returns `blocked`, `pnpm verify` breaks in a way no story owns, or the owner interrupts. Then push `main` once, for the whole run (owner, 2026-11-02: "if we're using run-stories, we don't have to push until they are all done"): check GitHub Actions first and watch the new run, as `CLAUDE.md` → Agent / loop rules says, and report its result in the summary. Never deploy or open a PR.
+Stop when `N` stories have been started, nothing is eligible, a review returns `blocked`, `pnpm verify` breaks in a way no story owns, or the owner interrupts. Then push to `stage` once, for the whole run (owner, 2026-11-02: "if we're using run-stories, we don't have to push until they are all done"): check GitHub Actions on `stage` first (`gh run list --branch stage --limit 1`) and watch the new run, as `CLAUDE.md` → Agent / loop rules says, and report its result in the summary. A run never pushes or merges into `main`, and never opens a PR to it: a push to `main` deploys production, and merging `stage` into `main` is the owner's release step (S118; owner, 2026-11-06: "Instead of committing directly to main, we commit to stage, and the stage branch pushes to the stage site."). Never deploy or open a PR.
 
 End with one summary:
 

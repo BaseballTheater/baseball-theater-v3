@@ -14,6 +14,8 @@ import {
 	createDevAccountData, createDevAuth, StaticSecretsProvider,
 } from "./adapters/fixtures/auth.js";
 import { createBundledFixtureClient } from "./adapters/fixtures/bundled.js";
+import { LogtoIdentityAdmin, LogtoManagementApi } from "./adapters/logto/admin.js";
+import { LogtoIdentityProvider } from "./adapters/logto/identity.js";
 import { HttpMlbStatsClient } from "./adapters/http/mlb.js";
 import type { MlbOverlaySource } from "./adapters/overlay-mlb.js";
 import { overlayMlbClient, storeOverlay } from "./adapters/overlay-mlb.js";
@@ -50,6 +52,22 @@ export type WorkerEnv = {
 	 * with `BT_INGEST_TICK=1`, and `dev:` sign-in is wired (S114 AC 7). No deployed env sets it.
 	 */
 	BT_LOCAL?: string;
+	/**
+	 * The Logto tenant's address and the single-page app's ID (S116): where both are set, the
+	 * Worker offers Logto sign-in. Per-env `vars` in `wrangler.jsonc`; only production names them
+	 * today (staging gets its own tenant's once it exists; previews never do).
+	 */
+	LOGTO_ENDPOINT?: string;
+	LOGTO_APP_ID?: string;
+	/** The tenant's own ID, for the Management API, which Logto Cloud serves only at `<id>.logto.app` (S116). */
+	LOGTO_TENANT_ID?: string;
+	/**
+	 * Production's machine-to-machine app (Worker secrets, pushed from GitHub secrets on every
+	 * production deploy, S116 AC 5): where the secret is set, account deletion also deletes the
+	 * fan's Logto account. No other env has one.
+	 */
+	LOGTO_S2S_APP_ID?: string;
+	LOGTO_S2S_SECRET?: string;
 	/** `"1"` lets the cron tick ingest in local dev (ADR-002 cadence; off by default, as `local-server.ts`). */
 	BT_INGEST_TICK?: string;
 	/** The per-game ingest objects (S48; `wrangler.jsonc` `durable_objects`); absent under Node. */
@@ -82,12 +100,17 @@ export function createMlbClient(env: WorkerEnv, store?: MlbOverlaySource): MlbSt
 	return store ? overlayMlbClient(fixtures, store) : fixtures;
 }
 
+/** What tests swap in the composition: the `fetch` the Logto adapters call (a stand-in tenant). */
+export type WorkerAppOptions = {
+	fetch?: (input: string, init?: RequestInit) => Promise<Response>;
+};
+
 /**
  * Wires the API for `env` on `db`. Exported for tests and the Node server; the Worker calls
  * `workerApp`, which builds it once on `scopedDatabase`. Nothing is seeded here: `pnpm db:seed`
  * fills the database, and a day or game that isn't stored is read through from MLB anyway.
  */
-export function createWorkerApp(env: WorkerEnv, db: PostgresDb): WorkerApp
+export function createWorkerApp(env: WorkerEnv, db: PostgresDb, options: WorkerAppOptions = {}): WorkerApp
 {
 	const schedules = new PostgresScheduleRepository(db);
 	const games = new PostgresGameRepository(db);
@@ -109,12 +132,25 @@ export function createWorkerApp(env: WorkerEnv, db: PostgresDb): WorkerApp
 		},
 	});
 	const devAuth = createDevAuth(secrets, new PostgresUserRepository(db));
-	const auth = devSignInAllowed(env) ? devAuth : withoutDevSignIn(devAuth);
+	const logto = logtoSignIn(env, options);
+	const auth: AuthDeps = {
+		...devSignInAllowed(env) ? devAuth : withoutDevSignIn(devAuth),
+		...logto && {
+			logto,
+		},
+	};
 	const settings = new PostgresSettingsRepository(db);
-	const account = createDevAccountData({
+	const devAccount = createDevAccountData({
 		users: auth.users,
 		settings,
 	}, secrets, new PostgresDeletionLog(db));
+	const admin = logtoAdmin(env, options);
+	// Deletion reaches each provider through its admin; without Logto's (everywhere but production)
+	// a deletion still removes every BT row and leaves the provider account alone (S116 AC 4).
+	const account = {
+		...devAccount,
+		identityAdmins: admin ? [...devAccount.identityAdmins, admin] : devAccount.identityAdmins,
+	};
 	return {
 		context: {
 			ingest,
@@ -134,11 +170,48 @@ export function createWorkerApp(env: WorkerEnv, db: PostgresDb): WorkerApp
 /**
  * Whether `Bearer dev:<uid>` signs in (S114 AC 7): only in local dev, where `pnpm dev` and the
  * Workers tests set `BT_LOCAL` to `"1"`. No deployed environment sets it (`wrangler.jsonc`), so
- * preview, staging and production refuse a `dev:` token until Logto sign-in lands (S116).
+ * preview, staging and production refuse a `dev:` token; production signs in through Logto (S116).
  */
 export function devSignInAllowed(env: WorkerEnv): boolean
 {
 	return env.BT_LOCAL === "1";
+}
+
+/** Logto sign-in where the env's vars name the tenant and the app (S116 AC 2); none elsewhere. */
+export function logtoSignIn(env: WorkerEnv, options: WorkerAppOptions = {}): AuthDeps["logto"]
+{
+	if (!env.LOGTO_ENDPOINT || !env.LOGTO_APP_ID) return undefined;
+	const config = {
+		endpoint: env.LOGTO_ENDPOINT,
+		appId: env.LOGTO_APP_ID,
+	};
+	return {
+		provider: new LogtoIdentityProvider({
+			...config,
+			...options.fetch && {
+				fetch: options.fetch,
+			},
+		}),
+		config,
+	};
+}
+
+/**
+ * Logto's admin, only where production's machine-to-machine app is set: `LOGTO_S2S_SECRET` and
+ * `LOGTO_S2S_APP_ID` (Worker secrets) and `LOGTO_TENANT_ID` (a var). Staging and previews have
+ * none, so none is composed there (S116 AC 4).
+ */
+export function logtoAdmin(env: WorkerEnv, options: WorkerAppOptions = {}): LogtoIdentityAdmin | undefined
+{
+	if (!env.LOGTO_S2S_SECRET || !env.LOGTO_S2S_APP_ID || !env.LOGTO_TENANT_ID) return undefined;
+	return new LogtoIdentityAdmin(new LogtoManagementApi({
+		tenantId: env.LOGTO_TENANT_ID,
+		appId: env.LOGTO_S2S_APP_ID,
+		secret: env.LOGTO_S2S_SECRET,
+		...options.fetch && {
+			fetch: options.fetch,
+		},
+	}));
 }
 
 /** The same auth with the `dev:` provider left out, so a `dev:` token is just an unknown bearer. */

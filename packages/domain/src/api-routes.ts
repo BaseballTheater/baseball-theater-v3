@@ -138,6 +138,31 @@ export function toMeResponse(user: UserProfile): MeResponse
 	};
 }
 
+/**
+ * How this deployment signs fans in (S116; ADR-019): its Logto tenant's address and the web
+ * app's ID, read from the Worker's `vars` (`LOGTO_ENDPOINT`, `LOGTO_APP_ID`) so the web app keeps
+ * no second copy. `logto` is null where the Worker offers no Logto sign-in: local dev (which signs
+ * in as `dev:`), previews, and staging until its own tenant exists.
+ */
+export interface SignInConfigResponse {
+	logto: {
+		/** The tenant's address, e.g. `https://auth.baseball.theater`. */
+		endpoint: string;
+		/** The single-page app's ID, the ID token's audience. */
+		appId: string;
+	} | null;
+}
+
+/** A sign-in hand-off: the ID token Logto's hosted sign-in gave the web app, sent once. */
+export interface SignInRequest {
+	idToken: string;
+}
+
+/** A finished sign-in: BT's own session token, which the web app sends as `Authorization: Bearer`. */
+export interface SignInResponse {
+	token: string;
+}
+
 /** Registry a route's response-type name is checked against — no unenforced string keys. */
 export interface ApiResponseTypes {
 	ScheduleDayResponse: ScheduleDayResponse;
@@ -150,6 +175,8 @@ export interface ApiResponseTypes {
 	MeDownloadFileResponse: MeDownloadFileResponse;
 	MeDeleteResponse: MeDeleteResponse;
 	SettingsResponse: SettingsResponse;
+	SignInConfigResponse: SignInConfigResponse;
+	SignInResponse: SignInResponse;
 	ApiErrorResponse: ApiErrorResponse;
 }
 
@@ -171,6 +198,8 @@ export const ApiRoutes = {
 	"POST /api/v1/me/delete": "MeDeleteResponse",
 	"GET /api/v1/me/settings": "SettingsResponse",
 	"PUT /api/v1/me/settings": "SettingsResponse",
+	"GET /api/v1/sign-in": "SignInConfigResponse",
+	"POST /api/v1/sign-in": "SignInResponse",
 } as const satisfies Record<string, keyof ApiResponseTypes>;
 
 export type ApiRoute = keyof typeof ApiRoutes;
@@ -182,6 +211,7 @@ export type ApiResponseFor<R extends ApiRoute> = ApiResponseTypes[(typeof ApiRou
 export interface ApiRequestTypes {
 	MeDeleteRequest: MeDeleteRequest;
 	SettingsRequest: SettingsRequest;
+	SignInRequest: SignInRequest;
 }
 
 /**
@@ -192,6 +222,7 @@ export interface ApiRequestTypes {
 export const ApiRequestBodies = {
 	"POST /api/v1/me/delete": "MeDeleteRequest",
 	"PUT /api/v1/me/settings": "SettingsRequest",
+	"POST /api/v1/sign-in": "SignInRequest",
 } as const satisfies Partial<Record<ApiRoute, keyof ApiRequestTypes>>;
 
 export type ApiRouteWithBody = keyof typeof ApiRequestBodies;

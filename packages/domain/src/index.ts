@@ -36,3 +36,4 @@ export * from "./hide-scores.js";
 export * from "./scoreboard-rows.js";
 export * from "./settings.js";
 export * from "./win-probability.js";
+export * from "./sign-in.js";

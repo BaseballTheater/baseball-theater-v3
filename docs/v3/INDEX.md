@@ -12,12 +12,12 @@
 
 Assembled, in this order and around the stories, into BACKLOG.md.
 
-- [00 Baseball Theater v3 — Checkable backlog](<backlog/frame/00 Baseball Theater v3 — Checkable backlog.md>) — 96 KB
+- [00 Baseball Theater v3 — Checkable backlog](<backlog/frame/00 Baseball Theater v3 — Checkable backlog.md>) — 98 KB
   - `127–145` Verify-script contract
   - `146–159` Story status
-  - `160–429` Backlog reviews
-  - `430–449` Doc parity reviews
-  - `450–454` Goal command for multiple stories
+  - `160–436` Backlog reviews
+  - `437–456` Doc parity reviews
+  - `457–461` Goal command for multiple stories
   - Rules, by number:
     - `10–10` 1. Acceptance criteria map to commands, tests, or file invariants (exit codes / assertions).
     - `11–11` 2. Vague phrases (“works correctly”, “handles errors gracefully”) are forbidden until rewrit…
@@ -41,7 +41,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
     - `120–120` 20. Every story has a Reuse check section (ADR-025, owner, 2026-10-19: "I would prefer that a…
     - `121–121` 21. Coverage floors ratchet up, never down (ADR-026; owner, 2026-10-19: ratchet).
     - `123–123` 22. A UI story is checked against its ratified frames by the owner's eye (ADR-026, amended 20…
-- [01 Current baseline](<backlog/frame/01 Current baseline.md>) — 28 KB
+- [01 Current baseline](<backlog/frame/01 Current baseline.md>) — 30 KB
   - `1–43` Current baseline
 - [02 Stories](<backlog/frame/02 Stories.md>) — 2 KB
 - [03 Data platform — MLB access & types](<backlog/frame/03 Data platform — MLB access & types.md>) — 2 KB
@@ -50,8 +50,8 @@ Assembled, in this order and around the stories, into BACKLOG.md.
     - `55–80` Later themes (not yet story-sliced)
 - [05 Gap map (doc → story)](<backlog/frame/05 Gap map (doc → story).md>) — 8 KB
   - `1–38` Gap map (doc → story)
-- [06 Baseline history](<backlog/frame/06 Baseline history.md>) — 34 KB
-  - `1–112` Baseline history
+- [06 Baseline history](<backlog/frame/06 Baseline history.md>) — 36 KB
+  - `1–116` Baseline history
 
 ## Product and architecture docs
 
@@ -395,7 +395,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `165–167` Fails
   - `168–170` Open decisions
   - `171–174` Missing
-- [INTENT.md — Baseball Theater v3 — Intent](INTENT.md) — 8 KB
+- [INTENT.md — Baseball Theater v3 — Intent](INTENT.md) — 9 KB
   - `10–22` Pillars
   - `23–36` Document set
   - `37–67` Open decisions (fill as we go)
@@ -405,7 +405,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `47–432` Every grader, sorted
   - `433–449` Graders edited after their story shipped
   - `450–514` Re-verified at shipping commits
-- [LOOP.md — Loop-ready automation guide](LOOP.md) — 5 KB
+- [LOOP.md — Loop-ready automation guide](LOOP.md) — 6 KB
 - [ORIGIN.md — Baseball Theater v3 — Origin](ORIGIN.md) — 4 KB
 - [SAVANT-DATA.md — Baseball Savant data](SAVANT-DATA.md) — 8 KB
   - `10–15` Terms of use
@@ -482,7 +482,6 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 
 | Priority | Story | Status | Depends on | Design |
 |---|---|---|---|---|
-| 80 | [S116](backlog/stories/S116.md) Logto sign-in | `todo` | S114 | — |
 | 80 | [S117](backlog/stories/S117.md) Baseball-data copy to staging | `todo` | S114 | — |
 | 90 | [S5](backlog/stories/S5.md) Search page queries highlights fixture | `todo` | S70, S61, S68, S81 | S34, S56 |
 | 91 | [S72](backlog/stories/S72.md) Search chips: date / team / tag | `todo` | S5, S69, S81 | S34 |
@@ -498,11 +497,10 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 | 115 | [S90](backlog/stories/S90.md) Next-pitch model (train + evaluate) | `todo` | S63 | — |
 | 116 | [S92](backlog/stories/S92.md) Design: next-pitch odds (owner-ratified) | `todo` | S64 | — |
 | 117 | [S91](backlog/stories/S91.md) Next-pitch odds in Live (paid) | `todo` | S90, S64 | S92 |
-| 89 | [S4](backlog/stories/S4.md) Standings fixture API + page | `blocked` | S81 | S34 |
 | 92 | [S73](backlog/stories/S73.md) Installable PWA + update notice | `blocked` | S55, S60, S6, S81 | S55, S56 |
 | 93 | [S28](backlog/stories/S28.md) Version sunset path + stale-client upgrade | `blocked` | S26, S25, S73, S81 | S31 |
 | 103 | [S107](backlog/stories/S107.md) Design: win-probability slot | `blocked` | S67, S68 | — |
 
-**`done`** (95): [S1](backlog/stories/S1.md), [S11](backlog/stories/S11.md), [S12](backlog/stories/S12.md), [S23](backlog/stories/S23.md), [S21](backlog/stories/S21.md), [S13](backlog/stories/S13.md), [S14](backlog/stories/S14.md), [S16](backlog/stories/S16.md), [S17](backlog/stories/S17.md), [S22](backlog/stories/S22.md), [S15](backlog/stories/S15.md), [S30](backlog/stories/S30.md), [S24](backlog/stories/S24.md), [S26](backlog/stories/S26.md), [S27](backlog/stories/S27.md), [S25](backlog/stories/S25.md), [S29](backlog/stories/S29.md), [S35](backlog/stories/S35.md), [S36](backlog/stories/S36.md), [S37](backlog/stories/S37.md), [S38](backlog/stories/S38.md), [S31](backlog/stories/S31.md), [S32](backlog/stories/S32.md), [S33](backlog/stories/S33.md), [S34](backlog/stories/S34.md), [S39](backlog/stories/S39.md), [S40](backlog/stories/S40.md), [S43](backlog/stories/S43.md), [S42](backlog/stories/S42.md), [S52](backlog/stories/S52.md), [S53](backlog/stories/S53.md), [S54](backlog/stories/S54.md), [S55](backlog/stories/S55.md), [S56](backlog/stories/S56.md), [S57](backlog/stories/S57.md), [S58](backlog/stories/S58.md), [S44](backlog/stories/S44.md), [S49](backlog/stories/S49.md), [S46](backlog/stories/S46.md), [S8](backlog/stories/S8.md), [S59](backlog/stories/S59.md), [S76](backlog/stories/S76.md), [S77](backlog/stories/S77.md), [S6](backlog/stories/S6.md), [S80](backlog/stories/S80.md), [S78](backlog/stories/S78.md), [S81](backlog/stories/S81.md), [S83](backlog/stories/S83.md), [S84](backlog/stories/S84.md), [S85](backlog/stories/S85.md), [S86](backlog/stories/S86.md), [S87](backlog/stories/S87.md), [S79](backlog/stories/S79.md), [S82](backlog/stories/S82.md), [S60](backlog/stories/S60.md), [S62](backlog/stories/S62.md), [S88](backlog/stories/S88.md), [S61](backlog/stories/S61.md), [S2](backlog/stories/S2.md), [S3](backlog/stories/S3.md), [S64](backlog/stories/S64.md), [S10](backlog/stories/S10.md), [S63](backlog/stories/S63.md), [S41](backlog/stories/S41.md), [S65](backlog/stories/S65.md), [S66](backlog/stories/S66.md), [S67](backlog/stories/S67.md), [S68](backlog/stories/S68.md), [S69](backlog/stories/S69.md), [S70](backlog/stories/S70.md), [S109](backlog/stories/S109.md), [S20](backlog/stories/S20.md), [S110](backlog/stories/S110.md), [S111](backlog/stories/S111.md), [S51](backlog/stories/S51.md), [S112](backlog/stories/S112.md), [S113](backlog/stories/S113.md), [S114](backlog/stories/S114.md), [S93](backlog/stories/S93.md), [S75](backlog/stories/S75.md), [S71](backlog/stories/S71.md), [S45](backlog/stories/S45.md), [S47](backlog/stories/S47.md), [S48](backlog/stories/S48.md), [S18](backlog/stories/S18.md), [S19](backlog/stories/S19.md), [S50](backlog/stories/S50.md), [S94](backlog/stories/S94.md), [S95](backlog/stories/S95.md), [S96](backlog/stories/S96.md), [S97](backlog/stories/S97.md), [S98](backlog/stories/S98.md), [S106](backlog/stories/S106.md), [S89](backlog/stories/S89.md), [S115](backlog/stories/S115.md)
+**`done`** (99): [S1](backlog/stories/S1.md), [S11](backlog/stories/S11.md), [S12](backlog/stories/S12.md), [S23](backlog/stories/S23.md), [S21](backlog/stories/S21.md), [S13](backlog/stories/S13.md), [S14](backlog/stories/S14.md), [S16](backlog/stories/S16.md), [S17](backlog/stories/S17.md), [S22](backlog/stories/S22.md), [S15](backlog/stories/S15.md), [S30](backlog/stories/S30.md), [S24](backlog/stories/S24.md), [S26](backlog/stories/S26.md), [S27](backlog/stories/S27.md), [S25](backlog/stories/S25.md), [S29](backlog/stories/S29.md), [S35](backlog/stories/S35.md), [S36](backlog/stories/S36.md), [S37](backlog/stories/S37.md), [S38](backlog/stories/S38.md), [S31](backlog/stories/S31.md), [S32](backlog/stories/S32.md), [S33](backlog/stories/S33.md), [S34](backlog/stories/S34.md), [S39](backlog/stories/S39.md), [S40](backlog/stories/S40.md), [S43](backlog/stories/S43.md), [S42](backlog/stories/S42.md), [S52](backlog/stories/S52.md), [S53](backlog/stories/S53.md), [S54](backlog/stories/S54.md), [S55](backlog/stories/S55.md), [S56](backlog/stories/S56.md), [S57](backlog/stories/S57.md), [S58](backlog/stories/S58.md), [S44](backlog/stories/S44.md), [S49](backlog/stories/S49.md), [S46](backlog/stories/S46.md), [S8](backlog/stories/S8.md), [S59](backlog/stories/S59.md), [S76](backlog/stories/S76.md), [S77](backlog/stories/S77.md), [S6](backlog/stories/S6.md), [S80](backlog/stories/S80.md), [S78](backlog/stories/S78.md), [S81](backlog/stories/S81.md), [S83](backlog/stories/S83.md), [S84](backlog/stories/S84.md), [S85](backlog/stories/S85.md), [S86](backlog/stories/S86.md), [S87](backlog/stories/S87.md), [S79](backlog/stories/S79.md), [S82](backlog/stories/S82.md), [S60](backlog/stories/S60.md), [S62](backlog/stories/S62.md), [S88](backlog/stories/S88.md), [S61](backlog/stories/S61.md), [S2](backlog/stories/S2.md), [S3](backlog/stories/S3.md), [S64](backlog/stories/S64.md), [S10](backlog/stories/S10.md), [S63](backlog/stories/S63.md), [S41](backlog/stories/S41.md), [S65](backlog/stories/S65.md), [S66](backlog/stories/S66.md), [S67](backlog/stories/S67.md), [S68](backlog/stories/S68.md), [S69](backlog/stories/S69.md), [S70](backlog/stories/S70.md), [S109](backlog/stories/S109.md), [S20](backlog/stories/S20.md), [S110](backlog/stories/S110.md), [S111](backlog/stories/S111.md), [S51](backlog/stories/S51.md), [S112](backlog/stories/S112.md), [S113](backlog/stories/S113.md), [S114](backlog/stories/S114.md), [S118](backlog/stories/S118.md), [S119](backlog/stories/S119.md), [S93](backlog/stories/S93.md), [S116](backlog/stories/S116.md), [S75](backlog/stories/S75.md), [S71](backlog/stories/S71.md), [S45](backlog/stories/S45.md), [S47](backlog/stories/S47.md), [S48](backlog/stories/S48.md), [S18](backlog/stories/S18.md), [S19](backlog/stories/S19.md), [S4](backlog/stories/S4.md), [S50](backlog/stories/S50.md), [S94](backlog/stories/S94.md), [S95](backlog/stories/S95.md), [S96](backlog/stories/S96.md), [S97](backlog/stories/S97.md), [S98](backlog/stories/S98.md), [S106](backlog/stories/S106.md), [S89](backlog/stories/S89.md), [S115](backlog/stories/S115.md)
 
 **`superseded`** (2): [S7](backlog/stories/S7.md), [S9](backlog/stories/S9.md)

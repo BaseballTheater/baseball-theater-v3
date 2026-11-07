@@ -178,9 +178,9 @@ describe("download email", () =>
 		await withAccountServer(async (h) =>
 		{
 			await requested(h, await h.sessionFor("fan-1"));
-			expect(h.account.mailer.sent[0]!.text).toContain("https://baseball.theater/settings");
+			expect(h.account.mailer.sent[0]!.text).toContain("https://next.baseball.theater/settings");
 		}, {
-			[APP_ORIGIN_SECRET]: "https://baseball.theater",
+			[APP_ORIGIN_SECRET]: "https://next.baseball.theater",
 		});
 	});
 

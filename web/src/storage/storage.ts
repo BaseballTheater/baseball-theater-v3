@@ -9,7 +9,13 @@
  * access is guarded: a failed read is "nothing stored", a failed write is lost.
  */
 
-/** Every `localStorage` key BT uses (ADR-028's "Browser" inventory row: session token, cached settings). */
+/**
+ * Every `localStorage` key BT uses (ADR-028's "Browser" inventory row: session token, cached
+ * settings, and Logto's sign-in keys). Logto's browser SDK would otherwise keep its tokens in
+ * `localStorage` and its sign-in session in `sessionStorage` under keys of its own; the
+ * `AuthClient` (S116) hands it a storage adapter over this module instead, so every key it
+ * writes is listed here, labeled personal, and gone after sign-out and account deletion.
+ */
 export const STORAGE_KEYS = {
 	/** The S59 session bearer token. */
 	"bt.session": {
@@ -17,6 +23,25 @@ export const STORAGE_KEYS = {
 	},
 	/** The S6 settings store's cached copy of the account's settings, so a reload shows them before the account answers. */
 	"bt.settings": {
+		personal: true,
+	},
+	/** Where a sign-in started (S116), so the callback can return there; set before leaving for Logto, cleared on return. */
+	"bt.signInReturnTo": {
+		personal: true,
+	},
+	/** Logto's ID token for the moment between its sign-in and the hand-off to BT (S116); the `AuthClient` clears it right after. */
+	"logto.idToken": {
+		personal: true,
+	},
+	/** Logto's access and refresh tokens. BT asks Logto for neither, but the SDK may store them, so they are listed and cleared too. */
+	"logto.accessToken": {
+		personal: true,
+	},
+	"logto.refreshToken": {
+		personal: true,
+	},
+	/** Logto's in-flight sign-in (its PKCE verifier and state), from leaving for Logto until the callback. */
+	"logto.signInSession": {
 		personal: true,
 	},
 } as const satisfies Record<string, { personal: boolean }>;

@@ -58,7 +58,11 @@
 	// The Durable Object `migrations` stay top-level. Every deployed env serves live MLB and names
 	// its own address as BT_APP_ORIGIN; BT_SESSION_KEY is a Worker secret that every deploy pushes
 	// from GitHub secrets (`--secrets-file`), never a var. None sets BT_LOCAL, so none accepts a
-	// `dev:` sign-in (S114 AC 7).
+	// `dev:` sign-in (S114 AC 7). Sign-in is Logto (S116), offered only where an env's vars name
+	// a tenant (LOGTO_ENDPOINT, LOGTO_APP_ID): production's own tenant, never shared with another
+	// env. Previews offer no sign-in (owner, 2026-11-07: "Yes", to previews without sign-in), and
+	// staging none until its own Logto tenant exists (owner, 2026-11-06: "We will use a staging
+	// one or a fake shim"); its vars are then added to env.staging, never production's.
 	"env": {
 		// One Worker per pull request (`baseball-theater-pr-<N>` on workers.dev, its name and
 		// BT_APP_ORIGIN set at deploy time) on staging's database, `bt-staging` (owner, 2026-11-05:
@@ -86,7 +90,7 @@
 				"BT_USE_LIVE_MLB": "1"
 			}
 		},
-		// Every push to main, at stage.baseball.theater, on the Neon `staging` branch through
+		// Every push to stage, at stage.baseball.theater, on the Neon `staging` branch through
 		// `bt-staging`: a schema-only branch that never holds a fan's data (S114 AC 9).
 		"staging": {
 			"name": "baseball-theater-staging",
@@ -109,14 +113,22 @@
 				"BT_APP_ORIGIN": "https://stage.baseball.theater"
 			}
 		},
-		// baseball.theater, after staging and only once the owner approves the GitHub environment
-		// `production`. Its Hyperdrive config is `bt-production`, which the owner created on
+		// Every push to main, at next.baseball.theater until the owner's DNS cutover (S119; owner,
+		// 2026-11-07: "Do the temporary address"): baseball.theater still points at the Elastic
+		// Beanstalk (v2) site, and a deploy that claimed it would replace that DNS record at once.
+		// Cutting over is the owner's step: set this route and BT_APP_ORIGIN to baseball.theater
+		// (README). Its Hyperdrive config is `bt-production`, which the owner created on
 		// 2026-11-02 for the Neon project `old-sun-72319473` (Postgres 18); its connection string
-		// lives only in Cloudflare.
+		// lives only in Cloudflare. Its Logto tenant (S116; the owner's, at the custom domain
+		// auth.baseball.theater, tenant ID `rnrngs`) signs fans in through the single-page app
+		// LOGTO_APP_ID; the Management API is reached at rnrngs.logto.app (Logto Cloud serves it on no
+		// custom domain) by the machine-to-machine app whose ID and secret are Worker secrets.
+		// Every production deploy registers the app's sign-in and sign-out addresses from
+		// BT_APP_ORIGIN (`pnpm deploy:logto`), so the cutover moves them too.
 		"production": {
 			"name": "baseball-theater-production",
 			"workers_dev": false,
-			"routes": [{ "pattern": "baseball.theater", "custom_domain": true }],
+			"routes": [{ "pattern": "next.baseball.theater", "custom_domain": true }],
 			"durable_objects": {
 				"bindings": [
 					{ "name": "GAME_INGEST", "class_name": "GameIngestObject" },
@@ -131,7 +143,10 @@
 			],
 			"vars": {
 				"BT_USE_LIVE_MLB": "1",
-				"BT_APP_ORIGIN": "https://baseball.theater"
+				"BT_APP_ORIGIN": "https://next.baseball.theater",
+				"LOGTO_ENDPOINT": "https://auth.baseball.theater",
+				"LOGTO_APP_ID": "b2f2q1wau5axo1psqexdo",
+				"LOGTO_TENANT_ID": "rnrngs"
 			}
 		}
 	},
