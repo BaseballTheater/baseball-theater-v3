@@ -15914,3 +15914,223 @@ Owner, 2026-11-07, asked "Should I skip the backlog and doc parity reviews for S
 **What changed, and the owner's answer**
 
 Owner, 2026-11-07, asked "Should I skip the backlog and doc parity reviews for S121, or run them? I'd skip.": "2 skip"
+
+---
+
+## 2026-11-07 — S28 completed
+
+**Version sunset path + stale-client upgrade**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-07T07:29:37Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `7c08039` (tree dirty) |
+| Grader | `scripts/verify-S28.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: version lifecycle state lives in one exported table in packages/domain (supported / deprecated / sunset, with dates) beside the route table
+check 2 PASS: a deprecated version answers 200 with Deprecation and Sunset headers and the same body (functions test, alone)
+check 3 PASS: a sunset version answers 426 version_unsupported with no payload data (functions test, alone); the spec declares the 426
+check 4 PASS: each request's version is recorded through a seam a test reads; two versions make two distinct records
+check 5 PASS: the web client's one middleware turns a 426 into the reload-to-update notice, and a 200 doesn't (web test, alone via pnpm --filter @bt/web); after a 426, Update Now asks the service worker for the new version (registration.update()), activates it, then reloads (web test; 2026-11-02 design intake note)
+check 6 PASS: after a 426 the content already on screen stays readable behind the notice (web test); one tested keep-what's-on-screen rule (queryScreen) that the Scoreboard, Standings and Game pages all call (ADR-025; 2026-11-02 design intake note)
+check 7 PASS: README.md documents the lifecycle states, that retiring a version needs the usage log to show no traffic, and that pnpm verify needs no network for it
+check 8 PASS: the 426 notice renders through NoticeSlot / NoticeBanner; no second notice component exists
+check 9 PASS: design match: e2e/design/S28.spec.ts names shell-notice-mobile/-medium/-desktop; docs/v3/design-checks/S28/ holds them at 390 / 768 / 1200
+check 10 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**10/10 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with the ratified frame or written amendment that governs it
+
+| Ratified frame or amendment | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S28/shell-notice-desktop.png` | `63e035d4fa98600c689a386406ab08af1a6646c75fd47262e094ade7f5f94ca7` |
+| `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S28/shell-notice-medium.png` | `9a766ae417a72529206d58901d9d3e396af942acbb714554801a36a2f7d7a19b` |
+| `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S28/shell-notice-mobile.png` | `87404c8e4bd3205a41d38906900523e601373d0efabb55043dfe7d111775f25c` |
+Owner: "Asked "Do S73 and S28 match their designs now?" — the owner: "1 yes". Then, told S28 still needed the Update Now service-worker path and the one keep-what's-on-screen rule built and asked "Want me to go ahead with those?" — the owner: "Go head"."
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S28 check results ---
+check 1 PASS: version lifecycle state lives in one exported table in packages/domain (supported / deprecated / sunset, with dates) beside the route table
+check 2 PASS: a deprecated version answers 200 with Deprecation and Sunset headers and the same body (functions test, alone)
+check 3 PASS: a sunset version answers 426 version_unsupported with no payload data (functions test, alone); the spec declares the 426
+check 4 PASS: each request's version is recorded through a seam a test reads; two versions make two distinct records
+check 5 PASS: the web client's one middleware turns a 426 into the reload-to-update notice, and a 200 doesn't (web test, alone via pnpm --filter @bt/web); after a 426, Update Now asks the service worker for the new version (registration.update()), activates it, then reloads (web test; 2026-11-02 design intake note)
+check 6 PASS: after a 426 the content already on screen stays readable behind the notice (web test); one tested keep-what's-on-screen rule (queryScreen) that the Scoreboard, Standings and Game pages all call (ADR-025; 2026-11-02 design intake note)
+check 7 PASS: README.md documents the lifecycle states, that retiring a version needs the usage log to show no traffic, and that pnpm verify needs no network for it
+check 8 PASS: the 426 notice renders through NoticeSlot / NoticeBanner; no second notice component exists
+check 9 PASS: design match: e2e/design/S28.spec.ts names shell-notice-mobile/-medium/-desktop; docs/v3/design-checks/S28/ holds them at 390 / 768 / 1200
+check 10 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S28: 10/10 checks passed ---
+verify-S28: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 917ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  448ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  466ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 114ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 94ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1138ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  1057ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 79ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 15ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 59ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  07:32:23
+   Duration  3.33s (transform 103ms, setup 0ms, collect 4.72s, tests 2.56s, environment 1ms, prepare 492ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155436,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-07 — S73 design match
+
+| | |
+|---|---|
+| Entry | design match only — no grader run; not a completion |
+| Captured (UTC) | `2026-11-07T07:34:46Z` |
+| HEAD at capture | `427d700` (tree clean) |
+
+**Design match (rule 22)** — the owner compared each capture with the ratified frame or written amendment that governs it
+
+| Ratified frame or amendment | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/shell-scoreboard/amendments/scoreboard-standalone-mobile.png` | `77fec3633f38f4bd114d00272b4971a88607f1fd02970c8f41c99e375f757977` | `docs/v3/design-checks/S73/scoreboard-standalone-mobile.png` | `81733216394291900f93072d5c1aeabae8f1064e1ea67ef81d78f5eaa36a7198` |
+| `docs/v3/visual/standings-search-settings/amendments/A8.md` | `a740043250e808907ad82fe6370c805a7109fcd43d9df07ec88d8e6dfa2b591c` | `docs/v3/design-checks/S73/settings-install-desktop.png` | `4c2ef0d95fa383c3ae49b0c5bcd294c66aa02785e82121b2516a3289d3e786e4` |
+| `docs/v3/visual/standings-search-settings/amendments/A8.md` | `a740043250e808907ad82fe6370c805a7109fcd43d9df07ec88d8e6dfa2b591c` | `docs/v3/design-checks/S73/settings-install-ios-mobile.png` | `11725d491e2c5b6db551de1d65526102690b0582f1d90847c797a6f57e7a6bf6` |
+| `docs/v3/visual/standings-search-settings/amendments/A8.md` | `a740043250e808907ad82fe6370c805a7109fcd43d9df07ec88d8e6dfa2b591c` | `docs/v3/design-checks/S73/settings-install-medium.png` | `48ce4f733139ad5d09895b55b200cafec567ee989456699c065ca9223c8c52b8` |
+| `docs/v3/visual/standings-search-settings/amendments/A8.md` | `a740043250e808907ad82fe6370c805a7109fcd43d9df07ec88d8e6dfa2b591c` | `docs/v3/design-checks/S73/settings-install-mobile.png` | `e3628f9af19cde4ae446dd3c040ec3a3ef62d498990b5bca5047786cc7cdc83b` |
+| `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S73/shell-update-desktop.png` | `452d6eea670a484c53b0342a99231dec1ecd08a7d048c91a413788efad7d4b28` |
+| `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S73/shell-update-medium.png` | `2e0f8af3534025f1ed6e850b3a557efa705bf12344459a5581d7ef0170d9e9a3` |
+| `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S73/shell-update-mobile.png` | `8a863a0556af488ebf28cbec42efbc1950dda9c8e7ee0a11765afc6905de4738` |
+Owner: "Owner, 2026-11-07, shown the S73 captures (taken on GitHub, 22eba97) beside A6's and A8's written amendments and the scoreboard-standalone frame via `pnpm design:review S73`, asked "Do S73 and S28 match their designs now?": "1 yes". Then, told S73 would get this verdict recorded while its Docker-only Playwright flows (AC 6) wait for an environment with Docker: "Go head"."
+
+---
+
+## 2026-11-07 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-07T07:40:19Z` |
+| HEAD at review | `f34576a` (tree dirty) |
+| Trigger | 6 stories done since last review (count) |
+| Stories `done` since last review | S119, S116, S4, S120, S121, S28 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context backlog review, one reviewer, at `f34576a` on `stage`. Trigger: count, 6 stories done since the 2026-11-06 review's answers (S119, S116, S4, S120, S121, S28). Read: CLAUDE.md; the skill; the S117, S5, S72, S73 (grep), S102 notes; frame 00's review section (:160–185, :356–436) and 01 Current baseline; AUDIT.md:15243–15363 (the 2026-11-06 backlog and parity reviews and their answers), :15365–15920 skip entries, :16019 (S73 design match); ARCHITECTURE.md ADR-028 (:1314–1355), :617–631, :746–760, :771–775, :815–818; `functions/src/deploy/bootstrap.ts:170–277`; `packages/domain/src/sign-in.ts`; `web/src/components/queryScreen.ts`; `web/src/session/AuthClient.ts:118–133`; `git diff 73ba87e..HEAD` of non-doc files; `gh run list` (Deploy) and `gh api repos/jakelauer/baseball-theater-v3` (default branch).
+
+**Weighed as drift, not counted:** `7c08039` changed `scripts/audit.sh` and added `scripts/backlog-vault/design-reference.ts` + tests; the root `verify` line, workspace `test*`/`lint`/`build` scripts and `docs/v3/LAWS.md` are unchanged since `73ba87e` (only `deploy:logto` and `@logto/browser` were added to manifests), so the gate did not move. `427d700` (mirror job's write deploy key) and `f34576a` (S73's design match) change no story or gate. No new ADR, no new workspace package.
+
+**Next 3 by priority:** S117 (80), S5 (90), S72 (91).
+
+**1. Coverage**
+
+- **Parity queue item (ARCHITECTURE.md:631, :773, :817):** :631 is inside ADR-005, already marked superseded at its head (:619): nothing needed. :773 ("on `main`: deploy to Firebase") and :817 ("staging project vs preview channels" open) sit in ADR-013, whose ADR-017 amendment (:750) covers local dev only; S114/S118/S121 settled both. An ADR edit is the owner's: asked below, recorded as pending drift.
+- No later theme promoted. Every ADR's work since the last review has a carrier; the release flow (S121) and production address (S119) need nothing further from a story beyond the owner's GitHub settings and DNS cutover.
+
+**2. Ground truth**
+
+- **S117** (Depends on S114: `done`; Source Pillar: Delightful, owner-approved 2026-11-06). At HEAD: `DATA_CLASSIFICATION.postgresTables` (`data-classification.ts:118`) still labels `schedule_days`, `games`, `game_projections`, `replay_artifacts` `none` and the deletion log `retained`; schema tables at `schema.ts:22–100` unchanged (S116 added only the `logto` service entry to the manifest); `migrateDatabaseAt` (`migrate.ts:31`), `migratedPglite` (:45), `openPostgres` (`connect.ts:22`) present. Line drift fixed in a dated note: `findOrCreateBranch` :180 (was :165), default-branch check :183, `branchConnectionString` :239; `NEON_API_KEY` at `deploy.yml:92` (was :78); the `production` environment now deploys only from `v*` tags (README.md:207, S121), not `main`. Repo default branch is `stage` (gh api), so the dispatch workflow appears once merged. New hazard noted: `prepareSchemaOnlyCopy` (`bootstrap.ts:262`) drops `public` on a never-migrated copy, which AC 3 forbids; staging is already migrated by every `stage` deploy (Deploy run 42349644236 at `7556829`, success). Production now holds fans' accounts (S116 + S119, real sign-in tested 2026-11-07), so AC 1 guards real data. Fence (`functions/`, `.github/workflows/`, `package.json`, lockfile, README, docs, CHANGELOG) holds every AC; cap 16 unchanged.
+- **S5** (Depends S70, S61, S68, S81 `done`; Design S34, S56 `done`). `MlbRequest` (`mlb.ts:49`), `graphContentRequest` (:62), private `getJson` (:278), `DayDigest.tsx:16` `gameLabel` (private), `web/src/pages/SearchPage.tsx` (stub), `LazyPlayerDialog.tsx`, `api-routes.ts`, `web/src/api/client.ts`, `generated.types.test.ts`, `web/src/test/jsonResponse.ts` all present; no `fixtures/search-*.json` (S5 records it); `git log 03a72ef..HEAD` touches none of them. Fence holds `packages/ports/`, `fixtures/`, `openapi/`, `web/src/`. Added a note: AC 10's states go through `queryScreen` (S28) + `ViewState`, and S28's middleware already raises the update notice on a 426. Still needs a live MLB recording a cloud session can't make. Cap 16 unchanged.
+- **S72** (Depends S5 `todo`, S69 and S81 `done`; `classifyHighlight` at `packages/domain/src/highlights.ts:20`). **Amended:** its filters must reach MLB through S5's new `MlbStatsClient` search method (`packages/ports`) and need their own `fixtures/search-*.json` recording, and neither path was in its fence: a sure rule-10 stop. Fence gains `fixtures/` and `packages/ports/` (frontmatter, Scope files line, Goal condition, `/goal`), cap 12 → 14. Notes: the prior site's `STRUCTURED` queryType for date/tag; check MLB's team field and whether "tag" is an MLB filter or BT's `classifyHighlight` over one page (which would make AC 2's count page-local) before recording, else stop and report.
+
+**3. Prioritization challenge**
+
+- Only S117 is startable in a cloud session: S5, S72 and S99–S105 need live MLB recordings; S74 waits on S73; S108 on S107 (awaiting ratification); S90–S92 are far down. No re-prioritization: S117 is next, before the owner's DNS cutover by the owner's word.
+- **S73 (92, `blocked`) is the cheapest finish in the backlog**: built, design matched (`f34576a`), only AC 6's Docker-only Playwright flows remain, and S74 waits on it. Asked how it should finish (below).
+- S102 (division names) checked against S4: its AC 3 already retires `divisionName` (`team-colors.ts:129`) that S4's `DivisionTable.tsx:30` uses, and its fence holds `web/src/components/`; nothing to amend.
+- Nothing obsolete or quietly done. Underestimated class, again: deploy/GitHub plumbing meeting real services (S120 hardening after Copilot's review of S116; `427d700` moving the mirror push to a deploy key because personal-account rulesets can't list Actions as a bypass actor). Recorded as a watch item; S117's note says to check Neon's real answers.
+- **Baseline:** the deploy row's "not yet re-run on GitHub" replaced with the green staging (42349644236) and pre-S121 production (42349215791) runs; the PWA row says where S73 is parked. Done rows for S119, S116, S120, S121, S4, S28 checked present (rows 11, 30, 33, 35; As of = S28). The frame's **Last review** block was still the 2026-11-05 one; the 2026-11-06 and this review are added. Four 2026-11-06/07 pending-drift items closed (S116 shipped, S117's Source answered, production deploys only on a Release).
+
+**Duplication sweep (ADR-025).** Code added since `73ba87e`: `functions/src/adapters/logto/{identity,admin}.ts`, `functions/src/deploy/logto.ts`, `scripts/deploy-logto.ts`, `packages/domain/src/sign-in.ts`, `web/src/session/{AuthClient,SessionProvider,SignInCallback}.tsx?`, `web/src/storage/storage.ts`, `web/src/pwa/updates.ts`, `web/src/components/queryScreen.ts`, `web/src/layout/NoticeSlot.tsx`, `scripts/backlog-vault/design-reference.ts`. `pnpm dup:check`: 0 clones in 218 files. `queryScreen` and `design-reference.ts` are consolidations (3 pages; audit.sh + e2e/design-review.ts). `authTime` is read once per source (Logto adapter, dev provider) and checked once (`account-deletion.ts:63`); `SNOOZE_MS` once (`updates.ts:9`). **One hit:** `web/src/session/AuthClient.ts:128` builds the redirect URI as `${origin}${SIGN_IN_CALLBACK_PATH}` while `logtoAppUris` (`sign-in.ts:33`, which the deploy registers with Logto and whose comment says the web app reads it) builds it with trailing-slash trimming. Same value today; recorded as pending drift for the next story that edits `web/src/session/` (no `todo` story fences it narrowly enough for a drive-by).
+
+**Personal-data sweep (ADR-028).** New stores since the last review: the `logto` service entry (`data-classification.ts`, deleted via `USERS_STORE` → `IdentityAdmin.deleteAccount`; inventory row "Logto | account, email" exists) and browser keys `bt.signInReturnTo`, `logto.{idToken,accessToken,refreshToken,signInSession}` (personal, tab `sessionStorage`) and `bt.updateSnoozedUntil`, `bt.installTipDismissed` (`none`), all in `web/src/storage/storage.ts`. The Browser row's What ("session token, cached settings, offline caches") doesn't name Logto's sign-in keys; same store and deletion path, so asked rather than `blocked`. New `console.*` lines: `sign-in failed:` logs the error name only; `deploy-logto.ts` logs usage, masks the secret (`::add-mask::`), and lists changed URIs: no email or personal field. Next 3: S117 reads/writes `none` tables only and must log hosts and counts; S5 and S72 add no store (query not stored or logged).
+
+**Amendments:** S117 (notes), S5 (notes), S72 (fence + `fixtures/`, `packages/ports/`; cap 14; Goal condition, `/goal`; notes), `01 Current baseline.md` (deploy and PWA rows), `00 …Checkable backlog.md` (Last review block, 2026-11-06 entry, pending drift closed/added).
+
+**Questions for the owner (non-blocking):**
+1. May ADR-013 get a dated note at its head saying deploys are now Cloudflare through `deploy.yml` (a preview per pull request, staging on `stage`, production on a published GitHub Release), so its Firebase deploy row (ARCHITECTURE.md:773) and the open "staging project vs preview channels" item (:817) read as settled?
+2. May ADR-028's inventory Browser row add Logto's sign-in keys and the sign-in return page (kept in the tab's own storage until sign-in finishes, cleared on sign-out and deletion)?
+3. S73 is done except AC 6's Playwright flows, which need Docker this cloud session can't pull (CI runs them on every pull request). Will you finish it on a machine with Docker, or should its AC 6 accept the flows passing in CI on its pull request?
+
+---
+
+## 2026-11-07 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-07T07:43:08Z` |
+| HEAD at review | `cd88229` (tree dirty) |
+| Trigger | 6 stories done since 03a72ef (S119, S116, S4, S120, S121, S28) |
+| Stories `done` since last review | S119, S116, S4, S120, S121, S28 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context review at `cd88229`. Scope: the six stories done since `03a72ef` (S119, S116, S4, S120, S121, S28) and the next 3 open stories by priority: S117 (80), S5 (90), S72 (91).
+
+**1. Citation honesty**
+
+- **S119 — Pillar: Dependable, holds.** No FEATURES row covers where production runs (FEATURES.md:8: it "does not describe frameworks, repos, or deploy targets"), so a pillar is the right kind of citation. The approval is the owner's, quoted in the note and in the inserting commit `b2e867d` ("Agreed and yes"); between `b2e867d` and its shipping commit `0c9eb7b` the note changed only `status`, and nothing since.
+- **S121 — Pillar: Dependable, holds.** Same reasoning (release mechanics, no FEATURES row). Approval "Yes" is in the inserting commit `b3f4d05`; between `b3f4d05` and HEAD the note changed only `status` (`a3240d0`). `427d700` later changed the mirror job's push mechanism (a deploy key; owner, 2026-11-07: "Yes, deploy keys is there") but not what the story is for.
+- **S116 — Feature: Modern membership, holds.** Its Impact (fans sign in on the real site with an emailed one-time code) is the theme's own text (FEATURES.md, Modern membership: "Sign in with a one-time code sent by email"). The theme's "plus a link in the same email if Logto supports it" is still unsettled: README.md:263–265 leaves it to the owner to check in Logto's email templates, so it stays as written.
+- **S120 — Feature: Modern membership, holds.** Hardening the same sign-in (recent sign-in for deletion, settings per account, outages, per-tab sign-in); it delivers the theme's sign-in and the Delete-your-data "strongest confirmation" rather than sitting near them.
+- **S4 — Feature: Standings, holds** (carry table, Standings row). The row was empty; see 2.
+- **S28 — Feature: Update / changelist UX, holds.** The row says the update notice delivers this surface; S28 makes a retired version show that same notice. Row extended; see 2.
+- **S117 — Pillar: Delightful, holds.** Approved by the owner 2026-11-06 ("Delightful, bc it makes testing much faster in stage", `73ba87e`); since then only the 2026-11-07 backlog review added notes (`cd88229`: line drift, the production environment's tag rule, production now holding fans' accounts) — no Gap, Impact or AC change, so the approval still covers it.
+- **S5 — Feature: Highlight search (free-text), holds** (FEATURES carry table; S5's 2026-11-02 owner answer, "MLB's own search on every query", is the row's own text).
+- **S72 — Feature: Highlight search (date + tag), holds** (Impact narrows results by date, team or kind of play; the 2026-11-07 backlog review's MLB-filter fence doesn't change what it is for).
+- **Open stories:** none (`grep -l "Source:\*\* Open" docs/v3/backlog/stories/` is empty).
+
+**2. Doc reflects reality**
+
+- **Amended — INTENT Hosting row (INTENT.md:48)** still said the owner releases by merging `stage` into `main`, which deploys production at `baseball.theater` (S118). Since then S119 put production at `next.baseball.theater` until the owner's DNS cutover, and S121 made each story an auto-merged pull request into `stage` and a published GitHub Release the production deploy, with `main` a mirror (CLAUDE.md:95, README.md deploy section, `deploy.yml`). Rewritten in the owner's words quoted in S119's Gap ("changing the DNS away from the elastic beanstalk destination"; "Do the temporary address"; "Agreed and yes") and S121's Gap ("I think releases to main probably should use GitHub releases ... I want a release to be a set of PRs basically"; "1. You automatically 2. Mirror"); the 2026-11-02 and 2026-11-06 wordings are kept in the row as history.
+- **Amended — FEATURES carry table, Standings row** was blank though S4 shipped it. Now says what shipped, from the ratified frames (team color, name, W, L, PCT, GB with "—" for the leader; S4 note) and standings-search-settings A7, quoting the owner (2026-11-02): "The table should not be 100% width; it should only be as wide as it needs to be, and should scroll if it's wider than the viewport. On mobile, the names should shorten to just the abbreviated name (NYY, DET, etc)".
+- **Amended — FEATURES carry table, Update / changelist UX row** covered only a waiting new build. Now adds S28's retired-version case (same notice, page stays readable) and shell-scoreboard A6's floating notice with Snooze and Update Now, quoting the owner (2026-11-02): "The reload notice should be a floating notification-style box at the bottom, fixed. Replace the X with Snooze, and make it an hour-long snooze before it comes back. Change Reload to Update Now."
+- **Amended — FEATURES Open product question 1** ("Cutover timing/shape (hard cutover vs beta vs new host)"): the shape is settled by S119 (owner, 2026-11-07: "Do the temporary address"), struck through like questions 3 and 4; timing stays the owner's.
+- Noted, not mine to edit: ADR-013's deploy text and ADR-028's Browser row are already with the owner from the 2026-11-07 backlog review (`cd88229`).
+
+**3. Coverage**
+
+- No FEATURES item was added this review.
+
+**For the next backlog review**
+
+- Still unserved: FEATURES, Video play links — "A video played from Search's floating player links to its play too" (owner, 2026-11-05: "Yes"); no design amendment or story builds it yet (S5's note :119 waits on one).

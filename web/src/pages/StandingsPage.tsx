@@ -2,6 +2,7 @@ import { Stack, Title } from "@mantine/core";
 import { useSearchParams } from "react-router-dom";
 import { useStandings } from "../api/standings.js";
 import { ViewState } from "../components/ViewState.js";
+import { queryScreen } from "../components/queryScreen.js";
 import { DivisionTable } from "../components/standings/DivisionTable.js";
 import { FooterMeta } from "../layout/FooterMeta.js";
 
@@ -20,12 +21,16 @@ export function StandingsPage()
 	} = useStandings(params.get("date") ?? undefined);
 
 	let body;
-	// As the scoreboard: a failed refetch keeps the tables already shown (S28).
-	if (error && !standings)
+	// As the scoreboard: a failed refetch keeps the tables already shown (S28's one rule).
+	const screen = queryScreen({
+		data: standings,
+		error,
+	});
+	if (screen === "error")
 	{
 		body = <ViewState kind="error" title="Couldn't load standings" onRetry={() => void refetch()} />;
 	}
-	else if (!standings)
+	else if (screen === "loading" || !standings)
 	{
 		body = <ViewState kind="loading" />;
 	}

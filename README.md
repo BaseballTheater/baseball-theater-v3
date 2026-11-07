@@ -217,9 +217,12 @@ production's deploy then registers its Logto sign-in addresses (`pnpm deploy:log
    pushes**. Leave "Require linear history" off (stories merge as merge commits). Design captures then
    run on the story's branch (`gh workflow run design-capture.yml --ref story/S<N> …`), or add GitHub
    Actions to this ruleset's bypass list too, if they are to commit straight to `stage`.
-3. The `main` ruleset: add **GitHub Actions** to its **bypass list**, so the deploy workflow's token
-   can fast-forward `main` after a release (a ruleset that requires pull requests or restricts updates
-   would refuse that push). Without it the mirror job fails after production is already live. With no
+3. The `main` mirror's deploy key: a write **deploy key** on the repo (Settings → Deploy keys, "Allow
+   write access"), its private half stored as the `production` environment secret `MAIN_MIRROR_KEY`,
+   and **Deploy keys** added to the `main` ruleset's **bypass list**, so the mirror job can
+   fast-forward `main` after a release (a ruleset that requires pull requests would refuse that push).
+   A personal-account repo's rulesets don't offer GitHub Actions as a bypass actor, which is why it's a
+   deploy key. Without it the mirror job fails after production is already live. With no
    ruleset or branch protection on `main` nothing blocks the push, but one that blocks force pushes and
    deletions keeps `main` a faithful mirror.
 4. Settings → Environments → `production` → Deployment branches and tags: **Selected branches and

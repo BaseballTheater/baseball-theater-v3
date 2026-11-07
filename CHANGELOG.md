@@ -14,6 +14,19 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## An outdated app asks to update instead of breaking
+
+- **Before, nothing covered the day an old version of the app is retired: it would simply start failing with no
+  explanation. Now the API can mark a version deprecated (it keeps working, with a warning in every answer) or
+  retired, and a retired app floats the same "An update to Baseball Theater is ready." notice as a new release,
+  with Update Now and Snooze, while the scores, standings or game already on screen stay readable behind it.**
+  Update Now fetches and installs the new version before reloading, so the old saved copy of the app can't answer
+  the reload and fail again. Details: S28 — one lifecycle table (`API_VERSIONS` in `packages/domain`),
+  `Deprecation`/`Sunset` headers and `426 version_unsupported` in the API, a per-version usage log, the web
+  client's 426 middleware (`markVersionUnsupported` → `updateToNewVersion`), and one "keep what's on screen"
+  rule (`queryScreen`) shared by the Scoreboard, Standings and Game pages; design matched by the owner
+  (shell-scoreboard A6). _(2026-11-07)_
+
 ## Standings show every division's race
 
 - **Before, the Standings page was an empty placeholder. Now it shows every division's standings: each team's

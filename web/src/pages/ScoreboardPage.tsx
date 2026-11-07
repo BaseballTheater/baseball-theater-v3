@@ -8,6 +8,7 @@ import { useScheduleDay } from "../api/schedule.js";
 import { useScoreboardDefaultDate } from "../api/scoreboardDate.js";
 import type { ScheduleDayPayload } from "../api/schedule.js";
 import { ViewState } from "../components/ViewState.js";
+import { queryScreen } from "../components/queryScreen.js";
 import { CollapsedBar } from "../components/scoreboard/CollapsedBar.js";
 import { DayDigest } from "../components/scoreboard/DayDigest.js";
 import { DateControl } from "../components/scoreboard/DateControl.js";
@@ -94,13 +95,17 @@ function ScoreboardDay({ date, variant }: { date: string;
 	} = useScheduleDay(date);
 
 	let body;
-	// A failed background refetch keeps the day already shown (S28: a retired version's 426
-	// raises the update notice and leaves the screen readable); the error room is for no data.
-	if (error && !day)
+	// A failed background refetch keeps the day already shown (S28's one rule: a retired
+	// version's 426 raises the update notice and leaves the screen readable).
+	const screen = queryScreen({
+		data: day,
+		error,
+	});
+	if (screen === "error")
 	{
 		body = <ViewState kind="error" title="Couldn't load games" onRetry={() => void refetch()} />;
 	}
-	else if (!day)
+	else if (screen === "loading" || !day)
 	{
 		body = <ViewState kind="loading" title={`${formatDate(date)} Scoreboard`} />;
 	}

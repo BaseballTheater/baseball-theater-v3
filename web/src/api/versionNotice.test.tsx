@@ -10,8 +10,9 @@ import { fileURLToPath } from "node:url";
 import { MantineProvider } from "@mantine/core";
 import { QueryClientProvider } from "@tanstack/react-query";
 import {
-	act, cleanup, render, screen,
+	act, cleanup, render, screen, waitFor,
 } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import {
 	MemoryRouter, Route, Routes,
 } from "react-router-dom";
@@ -25,7 +26,7 @@ import { jsonResponse } from "../test/jsonResponse.js";
 import { createQueryClient } from "./queryClient.js";
 import { scheduleKey } from "./schedule.js";
 import type { ScheduleDayPayload } from "./schedule.js";
-import { useUpdateNotice } from "../pwa/updates.js";
+import { updateToNewVersion, useUpdateNotice } from "../pwa/updates.js";
 import { resetVersionNotice } from "./versionNotice.js";
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "../../../fixtures");
@@ -68,6 +69,45 @@ function serve()
 	};
 }
 
+/**
+ * A stand-in for `navigator.serviceWorker` after a deploy: nothing waits yet; `update()` finds
+ * the new worker, which installs on the next tick and, told `SKIP_WAITING`, takes control.
+ * Each step is written to `log`, so a test can check the order.
+ */
+function fakeServiceWorkers(log: string[]): ServiceWorkerContainer
+{
+	const container = new EventTarget();
+	const worker = Object.assign(new EventTarget(), {
+		state: "installing" as ServiceWorkerState,
+		postMessage: (message: { type: string }) =>
+		{
+			log.push(message.type);
+			worker.state = "activated";
+			container.dispatchEvent(new Event("controllerchange"));
+		},
+	});
+	const registration = {
+		waiting: null as typeof worker | null,
+		installing: null as typeof worker | null,
+		update: () =>
+		{
+			log.push("update");
+			registration.installing = worker;
+			setTimeout(() =>
+			{
+				worker.state = "installed";
+				registration.installing = null;
+				registration.waiting = worker;
+				worker.dispatchEvent(new Event("statechange"));
+			}, 0);
+			return Promise.resolve(registration);
+		},
+	};
+	return Object.assign(container, {
+		getRegistration: () => Promise.resolve(registration),
+	}) as unknown as ServiceWorkerContainer;
+}
+
 function Shell()
 {
 	return (
@@ -104,6 +144,7 @@ afterEach(() =>
 	cleanup();
 	resetVersionNotice();
 	vi.unstubAllGlobals();
+	vi.restoreAllMocks();
 });
 
 describe("a retired API version (S28)", () =>
@@ -145,5 +186,39 @@ describe("a retired API version (S28)", () =>
 		await screen.findByText(MESSAGE);
 		expect(screen.getAllByTestId("scoreboard-module").map((m) => m.textContent)).toEqual(before);
 		expect(screen.queryByRole("alert")).toBeNull();
+	});
+
+	it("426: Update Now asks the service worker for the new version, activates it, then reloads (not a bare reload onto the old cached shell)", async () =>
+	{
+		const log: string[] = [];
+		await updateToNewVersion(fakeServiceWorkers(log), () => log.push("reload"));
+		expect(log).toEqual(["update", "SKIP_WAITING", "reload"]);
+	});
+
+	it("426: Update Now with no service worker (dev, old browsers) still reloads", async () =>
+	{
+		const reload = vi.fn();
+		await updateToNewVersion(undefined, reload);
+		expect(reload).toHaveBeenCalledOnce();
+	});
+
+	it("426: the notice's Update Now takes that path: it asks the service worker for the new version", async () =>
+	{
+		const log: string[] = [];
+		vi.stubGlobal("navigator", Object.assign(Object.create(navigator) as Navigator, {
+			serviceWorker: fakeServiceWorkers(log),
+		}));
+		// jsdom can't navigate: the closing reload only logs "not implemented".
+		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		const api = serve();
+		const client = await renderApp();
+		api.retire();
+		await act(() => client.refetchQueries({
+			queryKey: scheduleKey("2024-07-04"),
+		}));
+		await userEvent.click(await screen.findByRole("button", {
+			name: "Update Now",
+		}));
+		await waitFor(() => expect(log).toEqual(["update", "SKIP_WAITING"]));
 	});
 });

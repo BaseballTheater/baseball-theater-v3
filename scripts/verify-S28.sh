@@ -18,8 +18,8 @@ check 1 "version lifecycle state lives in one exported table in packages/domain 
 check 2 "a deprecated version answers 200 with Deprecation and Sunset headers and the same body (functions test, alone)"
 check 3 "a sunset version answers 426 version_unsupported with no payload data (functions test, alone); the spec declares the 426"
 check 4 "each request's version is recorded through a seam a test reads; two versions make two distinct records"
-check 5 "the web client's one middleware turns a 426 into the reload-to-update notice, and a 200 doesn't (web test, alone via pnpm --filter @bt/web)"
-check 6 "after a 426 the content already on screen stays readable behind the notice (web test)"
+check 5 "the web client's one middleware turns a 426 into the reload-to-update notice, and a 200 doesn't (web test, alone via pnpm --filter @bt/web); after a 426, Update Now asks the service worker for the new version (registration.update()), activates it, then reloads (web test; 2026-11-02 design intake note)"
+check 6 "after a 426 the content already on screen stays readable behind the notice (web test); one tested keep-what's-on-screen rule (queryScreen) that the Scoreboard, Standings and Game pages all call (ADR-025; 2026-11-02 design intake note)"
 check 7 "README.md documents the lifecycle states, that retiring a version needs the usage log to show no traffic, and that pnpm verify needs no network for it"
 check 8 "the 426 notice renders through NoticeSlot / NoticeBanner; no second notice component exists"
 check 9 "design match: e2e/design/S28.spec.ts names shell-notice-mobile/-medium/-desktop; docs/v3/design-checks/S28/ holds them at 390 / 768 / 1200"
@@ -78,7 +78,19 @@ run_vitest 5 web "$WT" -t "200"
 if [ -f "web/$WT" ]; then
   pnpm --filter @bt/web exec vitest run "$WT" >"$TMP/walone.log" 2>&1 || bad 5 "web/$WT fails run alone"
 fi
+run_vitest 5 web "$WT" -t "Update Now asks the service worker"
+grep -qE 'registration\.update\(\)|\.update\(\)' web/src/pwa/updates.ts || bad 5 "web/src/pwa/updates.ts never asks the service worker registration for the new version (.update())"
+grep -qE 'SKIP_WAITING' web/src/pwa/updates.ts || bad 5 "web/src/pwa/updates.ts never activates the new worker (SKIP_WAITING)"
 run_vitest 6 web "$WT" -t "readable"
+# One keep-what's-on-screen rule (ADR-025): a failed refetch keeps the data shown; the error room is for no data.
+Q="web/src/components/queryScreen.ts"
+grep -qE '^export function queryScreen\b' "$Q" 2>/dev/null || bad 6 "$Q exports no queryScreen"
+run_vitest 6 web src/components/queryScreen.test.ts
+for page in GamePage ScoreboardPage StandingsPage; do
+  f="web/src/pages/$page.tsx"
+  grep -qE '\bqueryScreen\(' "$f" || bad 6 "$f does not call queryScreen"
+  grep -qE 'if \(error\b|error && !' "$f" && bad 6 "$f still decides on error itself"
+done
 
 # --- Check 7: README --------------------------------------------------------------------------------
 for word in supported deprecated sunset; do grep -qiw "$word" README.md || bad 7 "README.md does not name the $word state"; done

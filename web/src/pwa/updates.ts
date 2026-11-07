@@ -37,7 +37,7 @@ export function startUpdates(register: RegisterServiceWorker): void
 /**
  * Raises the one "reload to update" notice (ADR-025: S28 and S73 share it, with one message).
  * `next` is how to activate a waiting worker; a retired API version (`markVersionUnsupported`)
- * passes null, and Update Now then just reloads. A waiting worker, once known, is kept, since
+ * passes null, and Update Now then fetches the new version first (`updateToNewVersion`). A waiting worker, once known, is kept, since
  * activating it and reloading is the better update either way.
  */
 export function announceUpdate(next: (() => Promise<void>) | null): void
@@ -57,6 +57,75 @@ export function exposeDevUpdateTrigger(): void
 	(window as { btShowUpdate?: () => void }).btShowUpdate = () => announceUpdate(async () => window.location.reload());
 }
 
+/** How long Update Now waits for a new worker to install or take over before it reloads anyway. */
+export const ACTIVATE_TIMEOUT_MS = 10_000;
+
+/** The message the generated worker (workbox with `registerType: "prompt"`, `options.ts`) answers by taking over. */
+const SKIP_WAITING = {
+	type: "SKIP_WAITING",
+} as const;
+
+/** This browser's service workers, or undefined where there are none (old browsers, jsdom). */
+function serviceWorkers(): ServiceWorkerContainer | undefined
+{
+	return "serviceWorker" in navigator ? navigator.serviceWorker : undefined;
+}
+
+/** Resolves after `ms`, so a step that never finishes can't leave Update Now doing nothing. */
+function after(ms: number): Promise<null>
+{
+	return new Promise((resolve) => setTimeout(() => resolve(null), ms));
+}
+
+/** The worker once it has installed and waits, or null if it fails (redundant) or takes over on its own. */
+function installed(worker: ServiceWorker | null): Promise<ServiceWorker | null>
+{
+	if (!worker) return Promise.resolve(null);
+	return new Promise((resolve) =>
+	{
+		const settle = () =>
+		{
+			if (worker.state === "installing") return;
+			worker.removeEventListener("statechange", settle);
+			resolve(worker.state === "installed" ? worker : null);
+		};
+		worker.addEventListener("statechange", settle);
+		settle();
+	});
+}
+
+/**
+ * Update Now when no waiting worker is known yet: a retired API version's 426 (S28). A plain
+ * reload would be answered by the old worker from its precached shell (`navigateFallback`,
+ * `options.ts`), which gets 426 again and loops. So this asks the registration for the new
+ * version (`registration.update()`), waits for it to install, tells it to take over
+ * (`SKIP_WAITING`), waits for it to control the page, and only then reloads, onto the new
+ * shell. With no worker (dev, unsupported browsers), nothing new found, or a step that stalls
+ * past `ACTIVATE_TIMEOUT_MS`, it reloads anyway: the network answers then. `container` and
+ * `reload` are this browser's by default; tests pass stand-ins.
+ */
+export async function updateToNewVersion(
+	container: ServiceWorkerContainer | undefined = serviceWorkers(),
+	reload: () => void = () => window.location.reload(),
+): Promise<void>
+{
+	const registration = await container?.getRegistration().catch(() => undefined);
+	if (container && registration)
+	{
+		await registration.update().catch(() => undefined);
+		const next = registration.waiting ?? await Promise.race([installed(registration.installing), after(ACTIVATE_TIMEOUT_MS)]);
+		if (next)
+		{
+			const controlled = new Promise<void>((resolve) => container.addEventListener("controllerchange", () => resolve(), {
+				once: true,
+			}));
+			next.postMessage(SKIP_WAITING);
+			await Promise.race([controlled, after(ACTIVATE_TIMEOUT_MS)]);
+		}
+	}
+	reload();
+}
+
 /** When a snooze ends (epoch ms), 0 when none is stored. Kept in this browser so a reload within the hour stays quiet (A6). */
 function snoozedUntil(): number
 {
@@ -66,7 +135,7 @@ function snoozedUntil(): number
 /**
  * The update notice (S55's copy; shell-scoreboard A6's floating box): "An update to Baseball
  * Theater is ready." with Update Now, which activates the waiting worker (or, for a retired
- * version, just reloads), and Snooze, which hides it for an hour, after which it comes back
+ * version, fetches and activates the new one, then reloads: `updateToNewVersion`), and Snooze, which hides it for an hour, after which it comes back
  * on its own without a reload. Null while nothing is newer, or while snoozed.
  */
 export function useUpdateNotice(): Notice | null
@@ -92,7 +161,7 @@ export function useUpdateNotice(): Notice | null
 		id: "update",
 		message: UPDATE_MESSAGE,
 		update: {
-			onUpdate: () => void (activate ? activate() : window.location.reload()),
+			onUpdate: () => void (activate ? activate() : updateToNewVersion()),
 			onSnooze: () =>
 			{
 				writeStored("bt.updateSnoozedUntil", String(Date.now() + SNOOZE_MS));
