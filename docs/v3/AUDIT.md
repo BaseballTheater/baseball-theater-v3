@@ -15359,3 +15359,18 @@ Owner, 2026-11-06. Q1, separate Logto tenant for staging and previews: "We will 
 **Answers and what was applied**
 
 Owner, 2026-11-06. Carried question, which pillar or feature S117 (copy production's baseball data into staging, by hand) cites: "Delightful, bc it makes testing much faster in stage". Applied: S117's **Source:** is now "Pillar: Delightful — developers too: staging that already holds production's games, schedules and videos makes testing on stage.baseball.theater much faster", quoting the owner's approval (frontmatter `source: pillar`); the S117 note's "waits on its Source" bullet records the answer, so S117 may start.
+
+---
+
+## 2026-11-07 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T01:12:34Z` |
+| HEAD at capture | `1663fb0` (tree clean) |
+| Change | `1663fb0` — Owner-directed: S116 narrowed to production URI automation; previews have no sign-in |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Does this S116 change need a backlog review, or should I log a skip? ... I'd lean toward skip." (and again: "Does the S116 change need a backlog review, or should I log a skip? I'd skip it."): "Agreed and yes" — "Agreed" answers the skip question.
