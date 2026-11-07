@@ -21,7 +21,7 @@ check 3 "web: only the AuthClient imports Logto's browser SDK; deployed signIn()
 check 4 "a Logto IdentityAdmin lists, suspends (PATCH /api/users/{id}/is-suspended) and deletes (DELETE /api/users/{id}) through the Management API with machine-to-machine credentials; deletion reaches it; the Worker composes it only where the secret is set, and deleting without it still succeeds (tests 'S116 AC 4')"
 check 5 "LOGTO_ENDPOINT/LOGTO_APP_ID are per-env vars, production's (https://auth.baseball.theater, b2f2q1wau5axo1psqexdo) only in env.production and the production job; previews and their jobs carry no Logto value; staging reads no machine-to-machine secret; the production job alone pushes LOGTO_S2S_APP_ID/LOGTO_S2S_SECRET and sets the redirect and sign-out URIs from BT_APP_ORIGIN idempotently (test 'S116 AC 5' runs it twice); README documents the manual Logto setup"
 check 6 "backlog Status is done (story heading and Story status table)"
-check 7 "the story changed nothing outside its fence (.github/workflows/, functions/, web/, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, openapi/bt-api.v1.json, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, scripts/verify-S116.sh)"
+check 7 "the story changed nothing outside its fence (.github/workflows/, functions/, web/, packages/domain/src/, packages/domain/vitest.config.ts, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, openapi/bt-api.v1.json, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, scripts/verify-S116.sh)"
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
@@ -171,7 +171,7 @@ grep -qE '^\*\*Status:\*\* `done`$' "$TMP/s116.md" || bad 6 "S116 story heading 
 
 # --- Check 7: the fence -------------------------------------------------------------------------------------
 story_changed_files S116 "$BASE" . |
-  grep -vE '^(\.github/workflows/|functions/|web/|wrangler\.jsonc$|package\.json$|pnpm-lock\.yaml$|README\.md$|openapi/bt-api\.v1\.json$|docs/v3/BACKLOG\.md$|docs/v3/backlog/|docs/v3/AUDIT\.md$|docs/v3/audit\.jsonl$|docs/v3/INDEX\.md$|CHANGELOG\.md$|scripts/verify-S116\.sh$|docs/v3/\.obsidian/)' >"$TMP/out.txt"
+  grep -vE '^(\.github/workflows/|functions/|web/|packages/domain/src/|packages/domain/vitest\.config\.ts$|wrangler\.jsonc$|package\.json$|pnpm-lock\.yaml$|README\.md$|openapi/bt-api\.v1\.json$|docs/v3/BACKLOG\.md$|docs/v3/backlog/|docs/v3/AUDIT\.md$|docs/v3/audit\.jsonl$|docs/v3/INDEX\.md$|CHANGELOG\.md$|scripts/verify-S116\.sh$|docs/v3/\.obsidian/)' >"$TMP/out.txt"
 [ -s "$TMP/out.txt" ] && { bad 7 "files changed outside the fence:"; sed 's/^/        /' "$TMP/out.txt"; }
 
 report "verify-S116"
