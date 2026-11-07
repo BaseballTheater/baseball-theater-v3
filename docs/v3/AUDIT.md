@@ -15454,3 +15454,33 @@ export const label = game.abbreviation + " @ ";  794ms
 ```
 
 </details>
+
+---
+
+## 2026-11-07 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T01:47:39Z` |
+| HEAD at capture | `0c9eb7b` (tree clean) |
+| Change | `b2e867d` — Backlog: S119 production deploys to next.baseball.theater until the owner's DNS cutover |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Should I log skips for the backlog and doc parity reviews that S119 triggered, or run them? I'd skip both.": "1. Skip"
+
+---
+
+## 2026-11-07 — doc parity review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a doc parity review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T01:47:39Z` |
+| HEAD at capture | `0c9eb7b` (tree dirty) |
+| Change | `b2e867d` — Backlog: S119 production deploys to next.baseball.theater until the owner's DNS cutover |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Should I log skips for the backlog and doc parity reviews that S119 triggered, or run them? I'd skip both.": "1. Skip"
