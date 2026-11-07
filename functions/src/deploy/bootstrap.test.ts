@@ -342,7 +342,8 @@ describe("S114 AC 8: Worker secrets from GitHub on every deploy", () =>
 			expect(vars).not.toHaveProperty("BT_LOCAL");
 		}
 		expect(WRANGLER.env!.staging!.vars!.BT_APP_ORIGIN).toBe("https://stage.baseball.theater");
-		expect(WRANGLER.env!.production!.vars!.BT_APP_ORIGIN).toBe("https://baseball.theater");
+		// Production serves next.baseball.theater until the owner cuts baseball.theater over from Elastic Beanstalk (S119).
+		expect(WRANGLER.env!.production!.vars!.BT_APP_ORIGIN).toBe("https://next.baseball.theater");
 	});
 });
 

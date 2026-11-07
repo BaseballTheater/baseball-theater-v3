@@ -6,12 +6,14 @@ name: Deploy
 #   deleted when the pull request closes.
 # - Every push to stage deploys staging at stage.baseball.theater, on the Neon `staging` branch: a
 #   schema-only branch that never holds a fan's data.
-# - Every push to main deploys production at baseball.theater, on its own (S118; owner, 2026-11-06:
+# - Every push to main deploys production at next.baseball.theater, on its own (S118; owner, 2026-11-06:
 #   "main would deploy to production when it gets an update, and stage would deploy to stage when it
 #   gets an update", and "we don't need that approval step. We can just deploy when we merge into
 #   main"). Agents work on stage; merging stage into main is the owner's release step. The job still
 #   names the GitHub environment `production` for its secrets; the owner sets that environment to no
-#   required reviewers and to deploy from main only (README).
+#   required reviewers and to deploy from main only (README). Production stays at
+#   next.baseball.theater until the owner cuts baseball.theater over from Elastic Beanstalk by hand
+#   (S119; owner, 2026-11-07: "Do the temporary address").
 # Every deploy first runs `pnpm deploy:bootstrap` (find or create the Neon branch and the Hyperdrive
 # config by name, write the Worker config and secrets), then `pnpm db:migrate` and
 # `pnpm db:reapply-deletions` on its own database, and only then `wrangler deploy`, which pushes
@@ -198,7 +200,7 @@ jobs:
             - name: Deploy staging
               run: pnpm --filter @bt/functions exec wrangler deploy --config "${{ steps.bootstrap.outputs.config }}" --env staging --secrets-file "${{ steps.bootstrap.outputs.secrets_file }}"
 
-    # baseball.theater, on every push to main, once verify passes: the owner's merge of stage into
+    # next.baseball.theater (until the owner's cutover, S119), on every push to main, once verify passes: the owner's merge of stage into
     # main is the release, with no approval wait (S118). Rolling back is `wrangler rollback` (README).
     production:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -210,7 +212,7 @@ jobs:
             cancel-in-progress: false
         environment:
             name: production
-            url: https://baseball.theater
+            url: https://next.baseball.theater
         env:
             CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
             CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}

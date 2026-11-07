@@ -63,7 +63,7 @@ describe("POST /api/v1/me/delete sets the deletion cookie (S87)", () =>
 	{
 		await withAccountServer(async (h) =>
 		{
-			const res = await deleteAs(h, await h.sessionFor("fan-1"), ACCOUNT_DELETION_PHRASE, "https://baseball.theater");
+			const res = await deleteAs(h, await h.sessionFor("fan-1"), ACCOUNT_DELETION_PHRASE, "https://next.baseball.theater");
 			expect(res.headers.getSetCookie()[0]).toContain("Secure");
 		});
 	});

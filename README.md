@@ -122,9 +122,9 @@ an update, and stage would deploy to stage when it gets an update"):
 
 - A push to `stage` deploys staging, `stage.baseball.theater`. Agents commit and push here, and only
   here.
-- A push to `main` deploys production, `baseball.theater`, on its own, with no approval wait (owner,
-  same day: "we don't need that approval step. We can just deploy when we merge into main"). Agents
-  never push to it, merge into it or open a release to it.
+- A push to `main` deploys production, at `next.baseball.theater` until the owner's cutover (below),
+  on its own, with no approval wait (owner, same day: "we don't need that approval step. We can just
+  deploy when we merge into main"). Agents never push to it, merge into it or open a release to it.
 - Pull requests into either branch get a preview (below) and CI.
 
 - **Previews.** Every pull request gets its own Worker, `baseball-theater-pr-<number>` on workers.dev,
@@ -137,7 +137,7 @@ an update, and stage would deploy to stage when it gets an update"):
   The branch is created schema-only from production the first time (production's tables, none of its
   rows) and filled only by `pnpm db:migrate`, so it never holds a fan's data. Copying production's
   baseball data into it is a separate step the owner runs by hand (S117); no deploy copies data.
-- **Releasing.** The owner merges `stage` into `main`; that push deploys `baseball.theater` once
+- **Releasing.** The owner merges `stage` into `main`; that push deploys `next.baseball.theater` once
   `pnpm verify` passes. Merging the whole branch (`git checkout main && git merge stage && git push`,
   or a pull request from `stage` into `main`) is the smooth path. Cherry-picking a single commit onto
   `main` works too, but expect conflicts: every story's commit also touches `docs/v3/AUDIT.md`,
@@ -148,6 +148,23 @@ an update, and stage would deploy to stage when it gets an update"):
   `--config ../wrangler.jsonc`) returns production to its previous version in seconds; add a version
   id to pick an older one (`npx wrangler deployments list --env production` lists them). A rollback
   doesn't undo a migration, which is another reason they stay additive.
+- **Production's address until the cutover** (S119; owner, 2026-11-07: "Do the temporary address").
+  `baseball.theater` still points at the Elastic Beanstalk (v2) site, and that DNS change, not the
+  merge into `main`, is the real release gate. So production's Worker serves at
+  `next.baseball.theater` (its custom domain in `wrangler.jsonc`, with `BT_APP_ORIGIN`
+  `https://next.baseball.theater`); its first deploy creates that DNS record itself, and the v2 site
+  keeps serving fans untouched.
+- **The DNS cutover from Elastic Beanstalk is the owner's deliberate step**, never an agent's. In
+  `wrangler.jsonc` env `production`, change the route's custom domain from `next.baseball.theater`
+  to `baseball.theater` and `BT_APP_ORIGIN` to `https://baseball.theater` (and the production job's
+  environment `url` in `deploy.yml`), then release as usual. Know what that deploy does: wrangler, run
+  without a prompt in CI, **replaces the existing apex DNS record** pointing at Elastic Beanstalk with
+  the Worker's custom domain, so `baseball.theater` moves to v3 the moment the deploy finishes. Note
+  the Elastic Beanstalk record (its CNAME/alias target) before you do it. **Rolling the cutover back:**
+  point the `baseball.theater` DNS record back at Elastic Beanstalk in the Cloudflare dashboard
+  (remove the Worker's custom domain for `baseball.theater` first, or the next deploy re-claims it),
+  and revert the `wrangler.jsonc` change; `npx wrangler rollback --env production` returns the Worker
+  itself to its previous version, but does not move DNS.
 
 **What every deploy does**, in order, each step safe to repeat: `pnpm deploy:bootstrap <env>` finds
 the env's Neon branch (production's default branch, or `staging`, created schema-only if missing),
@@ -188,6 +205,8 @@ Still to finish before a public launch (the _Cloudflare deploy_ Later theme):
 - [ ] The Cloudflare Email `Mailer` adapter, so download links are actually emailed.
 - [ ] Worker log settings that carry no personal fields.
 - [ ] Logto sign-in (S116), before the first production release.
+- [ ] DNS cutover from Elastic Beanstalk: the owner points `baseball.theater` at production's Worker (S119, above),
+      once `next.baseball.theater` has been checked.
 
 ## Scripts
 

@@ -109,14 +109,17 @@
 				"BT_APP_ORIGIN": "https://stage.baseball.theater"
 			}
 		},
-		// baseball.theater, after staging and only once the owner approves the GitHub environment
-		// `production`. Its Hyperdrive config is `bt-production`, which the owner created on
+		// Every push to main, at next.baseball.theater until the owner's DNS cutover (S119; owner,
+		// 2026-11-07: "Do the temporary address"): baseball.theater still points at the Elastic
+		// Beanstalk (v2) site, and a deploy that claimed it would replace that DNS record at once.
+		// Cutting over is the owner's step: set this route and BT_APP_ORIGIN to baseball.theater
+		// (README). Its Hyperdrive config is `bt-production`, which the owner created on
 		// 2026-11-02 for the Neon project `old-sun-72319473` (Postgres 18); its connection string
 		// lives only in Cloudflare.
 		"production": {
 			"name": "baseball-theater-production",
 			"workers_dev": false,
-			"routes": [{ "pattern": "baseball.theater", "custom_domain": true }],
+			"routes": [{ "pattern": "next.baseball.theater", "custom_domain": true }],
 			"durable_objects": {
 				"bindings": [
 					{ "name": "GAME_INGEST", "class_name": "GameIngestObject" },
@@ -131,7 +134,7 @@
 			],
 			"vars": {
 				"BT_USE_LIVE_MLB": "1",
-				"BT_APP_ORIGIN": "https://baseball.theater"
+				"BT_APP_ORIGIN": "https://next.baseball.theater"
 			}
 		}
 	},

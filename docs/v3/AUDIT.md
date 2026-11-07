@@ -15374,3 +15374,83 @@ Owner, 2026-11-06. Carried question, which pillar or feature S117 (copy producti
 **What changed, and the owner's answer**
 
 Owner, 2026-11-07, asked "Does this S116 change need a backlog review, or should I log a skip? ... I'd lean toward skip." (and again: "Does the S116 change need a backlog review, or should I log a skip? I'd skip it."): "Agreed and yes" — "Agreed" answers the skip question.
+
+---
+
+## 2026-11-07 — S119 completed
+
+**Production at next.baseball.theater**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-07T01:18:45Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `b2e867d` (tree dirty) |
+| Grader | `scripts/verify-S119.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: wrangler.jsonc env.production is routed to the custom domain next.baseball.theater with BT_APP_ORIGIN https://next.baseball.theater; nothing in wrangler.jsonc or .github/workflows/ claims baseball.theater or www.baseball.theater; staging and previews unchanged
+check 2 PASS: no https://baseball.theater left in functions/, web/, wrangler.jsonc or .github/workflows/; bootstrap.test.ts expects https://next.baseball.theater and passes (test 'S114 AC 8')
+check 3 PASS: README's deploy section: production at next.baseball.theater until the owner's cutover, the cutover as an owner step (wrangler.jsonc custom domain + BT_APP_ORIGIN, replaces the Elastic Beanstalk DNS record), rollback (DNS back / wrangler rollback); launch checklist has DNS cutover from Elastic Beanstalk
+check 4 PASS: backlog Status is done (story heading and Story status table)
+check 5 PASS: the story changed nothing outside its fence (wrangler.jsonc, .github/workflows/deploy.yml, README.md, functions/, web/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, scripts/verify-S119.sh)
+```
+
+**5/5 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S119 check results ---
+check 1 PASS: wrangler.jsonc env.production is routed to the custom domain next.baseball.theater with BT_APP_ORIGIN https://next.baseball.theater; nothing in wrangler.jsonc or .github/workflows/ claims baseball.theater or www.baseball.theater; staging and previews unchanged
+check 2 PASS: no https://baseball.theater left in functions/, web/, wrangler.jsonc or .github/workflows/; bootstrap.test.ts expects https://next.baseball.theater and passes (test 'S114 AC 8')
+check 3 PASS: README's deploy section: production at next.baseball.theater until the owner's cutover, the cutover as an owner step (wrangler.jsonc custom domain + BT_APP_ORIGIN, replaces the Elastic Beanstalk DNS record), rollback (DNS back / wrangler rollback); launch checklist has DNS cutover from Elastic Beanstalk
+check 4 PASS: backlog Status is done (story heading and Story status table)
+check 5 PASS: the story changed nothing outside its fence (wrangler.jsonc, .github/workflows/deploy.yml, README.md, functions/, web/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, scripts/verify-S119.sh)
+--- verify-S119: 5/5 checks passed ---
+verify-S119: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 713ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  351ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  351ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 93ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 845ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  794ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 78ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 80ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 18ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 40ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  01:20:29
+   Duration  2.54s (transform 76ms, setup 0ms, collect 3.50s, tests 1.98s, environment 1ms, prepare 363ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154286,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

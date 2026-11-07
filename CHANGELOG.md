@@ -16,6 +16,12 @@ explicitly where that's the case. For what's still ahead, see
 
 ## Baseball Theater can go live
 
+- **Before, the owner's first release would have instantly replaced the current baseball.theater site with the new
+  app. Now the new app goes live at `next.baseball.theater` while the current site keeps serving fans, and moving
+  baseball.theater over is a separate step the owner takes on purpose, with written steps to undo it.** Details:
+  S119 — `wrangler.jsonc` env `production` routes to the custom domain `next.baseball.theater` with `BT_APP_ORIGIN`
+  `https://next.baseball.theater`; `deploy.yml`'s production `url` and test constants follow; README documents the
+  DNS cutover from Elastic Beanstalk and its rollback, and the launch checklist gains it. _(2026-11-07)_
 - **Before, every change went straight to the branch that becomes the live site, and releasing meant clicking an
   approval. Now changes land on a `stage` branch and go live at `stage.baseball.theater` first; the owner puts
   them on `baseball.theater` simply by merging `stage` into `main`, and nothing reaches the live site any other
