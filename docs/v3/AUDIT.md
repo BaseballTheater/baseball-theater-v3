@@ -16252,3 +16252,18 @@ export const label = game.abbreviation + " @ ";  1016ms
 ```
 
 </details>
+
+---
+
+## 2026-11-07 — backlog review answers (2026-11-07)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-07 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-07T09:25:46Z` |
+| HEAD at capture | `dcabeff` (tree clean) |
+| Applied in | `dcabeff` — Owner's answers to the 2026-11-07 backlog review: ADR-013 deploy note, ADR-028 Browser row |
+
+**Answers and what was applied**
+
+Owner, 2026-11-07, asked "May ADR-013 get a dated note at its head saying deploys are now Cloudflare through deploy.yml?" and "May ADR-028's inventory Browser row also list Logto's sign-in keys and the 'return to this page after sign-in' key?": "2 and 3 - change both". Applied as a dated note under ADR-013's heading and an extended Browser row in ADR-028's inventory.
