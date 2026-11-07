@@ -16267,3 +16267,18 @@ export const label = game.abbreviation + " @ ";  1016ms
 **Answers and what was applied**
 
 Owner, 2026-11-07, asked "May ADR-013 get a dated note at its head saying deploys are now Cloudflare through deploy.yml?" and "May ADR-028's inventory Browser row also list Logto's sign-in keys and the 'return to this page after sign-in' key?": "2 and 3 - change both". Applied as a dated note under ADR-013's heading and an extended Browser row in ADR-028's inventory.
+
+---
+
+## 2026-11-07 — doc parity review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a doc parity review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T09:26:58Z` |
+| HEAD at capture | `3186aef` (tree clean) |
+| Change | `dcabeff` — Owner's answers to the 2026-11-07 backlog review: ADR-013 deploy note, ADR-028 Browser row |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Should I skip the doc parity review for the ADR-013 and ADR-028 wording fixes, or run it? I'd skip.": "Skip"
