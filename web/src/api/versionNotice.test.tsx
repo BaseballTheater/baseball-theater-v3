@@ -26,7 +26,9 @@ import { jsonResponse } from "../test/jsonResponse.js";
 import { createQueryClient } from "./queryClient.js";
 import { scheduleKey } from "./schedule.js";
 import type { ScheduleDayPayload } from "./schedule.js";
-import { updateToNewVersion, useUpdateNotice } from "../pwa/updates.js";
+import {
+	ACTIVATE_TIMEOUT_MS, updateToNewVersion, useUpdateNotice,
+} from "../pwa/updates.js";
 import { resetVersionNotice } from "./versionNotice.js";
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "../../../fixtures");
@@ -72,9 +74,13 @@ function serve()
 /**
  * A stand-in for `navigator.serviceWorker` after a deploy: nothing waits yet; `update()` finds
  * the new worker, which installs on the next tick and, told `SKIP_WAITING`, takes control.
- * Each step is written to `log`, so a test can check the order.
+ * Each step is written to `log`, so a test can check the order. `fault` breaks one step, to
+ * check that a failed update never reloads a page the old worker controls (`controlled`).
  */
-function fakeServiceWorkers(log: string[]): ServiceWorkerContainer
+function fakeServiceWorkers(log: string[], { controlled = false, fault }: {
+	controlled?: boolean;
+	fault?: "update-stalls" | "update-fails" | "install-fails" | "install-stalls" | "takeover-stalls";
+} = {}): ServiceWorkerContainer
 {
 	const container = new EventTarget();
 	const worker = Object.assign(new EventTarget(), {
@@ -82,6 +88,7 @@ function fakeServiceWorkers(log: string[]): ServiceWorkerContainer
 		postMessage: (message: { type: string }) =>
 		{
 			log.push(message.type);
+			if (fault === "takeover-stalls") return;
 			worker.state = "activated";
 			container.dispatchEvent(new Event("controllerchange"));
 		},
@@ -92,20 +99,37 @@ function fakeServiceWorkers(log: string[]): ServiceWorkerContainer
 		update: () =>
 		{
 			log.push("update");
+			if (fault === "update-stalls") return new Promise<never>(() => undefined);
+			if (fault === "update-fails") return Promise.reject(new TypeError("Failed to update a ServiceWorker"));
 			registration.installing = worker;
-			setTimeout(() =>
+			if (fault !== "install-stalls") setTimeout(() =>
 			{
-				worker.state = "installed";
+				worker.state = fault === "install-fails" ? "redundant" : "installed";
 				registration.installing = null;
-				registration.waiting = worker;
+				if (fault !== "install-fails") registration.waiting = worker;
 				worker.dispatchEvent(new Event("statechange"));
 			}, 0);
 			return Promise.resolve(registration);
 		},
 	};
 	return Object.assign(container, {
+		controller: controlled ? {} : null,
 		getRegistration: () => Promise.resolve(registration),
 	}) as unknown as ServiceWorkerContainer;
+}
+
+/** Runs Update Now on fake timers, past every step's `ACTIVATE_TIMEOUT_MS`, and returns whether it finished. */
+async function updateWithTimeouts(container: ServiceWorkerContainer, reload: () => void): Promise<boolean>
+{
+	vi.useFakeTimers();
+	let finished = false;
+	void updateToNewVersion(container, reload).then(() =>
+	{
+		finished = true;
+	});
+	await vi.advanceTimersByTimeAsync(ACTIVATE_TIMEOUT_MS * 3 + 1);
+	vi.useRealTimers();
+	return finished;
 }
 
 function Shell()
@@ -200,6 +224,76 @@ describe("a retired API version (S28)", () =>
 		const reload = vi.fn();
 		await updateToNewVersion(undefined, reload);
 		expect(reload).toHaveBeenCalledOnce();
+	});
+
+	it("426: Update Now on a page the old worker controls reloads once the new worker takes control", async () =>
+	{
+		const log: string[] = [];
+		await updateToNewVersion(fakeServiceWorkers(log, {
+			controlled: true,
+		}), () => log.push("reload"));
+		expect(log).toEqual(["update", "SKIP_WAITING", "reload"]);
+	});
+
+	it("426: an update request that never answers stops Update Now waiting, without reloading, so it can be tried again", async () =>
+	{
+		const reload = vi.fn();
+		const finished = await updateWithTimeouts(fakeServiceWorkers([], {
+			fault: "update-stalls",
+		}), reload);
+		expect(finished).toBe(true);
+		expect(reload).not.toHaveBeenCalled();
+	});
+
+	// Reloading here would let the old worker serve its cached copy of the retired app: 426 again, readable screen lost.
+	for (const fault of ["update-fails", "install-fails", "install-stalls", "takeover-stalls"] as const)
+	{
+		it(`426: ${fault}: a page the old worker controls is not reloaded; Update Now finishes and stays available`, async () =>
+		{
+			const log: string[] = [];
+			const finished = await updateWithTimeouts(fakeServiceWorkers(log, {
+				controlled: true,
+				fault,
+			}), () => log.push("reload"));
+			expect(finished).toBe(true);
+			expect(log).not.toContain("reload");
+		});
+
+		it(`426: ${fault}: a page no worker controls still reloads, since the network answers it`, async () =>
+		{
+			const log: string[] = [];
+			const finished = await updateWithTimeouts(fakeServiceWorkers(log, {
+				fault,
+			}), () => log.push("reload"));
+			expect(finished).toBe(true);
+			expect(log.at(-1)).toBe("reload");
+		});
+	}
+
+	it("426: after a failed update the notice and its Update Now stay on screen for a retry", async () =>
+	{
+		const log: string[] = [];
+		vi.stubGlobal("navigator", Object.assign(Object.create(navigator) as Navigator, {
+			serviceWorker: fakeServiceWorkers(log, {
+				controlled: true,
+				fault: "update-fails",
+			}),
+		}));
+		const api = serve();
+		const client = await renderApp();
+		api.retire();
+		await act(() => client.refetchQueries({
+			queryKey: scheduleKey("2024-07-04"),
+		}));
+		await userEvent.click(await screen.findByRole("button", {
+			name: "Update Now",
+		}));
+		await waitFor(() => expect(log).toEqual(["update"]));
+		expect(screen.getByText(MESSAGE)).toBeInTheDocument();
+		await userEvent.click(screen.getByRole("button", {
+			name: "Update Now",
+		}));
+		await waitFor(() => expect(log).toEqual(["update", "update"]));
 	});
 
 	it("426: the notice's Update Now takes that path: it asks the service worker for the new version", async () =>

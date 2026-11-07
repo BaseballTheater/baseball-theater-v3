@@ -26,6 +26,11 @@ explicitly where that's the case. For what's still ahead, see
   client's 426 middleware (`markVersionUnsupported` → `updateToNewVersion`), and one "keep what's on screen"
   rule (`queryScreen`) shared by the Scoreboard, Standings and Game pages; design matched by the owner
   (shell-scoreboard A6). _(2026-11-07)_
+- **Before, if fetching the new version stalled or failed, Update Now could hang forever or reload straight back into
+  the retired app, losing the readable screen. Now it gives up after a short wait and keeps the page and the notice
+  so Update Now can be tried again, reloading only once the new version has taken over.** Details: follow-up to
+  S28 (GitHub Copilot's review of PR #4) — `updateToNewVersion` bounds `registration.update()` and reloads a
+  controlled page only after `controllerchange`. _(2026-11-07)_
 
 ## Standings show every division's race
 

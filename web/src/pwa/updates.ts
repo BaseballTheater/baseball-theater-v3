@@ -57,7 +57,7 @@ export function exposeDevUpdateTrigger(): void
 	(window as { btShowUpdate?: () => void }).btShowUpdate = () => announceUpdate(async () => window.location.reload());
 }
 
-/** How long Update Now waits for a new worker to install or take over before it reloads anyway. */
+/** How long Update Now waits for each step (the update request, the install, the takeover) before giving up on it (`updateToNewVersion`). */
 export const ACTIVATE_TIMEOUT_MS = 10_000;
 
 /** The message the generated worker (workbox with `registerType: "prompt"`, `options.ts`) answers by taking over. */
@@ -100,9 +100,16 @@ function installed(worker: ServiceWorker | null): Promise<ServiceWorker | null>
  * `options.ts`), which gets 426 again and loops. So this asks the registration for the new
  * version (`registration.update()`), waits for it to install, tells it to take over
  * (`SKIP_WAITING`), waits for it to control the page, and only then reloads, onto the new
- * shell. With no worker (dev, unsupported browsers), nothing new found, or a step that stalls
- * past `ACTIVATE_TIMEOUT_MS`, it reloads anyway: the network answers then. `container` and
- * `reload` are this browser's by default; tests pass stand-ins.
+ * shell. With no worker at all (dev, unsupported browsers) it reloads straight away: the
+ * network answers then.
+ *
+ * Every step is bounded by `ACTIVATE_TIMEOUT_MS`, so Update Now can't hang. When a step fails
+ * or stalls (the update request, the install, the takeover) a page the old worker still
+ * controls is NOT reloaded: that reload would get the retired app again, 426 again, and lose
+ * the readable screen. It returns instead, leaving the page and the notice so Update Now can
+ * be tried again (Copilot review of PR #4). Only a page no worker controls reloads then,
+ * since the network answers it. `container` and `reload` are this browser's by default;
+ * tests pass stand-ins.
  */
 export async function updateToNewVersion(
 	container: ServiceWorkerContainer | undefined = serviceWorkers(),
@@ -110,20 +117,31 @@ export async function updateToNewVersion(
 ): Promise<void>
 {
 	const registration = await container?.getRegistration().catch(() => undefined);
-	if (container && registration)
+	if (!container || !registration)
 	{
-		await registration.update().catch(() => undefined);
-		const next = registration.waiting ?? await Promise.race([installed(registration.installing), after(ACTIVATE_TIMEOUT_MS)]);
-		if (next)
+		reload();
+		return;
+	}
+	// Read before the takeover: once the new worker claims the page, `controller` is it.
+	const controlledByOld = Boolean(container.controller);
+	// Listen before anything can take over, so a fast `controllerchange` isn't missed.
+	const tookControl = new Promise<true>((resolve) => container.addEventListener("controllerchange", () => resolve(true), {
+		once: true,
+	}));
+	// A failed update request still lets an already-waiting or installing worker through; a stalled one gives up.
+	const asked = await Promise.race([registration.update().then(() => "settled", () => "settled"), after(ACTIVATE_TIMEOUT_MS)]);
+	if (!asked) return;
+	const next = registration.waiting ?? await Promise.race([installed(registration.installing), after(ACTIVATE_TIMEOUT_MS)]);
+	if (next)
+	{
+		next.postMessage(SKIP_WAITING);
+		if (await Promise.race([tookControl, after(ACTIVATE_TIMEOUT_MS)]))
 		{
-			const controlled = new Promise<void>((resolve) => container.addEventListener("controllerchange", () => resolve(), {
-				once: true,
-			}));
-			next.postMessage(SKIP_WAITING);
-			await Promise.race([controlled, after(ACTIVATE_TIMEOUT_MS)]);
+			reload();
+			return;
 		}
 	}
-	reload();
+	if (!controlledByOld) reload();
 }
 
 /** When a snooze ends (epoch ms), 0 when none is stored. Kept in this browser so a reload within the hour stays quiet (A6). */
