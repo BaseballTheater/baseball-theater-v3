@@ -1,0 +1,12 @@
+# S121: "Generate release notes" on a GitHub Release lists the pull requests merged since the last
+# release (owner, 2026-11-07: "I want a release to be a set of PRs basically"). Every story reaches
+# stage as its own pull request from its story/S<N> branch, titled "S<N>: …", so a release's notes
+# are its stories. One category holds them all; a pull request labeled skip-release-notes is left out.
+changelog:
+    exclude:
+        labels:
+            - skip-release-notes
+    categories:
+        - title: Stories and changes
+          labels:
+              - "*"

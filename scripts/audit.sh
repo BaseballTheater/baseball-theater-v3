@@ -29,7 +29,7 @@
 # Flags: --commit <sha> names the shipping commit; --no-verify skips the repo-wide
 # pnpm verify for entries covered by another run; --findings - reads stdin.
 # --design-match <verdict|-> (rule 22, S81) pairs each capture in
-# docs/v3/design-checks/<ID>/ with its ratified frame under docs/v3/visual/,
+# docs/v3/design-checks/<ID>/ with the ratified frame (or written amendment) under docs/v3/visual/ that governs it,
 # recording both SHA-256s and the owner's verdict, quoted. A story whose note has a
 # `design:` list cannot be recorded as completed without it (backlog rule 22).
 # `design <ID>` records such a verdict on its own, without running the grader (S84).
@@ -89,11 +89,13 @@ read_arg() { # read_arg <value> — "-" means stdin
 source "$(dirname "$0")/lib/reverify.sh"
 
 # design_match_rows <ID> — one table row per capture in CHECKS_DIR/<ID>/, paired with the
-# one ratified frame of the same name under VISUAL_DIR; exits 2 if any pairing fails. An
-# amendment that redraws a frame under its own name wins over the original, as in
-# `pnpm design:review` (e2e/design-review.ts), so the pair is the frame the owner judged.
+# ratified reference that governs its name under VISUAL_DIR; exits 2 if any pairing fails. The
+# reference comes from scripts/backlog-vault/design-reference.ts, the same code `pnpm design:review`
+# (e2e/design-review.ts) uses, so the pair is the one the owner judged: an amendment frame wins
+# over the original, and a written amendment that overrides the frame wins over both, in which
+# case the row names the amendment file and its hash, never the frame it supersedes.
 design_match_rows() {
-  local id="$1" captures cap name frames count fsum csum
+  local id="$1" captures cap name refs count fsum csum
   captures="$(ls "${CHECKS_DIR}/${id}"/*.png 2>/dev/null || true)"
   if [ -z "$captures" ]; then
     echo "audit: no captures in ${CHECKS_DIR}/${id}/ (run pnpm design:capture ${id})" >&2
@@ -101,28 +103,24 @@ design_match_rows() {
   fi
   for cap in $captures; do
     name="$(basename "$cap")"
-    frames="$(find "$VISUAL_DIR" -type f -name "$name")"
-    count="$(printf '%s' "$frames" | grep -c . || true)"
-    if [ "$count" -gt 1 ]; then
-      frames="$(printf '%s\n' "$frames" | grep '/amendments/' || true)"
-      count="$(printf '%s' "$frames" | grep -c . || true)"
-    fi
+    refs="$(node scripts/backlog-vault/design-reference.ts "$VISUAL_DIR" "$name")" || exit 2
+    count="$(printf '%s' "$refs" | grep -c . || true)"
     if [ "$count" != "1" ]; then
       echo "audit: capture ${name} matches ${count} ratified frames under ${VISUAL_DIR}; need exactly one" >&2
       exit 2
     fi
-    fsum="$(shasum -a 256 "$frames" | cut -d' ' -f1)"
+    fsum="$(shasum -a 256 "$refs" | cut -d' ' -f1)"
     csum="$(shasum -a 256 "$cap" | cut -d' ' -f1)"
-    printf '| `%s` | `%s` | `%s` | `%s` |\n' "$frames" "$fsum" "$cap" "$csum"
+    printf '| `%s` | `%s` | `%s` | `%s` |\n' "$refs" "$fsum" "$cap" "$csum"
   done
 }
 
 # design_match_section <rows> <verdict> — the ledger section both modes write.
 design_match_section() {
   echo
-  echo "**Design match (rule 22)** — the owner compared each capture with its ratified frame"
+  echo "**Design match (rule 22)** — the owner compared each capture with the ratified frame or written amendment that governs it"
   echo
-  echo "| Frame | SHA-256 | Capture | SHA-256 |"
+  echo "| Ratified frame or amendment | SHA-256 | Capture | SHA-256 |"
   echo "|---|---|---|---|"
   printf '%s' "$1"
   echo

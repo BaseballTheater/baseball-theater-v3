@@ -15800,3 +15800,117 @@ Owner, 2026-11-07, asked "Should I skip the backlog and doc parity reviews for S
 **What changed, and the owner's answer**
 
 Owner, 2026-11-07, asked "Should I skip the backlog and doc parity reviews for S120, or run them? I'd skip both.": "Skip"
+
+---
+
+## 2026-11-07 — S121 completed
+
+**Releases from pull requests**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-07T07:01:43Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `b3f4d05` (tree dirty) |
+| Grader | `scripts/verify-S121.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: deploy.yml: production deploys only on a published release, checking out the release's tag, with the production steps unchanged in order; no push to main deploys; staging on a push to stage and previews unchanged
+check 2 PASS: deploy.yml: after the production job, a job fast-forwards main to the released commit (never forced, failing loudly otherwise) with contents: write on that job only; README names the main ruleset's bypass for GitHub Actions
+check 3 PASS: .github/release.yml configures generated release notes; README's release section: publish a release targeting stage with a v* tag, notes list its pull requests, and how to roll back
+check 4 PASS: CLAUDE.md, the run-stories skill and LOOP.md: each story is a story/S<N> branch and pull request into stage with auto-merge; agents never push directly to stage or main, never merge into main, never publish releases; run-stories pushes once and opens one pull request per story; each quotes the owner; no rule text says to push to stage
+check 5 PASS: README documents the owner's GitHub settings: Allow auto-merge, a stage ruleset requiring a pull request and ci-passed, GitHub Actions bypassing the main ruleset, production's deployment rules allowing v* tags
+check 6 PASS: backlog Status is done (story heading and Story status table)
+check 7 PASS: the story changed nothing outside its fence (.github/workflows/, .github/release.yml, CLAUDE.md, the run-stories skill, docs/v3/LOOP.md, README.md, functions/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, scripts/verify-S121.sh)
+```
+
+**7/7 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S121 check results ---
+check 1 PASS: deploy.yml: production deploys only on a published release, checking out the release's tag, with the production steps unchanged in order; no push to main deploys; staging on a push to stage and previews unchanged
+check 2 PASS: deploy.yml: after the production job, a job fast-forwards main to the released commit (never forced, failing loudly otherwise) with contents: write on that job only; README names the main ruleset's bypass for GitHub Actions
+check 3 PASS: .github/release.yml configures generated release notes; README's release section: publish a release targeting stage with a v* tag, notes list its pull requests, and how to roll back
+check 4 PASS: CLAUDE.md, the run-stories skill and LOOP.md: each story is a story/S<N> branch and pull request into stage with auto-merge; agents never push directly to stage or main, never merge into main, never publish releases; run-stories pushes once and opens one pull request per story; each quotes the owner; no rule text says to push to stage
+check 5 PASS: README documents the owner's GitHub settings: Allow auto-merge, a stage ruleset requiring a pull request and ci-passed, GitHub Actions bypassing the main ruleset, production's deployment rules allowing v* tags
+check 6 PASS: backlog Status is done (story heading and Story status table)
+check 7 PASS: the story changed nothing outside its fence (.github/workflows/, .github/release.yml, CLAUDE.md, the run-stories skill, docs/v3/LOOP.md, README.md, functions/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, scripts/verify-S121.sh)
+--- verify-S121: 7/7 checks passed ---
+verify-S121: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 1039ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  524ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  512ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 132ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1086ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  996ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 69ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 101ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 17ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 63ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  07:04:05
+   Duration  3.54s (transform 126ms, setup 0ms, collect 5.02s, tests 2.66s, environment 1ms, prepare 534ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155116,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-07 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T07:10:09Z` |
+| HEAD at capture | `7556829` (tree clean) |
+| Change | `b3f4d05` — Backlog: S121 release flow (stories land as auto-merged PRs into stage; a published GitHub Release deploys production) |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Should I skip the backlog and doc parity reviews for S121, or run them? I'd skip.": "2 skip"
+
+---
+
+## 2026-11-07 — doc parity review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a doc parity review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T07:10:09Z` |
+| HEAD at capture | `7556829` (tree dirty) |
+| Change | `b3f4d05` — Backlog: S121 release flow (stories land as auto-merged PRs into stage; a published GitHub Release deploys production) |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Should I skip the backlog and doc parity reviews for S121, or run them? I'd skip.": "2 skip"

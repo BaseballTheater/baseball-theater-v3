@@ -97,6 +97,18 @@ describe("audit.sh story --design-match (rule 22)", () =>
 		expect(ledger).toMatch(/^Owner: "Matches, ship it"$/m);
 	});
 
+	it("names the written amendment that overrides a frame, not the frame it supersedes", () =>
+	{
+		const env = world(true);
+		const amendment = "# A2\n\n**Overrides:** `thing-desktop` / `-mobile`: it moves.\n\n## Frames\n\nNone.\n";
+		writeFileSync(join(root, "visual/surface/amendments/A2.md"), amendment);
+		const run = audit(env, ["--design-match", "-"], "Matches A2\n");
+		expect(run.status).toBe(0);
+		const ledger = readFileSync(env.BT_AUDIT_LEDGER!, "utf8");
+		expect(ledger).toContain(`| \`${join(root, "visual/surface/amendments/A2.md")}\` | \`${sha(amendment)}\` |`);
+		expect(ledger).not.toContain("amendments/thing-mobile.png");
+	});
+
 	it("refuses a verdict when the story has no captures", () =>
 	{
 		const env = world(true);

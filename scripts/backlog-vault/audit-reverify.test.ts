@@ -58,7 +58,7 @@ function audit(args: string[], input = ""): ReturnType<typeof spawnSync>
 function shippedThenBroken(): string
 {
 	git("init", "-q", "-b", "main");
-	for (const f of ["audit.sh", "lib/checks.sh", "lib/reverify.sh"]) copyFileSync(join(SCRIPTS, f), join(mkdirOf(`scripts/${f}`), f.split("/").pop()!));
+	for (const f of ["audit.sh", "lib/checks.sh", "lib/reverify.sh", "backlog-vault/design-reference.ts"]) copyFileSync(join(SCRIPTS, f), join(mkdirOf(`scripts/${f}`), f.split("/").pop()!));
 	write("scripts/verify-S900.sh", [
 		"#!/usr/bin/env bash",
 		"set -uo pipefail",

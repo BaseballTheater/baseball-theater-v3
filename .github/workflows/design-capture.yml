@@ -3,8 +3,10 @@ name: Design capture
 # S115: take a story's design captures (rule 22) on request, on a GitHub runner, which has the
 # browser and Docker a cloud session lacks. Run it from the Actions tab or with
 # `gh workflow run design-capture.yml -f story=S106` (add `-f commit=true` to commit them).
-# It commits back to the branch it runs on: the default branch, `stage`, unless `--ref` names
-# another (S118; agents never push the production branch).
+# It commits back to the branch it runs on. Since S121 `stage` takes changes only through pull
+# requests, so run it on the story's branch (`--ref story/S106`): the captures commit joins that
+# story's pull request. Run on `stage` itself, its push is refused unless the owner lets GitHub
+# Actions bypass the `stage` ruleset (README).
 # The owner's design match still happens in a session (`scripts/audit.sh story <ID> --design-match -`).
 on:
     workflow_dispatch:

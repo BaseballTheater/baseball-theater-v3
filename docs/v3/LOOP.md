@@ -79,16 +79,16 @@ Use the S1 prompt in BACKLOG. Watch stalls/overreach. Do not walk away on the fi
 
 ## 7 — Reviewer pass
 
-Loop output lands on `stage`, never `main` (S118; owner, 2026-11-06: "Instead of committing directly to main, we commit to stage, and the stage branch pushes to the stage site."): agents commit and push to `stage`, which deploys `stage.baseball.theater`, and never push or merge into `main`, because a push to `main` deploys production; merging `stage` into `main` is the owner's release step.
+Loop output reaches `stage` only through pull requests, one per story (S121; owner, 2026-11-07: "I think releases to main probably should use GitHub releases, if that's actually possible. I want a release to be a set of PRs basically"; on who merges them: "1. You automatically"). Each story is committed on its own `story/S<N>` branch; the coordinator pushes it and opens its pull request into `stage` with auto-merge on (`gh pr merge --auto --merge`), so it merges once the required checks (`ci-passed`) pass, and the merge deploys `stage.baseball.theater`. Agents never push directly to `stage` or `main`, never merge into `main`, and never publish releases: publishing a GitHub Release is the owner's release step; it deploys production and then fast-forwards `main` to the released commit, so `main` mirrors production ("2. Mirror").
 
-Before accepting loop output onto `stage`:
+Before a story's pull request merges into `stage`:
 
-1. Ensure `pnpm verify` is green on the branch
-2. Run a **fresh-context** review (no prior loop transcript):
+1. Ensure `pnpm verify` is green on the branch (CI's `ci-passed` gates the auto-merge)
+2. Run a **fresh-context** review (no prior loop transcript) when one is asked for:
    - Claude Code: `/code-review`
    - Cursor: Bugbot review and/or Security Review on the diff
-3. Fix anything the reviewer flags that violates BACKLOG AC or CLAUDE.md
-4. Only then merge/push
+3. Fix anything the reviewer flags that violates BACKLOG AC or CLAUDE.md, on the story's branch
+4. Only then push the branch and open its pull request
 
 ## 8 — Scale → loop
 

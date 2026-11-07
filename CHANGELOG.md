@@ -25,6 +25,16 @@ explicitly where that's the case. For what's still ahead, see
 
 ## Baseball Theater can go live
 
+- **Before, finished work went straight onto the test site's branch, and the live site changed whenever the
+  `main` branch did, with no record of what each release contained. Now every finished story arrives as its own
+  pull request that merges itself once its checks pass, and the live site changes only when the owner publishes
+  a GitHub Release, whose notes list the pull requests it ships; `main` then follows to show what is live.**
+  Details: S121 — `.github/workflows/deploy.yml` deploys production on `release: published` from the release's
+  tag (same bootstrap → migrate → reapply-deletions → deploy → Logto steps), a `mirror-main` job fast-forwards
+  `main` (never forced), `.github/release.yml` for generated notes; CLAUDE.md, the run-stories skill and
+  `docs/v3/LOOP.md` move agents to `story/S<N>` branches and auto-merged pull requests into `stage`; README lists
+  the owner's GitHub settings (auto-merge, a `stage` ruleset with `ci-passed`, GitHub Actions bypassing `main`'s
+  ruleset, `v*` tags for the `production` environment) and how to release and roll back. _(2026-11-07)_
 - **Before, nobody could sign in on the real site: accounts and settings only worked on a developer's machine. Now
   fans sign in on production with a one-time code emailed to them, deleting an account also deletes it at the
   sign-in service, and every release sets up the sign-in service's addresses itself.** The test site
