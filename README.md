@@ -130,8 +130,9 @@ automatically 2. Mirror"):
   (S118). A push to `main` deploys nothing.
 - After production is live, the workflow fast-forwards `main` to the released commit, so `main`
   always shows what production runs. It never forces `main`.
-- Agents never push directly to `stage` or `main`, never merge into `main`, and never publish a
-  release: publishing a release is the owner's release step.
+- Agents never push directly to `stage` or `main` and never merge into `main`. The coordinator
+  publishes a release only when the owner says so; each release has a milestone, and every pull
+  request into `stage` is assigned to the next one. The DNS cutover stays the owner's.
 
 - **Previews.** Every pull request gets its own Worker, `baseball-theater-pr-<number>` on workers.dev,
   once `pnpm verify` passes, and the workflow posts its address on the pull request. Previews share

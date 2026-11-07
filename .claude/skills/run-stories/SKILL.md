@@ -80,7 +80,7 @@ Stop when `N` stories have been started, nothing is eligible, a review returns `
 3. Watch the pull requests' checks (`gh pr checks <number> --watch`, in the background) and report each one's result in the summary; a failure is the next thing to fix, committed on that story's branch.
 4. Once they merge, bring the local `stage` up to date (`git fetch origin && git switch stage && git merge --ff-only origin/stage`).
 
-A run never pushes directly to `stage` or `main`, never merges into `main`, and never publishes releases: publishing a GitHub Release is the owner's release step, which deploys production and fast-forwards `main` to mirror it. Never deploy.
+Each pull request is assigned to the next release's milestone when it's opened, and a story counts as complete only once that release is published; the summary says which release each story waits for. A run never pushes directly to `stage` or `main`, never merges into `main`, and never publishes a release on its own: the coordinator publishes one only when the owner says so (`CLAUDE.md` → "The coordinator manages releases"; owner, 2026-11-07: "I want you to manage the releases"; then "Release when I say so. PRs must be assigned a release to be considered complete, and PRs cannot be merged to main with no release. Roll back on your own. v3.0.0. I keep DNS cutover."). Never deploy by hand.
 
 End with one summary:
 
