@@ -6,14 +6,19 @@ name: Deploy
 #   deleted when the pull request closes.
 # - Every push to stage deploys staging at stage.baseball.theater, on the Neon `staging` branch: a
 #   schema-only branch that never holds a fan's data.
-# - Every push to main deploys production at next.baseball.theater, on its own (S118; owner, 2026-11-06:
-#   "main would deploy to production when it gets an update, and stage would deploy to stage when it
-#   gets an update", and "we don't need that approval step. We can just deploy when we merge into
-#   main"). Agents work on stage; merging stage into main is the owner's release step. The job still
-#   names the GitHub environment `production` for its secrets; the owner sets that environment to no
-#   required reviewers and to deploy from main only (README). Production stays at
-#   next.baseball.theater until the owner cuts baseball.theater over from Elastic Beanstalk by hand
-#   (S119; owner, 2026-11-07: "Do the temporary address").
+# - Production, at next.baseball.theater, deploys only when the owner publishes a GitHub Release
+#   (S121; owner, 2026-11-07: "I think releases to main probably should use GitHub releases, if
+#   that's actually possible. I want a release to be a set of PRs basically"). It checks out and
+#   deploys exactly the release's tag, and a push to main deploys nothing. Each story reaches stage
+#   as its own auto-merged pull request; a release is the pull requests merged into stage since the
+#   last one (.github/release.yml groups them in the generated notes). Production has no approval
+#   wait (S118: "we don't need that approval step"). The job names the GitHub environment
+#   `production` for its secrets; the owner lets that environment deploy from `v*` tags (README).
+#   Production stays at next.baseball.theater until the owner cuts baseball.theater over from
+#   Elastic Beanstalk by hand (S119; owner, 2026-11-07: "Do the temporary address").
+# - Once production is live, `main` is fast-forwarded to the released commit, so it mirrors what
+#   production runs (owner, 2026-11-07: "2. Mirror"). Never forced: if main can't fast-forward (a
+#   rollback to an older release, or main moved by hand) the job fails loudly and main stays put.
 # Every deploy first runs `pnpm deploy:bootstrap` (find or create the Neon branch and the Hyperdrive
 # config by name, write the Worker config and secrets), then `pnpm db:migrate` and
 # `pnpm db:reapply-deletions` on its own database, and only then `wrangler deploy`, which pushes
@@ -30,7 +35,9 @@ on:
     pull_request:
         types: [opened, synchronize, reopened, closed]
     push:
-        branches: [stage, main]
+        branches: [stage]
+    release:
+        types: [published]
 
 permissions:
     contents: read
@@ -205,10 +212,11 @@ jobs:
             - name: Deploy staging
               run: pnpm --filter @bt/functions exec wrangler deploy --config "${{ steps.bootstrap.outputs.config }}" --env staging --secrets-file "${{ steps.bootstrap.outputs.secrets_file }}"
 
-    # next.baseball.theater (until the owner's cutover, S119), on every push to main, once verify passes: the owner's merge of stage into
-    # main is the release, with no approval wait (S118). Rolling back is `wrangler rollback` (README).
+    # next.baseball.theater (until the owner's cutover, S119), when the owner publishes a GitHub Release,
+    # once verify passes on its tag (S121). The release's tag is what deploys, never a branch head.
+    # Rolling back is `wrangler rollback` or re-running an older release's run (README).
     production:
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'release' && github.event.action == 'published'
         needs: [verify]
         runs-on: ubuntu-latest
         timeout-minutes: 20
@@ -228,6 +236,8 @@ jobs:
             LOGTO_S2S_SECRET: ${{ secrets.LOGTO_S2S_SECRET }}
         steps:
             - uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.release.tag_name }}
 
             - uses: pnpm/action-setup@v4
               with:
@@ -261,3 +271,40 @@ jobs:
             # visibly instead. Idempotent: an unchanged origin changes nothing in Logto.
             - name: Register production's Logto sign-in and sign-out addresses
               run: pnpm run deploy:logto production
+
+    # main mirrors production (S121; owner, 2026-11-07: "2. Mirror"): once the release is live, move
+    # main to the released commit, as a fast-forward only. A plain `git push` already refuses a
+    # non-fast-forward; the ancestry check first makes that a clear error instead of a git message.
+    # It never forces, so a rollback to an older release fails here on purpose and leaves main at
+    # the newer release. The push uses this workflow's token, so it starts no other workflow; the
+    # `main` ruleset must list GitHub Actions as a bypass actor or the push is refused (README).
+    mirror-main:
+        if: github.event_name == 'release' && github.event.action == 'published'
+        needs: [production]
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        permissions:
+            contents: write
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.release.tag_name }}
+                  fetch-depth: 0
+
+            - name: Fast-forward main to the released commit
+              env:
+                  TAG: ${{ github.event.release.tag_name }}
+              run: |
+                  released=$(git rev-parse "HEAD^{commit}")
+                  git fetch --no-tags origin main
+                  current=$(git rev-parse origin/main)
+                  if [ "$current" = "$released" ]; then
+                      echo "main is already at $TAG ($released)"
+                      exit 0
+                  fi
+                  if ! git merge-base --is-ancestor "$current" "$released"; then
+                      echo "::error::main ($current) is not an ancestor of $TAG ($released), so it cannot fast-forward. Production runs $TAG; main stays where it is. A rollback to an older release does this on purpose; otherwise main was changed by hand."
+                      exit 1
+                  fi
+                  git push origin "$released:refs/heads/main"
+                  echo "main fast-forwarded from $current to $TAG ($released)"

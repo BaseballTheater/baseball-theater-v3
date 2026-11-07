@@ -87,7 +87,7 @@ config. Every bootstrapping step is safe to repeat (owner, 2026-11-05: "It shoul
 can happen with every deployment. All the bootstrapping should be like that."), so deploys run them
 each time rather than anyone remembering to. **Agents never touch production**: no migrations,
 restores or deploys against it, and no production connection string in the repo (CLAUDE.md);
-production changes go out only when the owner merges `stage` into `main` (S114, S118).
+production changes go out only when the owner publishes a GitHub Release (S114, S121).
 
 **One-time setup** (done by the owner 2026-11-02; repeat it only to rebuild from scratch):
 
@@ -117,15 +117,21 @@ uid and a time. This step deletes every logged account again from every personal
 `.github/workflows/deploy.yml` deploys the app as a Cloudflare Worker (ADR-017, S114). Agents never
 deploy: it runs only on GitHub, with keys only GitHub holds.
 
-**Two branches, two sites** (S118; owner, 2026-11-06: "main would deploy to production when it gets
-an update, and stage would deploy to stage when it gets an update"):
+**Pull requests into `stage`, releases to production** (S121; owner, 2026-11-07: "I think releases to
+main probably should use GitHub releases, if that's actually possible. I want a release to be a set
+of PRs basically"; asked who merges a story's pull request and whether `main` stays: "1. You
+automatically 2. Mirror"):
 
-- A push to `stage` deploys staging, `stage.baseball.theater`. Agents commit and push here, and only
-  here.
-- A push to `main` deploys production, at `next.baseball.theater` until the owner's cutover (below),
-  on its own, with no approval wait (owner, same day: "we don't need that approval step. We can just
-  deploy when we merge into main"). Agents never push to it, merge into it or open a release to it.
-- Pull requests into either branch get a preview (below) and CI.
+- Every story arrives as its own pull request from a `story/S<N>` branch into `stage`. The agent
+  opens it with auto-merge on, so it merges by itself once `ci-passed` is green; each merge deploys
+  staging, `stage.baseball.theater`. Every pull request also gets a preview (below).
+- Production, at `next.baseball.theater` until the owner's cutover (below), deploys only when the
+  owner publishes a GitHub Release, and deploys exactly that release's tag, with no approval wait
+  (S118). A push to `main` deploys nothing.
+- After production is live, the workflow fast-forwards `main` to the released commit, so `main`
+  always shows what production runs. It never forces `main`.
+- Agents never push directly to `stage` or `main`, never merge into `main`, and never publish a
+  release: publishing a release is the owner's release step.
 
 - **Previews.** Every pull request gets its own Worker, `baseball-theater-pr-<number>` on workers.dev,
   once `pnpm verify` passes, and the workflow posts its address on the pull request. Previews share
@@ -137,20 +143,30 @@ an update, and stage would deploy to stage when it gets an update"):
   The branch is created schema-only from production the first time (production's tables, none of its
   rows) and filled only by `pnpm db:migrate`, so it never holds a fan's data. Copying production's
   baseball data into it is a separate step the owner runs by hand (S117); no deploy copies data.
-- **Releasing.** The owner merges `stage` into `main`; that push deploys `next.baseball.theater` once
-  `pnpm verify` passes. Merging the whole branch (`git checkout main && git merge stage && git push`,
-  or a pull request from `stage` into `main`) is the smooth path. Cherry-picking a single commit onto
-  `main` works too, but expect conflicts: every story's commit also touches `docs/v3/AUDIT.md`,
-  `CHANGELOG.md` and the generated backlog files (`docs/v3/BACKLOG.md`, `docs/v3/INDEX.md`,
-  `docs/v3/audit.jsonl`), and a picked commit lands without the ones before it; rebuild the generated
-  files with `pnpm backlog:build` while resolving. Only the owner releases.
-- **Rolling back.** `npx wrangler rollback --env production` (from `functions/`, with
-  `--config ../wrangler.jsonc`) returns production to its previous version in seconds; add a version
-  id to pick an older one (`npx wrangler deployments list --env production` lists them). A rollback
-  doesn't undo a migration, which is another reason they stay additive.
+- **Releasing.** On GitHub, Releases → Draft a new release: choose a new tag `v*` (e.g. `v0.1.0`)
+  with its target `stage` (or a single `stage` commit, from the target's recent commits), then press
+  **Generate release notes**: `.github/release.yml` makes the notes the list of pull requests merged
+  into `stage` since the last release, which is the stories the release ships. Publishing it
+  (`gh release create v0.1.0 --target stage --generate-notes` does the same) runs the deploy workflow
+  on that tag: `pnpm verify`, then production's steps (below), then `main` fast-forwards to the
+  tagged commit. A release ships everything on `stage` up to its target; there is no picking single
+  stories out of the middle, and releasing is no longer done by merging `stage` into `main`. The
+  first release must target a commit that has S121's workflow (a release runs the workflow as it is at
+  its tag). Only the owner releases.
+- **Rolling back.** Three ways, quickest first. (1) `npx wrangler rollback --env production` (from
+  `functions/`, with `--config ../wrangler.jsonc`) returns production's Worker to its previous version
+  in seconds; add a version id to pick an older one (`npx wrangler deployments list --env production`
+  lists them). (2) Re-run the previous release's run of the Deploy workflow (Actions → Deploy → that
+  release's run → Re-run all jobs): it deploys that release's tag again, with the workflow as it was at
+  that tag. GitHub re-runs a run only within 30 days of it. (3) Otherwise publish a new release with a
+  new tag (e.g. `v0.1.1`) whose target is the older release's commit: tag it with
+  `git tag v0.1.1 'v0.1.0^{}'` and `git push origin v0.1.1`, then publish a release from that tag.
+  This works only if that commit has S121's workflow. In (2) and (3) production goes back but `main` does not: the mirror job fails red on purpose
+  ("main … is not an ancestor"), because `main` never moves backwards; the next forward release
+  fast-forwards it again. No rollback undoes a migration, which is another reason they stay additive.
 - **Production's address until the cutover** (S119; owner, 2026-11-07: "Do the temporary address").
-  `baseball.theater` still points at the Elastic Beanstalk (v2) site, and that DNS change, not the
-  merge into `main`, is the real release gate. So production's Worker serves at
+  `baseball.theater` still points at the Elastic Beanstalk (v2) site, and that DNS change, not
+  publishing a release, is the real release gate. So production's Worker serves at
   `next.baseball.theater` (its custom domain in `wrangler.jsonc`, with `BT_APP_ORIGIN`
   `https://next.baseball.theater`); its first deploy creates that DNS record itself, and the v2 site
   keeps serving fans untouched.
@@ -188,13 +204,28 @@ production's deploy then registers its Logto sign-in addresses (`pnpm deploy:log
 | `BT_SESSION_KEY_PRODUCTION` | secret      | signs sessions on production                                                                                       |
 | `LOGTO_S2S_APP_ID`          | secret      | production's Logto machine-to-machine app ID (the `production` job only; a Worker secret too)                      |
 | `LOGTO_S2S_SECRET`          | secret      | that app's secret: deletes fans' Logto accounts and sets production's sign-in addresses (`production` job only)    |
-| `production`                | environment | no required reviewers; deployment branches limited to `main`, so only `main` reaches production's secrets          |
+| `production`                | environment | no required reviewers; deployments only from `v*` tags, so only a release reaches production's secrets             |
 
-**GitHub settings the owner sets** (S118; agents never change repo settings):
+**GitHub settings the owner sets** (S118, S121; agents never change repo settings), in this order:
 
-- Default branch: `stage`, so pull requests, `gh workflow run` and new clones start there.
-- Environment `production`: no required reviewers (a push to `main` deploys without a wait), and
-  deployment branches limited to `main`, so no other branch can deploy production or read its secrets.
+1. Settings → General → Pull Requests: turn on **Allow auto-merge** (and keep "Allow merge commits" on:
+   a story's commit then reaches `stage` with the sha its ledger entry names). Without it
+   `gh pr merge --auto` fails.
+2. Settings → Rules → Rulesets → New branch ruleset for `stage`: **Require a pull request before
+   merging** (0 required approvals, so auto-merge doesn't wait for a review), **Require status checks
+   to pass** with the check `ci-passed` (CI's one job that stands for all of them), and **Block force
+   pushes**. Leave "Require linear history" off (stories merge as merge commits). Design captures then
+   run on the story's branch (`gh workflow run design-capture.yml --ref story/S<N> …`), or add GitHub
+   Actions to this ruleset's bypass list too, if they are to commit straight to `stage`.
+3. The `main` ruleset: add **GitHub Actions** to its **bypass list**, so the deploy workflow's token
+   can fast-forward `main` after a release (a ruleset that requires pull requests or restricts updates
+   would refuse that push). Without it the mirror job fails after production is already live. With no
+   ruleset or branch protection on `main` nothing blocks the push, but one that blocks force pushes and
+   deletions keeps `main` a faithful mirror.
+4. Settings → Environments → `production` → Deployment branches and tags: **Selected branches and
+   tags**, with the tag rule `v*` (remove the old `main` branch rule). A release's run has the tag as
+   its ref (`refs/tags/v…`), so a `main`-only policy would refuse it. Keep no required reviewers.
+5. Default branch: `stage` (S118), so pull requests, `gh workflow run` and new clones start there.
 
 ### Sign-in (Logto)
 
