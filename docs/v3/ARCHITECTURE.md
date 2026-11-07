@@ -745,6 +745,8 @@ Campaign webhooks and/or scheduled refresh → update entitlements
 
 ### ADR-013 — Local dev, testing, lint & CI/CD (accepted)
 
+**Note 2026-11-07 (owner: "2 and 3 - change both"):** deploys no longer follow this ADR's Firebase text. They run on Cloudflare through `.github/workflows/deploy.yml`: a preview Worker per pull request (S114), staging on every merge into `stage` (S118, S121), and production when the owner publishes a GitHub Release, after which `main` is fast-forwarded to mirror it (S121). The "staging project vs preview channels" question below is settled by those stories. The rest of this ADR (local dev, tests, lint, CI) stands as amended below; its deploy lines are kept as history.
+
 **Amended 2026-10-19 by [ADR-026](#adr-026--performance-budgets-and-test-coverage-accepted-2026-10-19):** coverage floors raised (domain 95%; everything else 85% lines / 80% branches); Playwright e2e and performance budgets (size-limit, Lighthouse CI) are in.
 
 **Amended 2026-10-18 by [ADR-017](#adr-017--platform-cloudflare-workers--neon-postgres-accepted-2026-10-18):** the Firebase Emulator Suite is replaced by the local Workers runtime. Requirements in the table below stand; the *how* changes:
@@ -1345,7 +1347,7 @@ Owner, 2026-10-23: *"I need tools to allow a user to delete all of their data, a
 | Logto | account, email | `IdentityAdmin.deleteAccount` | Logto's own logs |
 | Cloudflare Email | the address a download-ready email went to | — | Cloudflare's retention; labeled in the manifest when its adapter lands |
 | Patreon | membership, pledge | BT deletes its copy and revokes access | Patreon's records are Patreon's |
-| Browser | session token, cached settings, offline caches | `web/src/storage/` on sign-out and deletion | — |
+| Browser | session token, cached settings, offline caches; while a sign-in is under way, Logto's in-flight sign-in keys (`logto.*`) and the page to return to after sign-in (`bt.signInReturnTo`), kept in the tab's own storage (S116, S120; owner, 2026-11-07: "2 and 3 - change both") | `web/src/storage/` on sign-out and deletion | — |
 | Push subscriptions (Later) | endpoint | `deleteFor` | — |
 | Server and email logs | must not carry personal fields | — | Provider retention |
 

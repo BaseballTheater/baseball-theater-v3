@@ -55,7 +55,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
 
 ## Product and architecture docs
 
-- [ARCHITECTURE.md — Baseball Theater v3 — Architecture](ARCHITECTURE.md) — 133 KB
+- [ARCHITECTURE.md — Baseball Theater v3 — Architecture](ARCHITECTURE.md) — 134 KB
   - `14–33` Architecture principles
   - `34–88` 1. Foundational data topology (accepted direction)
     - `40–48` Two modes
@@ -82,7 +82,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
     - `439–480` Research notes (feasibility — 2026)
   - `481–496` Lessons from v2 (problems to solve or consciously accept)
   - `497–527` Target picture (partial)
-  - `528–1372` Major decision records
+  - `528–1374` Major decision records
     - `532–537` ADR-001 — Clean slate (accepted)
     - `538–556` ADR-002 — Data-access topology for schedule & game details (accepted)
     - `557–579` ADR-003 — Client delivery (accepted)
@@ -95,54 +95,54 @@ Assembled, in this order and around the stories, into BACKLOG.md.
     - `685–703` ADR-010 — Impact curation & league digests (direction accepted)
     - `704–722` ADR-011 — Inning feed & game package pipeline (direction accepted)
     - `723–745` ADR-012 — Ports & adapters (accepted)
-    - `746–818` ADR-013 — Local dev, testing, lint & CI/CD (accepted)
-    - `819–956` ADR-014 — Client state management (accepted)
-    - `957–1019` ADR-015 — API versioning & compatibility (accepted)
-    - `1020–1058` ADR-016 — Generated client DAL from the OpenAPI spec (accepted)
-    - `1059–1095` ADR-017 — Platform: Cloudflare Workers + Neon Postgres (accepted 2026-10-18)
-    - `1096–1122` ADR-018 — Storage: all BT data in Postgres (accepted 2026-10-18)
-    - `1123–1142` ADR-019 — Identity: Logto behind identity ports (accepted 2026-10-18)
-    - `1143–1180` ADR-020 — Live delivery & cadence: Durable Objects (accepted 2026-10-18)
-    - `1181–1194` ADR-021 — Graduated cache freshness (accepted 2026-10-18)
-    - `1195–1217` ADR-022 — Idempotent updates (accepted 2026-10-18)
-    - `1218–1244` ADR-023 — Web client: SPA + installable PWA (accepted 2026-10-19)
-    - `1245–1256` ADR-024 — Client state: simple, direct, followable (accepted 2026-10-19)
-    - `1257–1273` ADR-025 — Code that stays understandable: comments and one implementation (accepted 2026-10-19)
-    - `1274–1303` ADR-026 — Performance budgets and test coverage (accepted 2026-10-19)
-    - `1304–1313` ADR-027 — Settings live on the account (accepted 2026-10-19)
-    - `1314–1355` ADR-028 — Personal data: one inventory, and deletion reaches all of it (accepted 2026-10-23)
-    - `1356–1372` ADR-029 — Highlight search asks MLB on every query, for now (accepted 2026-11-02)
-  - `1373–1443` 4. Impact curation pipeline
-    - `1378–1392` Mental model
-    - `1393–1399` Why not rank in the browser
-    - `1400–1413` Heuristic bootstrap (Phase A)
-    - `1414–1420` Model / agent layer (Phase B–D)
-    - `1421–1434` Storage sketch
-    - `1435–1443` Open design knobs
-  - `1444–1527` 5. Inning insight feed & game package
-    - `1449–1472` Pipeline
-    - `1473–1485` Insight item (sketch)
-    - `1486–1500` Game package (sketch)
-    - `1501–1506` Triggering vs polling
-    - `1507–1518` Cost intuition (Meter A)
-    - `1519–1527` Open design knobs
-  - `1528–1587` System contexts (to flesh out)
-    - `1530–1533` Clients
-    - `1534–1537` Application / API layer
-    - `1538–1555` Data ingestion & cache
-    - `1556–1564` Enrichment & AI
-    - `1565–1571` Identity, billing, entitlements
-    - `1572–1575` Media playback
-    - `1576–1579` Observability & ops
-    - `1580–1587` Security baseline
-  - `1588–1628` Repo & package shape
-  - `1629–1652` BT store shapes
-  - `1653–1705` 6. Developer experience, testing & delivery
-    - `1657–1667` Local development
-    - `1668–1678` Testing
-    - `1679–1686` Lint & commit hooks
-    - `1687–1705` GitHub Actions
-  - `1706–1718` Open architecture questions
+    - `746–820` ADR-013 — Local dev, testing, lint & CI/CD (accepted)
+    - `821–958` ADR-014 — Client state management (accepted)
+    - `959–1021` ADR-015 — API versioning & compatibility (accepted)
+    - `1022–1060` ADR-016 — Generated client DAL from the OpenAPI spec (accepted)
+    - `1061–1097` ADR-017 — Platform: Cloudflare Workers + Neon Postgres (accepted 2026-10-18)
+    - `1098–1124` ADR-018 — Storage: all BT data in Postgres (accepted 2026-10-18)
+    - `1125–1144` ADR-019 — Identity: Logto behind identity ports (accepted 2026-10-18)
+    - `1145–1182` ADR-020 — Live delivery & cadence: Durable Objects (accepted 2026-10-18)
+    - `1183–1196` ADR-021 — Graduated cache freshness (accepted 2026-10-18)
+    - `1197–1219` ADR-022 — Idempotent updates (accepted 2026-10-18)
+    - `1220–1246` ADR-023 — Web client: SPA + installable PWA (accepted 2026-10-19)
+    - `1247–1258` ADR-024 — Client state: simple, direct, followable (accepted 2026-10-19)
+    - `1259–1275` ADR-025 — Code that stays understandable: comments and one implementation (accepted 2026-10-19)
+    - `1276–1305` ADR-026 — Performance budgets and test coverage (accepted 2026-10-19)
+    - `1306–1315` ADR-027 — Settings live on the account (accepted 2026-10-19)
+    - `1316–1357` ADR-028 — Personal data: one inventory, and deletion reaches all of it (accepted 2026-10-23)
+    - `1358–1374` ADR-029 — Highlight search asks MLB on every query, for now (accepted 2026-11-02)
+  - `1375–1445` 4. Impact curation pipeline
+    - `1380–1394` Mental model
+    - `1395–1401` Why not rank in the browser
+    - `1402–1415` Heuristic bootstrap (Phase A)
+    - `1416–1422` Model / agent layer (Phase B–D)
+    - `1423–1436` Storage sketch
+    - `1437–1445` Open design knobs
+  - `1446–1529` 5. Inning insight feed & game package
+    - `1451–1474` Pipeline
+    - `1475–1487` Insight item (sketch)
+    - `1488–1502` Game package (sketch)
+    - `1503–1508` Triggering vs polling
+    - `1509–1520` Cost intuition (Meter A)
+    - `1521–1529` Open design knobs
+  - `1530–1589` System contexts (to flesh out)
+    - `1532–1535` Clients
+    - `1536–1539` Application / API layer
+    - `1540–1557` Data ingestion & cache
+    - `1558–1566` Enrichment & AI
+    - `1567–1573` Identity, billing, entitlements
+    - `1574–1577` Media playback
+    - `1578–1581` Observability & ops
+    - `1582–1589` Security baseline
+  - `1590–1630` Repo & package shape
+  - `1631–1654` BT store shapes
+  - `1655–1707` 6. Developer experience, testing & delivery
+    - `1659–1669` Local development
+    - `1670–1680` Testing
+    - `1681–1688` Lint & commit hooks
+    - `1689–1707` GitHub Actions
+  - `1708–1720` Open architecture questions
 - [CHATGPT-LOGO-BACKLOG.md — MLB Team Identifier Design Tracker](CHATGPT-LOGO-BACKLOG.md) — 25 KB
   - `3–22` Purpose
   - `23–35` Priority Order
