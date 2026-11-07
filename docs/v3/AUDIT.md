@@ -16013,3 +16013,27 @@ export const label = game.abbreviation + " @ ";  1057ms
 ```
 
 </details>
+
+---
+
+## 2026-11-07 — S73 design match
+
+| | |
+|---|---|
+| Entry | design match only — no grader run; not a completion |
+| Captured (UTC) | `2026-11-07T07:34:46Z` |
+| HEAD at capture | `427d700` (tree clean) |
+
+**Design match (rule 22)** — the owner compared each capture with the ratified frame or written amendment that governs it
+
+| Ratified frame or amendment | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/shell-scoreboard/amendments/scoreboard-standalone-mobile.png` | `77fec3633f38f4bd114d00272b4971a88607f1fd02970c8f41c99e375f757977` | `docs/v3/design-checks/S73/scoreboard-standalone-mobile.png` | `81733216394291900f93072d5c1aeabae8f1064e1ea67ef81d78f5eaa36a7198` |
+| `docs/v3/visual/standings-search-settings/amendments/A8.md` | `a740043250e808907ad82fe6370c805a7109fcd43d9df07ec88d8e6dfa2b591c` | `docs/v3/design-checks/S73/settings-install-desktop.png` | `4c2ef0d95fa383c3ae49b0c5bcd294c66aa02785e82121b2516a3289d3e786e4` |
+| `docs/v3/visual/standings-search-settings/amendments/A8.md` | `a740043250e808907ad82fe6370c805a7109fcd43d9df07ec88d8e6dfa2b591c` | `docs/v3/design-checks/S73/settings-install-ios-mobile.png` | `11725d491e2c5b6db551de1d65526102690b0582f1d90847c797a6f57e7a6bf6` |
+| `docs/v3/visual/standings-search-settings/amendments/A8.md` | `a740043250e808907ad82fe6370c805a7109fcd43d9df07ec88d8e6dfa2b591c` | `docs/v3/design-checks/S73/settings-install-medium.png` | `48ce4f733139ad5d09895b55b200cafec567ee989456699c065ca9223c8c52b8` |
+| `docs/v3/visual/standings-search-settings/amendments/A8.md` | `a740043250e808907ad82fe6370c805a7109fcd43d9df07ec88d8e6dfa2b591c` | `docs/v3/design-checks/S73/settings-install-mobile.png` | `e3628f9af19cde4ae446dd3c040ec3a3ef62d498990b5bca5047786cc7cdc83b` |
+| `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S73/shell-update-desktop.png` | `452d6eea670a484c53b0342a99231dec1ecd08a7d048c91a413788efad7d4b28` |
+| `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S73/shell-update-medium.png` | `2e0f8af3534025f1ed6e850b3a557efa705bf12344459a5581d7ef0170d9e9a3` |
+| `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S73/shell-update-mobile.png` | `8a863a0556af488ebf28cbec42efbc1950dda9c8e7ee0a11765afc6905de4738` |
+Owner: "Owner, 2026-11-07, shown the S73 captures (taken on GitHub, 22eba97) beside A6's and A8's written amendments and the scoreboard-standalone frame via `pnpm design:review S73`, asked "Do S73 and S28 match their designs now?": "1 yes". Then, told S73 would get this verdict recorded while its Docker-only Playwright flows (AC 6) wait for an environment with Docker: "Go head"."
