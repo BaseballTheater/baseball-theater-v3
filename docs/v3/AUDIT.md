@@ -16088,3 +16088,49 @@ Fresh-context backlog review, one reviewer, at `f34576a` on `stage`. Trigger: co
 1. May ADR-013 get a dated note at its head saying deploys are now Cloudflare through `deploy.yml` (a preview per pull request, staging on `stage`, production on a published GitHub Release), so its Firebase deploy row (ARCHITECTURE.md:773) and the open "staging project vs preview channels" item (:817) read as settled?
 2. May ADR-028's inventory Browser row add Logto's sign-in keys and the sign-in return page (kept in the tab's own storage until sign-in finishes, cleared on sign-out and deletion)?
 3. S73 is done except AC 6's Playwright flows, which need Docker this cloud session can't pull (CI runs them on every pull request). Will you finish it on a machine with Docker, or should its AC 6 accept the flows passing in CI on its pull request?
+
+---
+
+## 2026-11-07 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-07T07:43:08Z` |
+| HEAD at review | `cd88229` (tree dirty) |
+| Trigger | 6 stories done since 03a72ef (S119, S116, S4, S120, S121, S28) |
+| Stories `done` since last review | S119, S116, S4, S120, S121, S28 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context review at `cd88229`. Scope: the six stories done since `03a72ef` (S119, S116, S4, S120, S121, S28) and the next 3 open stories by priority: S117 (80), S5 (90), S72 (91).
+
+**1. Citation honesty**
+
+- **S119 — Pillar: Dependable, holds.** No FEATURES row covers where production runs (FEATURES.md:8: it "does not describe frameworks, repos, or deploy targets"), so a pillar is the right kind of citation. The approval is the owner's, quoted in the note and in the inserting commit `b2e867d` ("Agreed and yes"); between `b2e867d` and its shipping commit `0c9eb7b` the note changed only `status`, and nothing since.
+- **S121 — Pillar: Dependable, holds.** Same reasoning (release mechanics, no FEATURES row). Approval "Yes" is in the inserting commit `b3f4d05`; between `b3f4d05` and HEAD the note changed only `status` (`a3240d0`). `427d700` later changed the mirror job's push mechanism (a deploy key; owner, 2026-11-07: "Yes, deploy keys is there") but not what the story is for.
+- **S116 — Feature: Modern membership, holds.** Its Impact (fans sign in on the real site with an emailed one-time code) is the theme's own text (FEATURES.md, Modern membership: "Sign in with a one-time code sent by email"). The theme's "plus a link in the same email if Logto supports it" is still unsettled: README.md:263–265 leaves it to the owner to check in Logto's email templates, so it stays as written.
+- **S120 — Feature: Modern membership, holds.** Hardening the same sign-in (recent sign-in for deletion, settings per account, outages, per-tab sign-in); it delivers the theme's sign-in and the Delete-your-data "strongest confirmation" rather than sitting near them.
+- **S4 — Feature: Standings, holds** (carry table, Standings row). The row was empty; see 2.
+- **S28 — Feature: Update / changelist UX, holds.** The row says the update notice delivers this surface; S28 makes a retired version show that same notice. Row extended; see 2.
+- **S117 — Pillar: Delightful, holds.** Approved by the owner 2026-11-06 ("Delightful, bc it makes testing much faster in stage", `73ba87e`); since then only the 2026-11-07 backlog review added notes (`cd88229`: line drift, the production environment's tag rule, production now holding fans' accounts) — no Gap, Impact or AC change, so the approval still covers it.
+- **S5 — Feature: Highlight search (free-text), holds** (FEATURES carry table; S5's 2026-11-02 owner answer, "MLB's own search on every query", is the row's own text).
+- **S72 — Feature: Highlight search (date + tag), holds** (Impact narrows results by date, team or kind of play; the 2026-11-07 backlog review's MLB-filter fence doesn't change what it is for).
+- **Open stories:** none (`grep -l "Source:\*\* Open" docs/v3/backlog/stories/` is empty).
+
+**2. Doc reflects reality**
+
+- **Amended — INTENT Hosting row (INTENT.md:48)** still said the owner releases by merging `stage` into `main`, which deploys production at `baseball.theater` (S118). Since then S119 put production at `next.baseball.theater` until the owner's DNS cutover, and S121 made each story an auto-merged pull request into `stage` and a published GitHub Release the production deploy, with `main` a mirror (CLAUDE.md:95, README.md deploy section, `deploy.yml`). Rewritten in the owner's words quoted in S119's Gap ("changing the DNS away from the elastic beanstalk destination"; "Do the temporary address"; "Agreed and yes") and S121's Gap ("I think releases to main probably should use GitHub releases ... I want a release to be a set of PRs basically"; "1. You automatically 2. Mirror"); the 2026-11-02 and 2026-11-06 wordings are kept in the row as history.
+- **Amended — FEATURES carry table, Standings row** was blank though S4 shipped it. Now says what shipped, from the ratified frames (team color, name, W, L, PCT, GB with "—" for the leader; S4 note) and standings-search-settings A7, quoting the owner (2026-11-02): "The table should not be 100% width; it should only be as wide as it needs to be, and should scroll if it's wider than the viewport. On mobile, the names should shorten to just the abbreviated name (NYY, DET, etc)".
+- **Amended — FEATURES carry table, Update / changelist UX row** covered only a waiting new build. Now adds S28's retired-version case (same notice, page stays readable) and shell-scoreboard A6's floating notice with Snooze and Update Now, quoting the owner (2026-11-02): "The reload notice should be a floating notification-style box at the bottom, fixed. Replace the X with Snooze, and make it an hour-long snooze before it comes back. Change Reload to Update Now."
+- **Amended — FEATURES Open product question 1** ("Cutover timing/shape (hard cutover vs beta vs new host)"): the shape is settled by S119 (owner, 2026-11-07: "Do the temporary address"), struck through like questions 3 and 4; timing stays the owner's.
+- Noted, not mine to edit: ADR-013's deploy text and ADR-028's Browser row are already with the owner from the 2026-11-07 backlog review (`cd88229`).
+
+**3. Coverage**
+
+- No FEATURES item was added this review.
+
+**For the next backlog review**
+
+- Still unserved: FEATURES, Video play links — "A video played from Search's floating player links to its play too" (owner, 2026-11-05: "Yes"); no design amendment or story builds it yet (S5's note :119 waits on one).

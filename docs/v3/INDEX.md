@@ -377,7 +377,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `2167–2170` System Consistency
   - `2171–2174` Originality
   - `2175–2221` Small-Size Test
-- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 37 KB
+- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 38 KB
   - `12–19` North star
   - `20–34` Principles (product)
   - `35–46` Scope legend
@@ -395,7 +395,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `165–167` Fails
   - `168–170` Open decisions
   - `171–174` Missing
-- [INTENT.md — Baseball Theater v3 — Intent](INTENT.md) — 9 KB
+- [INTENT.md — Baseball Theater v3 — Intent](INTENT.md) — 10 KB
   - `10–22` Pillars
   - `23–36` Document set
   - `37–67` Open decisions (fill as we go)
