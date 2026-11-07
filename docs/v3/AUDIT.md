@@ -15770,3 +15770,33 @@ export const label = game.abbreviation + " @ ";  1059ms
 ```
 
 </details>
+
+---
+
+## 2026-11-07 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T06:42:38Z` |
+| HEAD at capture | `0716854` (tree clean) |
+| Change | `394d003` — Backlog: S120 sign-in hardening (Copilot's review of S116's Logto sign-in) |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Should I skip the backlog and doc parity reviews for S120, or run them? I'd skip both.": "Skip"
+
+---
+
+## 2026-11-07 — doc parity review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a doc parity review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T06:42:38Z` |
+| HEAD at capture | `0716854` (tree dirty) |
+| Change | `394d003` — Backlog: S120 sign-in hardening (Copilot's review of S116's Logto sign-in) |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Should I skip the backlog and doc parity reviews for S120, or run them? I'd skip both.": "Skip"
