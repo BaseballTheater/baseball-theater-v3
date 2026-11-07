@@ -14,6 +14,15 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## Standings show every division's race
+
+- **Before, the Standings page was an empty placeholder. Now it shows every division's standings: each team's
+  color, name, wins, losses, winning percentage and games behind the leader, matching the approved design on
+  phones, tablets and desktops.** On a phone each team is shown by its short abbreviation so the table fits;
+  a wide table scrolls on its own instead of the whole page. Details: S4 — `GET /api/v1/standings`
+  (`fixtures/standings-2026-09-05.json`), `web/src/api/standings.ts`, `StandingsPage`, `DivisionTable`;
+  design matched by the owner (standings-search-settings A7). _(2026-11-07)_
+
 ## Baseball Theater can go live
 
 - **Before, nobody could sign in on the real site: accounts and settings only worked on a developer's machine. Now

@@ -15583,3 +15583,104 @@ export const label = game.abbreviation + " @ ";  823ms
 ```
 
 </details>
+
+---
+
+## 2026-11-07 — S4 completed
+
+**Standings fixture API + page**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-07T05:52:45Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `6e715e4` (tree dirty) |
+| Grader | `scripts/verify-S4.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: fixtures/standings-2026-09-05.json exists and is valid JSON; fixtures/standings-2024-07-04.json does not exist
+check 2 PASS: the fixture has >=2 divisions, each with a name or id and a teams list; each team has a name string and numeric wins and losses
+check 3 PASS: GET /api/v1/standings?date=2026-09-05 returns 200 with >=2 divisions of such records (functions test); the route is in the route table with its response type
+check 4 PASS: a web test renders StandingsPage and finds a team name from the fixture
+check 5 PASS: that web test file exits 0 run alone through pnpm --filter @bt/web exec vitest run
+check 6 PASS: the standings UI files have no <img, mlbstatic or /logos/
+check 7 PASS: the standings UI files call no useMediaQuery / hiddenFrom / visibleFrom
+check 8 PASS: each division table shows TeamSwatch, name, abbreviation, W, L, PCT and GB with — for the leader; headings from divisionName (RTL: AL East)
+check 9 PASS: loading, empty and error use ViewState (a test per state)
+check 10 PASS: design match: e2e/design/S4.spec.ts names standings-mobile/-medium/-desktop; docs/v3/design-checks/S4/ holds them at 390 / 768 / 1200
+check 11 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**11/11 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with its ratified frame
+
+| Frame | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/standings-search-settings/standings-desktop.png` | `c36237e7078f967d026c56377fd90bf497186c6e8e95c05eb9e5c6bb44182ed7` | `docs/v3/design-checks/S4/standings-desktop.png` | `815082d9295467dfab38f9f503ae8682f6eb298efd21b8bb64a740eeeae3c7da` |
+| `docs/v3/visual/standings-search-settings/standings-medium.png` | `a5db812bdd9c59090d3b0077481df772f2665c545da81b559d70d2f4200fbd71` | `docs/v3/design-checks/S4/standings-medium.png` | `664cd4ced057294067835f22fdbc2b7f742d341c0d9e5dea5007a3ec409737ab` |
+| `docs/v3/visual/standings-search-settings/standings-mobile.png` | `6b2b0c808ac46b8984add44dde391c127a335c528bcb5e8a85b267b6ccfacccb` | `docs/v3/design-checks/S4/standings-mobile.png` | `f1b2955c98fa68f0e6acade2f1268aa28f3b36ecd94140b1c0bf5108dcb98910` |
+Owner: ""All the screenshots look good" (owner, 2026-11-07, this session, covering S4, S73 and S28; shown side by side via pnpm design:review S4 with the coordinator noting bold team names vs the frame's regular weight, some gray-looking team-color dots, all six divisions vs the frame's AL only, and "Sign in" in the header)"
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S4 check results ---
+check 1 PASS: fixtures/standings-2026-09-05.json exists and is valid JSON; fixtures/standings-2024-07-04.json does not exist
+check 2 PASS: the fixture has >=2 divisions, each with a name or id and a teams list; each team has a name string and numeric wins and losses
+check 3 PASS: GET /api/v1/standings?date=2026-09-05 returns 200 with >=2 divisions of such records (functions test); the route is in the route table with its response type
+check 4 PASS: a web test renders StandingsPage and finds a team name from the fixture
+check 5 PASS: that web test file exits 0 run alone through pnpm --filter @bt/web exec vitest run
+check 6 PASS: the standings UI files have no <img, mlbstatic or /logos/
+check 7 PASS: the standings UI files call no useMediaQuery / hiddenFrom / visibleFrom
+check 8 PASS: each division table shows TeamSwatch, name, abbreviation, W, L, PCT and GB with — for the leader; headings from divisionName (RTL: AL East)
+check 9 PASS: loading, empty and error use ViewState (a test per state)
+check 10 PASS: design match: e2e/design/S4.spec.ts names standings-mobile/-medium/-desktop; docs/v3/design-checks/S4/ holds them at 390 / 768 / 1200
+check 11 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S4: 11/11 checks passed ---
+verify-S4: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 1145ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  606ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  536ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 77ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1071ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  979ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 93ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 63ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 16ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 66ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  05:55:37
+   Duration  3.30s (transform 97ms, setup 0ms, collect 4.74s, tests 2.69s, environment 1ms, prepare 510ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154775,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
