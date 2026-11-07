@@ -79,7 +79,7 @@ Use the S1 prompt in BACKLOG. Watch stalls/overreach. Do not walk away on the fi
 
 ## 7 — Reviewer pass
 
-Loop output reaches `stage` only through pull requests, one per story (S121; owner, 2026-11-07: "I think releases to main probably should use GitHub releases, if that's actually possible. I want a release to be a set of PRs basically"; on who merges them: "1. You automatically"). Each story is committed on its own `story/S<N>` branch; the coordinator pushes it and opens its pull request into `stage` with auto-merge on (`gh pr merge --auto --merge`), so it merges once the required checks (`ci-passed`) pass, and the merge deploys `stage.baseball.theater`. Agents never push directly to `stage` or `main`, never merge into `main`, and never publish releases: publishing a GitHub Release is the owner's release step; it deploys production and then fast-forwards `main` to the released commit, so `main` mirrors production ("2. Mirror").
+Loop output reaches `stage` only through pull requests, one per story (S121; owner, 2026-11-07: "I think releases to main probably should use GitHub releases, if that's actually possible. I want a release to be a set of PRs basically"; on who merges them: "1. You automatically"). Each story is committed on its own `story/S<N>` branch; the coordinator pushes it and opens its pull request into `stage`, handles Copilot's review (step 5 below), then turns on auto-merge (`gh pr merge --auto --merge`), so it merges once the required checks (`ci-passed`) pass, and the merge deploys `stage.baseball.theater`. Agents never push directly to `stage` or `main`, never merge into `main`, and never publish releases: publishing a GitHub Release is the owner's release step; it deploys production and then fast-forwards `main` to the released commit, so `main` mirrors production ("2. Mirror").
 
 Before a story's pull request merges into `stage`:
 
@@ -89,6 +89,7 @@ Before a story's pull request merges into `stage`:
    - Cursor: Bugbot review and/or Security Review on the diff
 3. Fix anything the reviewer flags that violates BACKLOG AC or CLAUDE.md, on the story's branch
 4. Only then push the branch and open its pull request
+5. Wait for Copilot's review, handle every comment (fix with a test, or reply why not, and resolve the thread), and only then turn on auto-merge; repeated feedback already handled doesn't hold it back (CLAUDE.md → "Copilot's review is handled before a pull request merges"; owner, 2026-11-07: "If Copilot continues giving the same feedback you can merge when you feel the real stuff is all handled")
 
 ## 8 — Scale → loop
 
