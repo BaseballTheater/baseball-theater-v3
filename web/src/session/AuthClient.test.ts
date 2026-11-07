@@ -70,13 +70,26 @@ describe("AuthClient (S116)", () =>
 		const { factory, sdk } = standIn();
 		const client = createAuthClient(TARGET, "https://bt.test", factory);
 		await client.signIn();
+		expect(sdk().signIn).toHaveBeenCalledWith(expect.objectContaining({
+			redirectUri: `https://bt.test${SIGN_IN_CALLBACK_PATH}`,
+			prompt: "login",
+		}));
+		// The SDK's in-flight sign-in lives in BT's storage, not Logto's own keys (in the tab's own area since S120).
+		expect(sessionStorage.getItem("logto.signInSession")).toBe("pkce-state");
+		expect(Object.keys(localStorage)).toEqual([]);
+	});
+
+	it("S120 AC 1: every sign-in also asks for max_age=0, so the ID token carries auth_time", async () =>
+	{
+		const { factory, sdk } = standIn();
+		await createAuthClient(TARGET, "https://bt.test", factory).signIn();
 		expect(sdk().signIn).toHaveBeenCalledWith({
 			redirectUri: `https://bt.test${SIGN_IN_CALLBACK_PATH}`,
 			prompt: "login",
+			extraParams: {
+				max_age: "0",
+			},
 		});
-		// The SDK's in-flight sign-in lives in BT's storage, not Logto's own keys.
-		expect(localStorage.getItem("logto.signInSession")).toBe("pkce-state");
-		expect(Object.keys(sessionStorage)).toEqual([]);
 	});
 
 	it("S116 AC 3: the callback answers the ID token once and leaves none of Logto's tokens behind; sign-out ends Logto's session", async () =>
@@ -87,6 +100,7 @@ describe("AuthClient (S116)", () =>
 		expect(await client.finishSignIn("https://bt.test/sign-in/callback?code=c&state=s")).toBe("id-token-1");
 		expect(sdk().handleSignInCallback).toHaveBeenCalledWith("https://bt.test/sign-in/callback?code=c&state=s");
 		expect(Object.keys(localStorage)).toEqual([]);
+		expect(Object.keys(sessionStorage)).toEqual([]);
 		await expect(client.finishSignIn("https://bt.test/sign-in/callback?code=c&state=s")).rejects.toThrow(/without an ID token/);
 		await client.signOut("https://bt.test/settings");
 		expect(sdk().signOut).toHaveBeenCalledWith("https://bt.test/settings");

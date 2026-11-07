@@ -33,6 +33,15 @@ explicitly where that's the case. For what's still ahead, see
   (`functions/src/adapters/logto/`), `GET`/`POST /api/v1/sign-in`, the web `AuthClient` and `/sign-in/callback`,
   production-only `LOGTO_*` vars in `wrangler.jsonc` and `LOGTO_S2S_*` secrets in the `production` job,
   `pnpm deploy:logto`; README lists the owner's remaining Logto console steps. _(2026-11-07)_
+- **Before, someone holding a fan's sign-in for up to an hour could delete their account without a fresh emailed
+  code, a second sign-in could carry one fan's settings into another's account, sign-in outages looked like refused
+  sign-ins, and signing in from two tabs at once could fail. Now deleting an account really needs a sign-in from
+  the last ten minutes, settings always belong to whoever is signed in, outages are reported as outages, and each
+  tab signs in on its own.** Details: S120 (fixes from GitHub Copilot's review of S116) — the ID token's `auth_time`
+  (asked for with `max_age=0`) carried into BT's session and checked by `deleteAccount`; `hydrateSettings(uid)`
+  resets on an account change and drops stale answers; a one-minute JWKS refetch cooldown with one shared fetch;
+  `POST /api/v1/sign-in` answers `503 sign_in_failed` for BT's own failures; Logto's keys and the sign-in's return
+  path in per-tab `sessionStorage`; session loads for a replaced token are ignored. _(2026-11-07)_
 - **Before, the owner's first release would have instantly replaced the current baseball.theater site with the new
   app. Now the new app goes live at `next.baseball.theater` while the current site keeps serving fans, and moving
   baseball.theater over is a separate step the owner takes on purpose, with written steps to undo it.** Details:

@@ -45,7 +45,7 @@ interface RouteDescription
 	operationId: string;
 	summary: string;
 	parameters: Parameter[];
-	/** 4xx status → description; each response carries {@link ERROR_TYPE}. Mirrors `handlers/api.ts`. */
+	/** 4xx/5xx status → description; each response carries {@link ERROR_TYPE}. Mirrors `handlers/api.ts`. */
 	errors: Record<string, string>;
 }
 
@@ -220,8 +220,9 @@ export const ROUTE_DESCRIPTIONS: Record<ApiRoute, RouteDescription> = {
 		parameters: [],
 		errors: {
 			400: "The body is not JSON with a non-empty `idToken`.",
-			401: "`sign_in_refused`: the ID token doesn't verify, has expired, is for another app or tenant, or carries no email.",
+			401: "`sign_in_refused`: the ID token doesn't verify, is malformed, has expired, is for another app or tenant, or carries no email.",
 			404: "`sign_in_unavailable`: this deployment offers no Logto sign-in.",
+			503: "`sign_in_failed`: BT couldn't finish the sign-in for a reason of its own (the tenant's keys couldn't be fetched, or its database or session key failed); the token wasn't refused, so trying again later may succeed.",
 		},
 	},
 	"PUT /api/v1/me/settings": {

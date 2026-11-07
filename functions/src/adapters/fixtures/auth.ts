@@ -16,7 +16,8 @@ export const DEV_EMAIL = "dev@local.test";
 
 /**
  * Local/CI identity provider (ADR-013, ADR-019): `dev:<uid>` signs in as that
- * uid with a verified {@link DEV_EMAIL}, no network and no Logto. Only wired
+ * uid with a verified {@link DEV_EMAIL}, signed in at the moment of the call
+ * (`authTime`, S120), no network and no Logto. Only wired
  * where dev sign-in is allowed (local server, tests), never in production.
  */
 export class DevIdentityProvider implements IdentityProvider
@@ -30,6 +31,8 @@ export class DevIdentityProvider implements IdentityProvider
 			subject,
 			email: DEV_EMAIL,
 			emailVerified: true,
+			// A dev sign-in happens now, so the session it issues counts as a recent sign-in (S120).
+			authTime: Math.floor(Date.now() / 1000),
 		};
 	}
 }

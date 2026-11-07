@@ -143,7 +143,7 @@ describe("the day digest (S71)", () =>
 			hideScores: true,
 			version: 1,
 		});
-		await hydrateSettings();
+		await hydrateSettings("test-user");
 		const hidden = await renderScoreboard();
 		expect(rows(hidden)).toEqual(shown);
 		expect(within(hidden).getByText("Judge hammers a two-run home run")).toBeInTheDocument();

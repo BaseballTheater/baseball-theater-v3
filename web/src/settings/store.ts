@@ -38,9 +38,19 @@ export function useSettings(): AccountSettings
 	return settingsStore((state) => state.settings);
 }
 
-/** Keeps whichever copy is newer, so a slow server answer never rolls back a newer local change (ADR-022). */
-function keepNewer(incoming: AccountSettings): void
+/**
+ * Whose settings the store holds, and a count bumped whenever that changes (S120). A read or save
+ * answers for the account it was sent for; if the store has since been reset or moved to another
+ * account, the answer is dropped, so one account's settings never land in another's store and are
+ * never saved to it from there.
+ */
+let owner: string | null = null;
+let generation = 0;
+
+/** Keeps whichever copy is newer, so a slow server answer never rolls back a newer local change (ADR-022), unless the account changed meanwhile. */
+function keepNewer(incoming: AccountSettings, sentIn: number): void
 {
+	if (sentIn !== generation) return;
 	settingsStore.setState((state) => ({
 		settings: applyIfNewer(state.settings, incoming),
 	}));
@@ -62,9 +72,10 @@ async function save(change: Partial<Omit<AccountSettings, "version">>): Promise<
 	settingsStore.setState({
 		settings: next,
 	});
+	const sentIn = generation;
 	try
 	{
-		keepNewer(await saveSettings(next));
+		keepNewer(await saveSettings(next), sentIn);
 	}
 	catch
 	{
@@ -121,17 +132,29 @@ export function setVideoPlayer(mode: VideoPlayerMode): Promise<void>
 	});
 }
 
-/** Reads the account's settings into the store (after sign-in). */
-export async function hydrateSettings(): Promise<void>
+/**
+ * Reads account `uid`'s settings into the store (after sign-in). When the store held another
+ * account's, it goes back to the house defaults first, so nothing of theirs shows or is saved
+ * while `uid`'s are read (S120). The first hydrate after a reload keeps the cached copy until the
+ * account answers.
+ */
+export async function hydrateSettings(uid: string): Promise<void>
 {
+	if (owner !== null && owner !== uid) resetSettings();
+	owner = uid;
+	const sentIn = generation;
+	const settings = await fetchSettings();
+	if (sentIn !== generation) return;
 	settingsStore.setState({
-		settings: await fetchSettings(),
+		settings,
 	});
 }
 
-/** Back to the house defaults (on sign-out). */
+/** Back to the house defaults (on sign-out, or before another account's settings are read); answers still on their way are dropped. */
 export function resetSettings(): void
 {
+	owner = null;
+	generation++;
 	settingsStore.setState({
 		settings: DEFAULT_SETTINGS,
 	});

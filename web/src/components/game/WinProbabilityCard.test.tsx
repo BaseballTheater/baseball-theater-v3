@@ -58,7 +58,7 @@ async function hideScores(on: boolean): Promise<void>
 		hideScores: on,
 		version: 1,
 	}))));
-	await hydrateSettings();
+	await hydrateSettings("test-user");
 }
 
 /** Renders `/game/823823/live` at a pairing and returns the Live tab panel. */

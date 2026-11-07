@@ -38,14 +38,17 @@ export default defineConfig({
 				// test and the box score / recap mappers): lines 95.62, functions 95.08, statements 95.62.
 				// Raised 2026-10-29 by S65 (scoreboard summary mappers, folded summaries, schedule route): lines 96.04,
 				// branches 88.36, statements 96.04.
-				lines: 96,
-				functions: 95,
+				// Raised 2026-11-07 by S120 (sign-in hardening's tests; S116's Logto adapters folded in): lines 97.25,
+				// functions 96.43, statements 97.25.
+				lines: 97,
+				functions: 96,
 				// Raised 2026-10-29 by S87 (deletion cookie and cookie-law tests): branches 87.18.
 				// Raised 2026-10-30 by S67 (S45's Worker composition and S69's keyword mapping folded in): branches 89.62.
 				// Raised 2026-10-30 by S48 (the per-game ingest object, hub leases and their tests): branches 90.62.
 				// Raised 2026-10-30 by S18 (the live hub, its route and their tests): branches 91.19.
-				branches: 91,
-				statements: 96,
+				// Raised 2026-11-07 by S120: branches 92.28.
+				branches: 92,
+				statements: 97,
 			},
 		},
 	},

@@ -15,7 +15,10 @@ import {
 	afterEach, describe, expect, it, vi,
 } from "vitest";
 import { createQueryClient } from "../api/queryClient.js";
-import { DEV_SIGN_IN_TOKEN, useSession } from "../session/session.js";
+import type { Session } from "../session/session.js";
+import {
+	DEV_SIGN_IN_TOKEN, SessionContext, useSession,
+} from "../session/session.js";
 import { SessionProvider } from "../session/SessionProvider.js";
 import { setSessionToken } from "../session/token.js";
 import { clearPersonalData, readStored } from "../storage/storage.js";
@@ -166,8 +169,139 @@ describe("settings store", () =>
 			videoPlayer: "dialog" as const,
 			version: 9,
 		});
-		await hydrateSettings();
+		await hydrateSettings("test-user");
 		const { result } = renderHook(() => useSettings());
 		expect(result.current.opensFirst).toBe("box");
+	});
+});
+
+describe("settings follow the signed-in account (S120)", () =>
+{
+	const settingsOf = (favorite: number, version: number): AccountSettings => ({
+		...DEFAULT_SETTINGS,
+		favoriteTeamIds: [favorite],
+		version,
+	});
+	const A = settingsOf(111, 7);
+	const B = settingsOf(147, 2);
+
+	/** A session signed in as `uid`, as `SessionProvider` would give it, without the provider. */
+	function signedInAs(uid: string): Session
+	{
+		return {
+			status: "signedIn",
+			account: {
+				...DEV_ACCOUNT,
+				role: "member",
+				entitlements: {
+					...DEV_ACCOUNT.entitlements,
+					tier: "none",
+				},
+				uid,
+			},
+			signIn: vi.fn(async () => undefined),
+			finishSignIn: vi.fn(async () => "/"),
+			signOut: vi.fn(),
+		};
+	}
+
+	/**
+	 * The settings API per bearer token: `bt-a` is account A, `bt-b` account B. `hold` keeps A's
+	 * answers (reads and saves) waiting until `release()`, as a slow network would.
+	 */
+	function stubTwoAccounts(hold = false)
+	{
+		const docs: Record<string, AccountSettings> = {
+			"Bearer bt-a": A,
+			"Bearer bt-b": B,
+		};
+		const puts: { auth: string;
+			body: AccountSettings; }[] = [];
+		const held: (() => void)[] = [];
+		vi.stubGlobal("fetch", vi.fn(async (request: Request) =>
+		{
+			const auth = request.headers.get("Authorization") ?? "";
+			const body = request.method === "PUT" ? await request.json() as AccountSettings : undefined;
+			if (body) puts.push({
+				auth,
+				body,
+			});
+			const answer = () => jsonResponse(body && body.version > docs[auth]!.version ? docs[auth] = body : docs[auth]);
+			if (hold && auth === "Bearer bt-a" && held.length < 10) return new Promise<Response>((resolve) => held.push(() => resolve(answer())));
+			return answer();
+		}));
+		return {
+			puts,
+			release: () => held.splice(0).forEach((resolve) => resolve()),
+			held: () => held.length,
+		};
+	}
+
+	function renderSync(session: Session)
+	{
+		let current = session;
+		const view = renderHook(() => useSettings(), {
+			wrapper: ({ children }: { children: ReactNode }) => (
+				<SessionContext.Provider value={current}>
+					<SettingsSync />
+					{children}
+				</SessionContext.Provider>
+			),
+		});
+		return {
+			result: view.result,
+			switchTo: (next: Session) =>
+			{
+				current = next;
+				view.rerender();
+			},
+		};
+	}
+
+	it("S120 AC 2: a sign-in as another account (status stays signedIn) resets the store and reads the new account's settings; a change then saves to the new account only", async () =>
+	{
+		const api = stubTwoAccounts();
+		setSessionToken("bt-a");
+		const { result, switchTo } = renderSync(signedInAs("account-a"));
+		await waitFor(() => expect(result.current).toEqual(A));
+
+		setSessionToken("bt-b");
+		switchTo(signedInAs("account-b"));
+		// A's settings are gone at once, before B's arrive.
+		expect(result.current.favoriteTeamIds).not.toContain(111);
+		await waitFor(() => expect(result.current).toEqual(B));
+
+		await act(() => setOpensFirst("box"));
+		expect(api.puts).toHaveLength(1);
+		expect(api.puts[0]!.auth).toBe("Bearer bt-b");
+		expect(api.puts[0]!.body).toEqual({
+			...B,
+			opensFirst: "box",
+			version: B.version + 1,
+		});
+	});
+
+	it("S120 AC 2: a read or save answered for the previous account after the switch is discarded", async () =>
+	{
+		const api = stubTwoAccounts(true);
+		setSessionToken("bt-a");
+		const { result, switchTo } = renderSync(signedInAs("account-a"));
+		// A's read is held; a change under A sends a save that is held too.
+		await waitFor(() => expect(api.held()).toBe(1));
+		void setFavoriteTeams([121]);
+		await waitFor(() => expect(api.held()).toBe(2));
+
+		setSessionToken("bt-b");
+		switchTo(signedInAs("account-b"));
+		await waitFor(() => expect(result.current).toEqual(B));
+
+		// A's answers land now: neither replaces B's settings.
+		await act(async () =>
+		{
+			api.release();
+			await new Promise((resolve) => setTimeout(resolve, 20));
+		});
+		expect(result.current).toEqual(B);
+		expect(api.puts.map((p) => p.auth)).toEqual(["Bearer bt-a"]);
 	});
 });

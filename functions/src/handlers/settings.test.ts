@@ -147,6 +147,7 @@ describe("/api/v1/me/settings", () =>
 				subject: "fan-1",
 				email: DEV_EMAIL,
 				emailVerified: true,
+				authTime: Math.floor(Date.now() / 1000),
 			}, () => "fan-1");
 			const bearer = `Bearer ${token}`;
 			await put(base, saved, bearer);

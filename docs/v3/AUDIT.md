@@ -15684,3 +15684,89 @@ export const label = game.abbreviation + " @ ";  979ms
 ```
 
 </details>
+
+---
+
+## 2026-11-07 — S120 completed
+
+**Sign-in hardening**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-07T06:26:00Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `394d003` (tree dirty) |
+| Grader | `scripts/verify-S120.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: recent sign-in comes from the provider's auth_time: Logto adapter reads auth_time, dev provider stamps now, signIn carries it into the BT session, deleteAccount checks it (not issuedAt), AuthClient asks max_age=0; re-exchanging a token with an old or missing auth_time can't delete (tests 'S120 AC 1')
+check 2 PASS: settings follow the signed-in account: a uid change resets and re-hydrates, and responses for the previous account are discarded (tests 'S120 AC 2' in web/src/settings/)
+check 3 PASS: JWKS refetch for an unknown key id at most once per cooldown, refused without a fetch during it, concurrent sign-ins share one fetch (test 'S120 AC 3')
+check 4 PASS: POST /api/v1/sign-in answers 401 only for a refused credential and 503 sign_in_failed for any other failure; the spec lists the 503 (test 'S120 AC 4'; spec)
+check 5 PASS: Logto's keys and bt.signInReturnTo live in per-tab sessionStorage through web/src/storage/, labeled personal, cleared by clearPersonalData; bt/no-browser-storage not disabled (tests 'S120 AC 5'; grep)
+check 6 PASS: a session load for a replaced token neither sets state nor clears the newer token (test 'S120 AC 6')
+check 7 PASS: backlog Status is done (story heading and Story status table)
+check 8 PASS: the story changed nothing outside its fence (functions/, web/, packages/domain/src/, packages/domain/vitest.config.ts, packages/ports/src/, openapi/bt-api.v1.json, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, scripts/verify-S120.sh)
+```
+
+**8/8 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S120 check results ---
+check 1 PASS: recent sign-in comes from the provider's auth_time: Logto adapter reads auth_time, dev provider stamps now, signIn carries it into the BT session, deleteAccount checks it (not issuedAt), AuthClient asks max_age=0; re-exchanging a token with an old or missing auth_time can't delete (tests 'S120 AC 1')
+check 2 PASS: settings follow the signed-in account: a uid change resets and re-hydrates, and responses for the previous account are discarded (tests 'S120 AC 2' in web/src/settings/)
+check 3 PASS: JWKS refetch for an unknown key id at most once per cooldown, refused without a fetch during it, concurrent sign-ins share one fetch (test 'S120 AC 3')
+check 4 PASS: POST /api/v1/sign-in answers 401 only for a refused credential and 503 sign_in_failed for any other failure; the spec lists the 503 (test 'S120 AC 4'; spec)
+check 5 PASS: Logto's keys and bt.signInReturnTo live in per-tab sessionStorage through web/src/storage/, labeled personal, cleared by clearPersonalData; bt/no-browser-storage not disabled (tests 'S120 AC 5'; grep)
+check 6 PASS: a session load for a replaced token neither sets state nor clears the newer token (test 'S120 AC 6')
+check 7 PASS: backlog Status is done (story heading and Story status table)
+check 8 PASS: the story changed nothing outside its fence (functions/, web/, packages/domain/src/, packages/domain/vitest.config.ts, packages/ports/src/, openapi/bt-api.v1.json, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, scripts/verify-S120.sh)
+--- verify-S120: 8/8 checks passed ---
+verify-S120: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 1008ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  485ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  519ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 86ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1125ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  1059ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 69ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 61ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 20ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 53ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  06:28:34
+   Duration  3.46s (transform 103ms, setup 0ms, collect 4.90s, tests 2.58s, environment 1ms, prepare 548ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154955,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

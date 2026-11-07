@@ -101,6 +101,7 @@ export async function withAccountServer(run: (h: AccountHarness) => Promise<void
 				subject: uid,
 				email,
 				emailVerified: true,
+				authTime: Math.floor(now / 1000),
 			}, () => uid)).token,
 			get: (path, token) => fetch(`${base}${path}`, {
 				headers: headers(token),

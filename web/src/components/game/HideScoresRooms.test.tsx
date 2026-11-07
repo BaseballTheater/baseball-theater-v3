@@ -68,7 +68,7 @@ async function hideScores(on: boolean): Promise<void>
 		hideScores: on,
 		version: 1,
 	}))));
-	await hydrateSettings();
+	await hydrateSettings("test-user");
 }
 
 function wrap(node: ReactNode)

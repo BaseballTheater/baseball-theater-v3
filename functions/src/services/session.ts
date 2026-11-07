@@ -29,14 +29,18 @@ export interface SessionSigner
 	verify(token: string): Promise<BtSession | null>;
 }
 
-/** True when `value` has every session field with the right type. Guards against a validly signed but older-shaped token. */
+/**
+ * True when `value` has every session field with the right type. Guards against a validly signed but older-shaped token.
+ * `authTime` is optional (S120): a session issued before it still verifies, and deletion treats its sign-in as not recent.
+ */
 function isSession(value: unknown): value is BtSession
 {
 	if (value === null || typeof value !== "object") return false;
 	const v = value as Record<string, unknown>;
 	return typeof v.uid === "string" && (v.role === "member" || v.role === "admin")
 		&& v.entitlements !== null && typeof v.entitlements === "object"
-		&& typeof v.issuedAt === "number" && typeof v.expiresAt === "number";
+		&& typeof v.issuedAt === "number" && typeof v.expiresAt === "number"
+		&& (v.authTime === undefined || typeof v.authTime === "number");
 }
 
 /**
