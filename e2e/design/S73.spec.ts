@@ -2,7 +2,13 @@
  * S73's design match (rule 22): the installed app's frames — shell-scoreboard A1
  * `scoreboard-standalone-mobile` and `shell-update-mobile` / `-medium` / `-desktop`, and
  * standings-search-settings A1 `settings-install-mobile` / `-desktop` and A2
- * `settings-install-ios-mobile` (desktop at 1200px, owner 2026-10-28).
+ * `settings-install-ios-mobile` (desktop at 1200px, owner 2026-10-28), as amended by two
+ * written amendments with no frames of their own, whose captures here become their drawn
+ * record: shell-scoreboard A6 (the update notice floats at the bottom, Snooze and Update Now
+ * right-aligned under the message; no ✕, no Reload link, not under the header) and
+ * standings-search-settings A8 (the install tip at the very top with a Tip mark, then the
+ * Settings and Account frames). `settings-install-medium` is added for A8's two columns at
+ * 768, which no listed frame shows.
  *
  * - Standalone: Chromium is told the display mode is standalone (DevTools protocol), so
  *   the installed CSS applies. A desktop browser has no notch or home indicator, so
@@ -16,7 +22,7 @@
  *   is fired as a `beforeinstallprompt` event; for iOS the page reports an iPhone's user agent.
  *
  * Judge only S73's parts (owner, 2026-10-28: "Judge only the story's own parts"): the
- * standalone ground, the update notice, and Settings → App above Account. Expected
+ * standalone ground, the floating update notice, and Settings' tip and two frames. Expected
  * differences: the scoreboard's fixture day versus the frames' sample day; Settings'
  * Account group as S6 / S79 built it (signed in, download and delete) where the frames
  * draw the signed-out magic-link button; the footer's "Fetched … ago" is the real time.
@@ -93,8 +99,8 @@ async function settings(page: Page, ios: boolean): Promise<void>
 			prompt: () => Promise.resolve(),
 		})));
 	}
-	await page.getByRole("heading", {
-		name: "App",
+	await page.getByRole("complementary", {
+		name: "Install tip",
 	}).waitFor();
 }
 
@@ -114,6 +120,7 @@ const FRAMES: Record<string, (page: Page) => Promise<void>> = {
 	"shell-update-medium": async (page) => update(page),
 	"shell-update-desktop": async (page) => update(page),
 	"settings-install-mobile": async (page) => settings(page, false),
+	"settings-install-medium": async (page) => settings(page, false),
 	"settings-install-desktop": async (page) => settings(page, false),
 	"settings-install-ios-mobile": async (page) => settings(page, true),
 };
@@ -123,6 +130,9 @@ async function update(page: Page): Promise<void>
 	await scoreboard(page);
 	await page.evaluate(() => (window as { btShowUpdate?: () => void }).btShowUpdate?.());
 	await page.getByText("An update to Baseball Theater is ready.").waitFor();
+	await page.getByRole("button", {
+		name: "Update Now",
+	}).waitFor();
 }
 
 for (const [frame, open] of Object.entries(FRAMES))

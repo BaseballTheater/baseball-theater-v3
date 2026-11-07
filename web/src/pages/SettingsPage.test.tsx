@@ -86,6 +86,22 @@ describe("SettingsPage layout", () =>
 		}
 	});
 
+	it("A8: two bordered frames, Settings (Game List then Game Detail) and Account", () =>
+	{
+		stubAccountApi();
+		renderSettings();
+		const settingsFrame = screen.getByRole("region", {
+			name: "Settings",
+		});
+		expect(within(settingsFrame).getAllByRole("region").map((r) => r.getAttribute("aria-label"))).toEqual(["Game List", "Game Detail"]);
+		expect(screen.getByRole("region", {
+			name: "Account",
+		})).toBeInTheDocument();
+		expect(screen.getByRole("heading", {
+			level: 1,
+		})).toHaveTextContent("Settings");
+	});
+
 	it("is one column on mobile and two on medium and desktop", () =>
 	{
 		stubAccountApi();

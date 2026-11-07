@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { readStored, writeStored } from "../storage/storage.js";
 
 /** Chromium's install prompt event (not in the DOM typings). */
 interface BeforeInstallPromptEvent extends Event
@@ -82,9 +83,26 @@ export function useInstallOffer(): InstallOffer
 	} : null;
 }
 
+/**
+ * Whether the Settings install tip has been dismissed in this browser, and how to dismiss it
+ * (standings-search-settings A8: "dismissable at a browser level via localStorage"). Kept
+ * through `web/src/storage/` under a key labeled not personal, so sign-out keeps it and it
+ * never syncs to the account.
+ */
+export function useInstallTipDismissed(): [boolean, () => void]
+{
+	const [dismissed, setDismissed] = useState(() => readStored("bt.installTipDismissed") === "1");
+	return [dismissed, () =>
+	{
+		writeStored("bt.installTipDismissed", "1");
+		setDismissed(true);
+	}];
+}
+
 /** Tests only: forget a held prompt and an install between cases. */
 export function resetInstall(): void
 {
 	deferred = null;
 	installedHere = false;
+	writeStored("bt.installTipDismissed", null);
 }

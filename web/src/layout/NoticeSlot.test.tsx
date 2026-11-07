@@ -20,49 +20,47 @@ function renderSlot(notice: Notice | null)
 	);
 }
 
-describe("NoticeSlot (S60)", () =>
+describe("NoticeSlot (S60; shell-scoreboard A6)", () =>
 {
-	it("renders the banner with its message, Reload and ✕; Reload calls the action", async () =>
+	it("floats the reload notice at the bottom: message on top, then Snooze and Update Now, right-aligned, and no ✕", async () =>
 	{
-		const reload = vi.fn();
+		const onUpdate = vi.fn();
+		const onSnooze = vi.fn();
 		renderSlot({
 			id: "update",
 			message: "An update to Baseball Theater is ready.",
-			action: {
-				label: "Reload",
-				onClick: reload,
+			update: {
+				onUpdate,
+				onSnooze,
 			},
-			dismissible: true,
 		});
+		const float = screen.getByTestId("notice-float");
+		expect(float.style.position).toBe("fixed");
+		expect(float.style.bottom).toContain("safe-area-inset-bottom");
+		expect(screen.queryByTestId("notice-slot")).toBeNull();
 		expect(screen.getByRole("status")).toHaveTextContent("An update to Baseball Theater is ready.");
-		await userEvent.click(screen.getByRole("button", {
-			name: "Reload",
-		}));
-		expect(reload).toHaveBeenCalledOnce();
-		expect(screen.getByRole("button", {
+		// Snooze first, so Update Now sits at the far right (A6's interpretation).
+		expect(screen.getAllByRole("button").map((b) => b.textContent)).toEqual(["Snooze", "Update Now"]);
+		expect(screen.queryByRole("button", {
 			name: "Dismiss",
-		})).toBeInTheDocument();
+		})).toBeNull();
+		await userEvent.click(screen.getByRole("button", {
+			name: "Update Now",
+		}));
+		expect(onUpdate).toHaveBeenCalledOnce();
+		await userEvent.click(screen.getByRole("button", {
+			name: "Snooze",
+		}));
+		expect(onSnooze).toHaveBeenCalledOnce();
 	});
 
-	it("✕ dismisses the notice", async () =>
-	{
-		renderSlot({
-			id: "update",
-			message: "An update to Baseball Theater is ready.",
-			dismissible: true,
-		});
-		await userEvent.click(screen.getByRole("button", {
-			name: "Dismiss",
-		}));
-		expect(screen.queryByRole("status")).toBeNull();
-	});
-
-	it("renders a message-only banner with no action and no ✕ (the offline marker)", () =>
+	it("renders a message-only banner under the header with no buttons (the offline marker)", () =>
 	{
 		renderSlot({
 			id: "offline",
 			message: "You're offline. Scores as of 7:42 PM — 18 min ago.",
 		});
+		expect(screen.getByTestId("notice-slot")).toBeInTheDocument();
 		expect(screen.getByRole("status")).toHaveTextContent("You're offline.");
 		expect(screen.queryByRole("button")).toBeNull();
 	});
@@ -71,5 +69,6 @@ describe("NoticeSlot (S60)", () =>
 	{
 		renderSlot(null);
 		expect(screen.queryByTestId("notice-slot")).toBeNull();
+		expect(screen.queryByTestId("notice-float")).toBeNull();
 	});
 });

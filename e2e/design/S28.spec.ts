@@ -1,13 +1,15 @@
 /**
- * S28's design match (rule 22): the stale-client prompt in the app-level notice slot under
- * the header — shell-scoreboard `shell-notice-mobile`, `-medium` and `-desktop` (desktop at
- * 1200px, owner 2026-10-28). The scoreboard loads S66's day (SF @ NYM final, 823823 CHC @ MIA
+ * S28's design match (rule 22): the stale-client prompt — shell-scoreboard `shell-notice-mobile`,
+ * `-medium` and `-desktop` (desktop at 1200px, owner 2026-10-28), as shell-scoreboard A6
+ * (ratified 2026-11-02, written, no frames) overrides them: the one "reload to update" notice
+ * (S73 builds it) floats in a box fixed at the bottom, message on top, Snooze and Update Now
+ * right-aligned underneath. The scoreboard loads S66's day (SF @ NYM final, 823823 CHC @ MIA
  * in progress and before first pitch); the day digest's request is answered 426
  * `version_unsupported`, as a retired API version would answer, so the notice rises over the
  * page the reader already has.
  *
- * Judge only S28's parts (owner, 2026-10-28: "Judge only the story's own parts"): the notice
- * banner in the slot (message, Primary Reload, ✕) and the page still readable under it.
+ * Judge only S28's parts (owner, 2026-10-28: "Judge only the story's own parts"): the floating
+ * notice (message, Snooze, Update Now; A6 repealed the ✕ and Reload) and the page still readable under it.
  * Expected differences: the copy is S55's final "An update to Baseball Theater is ready."
  * (shell-scoreboard A1), where S31's frames carry the placeholder the DESIGN notes call
  * placeholder; the frames' sample day versus the fixture's; no day digest (its request is the

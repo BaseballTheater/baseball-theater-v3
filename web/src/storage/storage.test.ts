@@ -36,6 +36,17 @@ describe("browser storage", () =>
 		expect(localStorage.getItem("someone-else")).toBe("kept");
 	});
 
+	it("S73: the update snooze and the dismissed install tip say nothing about the person, so sign-out keeps them", () =>
+	{
+		writeStored("bt.updateSnoozedUntil", "123");
+		writeStored("bt.installTipDismissed", "1");
+		clearPersonalData();
+		expect(readStored("bt.updateSnoozedUntil")).toBe("123");
+		expect(readStored("bt.installTipDismissed")).toBe("1");
+		writeStored("bt.updateSnoozedUntil", null);
+		writeStored("bt.installTipDismissed", null);
+	});
+
 	it("reads null and drops writes when storage throws", () =>
 	{
 		vi.spyOn(Storage.prototype, "getItem").mockImplementation(() =>

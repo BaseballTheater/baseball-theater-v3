@@ -8,7 +8,11 @@
 //   pnpm design:review S68 --done   # delete it after the verdict
 //
 // A ratified amendment (docs/v3/visual/<surface>/amendments/<frame>.png) wins over the
-// original frame of the same name, since it is what the build is matched against. The
+// original frame of the same name, since it is what the build is matched against. A written
+// amendment (its "## Frames" section says "None") that overrides a frame wins too, and since it
+// has no picture its text goes on the reference side instead: an older frame it supersedes is
+// never shown beside a capture (S73: the old under-the-header banner frames, shown beside
+// captures after A6 moved the notice to the bottom, made a stale build look right). The
 // pairs are drawn by Playwright's Chromium (already installed for `pnpm design:capture`),
 // so no image library is needed.
 import {
@@ -57,6 +61,64 @@ function ratifiedFrame(name: string): string | null
 	return null;
 }
 
+/**
+ * The ratified written amendment that governs a frame, if one does: the highest-numbered
+ * amendment of any surface whose text names the frame, where that amendment is written (no
+ * drawn frames) and names it on its **Overrides:** line. Names there are backticked: whole
+ * (`shell-notice-mobile`), a suffix shorthand for the name before it (`-medium`), or a glob
+ * (`settings-*`). A later amendment that draws the frame (`<name>.png` in its text) governs instead.
+ */
+function writtenAmendment(name: string): { path: string;
+	text: string; } | null
+{
+	const frame = name.replace(/\.png$/, "");
+	let best: { n: number;
+		path: string;
+		text: string;
+		written: boolean; } | null = null;
+	for (const surface of readdirSync("docs/v3/visual", {
+		withFileTypes: true,
+	}).filter((d) => d.isDirectory()))
+	{
+		const dir = join("docs/v3/visual", surface.name, "amendments");
+		if (!existsSync(dir)) continue;
+		for (const file of readdirSync(dir).filter((f) => /^A\d+\.md$/.test(f)))
+		{
+			const path = join(dir, file);
+			const text = readFileSync(path, "utf8");
+			const n = Number(file.slice(1, -3));
+			const written = /^## Frames\s+None\b/m.test(text);
+			const overrides = written ? overriddenNames(text) : [];
+			const covers = text.includes(`${frame}.png`) || overrides.some((o) => (o.endsWith("*") ? frame.startsWith(o.slice(0, -1)) : o === frame));
+			if (covers && (!best || n > best.n)) best = {
+				n,
+				path,
+				text,
+				written,
+			};
+		}
+	}
+	return best?.written ? {
+		path: best.path,
+		text: best.text,
+	} : null;
+}
+
+/** The frame names on an amendment's **Overrides:** line, with `-medium`-style shorthands expanded. */
+function overriddenNames(text: string): string[]
+{
+	const line = /^\*\*Overrides:\*\*(.*)$/m.exec(text)?.[1] ?? "";
+	const names: string[] = [];
+	for (const [, token] of line.matchAll(/`([a-z0-9*-]+)`/g))
+	{
+		const previous = names.at(-1);
+		names.push(token!.startsWith("-") && previous ? previous.replace(/-[a-z0-9]+$/, token!) : token!);
+	}
+	return names;
+}
+
+const escapeHtml = (text: string): string => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
 const dataUrl = (path: string): string => `data:image/png;base64,${readFileSync(path).toString("base64")}`;
 const panel = (label: string, path: string | null): string => (path
 	? `<figure><figcaption>${label}<small>${path}</small></figcaption><img src="${dataUrl(path)}"></figure>`
@@ -74,7 +136,11 @@ const page = await browser.newPage();
 const captures = readdirSync(checks).filter((f) => f.endsWith(".png")).sort();
 for (const name of captures)
 {
-	const frame = ratifiedFrame(name);
+	const amendment = writtenAmendment(name);
+	const frame = amendment ? null : ratifiedFrame(name);
+	const reference = amendment
+		? `<figure class="written"><figcaption>Ratified written amendment (no frame; it supersedes any older frame named ${name})<small>${amendment.path}</small></figcaption><pre>${escapeHtml(amendment.text)}</pre></figure>`
+		: panel("Ratified frame", frame);
 	await page.setContent(`<!doctype html><style>
 		body { margin: 0; background: #282828; color: #fff2d3; font: 20px Helvetica, Arial, sans-serif; }
 		main { display: inline-flex; gap: 24px; padding: 16px 24px 24px; align-items: flex-start; }
@@ -82,10 +148,11 @@ for (const name of captures)
 		figcaption { margin-bottom: 12px; }
 		small { display: block; font-size: 12px; opacity: 0.7; }
 		img { display: block; }
-	</style><main>${panel("Ratified frame", frame)}${panel(`${story} build`, join(checks, name))}</main>`);
+		.written pre { width: 560px; margin: 0; white-space: pre-wrap; font: 14px/1.45 Helvetica, Arial, sans-serif; }
+	</style><main>${reference}${panel(`${story} build`, join(checks, name))}</main>`);
 	await page.locator("main").screenshot({
 		path: join(out, name),
 	});
-	console.log(`${join(out, name)}${frame ? "" : "  (no ratified frame found)"}`);
+	console.log(`${join(out, name)}${amendment ? `  (written amendment ${amendment.path})` : frame ? "" : "  (no ratified frame found)"}`);
 }
 await browser.close();

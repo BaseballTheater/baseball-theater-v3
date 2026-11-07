@@ -23,8 +23,9 @@ const RAIL_WIDTH = 240;
  * - **game routes** (`/game/:pk`) draw the game top bar in place of the app
  *   header; on desktop the rail stays.
  *
- * The notice slot sits directly under the header (S31 `shell-notice-*`); the
- * notice's owner (update prompt, offline marker) passes it in.
+ * The notice slot sits directly under the header (S31 `shell-notice-*`); the reload notice
+ * floats fixed at the bottom of the screen instead (shell-scoreboard A6), which `NoticeSlot`
+ * decides. The notice's owner (update prompt, offline marker) passes it in.
  */
 export function AppShellLayout({ children, notice = null }: {
 	children: (variant: LayoutVariant) => ReactNode;

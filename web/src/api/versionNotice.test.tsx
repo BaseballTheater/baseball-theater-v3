@@ -1,7 +1,8 @@
 /**
  * S28: a retired API version, seen by the web client. The scoreboard loads (200); when a
- * later request comes back 426 `version_unsupported`, the shell's notice slot offers Reload,
- * and the games already on screen stay readable behind it. A normal 200 raises nothing.
+ * later request comes back 426 `version_unsupported`, the shell floats the one update notice
+ * with Update Now (shell-scoreboard A6 replaced Reload), and the games already on screen stay
+ * readable behind it. A normal 200 raises nothing.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -24,7 +25,8 @@ import { jsonResponse } from "../test/jsonResponse.js";
 import { createQueryClient } from "./queryClient.js";
 import { scheduleKey } from "./schedule.js";
 import type { ScheduleDayPayload } from "./schedule.js";
-import { resetVersionNotice, useVersionNotice } from "./versionNotice.js";
+import { useUpdateNotice } from "../pwa/updates.js";
+import { resetVersionNotice } from "./versionNotice.js";
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "../../../fixtures");
 
@@ -69,7 +71,7 @@ function serve()
 function Shell()
 {
 	return (
-		<AppShellLayout notice={useVersionNotice()}>
+		<AppShellLayout notice={useUpdateNotice()}>
 			{(variant) => (
 				<Routes>
 					<Route path="/games/:date" element={<ScoreboardPage variant={variant} />} />
@@ -113,7 +115,7 @@ describe("a retired API version (S28)", () =>
 		expect(screen.queryByText(MESSAGE)).toBeNull();
 	});
 
-	it("426: the next answer being 426 raises the reload notice through the notice slot", async () =>
+	it("426: the next answer being 426 raises the reload notice through the notice slot, with Update Now and Snooze", async () =>
 	{
 		const api = serve();
 		const client = await renderApp();
@@ -124,7 +126,10 @@ describe("a retired API version (S28)", () =>
 		const notice = await screen.findByRole("status");
 		expect(notice).toHaveTextContent(MESSAGE);
 		expect(screen.getByRole("button", {
-			name: "Reload",
+			name: "Update Now",
+		})).toBeInTheDocument();
+		expect(screen.getByRole("button", {
+			name: "Snooze",
 		})).toBeInTheDocument();
 	});
 

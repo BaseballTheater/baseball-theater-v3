@@ -17,7 +17,10 @@
  * must not overwrite the first's). Logto's browser SDK would otherwise keep its tokens and sign-in
  * session under keys of its own; the `AuthClient` (S116) hands it a storage adapter over this
  * module instead, so every key it writes is listed here, labeled personal, and gone after sign-out
- * and account deletion.
+ * and account deletion. Two keys say nothing about the person (S73; ADR-028's `none`): when the
+ * update notice's Snooze runs out (shell-scoreboard A6) and that the Settings install tip was
+ * dismissed (standings-search-settings A8). They belong to this browser, survive sign-out, and
+ * never sync to the account.
  */
 export const STORAGE_KEYS = {
 	/** The S59 session bearer token; shared, so every tab is signed in. */
@@ -53,6 +56,16 @@ export const STORAGE_KEYS = {
 	"logto.signInSession": {
 		personal: true,
 		area: "tab",
+	},
+	/** When the update notice's Snooze ends, in epoch ms (S73, shell-scoreboard A6), so a reload within the hour keeps it hidden. */
+	"bt.updateSnoozedUntil": {
+		personal: false,
+		area: "shared",
+	},
+	/** Set once the Settings install tip is dismissed (S73, standings-search-settings A8): it stays gone in this browser. */
+	"bt.installTipDismissed": {
+		personal: false,
+		area: "shared",
 	},
 } as const satisfies Record<string, { personal: boolean;
 	area: "shared" | "tab"; }>;

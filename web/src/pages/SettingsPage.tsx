@@ -5,12 +5,12 @@ import {
 	GAME_ROW_SLOTS, MLB_TEAMS, OPENS_FIRST_ROOMS, VIDEO_PLAYERS,
 } from "@bt/domain";
 import {
-	Anchor, Divider, MultiSelect, Radio, SimpleGrid, Stack, Switch, Text, Title,
+	Anchor, Divider, MultiSelect, Paper, Radio, SimpleGrid, Stack, Switch, Text, Title,
 } from "@mantine/core";
 import type { ReactNode } from "react";
 import { roomLabel } from "../components/game/format.js";
 import type { LayoutVariant } from "../layout/variant.js";
-import { useInstallOffer } from "../pwa/install.js";
+import { useInstallOffer, useInstallTipDismissed } from "../pwa/install.js";
 import { useSession } from "../session/session.js";
 import { AccountData } from "./settings/AccountData.js";
 import { InstallApp } from "./settings/InstallApp.js";
@@ -35,41 +35,66 @@ const PLAYER_LABELS: Readonly<Record<VideoPlayerMode, string>> = {
 	stage: "Stage",
 };
 
-/** One titled group of the ratified Settings frame (Game List · Game Detail · App · Account). */
+/** One titled section inside a frame (Game List, Game Detail): a smaller heading than the frame's, so the two read as distinct parts of Settings (A8). */
 function SettingsGroup({ title, children }: { title: string;
 	children: ReactNode })
 {
 	return (
 		<Stack gap="xs" component="section" aria-label={title}>
-			<Title order={2} size="h4">{title}</Title>
+			<Title order={2} size="h5" c="dimmed" tt="uppercase" fw={600}>{title}</Title>
 			{children}
 		</Stack>
 	);
 }
 
 /**
- * Settings, as the ratified frames draw it (standings-search-settings, A3):
- * Game List (Favorite Teams, Game-Row Slot, Collapse Non-Favorites, Hide Scores) on the
- * left, Game Detail (Opens First, Video Player) and Account on the right; one column on mobile. Every
- * control is one this story can make work; the Video Player control arrives with
- * the screen that reads it (S70), and the Patreon rows with the
- * Patreon link. Signed-in only (the route guards it), so the session has an
- * account. Download and delete your data sit at the end of Account (A4, S79). The App group
- * (install, S73) sits above Account when the browser can install or on iPhone/iPad.
+ * One of A8's two bordered frames, Settings or Account (standings-search-settings A8: "frames
+ * around them for visual separation"). The Settings frame's heading is the page's h1, since
+ * the frames now carry the page's titles; Account's is an h2, beside the Settings sections.
+ */
+function SettingsFrame({
+	title, level, children,
+}: { title: string;
+	level: 1 | 2;
+	children: ReactNode })
+{
+	return (
+		<Paper component="section" aria-label={title} withBorder radius="md" p="lg">
+			<Stack gap="lg">
+				<Title order={level} size="h3">{title}</Title>
+				{children}
+			</Stack>
+		</Paper>
+	);
+}
+
+/**
+ * Settings, as the ratified frames draw it (standings-search-settings, A3) and A8 lays it out
+ * (ratified 2026-11-02): the install tip at the very top, outside both frames, while there is
+ * an install offer (S73; the browser's prompt, or the Share steps on iPhone/iPad) and until it
+ * is dismissed in this browser; then two bordered frames side by side on medium and desktop,
+ * **Settings** (Game List, then Game Detail, as distinct sections) and **Account**; on mobile
+ * one column: tip, Settings, Account. Every control is one this story can make work; the
+ * Video Player control arrives with the screen that reads it (S70), and the Patreon rows with
+ * the Patreon link. Signed-in only (the route guards it), so the session has an account.
+ * Download and delete your data sit at the end of Account (A4, S79).
  */
 export function SettingsPage({ variant }: { variant: LayoutVariant })
 {
 	const settings = useSettings();
 	const session = useSession();
-	// Settings → App sits above Account only while there is an install offer (S55 A1, S73).
+	// The install tip shows only while there is an install offer (S55 A1, S73) and it isn't dismissed (A8).
 	const install = useInstallOffer();
+	const [tipDismissed, dismissTip] = useInstallTipDismissed();
 	const columns = variant === "mobile" ? 1 : 2;
 
 	return (
 		<Stack>
-			<Title order={1}>Settings</Title>
-			<SimpleGrid cols={columns} spacing="xl" data-columns={columns}>
-				<Stack gap="xl">
+			{install && !tipDismissed ? <InstallApp offer={install} onDismiss={dismissTip} /> : null}
+			<SimpleGrid cols={columns} spacing="lg" data-columns={columns} style={{
+				alignItems: "start",
+			}}>
+				<SettingsFrame title="Settings" level={1}>
 					<SettingsGroup title="Game List">
 						<MultiSelect
 							label="Favorite Teams"
@@ -111,8 +136,7 @@ export function SettingsPage({ variant }: { variant: LayoutVariant })
 							}}
 						/>
 					</SettingsGroup>
-				</Stack>
-				<Stack gap="xl">
+					<Divider />
 					<SettingsGroup title="Game Detail">
 						<Radio.Group
 							label="Opens First"
@@ -133,12 +157,9 @@ export function SettingsPage({ variant }: { variant: LayoutVariant })
 							</Stack>
 						</Radio.Group>
 					</SettingsGroup>
-					{install ? (
-						<SettingsGroup title="App">
-							<InstallApp offer={install} />
-						</SettingsGroup>
-					) : null}
-					<SettingsGroup title="Account">
+				</SettingsFrame>
+				<SettingsFrame title="Account" level={2}>
+					<Stack gap="xs">
 						{session.status === "signedIn" && <Text>Signed in as {session.account.email}</Text>}
 						{/* A text link, not a button (A3, owner 2026-10-22: "Text link"). */}
 						<Anchor
@@ -154,8 +175,8 @@ export function SettingsPage({ variant }: { variant: LayoutVariant })
 							Sign out
 						</Anchor>
 						<AccountData variant={variant} />
-					</SettingsGroup>
-				</Stack>
+					</Stack>
+				</SettingsFrame>
 			</SimpleGrid>
 		</Stack>
 	);

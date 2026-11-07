@@ -1,7 +1,9 @@
 /**
- * S73: Settings → App (S55 standings-search-settings A1 `settings-install-*`; S56 A2
- * `settings-install-ios-mobile`). The group shows only when the browser has offered to
- * install, or on iPhone/iPad as the Share steps, and never once the app is installed.
+ * S73: the Settings install tip (S55 standings-search-settings A1 `settings-install-*`; S56 A2
+ * `settings-install-ios-mobile`; laid out by A8: at the very top, outside the Settings and
+ * Account frames, with a Tip mark, dismissable for good in this browser). It shows only when
+ * the browser has offered to install, or on iPhone/iPad as the Share steps, and never once
+ * the app is installed.
  */
 import { DEFAULT_SETTINGS } from "@bt/domain";
 import { MantineProvider } from "@mantine/core";
@@ -18,6 +20,7 @@ import {
 	captureInstallPrompt, isIos, resetInstall,
 } from "../../pwa/install.js";
 import { DEV_SIGN_IN_TOKEN } from "../../session/session.js";
+import { clearPersonalData, readStored } from "../../storage/storage.js";
 import { SessionProvider } from "../../session/SessionProvider.js";
 import { setSessionToken } from "../../session/token.js";
 import { resetSettings } from "../../settings/store.js";
@@ -67,12 +70,11 @@ function offerInstall()
 	return prompt;
 }
 
-/** The group headings, top to bottom. */
+/** The page's parts, top to bottom: the install tip (when shown), then A8's two frames. */
 function groups(): string[]
 {
-	return screen.getAllByRole("heading", {
-		level: 2,
-	}).map((h) => h.textContent ?? "");
+	return [...document.querySelectorAll("[aria-label='Install tip'], section[aria-label='Settings'], section[aria-label='Account']")]
+		.map((el) => el.getAttribute("aria-label") ?? "");
 }
 
 beforeAll(() => captureInstallPrompt());
@@ -87,17 +89,18 @@ afterEach(() =>
 	resetInstall();
 });
 
-describe("Settings → App (S73)", () =>
+describe("Settings install tip (S73; A8)", () =>
 {
-	it("install row: no App group until the browser offers; then it sits above Account and Install app prompts", async () =>
+	it("install row: no tip until the browser offers; then it sits at the very top, above both frames, and Install app prompts", async () =>
 	{
 		const user = userEvent.setup();
 		renderSettings();
 		await screen.findByText(/Signed in as/);
-		expect(groups()).not.toContain("App");
+		expect(groups()).toEqual(["Settings", "Account"]);
 
 		const prompt = offerInstall();
-		expect(groups()).toEqual(["Game List", "Game Detail", "App", "Account"]);
+		expect(groups()).toEqual(["Install tip", "Settings", "Account"]);
+		expect(screen.getByText("Tip")).toBeInTheDocument();
 		expect(screen.getByText("Open Baseball Theater from your home screen, without the browser bar.")).toBeInTheDocument();
 		await user.click(screen.getByRole("button", {
 			name: "Install app",
@@ -105,17 +108,17 @@ describe("Settings → App (S73)", () =>
 		expect(prompt).toHaveBeenCalledTimes(1);
 	});
 
-	it("installed: once the app installs, or when it already runs standalone, there is no App group", async () =>
+	it("installed: once the app installs, or when it already runs standalone, there is no install tip", async () =>
 	{
 		renderSettings();
 		await screen.findByText(/Signed in as/);
 		offerInstall();
-		expect(groups()).toContain("App");
+		expect(groups()).toContain("Install tip");
 		act(() =>
 		{
 			window.dispatchEvent(new Event("appinstalled"));
 		});
-		expect(groups()).not.toContain("App");
+		expect(groups()).not.toContain("Install tip");
 		cleanup();
 		resetInstall();
 
@@ -132,20 +135,40 @@ describe("Settings → App (S73)", () =>
 		renderSettings();
 		await screen.findByText(/Signed in as/);
 		offerInstall();
-		expect(groups()).not.toContain("App");
+		expect(groups()).not.toContain("Install tip");
 	});
 
-	it("iOS: on iPhone the App group shows the Share steps without any offer, and no install link", async () =>
+	it("iOS: on iPhone the tip shows the Share steps without any offer, and no install link", async () =>
 	{
 		vi.spyOn(navigator, "userAgent", "get").mockReturnValue(IPHONE);
 		renderSettings();
 		await screen.findByText(/Signed in as/);
-		expect(groups()).toEqual(["Game List", "Game Detail", "App", "Account"]);
+		expect(groups()).toEqual(["Install tip", "Settings", "Account"]);
 		expect(screen.getByText("Install Baseball Theater from Safari:")).toBeInTheDocument();
 		expect(screen.getAllByRole("listitem").map((li) => li.textContent)).toEqual(["Tap Share", "Choose “Add to Home Screen”"]);
 		expect(screen.queryByRole("button", {
 			name: "Install app",
 		})).toBeNull();
+	});
+
+	it("install row tip: ✕ dismisses it for good in this browser, through sign-out and a new visit (A8)", async () =>
+	{
+		const user = userEvent.setup();
+		renderSettings();
+		await screen.findByText(/Signed in as/);
+		offerInstall();
+		await user.click(screen.getByRole("button", {
+			name: "Dismiss tip",
+		}));
+		expect(groups()).toEqual(["Settings", "Account"]);
+		expect(readStored("bt.installTipDismissed")).toBe("1");
+		cleanup();
+		clearPersonalData();
+
+		renderSettings();
+		await screen.findByText(/Signed in as/);
+		offerInstall();
+		expect(groups()).toEqual(["Settings", "Account"]);
 	});
 
 	it("iOS: an iPad that reports itself as a Mac is told apart by its touch screen; a Mac isn't", () =>
