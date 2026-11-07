@@ -87,7 +87,8 @@ config. Every bootstrapping step is safe to repeat (owner, 2026-11-05: "It shoul
 can happen with every deployment. All the bootstrapping should be like that."), so deploys run them
 each time rather than anyone remembering to. **Agents never touch production**: no migrations,
 restores or deploys against it, and no production connection string in the repo (CLAUDE.md);
-production changes go out only when the owner publishes a GitHub Release (S114, S121).
+production changes go out only through a published GitHub Release, which the coordinator publishes
+when the owner says so (S114, S121).
 
 **One-time setup** (done by the owner 2026-11-02; repeat it only to rebuild from scratch):
 
@@ -123,10 +124,10 @@ of PRs basically"; asked who merges a story's pull request and whether `main` st
 automatically 2. Mirror"):
 
 - Every story arrives as its own pull request from a `story/S<N>` branch into `stage`. The agent
-  opens it with auto-merge on, so it merges by itself once `ci-passed` is green; each merge deploys
+  opens it, handles Copilot's review, then turns on auto-merge, so it merges once `ci-passed` is green; each merge deploys
   staging, `stage.baseball.theater`. Every pull request also gets a preview (below).
-- Production, at `next.baseball.theater` until the owner's cutover (below), deploys only when the
-  owner publishes a GitHub Release, and deploys exactly that release's tag, with no approval wait
+- Production, at `next.baseball.theater` until the owner's cutover (below), deploys only when a
+  GitHub Release is published (by the coordinator, on the owner's word), and deploys exactly that release's tag, with no approval wait
   (S118). A push to `main` deploys nothing.
 - After production is live, the workflow fast-forwards `main` to the released commit, so `main`
   always shows what production runs. It never forces `main`.
@@ -144,16 +145,16 @@ automatically 2. Mirror"):
   The branch is created schema-only from production the first time (production's tables, none of its
   rows) and filled only by `pnpm db:migrate`, so it never holds a fan's data. Copying production's
   baseball data into it is a separate step the owner runs by hand (S117); no deploy copies data.
-- **Releasing.** On GitHub, Releases → Draft a new release: choose a new tag `v*` (e.g. `v0.1.0`)
-  with its target `stage` (or a single `stage` commit, from the target's recent commits), then press
+- **Releasing.** On GitHub, Releases → Draft a new release: choose a new tag `v*` (e.g. `v3.0.0`)
+  with its target the exact `stage` commit that passed the release checks (not the moving branch), then press
   **Generate release notes**: `.github/release.yml` makes the notes the list of pull requests merged
   into `stage` since the last release, which is the stories the release ships. Publishing it
-  (`gh release create v0.1.0 --target stage --generate-notes` does the same) runs the deploy workflow
+  (`gh release create v3.0.0 --target <checked stage sha> --generate-notes` does the same) runs the deploy workflow
   on that tag: `pnpm verify`, then production's steps (below), then `main` fast-forwards to the
   tagged commit. A release ships everything on `stage` up to its target; there is no picking single
   stories out of the middle, and releasing is no longer done by merging `stage` into `main`. The
   first release must target a commit that has S121's workflow (a release runs the workflow as it is at
-  its tag). Only the owner releases.
+  its tag). The owner decides when to release; the coordinator publishes it, on the owner's word (CLAUDE.md).
 - **Rolling back.** Three ways, quickest first. (1) `npx wrangler rollback --env production` (from
   `functions/`, with `--config ../wrangler.jsonc`) returns production's Worker to its previous version
   in seconds; add a version id to pick an older one (`npx wrangler deployments list --env production`
