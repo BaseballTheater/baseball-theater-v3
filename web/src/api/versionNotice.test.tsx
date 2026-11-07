@@ -76,10 +76,14 @@ function serve()
  * the new worker, which installs on the next tick and, told `SKIP_WAITING`, takes control.
  * Each step is written to `log`, so a test can check the order. `fault` breaks one step, to
  * check that a failed update never reloads a page the old worker controls (`controlled`).
+ * The `takeover-during-*` faults have another tab activate the new worker while this one
+ * waits, so nothing is left waiting or installing here; `lookup-fails` and `no-registration`
+ * leave Update Now with no registration to ask (Copilot review of PR #5).
  */
 function fakeServiceWorkers(log: string[], { controlled = false, fault }: {
 	controlled?: boolean;
-	fault?: "update-stalls" | "update-fails" | "install-fails" | "install-stalls" | "takeover-stalls";
+	fault?: "update-stalls" | "update-fails" | "install-fails" | "install-stalls" | "takeover-stalls"
+		| "takeover-during-update" | "takeover-during-install" | "lookup-fails" | "no-registration";
 } = {}): ServiceWorkerContainer
 {
 	const container = new EventTarget();
@@ -101,7 +105,24 @@ function fakeServiceWorkers(log: string[], { controlled = false, fault }: {
 			log.push("update");
 			if (fault === "update-stalls") return new Promise<never>(() => undefined);
 			if (fault === "update-fails") return Promise.reject(new TypeError("Failed to update a ServiceWorker"));
+			if (fault === "takeover-during-update")
+			{
+				worker.state = "activated";
+				container.dispatchEvent(new Event("controllerchange"));
+				return Promise.resolve(registration);
+			}
 			registration.installing = worker;
+			if (fault === "takeover-during-install")
+			{
+				setTimeout(() =>
+				{
+					worker.state = "activated";
+					registration.installing = null;
+					container.dispatchEvent(new Event("controllerchange"));
+					worker.dispatchEvent(new Event("statechange"));
+				}, 0);
+				return Promise.resolve(registration);
+			}
 			if (fault !== "install-stalls") setTimeout(() =>
 			{
 				worker.state = fault === "install-fails" ? "redundant" : "installed";
@@ -114,7 +135,11 @@ function fakeServiceWorkers(log: string[], { controlled = false, fault }: {
 	};
 	return Object.assign(container, {
 		controller: controlled ? {} : null,
-		getRegistration: () => Promise.resolve(registration),
+		getRegistration: () =>
+		{
+			if (fault === "lookup-fails") return Promise.reject(new DOMException("The operation is insecure.", "SecurityError"));
+			return Promise.resolve(fault === "no-registration" ? undefined : registration);
+		},
 	}) as unknown as ServiceWorkerContainer;
 }
 
@@ -269,6 +294,77 @@ describe("a retired API version (S28)", () =>
 			expect(log.at(-1)).toBe("reload");
 		});
 	}
+
+	// Another tab activated the new worker while this one waited: nothing is left to activate, but the page is on the new worker, so it reloads.
+	for (const fault of ["takeover-during-update", "takeover-during-install"] as const)
+	{
+		for (const controlled of [true, false])
+		{
+			it(`426: ${fault}: a takeover seen while waiting reloads (${controlled ? "controlled" : "uncontrolled"} page)`, async () =>
+			{
+				const log: string[] = [];
+				const finished = await updateWithTimeouts(fakeServiceWorkers(log, {
+					controlled,
+					fault,
+				}), () => log.push("reload"));
+				expect(finished).toBe(true);
+				expect(log).toEqual(["update", "reload"]);
+			});
+		}
+	}
+
+	// No registration doesn't mean no controller: an unregistered worker can still serve the retired shell.
+	for (const fault of ["lookup-fails", "no-registration"] as const)
+	{
+		it(`426: ${fault}: a page a worker controls is not reloaded`, async () =>
+		{
+			const reload = vi.fn();
+			await updateToNewVersion(fakeServiceWorkers([], {
+				controlled: true,
+				fault,
+			}), reload);
+			expect(reload).not.toHaveBeenCalled();
+		});
+
+		it(`426: ${fault}: a page no worker controls reloads, since the network answers it`, async () =>
+		{
+			const reload = vi.fn();
+			await updateToNewVersion(fakeServiceWorkers([], {
+				fault,
+			}), reload);
+			expect(reload).toHaveBeenCalledOnce();
+		});
+	}
+
+	it("426: when the registration lookup fails on a controlled page, the notice and its Update Now stay on screen", async () =>
+	{
+		const container = fakeServiceWorkers([], {
+			controlled: true,
+			fault: "lookup-fails",
+		});
+		const lookup = vi.spyOn(container, "getRegistration");
+		vi.stubGlobal("navigator", Object.assign(Object.create(navigator) as Navigator, {
+			serviceWorker: container,
+		}));
+		// jsdom can't navigate: a wrong reload would only log "not implemented", so spy on it to catch one.
+		const navError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+		const api = serve();
+		const client = await renderApp();
+		api.retire();
+		await act(() => client.refetchQueries({
+			queryKey: scheduleKey("2024-07-04"),
+		}));
+		await userEvent.click(await screen.findByRole("button", {
+			name: "Update Now",
+		}));
+		await waitFor(() => expect(lookup).toHaveBeenCalledOnce());
+		await act(() => Promise.resolve());
+		expect(navError).not.toHaveBeenCalled();
+		expect(screen.getByText(MESSAGE)).toBeInTheDocument();
+		expect(screen.getByRole("button", {
+			name: "Update Now",
+		})).toBeInTheDocument();
+	});
 
 	it("426: after a failed update the notice and its Update Now stay on screen for a retry", async () =>
 	{

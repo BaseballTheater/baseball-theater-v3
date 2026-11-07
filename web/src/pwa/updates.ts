@@ -108,40 +108,59 @@ function installed(worker: ServiceWorker | null): Promise<ServiceWorker | null>
  * controls is NOT reloaded: that reload would get the retired app again, 426 again, and lose
  * the readable screen. It returns instead, leaving the page and the notice so Update Now can
  * be tried again (Copilot review of PR #4). Only a page no worker controls reloads then,
- * since the network answers it. `container` and `reload` are this browser's by default;
- * tests pass stand-ins.
+ * since the network answers it. The same holds when no registration is found (none, or the
+ * lookup failed): an unregistered worker can still control this page, so it reloads only
+ * when nothing does. And a takeover seen at any point (another tab may activate the new
+ * worker while this one waits, leaving nothing waiting or installing here) counts as success:
+ * the page is on the new worker, so it reloads (Copilot review of PR #5). `container` and
+ * `reload` are this browser's by default; tests pass stand-ins.
  */
 export async function updateToNewVersion(
 	container: ServiceWorkerContainer | undefined = serviceWorkers(),
 	reload: () => void = () => window.location.reload(),
 ): Promise<void>
 {
-	const registration = await container?.getRegistration().catch(() => undefined);
-	if (!container || !registration)
+	if (!container)
 	{
 		reload();
 		return;
 	}
-	// Read before the takeover: once the new worker claims the page, `controller` is it.
+	// Read before any takeover: once the new worker claims the page, `controller` is it.
 	const controlledByOld = Boolean(container.controller);
-	// Listen before anything can take over, so a fast `controllerchange` isn't missed.
-	const tookControl = new Promise<true>((resolve) => container.addEventListener("controllerchange", () => resolve(true), {
+	// Listen before anything can take over (this tab or another), so an early `controllerchange` isn't missed.
+	let tookOver = false;
+	const tookControl = new Promise<true>((resolve) => container.addEventListener("controllerchange", () =>
+	{
+		tookOver = true;
+		resolve(true);
+	}, {
 		once: true,
 	}));
+	// The new worker controls the page, or none does: a reload reaches the new shell or the network. Otherwise it would get the retired app.
+	const reloadIfSafe = () =>
+	{
+		if (tookOver || !controlledByOld) reload();
+	};
+	const registration = await container.getRegistration().catch(() => undefined);
+	if (!registration)
+	{
+		reloadIfSafe();
+		return;
+	}
 	// A failed update request still lets an already-waiting or installing worker through; a stalled one gives up.
 	const asked = await Promise.race([registration.update().then(() => "settled", () => "settled"), after(ACTIVATE_TIMEOUT_MS)]);
-	if (!asked) return;
+	if (tookOver || !asked)
+	{
+		if (tookOver) reload();
+		return;
+	}
 	const next = registration.waiting ?? await Promise.race([installed(registration.installing), after(ACTIVATE_TIMEOUT_MS)]);
-	if (next)
+	if (next && !tookOver)
 	{
 		next.postMessage(SKIP_WAITING);
-		if (await Promise.race([tookControl, after(ACTIVATE_TIMEOUT_MS)]))
-		{
-			reload();
-			return;
-		}
+		await Promise.race([tookControl, after(ACTIVATE_TIMEOUT_MS)]);
 	}
-	if (!controlledByOld) reload();
+	reloadIfSafe();
 }
 
 /** When a snooze ends (epoch ms), 0 when none is stored. Kept in this browser so a reload within the hour stays quiet (A6). */
