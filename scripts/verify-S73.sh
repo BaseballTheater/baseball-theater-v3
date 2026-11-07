@@ -3,10 +3,11 @@
 # manifest (standalone, flag-mark icons at 192 and 512, #10100F), a service worker at scope
 # `/` precaching the shell and never `/api/`, the update notice when a new worker waits, the
 # Install app row in Settings (and the iPhone/iPad Share steps), safe-area insets in
-# standalone mode, the size budget and Playwright flows intact. A commit-time proof of this
+# standalone mode, the size budget and Playwright flows intact (the flows proven in GitHub CI). A commit-time proof of this
 # story (S84).
 # Contract: docs/v3/BACKLOG.md#verify-script-contract
-# No network. No writes outside /tmp (the web build goes to a temp dir). Does its own
+# No network except check 6's read-only GitHub REST calls for the CI flows run (owner,
+# 2026-11-07). No writes outside /tmp (the web build goes to a temp dir). Does its own
 # checking (never `pnpm verify`).
 
 set -uo pipefail
@@ -20,7 +21,7 @@ check 2 "the service worker registers at scope / and precaches the shell, never 
 check 3 "a waiting worker shows the floating NoticeBanner 'An update to Baseball Theater is ready.' with Snooze and Update Now (shell-scoreboard A6); Update Now activates it and reloads; Snooze hides it for an hour (mocked registration)"
 check 4 "Settings shows the Install app row only after beforeinstallprompt and never installed; iPhone/iPad Safari shows the Share steps, never installed (tests)"
 check 5 "standalone mode applies the S55 safe-area insets (CSS test); sw.js and index.html are served to revalidate (_headers test)"
-check 6 "the entry chunk stays inside the 200 KB budget; a Playwright flow covers the update notice and the flows pass"
+check 6 "the entry chunk stays inside the 200 KB budget; a Playwright flow covers the update notice and the flows pass in GitHub CI on a commit HEAD contains"
 check 7 "files this story adds or edits reference no team logo and read no viewport outside web/src/layout/"
 check 8 "design match: e2e/design/S73.spec.ts names its 7 frames; docs/v3/design-checks/S73/ holds them at their widths"
 check 9 "backlog Status is done (story heading and Story status table)"
@@ -114,8 +115,37 @@ if [ "$BUILT" = 1 ]; then
   [ "$SIZE" -le 200000 ] || bad 6 "the entry chunk is $SIZE bytes gzipped, over 200000"
 fi
 grep -lF 'An update to Baseball Theater is ready.' e2e/flows/*.spec.ts >/dev/null 2>&1 || bad 6 "no e2e/flows spec covers the update notice"
-if ! pnpm exec playwright test --config e2e/playwright.config.ts e2e/flows >"$TMP/flows.log" 2>&1; then
-  bad 6 "the Playwright flows fail:"; tail -15 "$TMP/flows.log" | sed 's/^/        /'
+# Updated before S73 shipped (rule 7) on the owner's answer to the 2026-11-07 backlog review,
+# asked "Will you finish S73 yourself on a machine with Docker, or should its AC 6 count the
+# Playwright flows passing in CI on its pull request?": "4 passing in ci". The flows need Docker
+# Postgres (e2e/playwright.config.ts webServer), which a cloud session can't pull, so they are
+# proven by GitHub CI's `flows` job (`pnpm e2e --repeat-each=2`) instead of a local run: a
+# successful CI run whose commit is this tree's HEAD or an ancestor of it, contains S73's
+# checkpoint 9d64162, and holds e2e/flows/update.spec.ts exactly as it is here, with its `flows`
+# job concluded `success`. This is the one read-only GitHub REST call in this grader (the
+# contract's "no network" bends to the owner's answer); the size budget above stays local.
+SPEC_BLOB="$(git hash-object e2e/flows/update.spec.ts 2>/dev/null)"
+REPO="$(git remote get-url origin | sed -E 's#^(https://github.com/|git@github.com:)##; s#\.git$##')"
+if ! gh api "repos/$REPO/actions/workflows/ci.yml/runs?status=success&per_page=100" \
+  --jq '.workflow_runs[] | "\(.id) \(.head_sha)"' >"$TMP/runs.txt" 2>"$TMP/runs.err"; then
+  bad 6 "could not list CI runs on GitHub: $(head -3 "$TMP/runs.err")"
+else
+  FLOWS_RUN=""
+  while read -r run sha; do
+    git cat-file -e "$sha^{commit}" 2>/dev/null || continue
+    git merge-base --is-ancestor 9d64162 "$sha" || continue
+    git merge-base --is-ancestor "$sha" HEAD || continue
+    [ "$(git rev-parse "$sha:e2e/flows/update.spec.ts" 2>/dev/null)" = "$SPEC_BLOB" ] || continue
+    if gh api "repos/$REPO/actions/runs/$run/jobs" --jq '.jobs[] | select(.name == "flows") | .conclusion' </dev/null 2>/dev/null | grep -qx success; then
+      FLOWS_RUN="$run ${sha:0:7}"
+      break
+    fi
+  done <"$TMP/runs.txt"
+  if [ -n "$FLOWS_RUN" ]; then
+    CHECK_DESC[6]="${CHECK_DESC[6]} (CI run ${FLOWS_RUN%% *} at ${FLOWS_RUN##* }: flows job success)"
+  else
+    bad 6 "no successful CI run on a commit in HEAD's history after 9d64162, with this e2e/flows/update.spec.ts, has a successful flows job"
+  fi
 fi
 
 # --- Check 7: no logos, no viewport ------------------------------------------------------------------

@@ -275,3 +275,7 @@
 {"line":16019,"date":"2026-11-07","kind":"design-match","story":"S73","heading":"## 2026-11-07 — S73 design match"}
 {"line":16043,"date":"2026-11-07","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-11-07 — backlog review (`amended`)"}
 {"line":16094,"date":"2026-11-07","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-11-07 — doc parity review (`amended`)"}
+{"line":16140,"date":"2026-11-07","kind":"answers","review":"backlog","answers":"2026-11-07","heading":"## 2026-11-07 — backlog review answers (2026-11-07)"}
+{"line":16156,"date":"2026-11-07","kind":"completed","story":"S73","heading":"## 2026-11-07 — S73 completed"}
+{"line":16258,"date":"2026-11-07","kind":"answers","review":"backlog","answers":"2026-11-07","heading":"## 2026-11-07 — backlog review answers (2026-11-07)"}
+{"line":16273,"date":"2026-11-07","kind":"skip","review":"parity","heading":"## 2026-11-07 — doc parity review skipped"}

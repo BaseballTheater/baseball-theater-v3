@@ -16134,3 +16134,151 @@ Fresh-context review at `cd88229`. Scope: the six stories done since `03a72ef` (
 **For the next backlog review**
 
 - Still unserved: FEATURES, Video play links — "A video played from Search's floating player links to its play too" (owner, 2026-11-05: "Yes"); no design amendment or story builds it yet (S5's note :119 waits on one).
+
+---
+
+## 2026-11-07 — backlog review answers (2026-11-07)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-07 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-07T09:20:38Z` |
+| HEAD at capture | `86ea13e` (tree clean) |
+| Applied in | `86ea13e` — S73: AC 6's Playwright flows are proven by CI's flows job (owner's answer, 2026-11-07 review) |
+
+**Answers and what was applied**
+
+- **Question 3** ("S73 is done except AC 6's Playwright flows, which need Docker this cloud session can't pull (CI runs them on every pull request). Will you finish it on a machine with Docker, or should its AC 6 accept the flows passing in CI on its pull request?"; put to the owner as "Will you finish S73 yourself on a machine with Docker, or should its AC 6 count the Playwright flows passing in CI on its pull request?"). Owner, 2026-11-07: "4 passing in ci". **Applied** in `86ea13e`: S73's note records the answer; AC 6's S62 flows are proven by GitHub CI's `flows` job concluding `success` on a commit in HEAD's history that descends from S73's checkpoint `9d64162` and holds `e2e/flows/update.spec.ts` as in the tree; the S54 size budget stays a local check. `scripts/verify-S73.sh` check 6 reads that run through the GitHub REST API (rule 7: updated before S73 shipped; shown red when the spec differs from what CI ran). AC wording unchanged.
+- Questions 1 (ADR-013 dated note) and 2 (ADR-028 Browser row) are not answered here and stay pending.
+
+---
+
+## 2026-11-07 — S73 completed
+
+**Installable PWA + update notice**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-07T09:21:24Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `18efcf6` (tree dirty) |
+| Grader | `scripts/verify-S73.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: the built manifest.webmanifest: display standalone, theme_color #10100F, flag-mark icons at 192 and 512 that exist in the build
+check 2 PASS: the service worker registers at scope / and precaches the shell, never /api/ (config test + the built sw.js)
+check 3 PASS: a waiting worker shows the floating NoticeBanner 'An update to Baseball Theater is ready.' with Snooze and Update Now (shell-scoreboard A6); Update Now activates it and reloads; Snooze hides it for an hour (mocked registration)
+check 4 PASS: Settings shows the Install app row only after beforeinstallprompt and never installed; iPhone/iPad Safari shows the Share steps, never installed (tests)
+check 5 PASS: standalone mode applies the S55 safe-area insets (CSS test); sw.js and index.html are served to revalidate (_headers test)
+check 6 PASS: the entry chunk stays inside the 200 KB budget; a Playwright flow covers the update notice and the flows pass in GitHub CI on a commit HEAD contains (CI run 42357216312 at 655036f: flows job success)
+check 7 PASS: files this story adds or edits reference no team logo and read no viewport outside web/src/layout/
+check 8 PASS: design match: e2e/design/S73.spec.ts names its 7 frames; docs/v3/design-checks/S73/ holds them at their widths
+check 9 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**9/9 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with the ratified frame or written amendment that governs it
+
+| Ratified frame or amendment | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/shell-scoreboard/amendments/scoreboard-standalone-mobile.png` | `77fec3633f38f4bd114d00272b4971a88607f1fd02970c8f41c99e375f757977` | `docs/v3/design-checks/S73/scoreboard-standalone-mobile.png` | `81733216394291900f93072d5c1aeabae8f1064e1ea67ef81d78f5eaa36a7198` |
+| `docs/v3/visual/standings-search-settings/amendments/A8.md` | `a740043250e808907ad82fe6370c805a7109fcd43d9df07ec88d8e6dfa2b591c` | `docs/v3/design-checks/S73/settings-install-desktop.png` | `4c2ef0d95fa383c3ae49b0c5bcd294c66aa02785e82121b2516a3289d3e786e4` |
+| `docs/v3/visual/standings-search-settings/amendments/A8.md` | `a740043250e808907ad82fe6370c805a7109fcd43d9df07ec88d8e6dfa2b591c` | `docs/v3/design-checks/S73/settings-install-ios-mobile.png` | `11725d491e2c5b6db551de1d65526102690b0582f1d90847c797a6f57e7a6bf6` |
+| `docs/v3/visual/standings-search-settings/amendments/A8.md` | `a740043250e808907ad82fe6370c805a7109fcd43d9df07ec88d8e6dfa2b591c` | `docs/v3/design-checks/S73/settings-install-medium.png` | `48ce4f733139ad5d09895b55b200cafec567ee989456699c065ca9223c8c52b8` |
+| `docs/v3/visual/standings-search-settings/amendments/A8.md` | `a740043250e808907ad82fe6370c805a7109fcd43d9df07ec88d8e6dfa2b591c` | `docs/v3/design-checks/S73/settings-install-mobile.png` | `e3628f9af19cde4ae446dd3c040ec3a3ef62d498990b5bca5047786cc7cdc83b` |
+| `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S73/shell-update-desktop.png` | `452d6eea670a484c53b0342a99231dec1ecd08a7d048c91a413788efad7d4b28` |
+| `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S73/shell-update-medium.png` | `2e0f8af3534025f1ed6e850b3a557efa705bf12344459a5581d7ef0170d9e9a3` |
+| `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S73/shell-update-mobile.png` | `8a863a0556af488ebf28cbec42efbc1950dda9c8e7ee0a11765afc6905de4738` |
+Owner: "Owner, 2026-11-07, shown the S73 captures (taken on GitHub, 22eba97) beside A6's and A8's written amendments and the scoreboard-standalone frame via `pnpm design:review S73`, asked "Do S73 and S28 match their designs now?": "1 yes". (The same verdict recorded on its own in the 2026-11-07 S73 design match entry at f34576a; the captures are unchanged since.)"
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S73 check results ---
+check 1 PASS: the built manifest.webmanifest: display standalone, theme_color #10100F, flag-mark icons at 192 and 512 that exist in the build
+check 2 PASS: the service worker registers at scope / and precaches the shell, never /api/ (config test + the built sw.js)
+check 3 PASS: a waiting worker shows the floating NoticeBanner 'An update to Baseball Theater is ready.' with Snooze and Update Now (shell-scoreboard A6); Update Now activates it and reloads; Snooze hides it for an hour (mocked registration)
+check 4 PASS: Settings shows the Install app row only after beforeinstallprompt and never installed; iPhone/iPad Safari shows the Share steps, never installed (tests)
+check 5 PASS: standalone mode applies the S55 safe-area insets (CSS test); sw.js and index.html are served to revalidate (_headers test)
+check 6 PASS: the entry chunk stays inside the 200 KB budget; a Playwright flow covers the update notice and the flows pass in GitHub CI on a commit HEAD contains (CI run 42357216312 at 655036f: flows job success)
+check 7 PASS: files this story adds or edits reference no team logo and read no viewport outside web/src/layout/
+check 8 PASS: design match: e2e/design/S73.spec.ts names its 7 frames; docs/v3/design-checks/S73/ holds them at their widths
+check 9 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S73: 9/9 checks passed ---
+verify-S73: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 984ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  491ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  490ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 76ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1104ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  1016ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 116ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 88ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 15ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 66ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  09:24:22
+   Duration  3.35s (transform 86ms, setup 0ms, collect 4.59s, tests 2.61s, environment 1ms, prepare 471ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155520,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-07 — backlog review answers (2026-11-07)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-07 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-07T09:25:46Z` |
+| HEAD at capture | `dcabeff` (tree clean) |
+| Applied in | `dcabeff` — Owner's answers to the 2026-11-07 backlog review: ADR-013 deploy note, ADR-028 Browser row |
+
+**Answers and what was applied**
+
+Owner, 2026-11-07, asked "May ADR-013 get a dated note at its head saying deploys are now Cloudflare through deploy.yml?" and "May ADR-028's inventory Browser row also list Logto's sign-in keys and the 'return to this page after sign-in' key?": "2 and 3 - change both". Applied as a dated note under ADR-013's heading and an extended Browser row in ADR-028's inventory.
+
+---
+
+## 2026-11-07 — doc parity review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a doc parity review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T09:26:58Z` |
+| HEAD at capture | `3186aef` (tree clean) |
+| Change | `dcabeff` — Owner's answers to the 2026-11-07 backlog review: ADR-013 deploy note, ADR-028 Browser row |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Should I skip the doc parity review for the ADR-013 and ADR-028 wording fixes, or run it? I'd skip.": "Skip"

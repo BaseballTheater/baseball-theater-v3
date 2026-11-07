@@ -14,6 +14,19 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## Baseball Theater installs like an app
+
+- **Before, Baseball Theater could only be used in a browser tab, and it loaded from scratch on every visit. Now it
+  installs to your home screen or desktop and opens in its own window, comes back instantly on return visits, and
+  when a new version is out it floats a quiet "An update to Baseball Theater is ready." notice with Update Now and
+  Snooze (snoozing hides it for an hour).** Settings offers the install at the top, or on iPhone and iPad shows
+  the Share → Add to Home Screen steps, and stops offering once it's installed; installed on a phone, the app keeps
+  clear of the notch and the home indicator. Details: S73 (ADR-023) — `vite-plugin-pwa` manifest and service worker
+  at scope `/` (shell precached, never `/api/`; `web/public/_headers` keeps `sw.js` and `index.html` revalidating),
+  the update notice in `web/src/layout/NoticeSlot.tsx` shared with S28, the Settings install tip, standalone
+  safe-area insets; design matched by the owner (shell-scoreboard A6, standings-search-settings A8); its browser
+  flows pass in GitHub CI. _(2026-11-07)_
+
 ## An outdated app asks to update instead of breaking
 
 - **Before, nothing covered the day an old version of the app is retired: it would simply start failing with no
