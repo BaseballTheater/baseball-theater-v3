@@ -276,20 +276,27 @@ jobs:
     # main to the released commit, as a fast-forward only. A plain `git push` already refuses a
     # non-fast-forward; the ancestry check first makes that a clear error instead of a git message.
     # It never forces, so a rollback to an older release fails here on purpose and leaves main at
-    # the newer release. The push uses this workflow's token, so it starts no other workflow; the
-    # `main` ruleset must list GitHub Actions as a bypass actor or the push is refused (README).
+    # the newer release. The push goes over SSH with a write deploy key (`MAIN_MIRROR_KEY`, a
+    # `production` environment secret), because a personal-account repo's rulesets can't list GitHub
+    # Actions as a bypass actor but can list deploy keys (owner, 2026-11-07: "Yes, deploy keys is
+    # there"); the `main` ruleset lists Deploy keys in its bypass list (README). Unlike the workflow
+    # token, a deploy-key push does start workflows: CI runs on main once more, and this workflow
+    # doesn't run on a push to main, so nothing redeploys.
     mirror-main:
         if: github.event_name == 'release' && github.event.action == 'published'
         needs: [production]
         runs-on: ubuntu-latest
         timeout-minutes: 5
+        # For MAIN_MIRROR_KEY, which only the production environment holds.
+        environment: production
         permissions:
-            contents: write
+            contents: read
         steps:
             - uses: actions/checkout@v4
               with:
                   ref: ${{ github.event.release.tag_name }}
                   fetch-depth: 0
+                  ssh-key: ${{ secrets.MAIN_MIRROR_KEY }}
 
             - name: Fast-forward main to the released commit
               env:
