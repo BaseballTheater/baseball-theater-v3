@@ -16037,3 +16037,54 @@ export const label = game.abbreviation + " @ ";  1057ms
 | `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S73/shell-update-medium.png` | `2e0f8af3534025f1ed6e850b3a557efa705bf12344459a5581d7ef0170d9e9a3` |
 | `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S73/shell-update-mobile.png` | `8a863a0556af488ebf28cbec42efbc1950dda9c8e7ee0a11765afc6905de4738` |
 Owner: "Owner, 2026-11-07, shown the S73 captures (taken on GitHub, 22eba97) beside A6's and A8's written amendments and the scoreboard-standalone frame via `pnpm design:review S73`, asked "Do S73 and S28 match their designs now?": "1 yes". Then, told S73 would get this verdict recorded while its Docker-only Playwright flows (AC 6) wait for an environment with Docker: "Go head"."
+
+---
+
+## 2026-11-07 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-07T07:40:19Z` |
+| HEAD at review | `f34576a` (tree dirty) |
+| Trigger | 6 stories done since last review (count) |
+| Stories `done` since last review | S119, S116, S4, S120, S121, S28 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context backlog review, one reviewer, at `f34576a` on `stage`. Trigger: count, 6 stories done since the 2026-11-06 review's answers (S119, S116, S4, S120, S121, S28). Read: CLAUDE.md; the skill; the S117, S5, S72, S73 (grep), S102 notes; frame 00's review section (:160–185, :356–436) and 01 Current baseline; AUDIT.md:15243–15363 (the 2026-11-06 backlog and parity reviews and their answers), :15365–15920 skip entries, :16019 (S73 design match); ARCHITECTURE.md ADR-028 (:1314–1355), :617–631, :746–760, :771–775, :815–818; `functions/src/deploy/bootstrap.ts:170–277`; `packages/domain/src/sign-in.ts`; `web/src/components/queryScreen.ts`; `web/src/session/AuthClient.ts:118–133`; `git diff 73ba87e..HEAD` of non-doc files; `gh run list` (Deploy) and `gh api repos/jakelauer/baseball-theater-v3` (default branch).
+
+**Weighed as drift, not counted:** `7c08039` changed `scripts/audit.sh` and added `scripts/backlog-vault/design-reference.ts` + tests; the root `verify` line, workspace `test*`/`lint`/`build` scripts and `docs/v3/LAWS.md` are unchanged since `73ba87e` (only `deploy:logto` and `@logto/browser` were added to manifests), so the gate did not move. `427d700` (mirror job's write deploy key) and `f34576a` (S73's design match) change no story or gate. No new ADR, no new workspace package.
+
+**Next 3 by priority:** S117 (80), S5 (90), S72 (91).
+
+**1. Coverage**
+
+- **Parity queue item (ARCHITECTURE.md:631, :773, :817):** :631 is inside ADR-005, already marked superseded at its head (:619): nothing needed. :773 ("on `main`: deploy to Firebase") and :817 ("staging project vs preview channels" open) sit in ADR-013, whose ADR-017 amendment (:750) covers local dev only; S114/S118/S121 settled both. An ADR edit is the owner's: asked below, recorded as pending drift.
+- No later theme promoted. Every ADR's work since the last review has a carrier; the release flow (S121) and production address (S119) need nothing further from a story beyond the owner's GitHub settings and DNS cutover.
+
+**2. Ground truth**
+
+- **S117** (Depends on S114: `done`; Source Pillar: Delightful, owner-approved 2026-11-06). At HEAD: `DATA_CLASSIFICATION.postgresTables` (`data-classification.ts:118`) still labels `schedule_days`, `games`, `game_projections`, `replay_artifacts` `none` and the deletion log `retained`; schema tables at `schema.ts:22–100` unchanged (S116 added only the `logto` service entry to the manifest); `migrateDatabaseAt` (`migrate.ts:31`), `migratedPglite` (:45), `openPostgres` (`connect.ts:22`) present. Line drift fixed in a dated note: `findOrCreateBranch` :180 (was :165), default-branch check :183, `branchConnectionString` :239; `NEON_API_KEY` at `deploy.yml:92` (was :78); the `production` environment now deploys only from `v*` tags (README.md:207, S121), not `main`. Repo default branch is `stage` (gh api), so the dispatch workflow appears once merged. New hazard noted: `prepareSchemaOnlyCopy` (`bootstrap.ts:262`) drops `public` on a never-migrated copy, which AC 3 forbids; staging is already migrated by every `stage` deploy (Deploy run 42349644236 at `7556829`, success). Production now holds fans' accounts (S116 + S119, real sign-in tested 2026-11-07), so AC 1 guards real data. Fence (`functions/`, `.github/workflows/`, `package.json`, lockfile, README, docs, CHANGELOG) holds every AC; cap 16 unchanged.
+- **S5** (Depends S70, S61, S68, S81 `done`; Design S34, S56 `done`). `MlbRequest` (`mlb.ts:49`), `graphContentRequest` (:62), private `getJson` (:278), `DayDigest.tsx:16` `gameLabel` (private), `web/src/pages/SearchPage.tsx` (stub), `LazyPlayerDialog.tsx`, `api-routes.ts`, `web/src/api/client.ts`, `generated.types.test.ts`, `web/src/test/jsonResponse.ts` all present; no `fixtures/search-*.json` (S5 records it); `git log 03a72ef..HEAD` touches none of them. Fence holds `packages/ports/`, `fixtures/`, `openapi/`, `web/src/`. Added a note: AC 10's states go through `queryScreen` (S28) + `ViewState`, and S28's middleware already raises the update notice on a 426. Still needs a live MLB recording a cloud session can't make. Cap 16 unchanged.
+- **S72** (Depends S5 `todo`, S69 and S81 `done`; `classifyHighlight` at `packages/domain/src/highlights.ts:20`). **Amended:** its filters must reach MLB through S5's new `MlbStatsClient` search method (`packages/ports`) and need their own `fixtures/search-*.json` recording, and neither path was in its fence: a sure rule-10 stop. Fence gains `fixtures/` and `packages/ports/` (frontmatter, Scope files line, Goal condition, `/goal`), cap 12 → 14. Notes: the prior site's `STRUCTURED` queryType for date/tag; check MLB's team field and whether "tag" is an MLB filter or BT's `classifyHighlight` over one page (which would make AC 2's count page-local) before recording, else stop and report.
+
+**3. Prioritization challenge**
+
+- Only S117 is startable in a cloud session: S5, S72 and S99–S105 need live MLB recordings; S74 waits on S73; S108 on S107 (awaiting ratification); S90–S92 are far down. No re-prioritization: S117 is next, before the owner's DNS cutover by the owner's word.
+- **S73 (92, `blocked`) is the cheapest finish in the backlog**: built, design matched (`f34576a`), only AC 6's Docker-only Playwright flows remain, and S74 waits on it. Asked how it should finish (below).
+- S102 (division names) checked against S4: its AC 3 already retires `divisionName` (`team-colors.ts:129`) that S4's `DivisionTable.tsx:30` uses, and its fence holds `web/src/components/`; nothing to amend.
+- Nothing obsolete or quietly done. Underestimated class, again: deploy/GitHub plumbing meeting real services (S120 hardening after Copilot's review of S116; `427d700` moving the mirror push to a deploy key because personal-account rulesets can't list Actions as a bypass actor). Recorded as a watch item; S117's note says to check Neon's real answers.
+- **Baseline:** the deploy row's "not yet re-run on GitHub" replaced with the green staging (42349644236) and pre-S121 production (42349215791) runs; the PWA row says where S73 is parked. Done rows for S119, S116, S120, S121, S4, S28 checked present (rows 11, 30, 33, 35; As of = S28). The frame's **Last review** block was still the 2026-11-05 one; the 2026-11-06 and this review are added. Four 2026-11-06/07 pending-drift items closed (S116 shipped, S117's Source answered, production deploys only on a Release).
+
+**Duplication sweep (ADR-025).** Code added since `73ba87e`: `functions/src/adapters/logto/{identity,admin}.ts`, `functions/src/deploy/logto.ts`, `scripts/deploy-logto.ts`, `packages/domain/src/sign-in.ts`, `web/src/session/{AuthClient,SessionProvider,SignInCallback}.tsx?`, `web/src/storage/storage.ts`, `web/src/pwa/updates.ts`, `web/src/components/queryScreen.ts`, `web/src/layout/NoticeSlot.tsx`, `scripts/backlog-vault/design-reference.ts`. `pnpm dup:check`: 0 clones in 218 files. `queryScreen` and `design-reference.ts` are consolidations (3 pages; audit.sh + e2e/design-review.ts). `authTime` is read once per source (Logto adapter, dev provider) and checked once (`account-deletion.ts:63`); `SNOOZE_MS` once (`updates.ts:9`). **One hit:** `web/src/session/AuthClient.ts:128` builds the redirect URI as `${origin}${SIGN_IN_CALLBACK_PATH}` while `logtoAppUris` (`sign-in.ts:33`, which the deploy registers with Logto and whose comment says the web app reads it) builds it with trailing-slash trimming. Same value today; recorded as pending drift for the next story that edits `web/src/session/` (no `todo` story fences it narrowly enough for a drive-by).
+
+**Personal-data sweep (ADR-028).** New stores since the last review: the `logto` service entry (`data-classification.ts`, deleted via `USERS_STORE` → `IdentityAdmin.deleteAccount`; inventory row "Logto | account, email" exists) and browser keys `bt.signInReturnTo`, `logto.{idToken,accessToken,refreshToken,signInSession}` (personal, tab `sessionStorage`) and `bt.updateSnoozedUntil`, `bt.installTipDismissed` (`none`), all in `web/src/storage/storage.ts`. The Browser row's What ("session token, cached settings, offline caches") doesn't name Logto's sign-in keys; same store and deletion path, so asked rather than `blocked`. New `console.*` lines: `sign-in failed:` logs the error name only; `deploy-logto.ts` logs usage, masks the secret (`::add-mask::`), and lists changed URIs: no email or personal field. Next 3: S117 reads/writes `none` tables only and must log hosts and counts; S5 and S72 add no store (query not stored or logged).
+
+**Amendments:** S117 (notes), S5 (notes), S72 (fence + `fixtures/`, `packages/ports/`; cap 14; Goal condition, `/goal`; notes), `01 Current baseline.md` (deploy and PWA rows), `00 …Checkable backlog.md` (Last review block, 2026-11-06 entry, pending drift closed/added).
+
+**Questions for the owner (non-blocking):**
+1. May ADR-013 get a dated note at its head saying deploys are now Cloudflare through `deploy.yml` (a preview per pull request, staging on `stage`, production on a published GitHub Release), so its Firebase deploy row (ARCHITECTURE.md:773) and the open "staging project vs preview channels" item (:817) read as settled?
+2. May ADR-028's inventory Browser row add Logto's sign-in keys and the sign-in return page (kept in the tab's own storage until sign-in finishes, cleared on sign-out and deletion)?
+3. S73 is done except AC 6's Playwright flows, which need Docker this cloud session can't pull (CI runs them on every pull request). Will you finish it on a machine with Docker, or should its AC 6 accept the flows passing in CI on its pull request?
