@@ -15914,3 +15914,102 @@ Owner, 2026-11-07, asked "Should I skip the backlog and doc parity reviews for S
 **What changed, and the owner's answer**
 
 Owner, 2026-11-07, asked "Should I skip the backlog and doc parity reviews for S121, or run them? I'd skip.": "2 skip"
+
+---
+
+## 2026-11-07 — S28 completed
+
+**Version sunset path + stale-client upgrade**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-07T07:29:37Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `7c08039` (tree dirty) |
+| Grader | `scripts/verify-S28.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: version lifecycle state lives in one exported table in packages/domain (supported / deprecated / sunset, with dates) beside the route table
+check 2 PASS: a deprecated version answers 200 with Deprecation and Sunset headers and the same body (functions test, alone)
+check 3 PASS: a sunset version answers 426 version_unsupported with no payload data (functions test, alone); the spec declares the 426
+check 4 PASS: each request's version is recorded through a seam a test reads; two versions make two distinct records
+check 5 PASS: the web client's one middleware turns a 426 into the reload-to-update notice, and a 200 doesn't (web test, alone via pnpm --filter @bt/web); after a 426, Update Now asks the service worker for the new version (registration.update()), activates it, then reloads (web test; 2026-11-02 design intake note)
+check 6 PASS: after a 426 the content already on screen stays readable behind the notice (web test); one tested keep-what's-on-screen rule (queryScreen) that the Scoreboard, Standings and Game pages all call (ADR-025; 2026-11-02 design intake note)
+check 7 PASS: README.md documents the lifecycle states, that retiring a version needs the usage log to show no traffic, and that pnpm verify needs no network for it
+check 8 PASS: the 426 notice renders through NoticeSlot / NoticeBanner; no second notice component exists
+check 9 PASS: design match: e2e/design/S28.spec.ts names shell-notice-mobile/-medium/-desktop; docs/v3/design-checks/S28/ holds them at 390 / 768 / 1200
+check 10 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**10/10 checks passed**
+
+**Design match (rule 22)** — the owner compared each capture with the ratified frame or written amendment that governs it
+
+| Ratified frame or amendment | SHA-256 | Capture | SHA-256 |
+|---|---|---|---|
+| `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S28/shell-notice-desktop.png` | `63e035d4fa98600c689a386406ab08af1a6646c75fd47262e094ade7f5f94ca7` |
+| `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S28/shell-notice-medium.png` | `9a766ae417a72529206d58901d9d3e396af942acbb714554801a36a2f7d7a19b` |
+| `docs/v3/visual/shell-scoreboard/amendments/A6.md` | `55b71163fbc40aaa8cee23ed1b76db31c00e54bfa95f2915cf8c4b30c2fd1899` | `docs/v3/design-checks/S28/shell-notice-mobile.png` | `87404c8e4bd3205a41d38906900523e601373d0efabb55043dfe7d111775f25c` |
+Owner: "Asked "Do S73 and S28 match their designs now?" — the owner: "1 yes". Then, told S28 still needed the Update Now service-worker path and the one keep-what's-on-screen rule built and asked "Want me to go ahead with those?" — the owner: "Go head"."
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S28 check results ---
+check 1 PASS: version lifecycle state lives in one exported table in packages/domain (supported / deprecated / sunset, with dates) beside the route table
+check 2 PASS: a deprecated version answers 200 with Deprecation and Sunset headers and the same body (functions test, alone)
+check 3 PASS: a sunset version answers 426 version_unsupported with no payload data (functions test, alone); the spec declares the 426
+check 4 PASS: each request's version is recorded through a seam a test reads; two versions make two distinct records
+check 5 PASS: the web client's one middleware turns a 426 into the reload-to-update notice, and a 200 doesn't (web test, alone via pnpm --filter @bt/web); after a 426, Update Now asks the service worker for the new version (registration.update()), activates it, then reloads (web test; 2026-11-02 design intake note)
+check 6 PASS: after a 426 the content already on screen stays readable behind the notice (web test); one tested keep-what's-on-screen rule (queryScreen) that the Scoreboard, Standings and Game pages all call (ADR-025; 2026-11-02 design intake note)
+check 7 PASS: README.md documents the lifecycle states, that retiring a version needs the usage log to show no traffic, and that pnpm verify needs no network for it
+check 8 PASS: the 426 notice renders through NoticeSlot / NoticeBanner; no second notice component exists
+check 9 PASS: design match: e2e/design/S28.spec.ts names shell-notice-mobile/-medium/-desktop; docs/v3/design-checks/S28/ holds them at 390 / 768 / 1200
+check 10 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S28: 10/10 checks passed ---
+verify-S28: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 917ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  448ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  466ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 114ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 94ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1138ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  1057ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 79ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 15ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 59ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  07:32:23
+   Duration  3.33s (transform 103ms, setup 0ms, collect 4.72s, tests 2.56s, environment 1ms, prepare 492ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155436,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

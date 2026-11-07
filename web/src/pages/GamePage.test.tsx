@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { MantineProvider } from "@mantine/core";
 import { QueryClientProvider } from "@tanstack/react-query";
 import {
-	cleanup, render, screen, within,
+	act, cleanup, render, screen, within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
@@ -14,12 +14,14 @@ import {
 	afterEach, describe, expect, it, vi,
 } from "vitest";
 import type { GamePayload } from "../api/game.js";
+import { gameKey } from "../api/game.js";
 import type { LayoutVariant } from "../layout/variant.js";
 import { createQueryClient } from "../api/queryClient.js";
 import { jsonResponse } from "../test/jsonResponse.js";
 import { GamePage } from "./GamePage.js";
 import type { OpensFirst } from "@bt/domain";
 import { hydrateSettings, resetSettings } from "../settings/store.js";
+import { resetVersionNotice } from "../api/versionNotice.js";
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "../../../fixtures");
 
@@ -34,11 +36,11 @@ function fixture(gamePk: number): GamePayload
 	} as GamePayload;
 }
 
-function renderGame(path: string, variant: LayoutVariant = "mobile")
+function renderGame(path: string, variant: LayoutVariant = "mobile", client = createQueryClient())
 {
 	return render(
 		<MantineProvider>
-			<QueryClientProvider client={createQueryClient()}>
+			<QueryClientProvider client={client}>
 				<MemoryRouter initialEntries={[path]}>
 					<Routes>
 						<Route path="/game/:gamePk" element={<GamePage variant={variant} />} />
@@ -70,6 +72,7 @@ afterEach(() =>
 	cleanup();
 	vi.unstubAllGlobals();
 	resetSettings();
+	resetVersionNotice();
 });
 
 /** Hydrates the settings store as a signed-in account whose Opens First is `room`. */
@@ -251,6 +254,27 @@ describe("GamePage room states (S40)", () =>
 			name: "Retry",
 		}));
 		expect(fetchMock).toHaveBeenCalledTimes(2);
+	});
+
+	it("readable: a failed refetch (a retired version's 426) keeps the room on screen, not the error (S28's one rule)", async () =>
+	{
+		const fetchMock = serve(fixture(744834));
+		const client = createQueryClient();
+		renderGame("/game/744834/box", "mobile", client);
+		await tabNames();
+		const before = screen.getAllByRole("tablist")[0]!.textContent;
+		fetchMock.mockImplementation(() => Promise.resolve(jsonResponse({
+			error: "version_unsupported",
+		}, 426)));
+		await act(() => client.refetchQueries({
+			queryKey: gameKey(744834),
+		}));
+		expect(client.getQueryState(gameKey(744834))?.status).toBe("error");
+		// The query tells the page on its next tick; let that render land before looking.
+		await act(() => new Promise((resolve) => setTimeout(resolve, 20)));
+		expect(screen.getAllByRole("tablist")[0]!.textContent).toBe(before);
+		expect(screen.getByTestId("game-topbar")).toBeInTheDocument();
+		expect(screen.queryByRole("alert")).toBeNull();
 	});
 });
 

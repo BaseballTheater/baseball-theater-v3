@@ -9,6 +9,7 @@ import { RecapRoom } from "../components/game/RecapRoom.js";
 import { PlaysPanel } from "../components/pitch/PlaysPanel.js";
 import { VideosRoom } from "../components/videos/VideosRoom.js";
 import { ViewState } from "../components/ViewState.js";
+import { queryScreen } from "../components/queryScreen.js";
 import { FooterMeta } from "../layout/FooterMeta.js";
 import type { LayoutVariant } from "../layout/variant.js";
 import {
@@ -35,11 +36,17 @@ export function GamePage({ variant }: { variant: LayoutVariant })
 	// Signed out, the store holds the house defaults, so games open on the default room.
 	const { opensFirst } = useSettings();
 
-	if (error)
+	// A failed refetch keeps the room already shown (S28's one rule: a retired version's 426
+	// raises the update notice over it); the error room is for a game that never loaded.
+	const screen = queryScreen({
+		data: game,
+		error,
+	});
+	if (screen === "error")
 	{
 		return <ViewState kind="error" title="Couldn't load this room" onRetry={() => void refetch()} />;
 	}
-	if (!game)
+	if (screen === "loading" || !game)
 	{
 		return <ViewState kind="loading" />;
 	}
