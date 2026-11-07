@@ -11,7 +11,7 @@
  * - `config`, `secrets_file` and `origin` to `$GITHUB_OUTPUT`.
  *
  * It reads `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `NEON_API_KEY`, `NEON_PROJECT_ID` and
- * every `WORKER_SECRETS` name from the job's env, which the workflow maps from GitHub secrets and
+ * every Worker secret `workerSecretNames(env)` lists (production adds Logto's, S116) from the job's env, which the workflow maps from GitHub secrets and
  * variables. Running it again changes nothing. Agents never run it (CLAUDE.md): it reaches hosted
  * Cloudflare and Neon, and only the workflow on GitHub holds their keys.
  */

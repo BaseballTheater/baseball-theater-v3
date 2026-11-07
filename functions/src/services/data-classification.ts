@@ -205,6 +205,13 @@ export const DATA_CLASSIFICATION = {
 			kind: "none",
 			why: "the public MLB Stats API; requests carry no user data",
 		},
+		// Logto (S116) holds each fan's email and account. Account deletion reaches it through the
+		// identity links the users store holds: `deleteAccount` deletes each Logto link's account with
+		// Logto's `IdentityAdmin` before the users store's own rows go (ADR-028).
+		logto: {
+			kind: "personal",
+			deletedBy: USERS_STORE,
+		},
 		memory: {
 			kind: "personal",
 			deletedBy: USERS_STORE,

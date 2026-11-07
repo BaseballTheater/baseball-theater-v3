@@ -19,12 +19,20 @@ export type SessionState =
 
 export type Session = SessionState & {
 	/**
-	 * The one way to start signing in; the header's "Sign in" calls it (S60). In
-	 * development it is the dev sign-in as `dev:test-user`. In production it does
-	 * nothing until the Logto hand-off replaces it (a Later theme), without
-	 * changing any caller.
+	 * The one way to start signing in; the header's "Sign in" and Settings' "Sign in
+	 * again" call it (S60, S79). Where the deployment offers Logto (S116) it sends the
+	 * browser to Logto's hosted sign-in, always for a fresh emailed code; locally it is
+	 * the dev sign-in as `dev:test-user`; a production build without Logto (previews)
+	 * does nothing.
 	 */
 	signIn(): Promise<void>;
+	/**
+	 * At the sign-in callback route (S116): hands Logto's ID token to BT once, keeps
+	 * BT's session, and answers the path the sign-in started from. Calling it again
+	 * for the same callback URL answers the same result rather than a second hand-off.
+	 */
+	finishSignIn(callbackUrl: string): Promise<string>;
+	/** Ends BT's session and clears every personal browser key; where Logto signed in, ends Logto's too. */
 	signOut(): void;
 };
 

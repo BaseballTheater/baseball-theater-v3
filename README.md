@@ -173,7 +173,8 @@ creates it, and writes the Worker config with that config's id; then `pnpm db:mi
 `pnpm db:reapply-deletions` run on that database; then `wrangler deploy` pushes the Worker and every
 Worker secret from GitHub secrets (`--secrets-file`), so none is ever set by hand with
 `wrangler secret put`. Every deployed env serves live MLB, names its own address as `BT_APP_ORIGIN`,
-and refuses `dev:` sign-in (no `BT_LOCAL`); sign-in works there once Logto lands (S116).
+and refuses `dev:` sign-in (no `BT_LOCAL`); production signs in through Logto (S116, below), and
+production's deploy then registers its Logto sign-in addresses (`pnpm deploy:logto production`).
 
 **What the workflow reads from GitHub** (the owner sets these up once; the automation never does):
 
@@ -185,6 +186,8 @@ and refuses `dev:` sign-in (no `BT_LOCAL`); sign-in works there once Logto lands
 | `NEON_PROJECT_ID`           | variable    | `old-sun-72319473`                                                                                                 |
 | `BT_SESSION_KEY_STAGING`    | secret      | signs sessions on staging and previews                                                                             |
 | `BT_SESSION_KEY_PRODUCTION` | secret      | signs sessions on production                                                                                       |
+| `LOGTO_S2S_APP_ID`          | secret      | production's Logto machine-to-machine app ID (the `production` job only; a Worker secret too)                      |
+| `LOGTO_S2S_SECRET`          | secret      | that app's secret: deletes fans' Logto accounts and sets production's sign-in addresses (`production` job only)    |
 | `production`                | environment | no required reviewers; deployment branches limited to `main`, so only `main` reaches production's secrets          |
 
 **GitHub settings the owner sets** (S118; agents never change repo settings):
@@ -192,6 +195,50 @@ and refuses `dev:` sign-in (no `BT_LOCAL`); sign-in works there once Logto lands
 - Default branch: `stage`, so pull requests, `gh workflow run` and new clones start there.
 - Environment `production`: no required reviewers (a push to `main` deploys without a wait), and
   deployment branches limited to `main`, so no other branch can deploy production or read its secrets.
+
+### Sign-in (Logto)
+
+Fans sign in with Logto (ADR-019, S116): Logto's hosted page emails a one-time code, and Baseball
+Theater has no sign-in screen of its own. The web app reads each env's tenant and app from the
+Worker (`GET /api/v1/sign-in`), which reads them from that env's `vars` in `wrangler.jsonc`
+(`LOGTO_ENDPOINT`, `LOGTO_APP_ID`). Each env is on its own:
+
+- **Production** signs in through the owner's tenant at `auth.baseball.theater` (tenant ID `rnrngs`,
+  in `env.production` as `LOGTO_TENANT_ID`). Its one machine-to-machine app reaches Logto's
+  Management API at `https://rnrngs.logto.app` (Logto Cloud serves the Management API on no custom
+  domain): account deletion (S77) deletes the fan's Logto account through it, and every production
+  deploy uses it to set the single-page app's redirect URI (`<origin>/sign-in/callback`) and sign-out
+  URIs (`<origin>/` and `<origin>/settings`) from production's `BT_APP_ORIGIN`, and the sign-in
+  experience (email with a one-time code, no password). Each is read first and written only when it
+  differs, so a repeat deploy changes nothing, and the DNS cutover (above) moves the addresses with
+  the origin. Its ID and secret are the GitHub secrets `LOGTO_S2S_APP_ID` and `LOGTO_S2S_SECRET`,
+  which only the `production` job reads and pushes as Worker secrets.
+- **Staging** has no sign-in until it has a staging tenant of its own (owner, 2026-11-06: "We will use
+  a staging one or a fake shim"); it never uses production's tenant, so a fan's real account never
+  works there. Its accounts are test accounts in staging's own database.
+- **Previews** offer no sign-in (owner, 2026-11-07: "Yes", to previews without sign-in); staging is
+  where sign-in is tested.
+
+**What stays manual, in Logto's console** (the owner's, once):
+
+1. Production's tenant with the custom domain `auth.baseball.theater` (done), and in it a
+   **single-page** app (done: `b2f2q1wau5axo1psqexdo`, in `env.production`). Leave its redirect and
+   sign-out URIs to the deploy.
+2. Email sign-in with a one-time code: an email connector (Logto Cloud's built-in one will do) and
+   the verification-code email's wording and branding. The deploy turns on email-with-code sign-up and
+   sign-in itself; whether the same email can also carry a sign-in link (FEATURES, Modern membership:
+   "Code if I have to choose, both if possible in a single email") is the owner's to check in Logto's
+   email templates. The code works either way.
+3. Production's one **machine-to-machine** app, assigned a role with **Management API** access
+   (Logto's "Logto Management API access" role, scope `all`); copy its app ID and secret into the
+   GitHub secrets `LOGTO_S2S_APP_ID` and `LOGTO_S2S_SECRET` (repository or `production` environment).
+4. The hosted page's branding (logo, colors), if wanted.
+5. **When a staging tenant exists:** its own single-page app; add its `LOGTO_ENDPOINT` and
+   `LOGTO_APP_ID` to `env.staging`'s `vars` (never production's values). Staging has no
+   machine-to-machine app (the plan includes one, production's), so enter its redirect URI
+   `https://stage.baseball.theater/sign-in/callback` and sign-out URIs `https://stage.baseball.theater/`
+   and `https://stage.baseball.theater/settings` once by hand in its console. Without an admin there, a
+   staging account deleted in BT leaves its test account in staging's tenant.
 
 ### Launch checklist
 
@@ -204,7 +251,9 @@ Still to finish before a public launch (the _Cloudflare deploy_ Later theme):
 - [ ] The R2 `ExportStore` adapter (with its 14-day lifecycle rule), so data downloads outlive an isolate.
 - [ ] The Cloudflare Email `Mailer` adapter, so download links are actually emailed.
 - [ ] Worker log settings that carry no personal fields.
-- [ ] Logto sign-in (S116), before the first production release.
+- [ ] Logto's manual setup (Sign-in, above): the email connector and the machine-to-machine app's GitHub secrets,
+      before the DNS cutover (the release that matters: owner, 2026-11-06, "the actual production release gate
+      is changing the DNS away from the elastic beanstalk destination").
 - [ ] DNS cutover from Elastic Beanstalk: the owner points `baseball.theater` at production's Worker (S119, above),
       once `next.baseball.theater` has been checked.
 

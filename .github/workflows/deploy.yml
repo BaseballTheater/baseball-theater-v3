@@ -20,6 +20,11 @@ name: Deploy
 # every Worker secret from GitHub secrets. Each step is idempotent (owner, 2026-11-05: "It should be
 # idempotent so it can happen with every deployment. All the bootstrapping should be like that."),
 # so a re-run changes nothing. Secrets come only from GitHub secrets; agents never run this.
+# Sign-in (S116): only production has Logto's machine-to-machine app, so only the production job
+# reads its secrets (LOGTO_S2S_APP_ID, LOGTO_S2S_SECRET; owner, 2026-11-07: "LOGTO_S2S_APP_ID and
+# LOGTO_S2S_SECRET, go ahead"), pushes them as Worker secrets and, after deploying, sets the web
+# app's sign-in and sign-out addresses with `pnpm deploy:logto`. Staging and previews read nothing
+# of Logto's.
 
 on:
     pull_request:
@@ -219,6 +224,8 @@ jobs:
             NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
             NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
             BT_SESSION_KEY: ${{ secrets.BT_SESSION_KEY_PRODUCTION }}
+            LOGTO_S2S_APP_ID: ${{ secrets.LOGTO_S2S_APP_ID }}
+            LOGTO_S2S_SECRET: ${{ secrets.LOGTO_S2S_SECRET }}
         steps:
             - uses: actions/checkout@v4
 
@@ -249,3 +256,8 @@ jobs:
 
             - name: Deploy production
               run: pnpm --filter @bt/functions exec wrangler deploy --config "${{ steps.bootstrap.outputs.config }}" --env production --secrets-file "${{ steps.bootstrap.outputs.secrets_file }}"
+
+            # After the Worker is live, so a Logto hiccup never holds a release back; it fails the job
+            # visibly instead. Idempotent: an unchanged origin changes nothing in Logto.
+            - name: Register production's Logto sign-in and sign-out addresses
+              run: pnpm run deploy:logto production

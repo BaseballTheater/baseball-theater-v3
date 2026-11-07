@@ -15499,3 +15499,87 @@ Owner, 2026-11-07, asked "Should I log skips for the backlog and doc parity revi
 **What changed, and the owner's answer**
 
 Owner, 2026-11-07, asked "Should I log a skip for the review, or run a backlog review first?" after S116's fence was widened to packages/domain/src/ and packages/domain/vitest.config.ts with the owner's "Yes it's okay": "Skip"
+
+---
+
+## 2026-11-07 — S116 completed
+
+**Logto sign-in**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-07T03:14:00Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `195097f` (tree dirty) |
+| Grader | `scripts/verify-S116.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: a Logto IdentityProvider under functions/src/adapters/ checks the ID token against <endpoint>/oidc/jwks, issuer <endpoint>/oidc, audience the app ID and expiry, returns { provider: "logto", subject, email, emailVerified }, and refuses a bad signature, issuer, audience, expired token or missing email (tests 'S116 AC 1')
+check 2 PASS: the Worker offers Logto where LOGTO_ENDPOINT and LOGTO_APP_ID are in vars and the dev provider only under BT_LOCAL; a sign-in route in the API route table (and openapi/bt-api.v1.json, up to date with pnpm api:spec) trades a Logto ID token for BT's session token, and a dev: token is refused (workerd test 'S116 AC 2')
+check 3 PASS: web: only the AuthClient imports Logto's browser SDK; deployed signIn() goes to Logto with the email scope and prompt login, a callback hands the ID token to BT once, signOut() ends both sessions, local dev sign-in unchanged; Logto's browser keys go through web/src/storage/ (labeled personal) and are gone after sign-out and deletion; bt/no-browser-storage disabled nowhere (RTL tests 'S116 AC 3'; grep)
+check 4 PASS: a Logto IdentityAdmin lists, suspends (PATCH /api/users/{id}/is-suspended) and deletes (DELETE /api/users/{id}) through the Management API with machine-to-machine credentials; deletion reaches it; the Worker composes it only where the secret is set, and deleting without it still succeeds (tests 'S116 AC 4')
+check 5 PASS: LOGTO_ENDPOINT/LOGTO_APP_ID are per-env vars, production's (https://auth.baseball.theater, b2f2q1wau5axo1psqexdo) only in env.production and the production job; previews and their jobs carry no Logto value; staging reads no machine-to-machine secret; the production job alone pushes LOGTO_S2S_APP_ID/LOGTO_S2S_SECRET and sets the redirect and sign-out URIs from BT_APP_ORIGIN idempotently (test 'S116 AC 5' runs it twice); README documents the manual Logto setup
+check 6 PASS: backlog Status is done (story heading and Story status table)
+check 7 PASS: the story changed nothing outside its fence (.github/workflows/, functions/, web/, packages/domain/src/, packages/domain/vitest.config.ts, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, openapi/bt-api.v1.json, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, scripts/verify-S116.sh)
+```
+
+**7/7 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S116 check results ---
+check 1 PASS: a Logto IdentityProvider under functions/src/adapters/ checks the ID token against <endpoint>/oidc/jwks, issuer <endpoint>/oidc, audience the app ID and expiry, returns { provider: "logto", subject, email, emailVerified }, and refuses a bad signature, issuer, audience, expired token or missing email (tests 'S116 AC 1')
+check 2 PASS: the Worker offers Logto where LOGTO_ENDPOINT and LOGTO_APP_ID are in vars and the dev provider only under BT_LOCAL; a sign-in route in the API route table (and openapi/bt-api.v1.json, up to date with pnpm api:spec) trades a Logto ID token for BT's session token, and a dev: token is refused (workerd test 'S116 AC 2')
+check 3 PASS: web: only the AuthClient imports Logto's browser SDK; deployed signIn() goes to Logto with the email scope and prompt login, a callback hands the ID token to BT once, signOut() ends both sessions, local dev sign-in unchanged; Logto's browser keys go through web/src/storage/ (labeled personal) and are gone after sign-out and deletion; bt/no-browser-storage disabled nowhere (RTL tests 'S116 AC 3'; grep)
+check 4 PASS: a Logto IdentityAdmin lists, suspends (PATCH /api/users/{id}/is-suspended) and deletes (DELETE /api/users/{id}) through the Management API with machine-to-machine credentials; deletion reaches it; the Worker composes it only where the secret is set, and deleting without it still succeeds (tests 'S116 AC 4')
+check 5 PASS: LOGTO_ENDPOINT/LOGTO_APP_ID are per-env vars, production's (https://auth.baseball.theater, b2f2q1wau5axo1psqexdo) only in env.production and the production job; previews and their jobs carry no Logto value; staging reads no machine-to-machine secret; the production job alone pushes LOGTO_S2S_APP_ID/LOGTO_S2S_SECRET and sets the redirect and sign-out URIs from BT_APP_ORIGIN idempotently (test 'S116 AC 5' runs it twice); README documents the manual Logto setup
+check 6 PASS: backlog Status is done (story heading and Story status table)
+check 7 PASS: the story changed nothing outside its fence (.github/workflows/, functions/, web/, packages/domain/src/, packages/domain/vitest.config.ts, wrangler.jsonc, package.json, pnpm-lock.yaml, README.md, openapi/bt-api.v1.json, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, scripts/verify-S116.sh)
+--- verify-S116: 7/7 checks passed ---
+verify-S116: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 773ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  368ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  403ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 100ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 100ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 899ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  823ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 91ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 17ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 49ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  03:16:10
+   Duration  2.83s (transform 81ms, setup 0ms, collect 3.87s, tests 2.16s, environment 1ms, prepare 390ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 154775,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

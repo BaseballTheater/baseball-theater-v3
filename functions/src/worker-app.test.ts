@@ -18,7 +18,12 @@ import { handleApiRequest } from "./handlers/api.js";
 import { getOrRefreshGame, getOrRefreshSchedule } from "./services/ingest.js";
 import { loadDevSeed, recordDevSeed } from "./services/dev-seed.js";
 import { recordedClient } from "./test/recorded-mlb.js";
-import { createWorkerApp } from "./worker-app.js";
+import { createManagementStandIn } from "./test/logto-management.js";
+import {
+	createTestTenant, TEST_LOGTO_APP_ID, TEST_LOGTO_ENDPOINT,
+} from "./test/logto-tokens.js";
+import type { WorkerEnv } from "./worker-app.js";
+import { createWorkerApp, logtoAdmin } from "./worker-app.js";
 
 async function count(db: PostgresDb, table: string): Promise<number>
 {
@@ -133,5 +138,82 @@ describe("the dev composition on a loaded dev seed (S112)", () =>
 		const served = await handleApiRequest(new Request("http://bt.test/api/v1/games/823823"), app.context);
 		expect(served.status).toBe(200);
 		expect(network).not.toHaveBeenCalled();
+	});
+});
+
+describe("Logto accounts in the Worker composition (S116)", () =>
+{
+	/** Signs in with a Logto ID token, then deletes the account; answers the deletion's status and the user rows left. */
+	async function signInAndDelete(env: WorkerEnv)
+	{
+		const { db } = await migratedPglite();
+		const tenant = await createTestTenant();
+		const management = createManagementStandIn("tenant1");
+		management.users.set("logto-user-1", {
+			id: "logto-user-1",
+			primaryEmail: "fan@example.test",
+			isSuspended: false,
+		});
+		const app = createWorkerApp(env, db, {
+			fetch: (input, init) => (input.startsWith(TEST_LOGTO_ENDPOINT) ? tenant.fetch(input) : management.fetch(input, init)),
+		});
+		const call = (path: string, init: RequestInit) => handleApiRequest(new Request(`http://bt.test${path}`, init), app.context);
+		const signedIn = await call("/api/v1/sign-in", {
+			method: "POST",
+			body: JSON.stringify({
+				idToken: await tenant.sign(),
+			}),
+		});
+		const { token } = await signedIn.json() as { token: string };
+		const deleted = await call("/api/v1/me/delete", {
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify({
+				phrase: "delete my account",
+			}),
+		});
+		return {
+			status: deleted.status,
+			users: await count(db, "users"),
+			links: await count(db, "identity_links"),
+			management,
+		};
+	}
+
+	const logtoVars: WorkerEnv = {
+		LOGTO_ENDPOINT: TEST_LOGTO_ENDPOINT,
+		LOGTO_APP_ID: TEST_LOGTO_APP_ID,
+	};
+
+	it("S116 AC 4: with production's machine-to-machine secret, deleting an account deletes its Logto account too", async () =>
+	{
+		const result = await signInAndDelete({
+			...logtoVars,
+			LOGTO_TENANT_ID: "tenant1",
+			LOGTO_S2S_APP_ID: "m2m-app",
+			LOGTO_S2S_SECRET: "m2m-secret",
+		});
+		expect(result.status).toBe(200);
+		expect(result.users).toBe(0);
+		expect(result.links).toBe(0);
+		expect(result.management.users.has("logto-user-1")).toBe(false);
+	});
+
+	it("S116 AC 4: without the secret (staging) no Logto admin is composed, and deletion still removes every BT row", async () =>
+	{
+		expect(logtoAdmin(logtoVars)).toBeUndefined();
+		expect(logtoAdmin({
+			...logtoVars,
+			LOGTO_TENANT_ID: "tenant1",
+			LOGTO_S2S_APP_ID: "m2m-app",
+		})).toBeUndefined();
+		const result = await signInAndDelete(logtoVars);
+		expect(result.status).toBe(200);
+		expect(result.users).toBe(0);
+		expect(result.links).toBe(0);
+		// The test account in staging's own tenant is left alone; nothing called the Management API.
+		expect(result.management.calls).toEqual([]);
 	});
 });

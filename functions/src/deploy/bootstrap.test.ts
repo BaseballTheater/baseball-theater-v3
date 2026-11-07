@@ -129,6 +129,8 @@ function standIns(initial: { branches?: NeonBranch[];
 		rebase: (path) => `../../${path}`,
 		secrets: {
 			BT_SESSION_KEY: "from-github",
+			LOGTO_S2S_APP_ID: "m2m-from-github",
+			LOGTO_S2S_SECRET: "gh-secret",
 		},
 		prepareCopy: async (url) =>
 		{
@@ -313,17 +315,23 @@ describe("S114 AC 8: Worker secrets from GitHub on every deploy", () =>
 		expect(workerSecrets({
 			BT_SESSION_KEY: "k",
 			OTHER: "ignored",
-		})).toEqual({
+		}, "staging")).toEqual({
 			BT_SESSION_KEY: "k",
 		});
-		expect(() => workerSecrets({})).toThrow(/missing Worker secrets[^]*BT_SESSION_KEY/);
+		expect(() => workerSecrets({}, "staging")).toThrow(/missing Worker secrets[^]*BT_SESSION_KEY/);
 		const { deps, writes } = standIns();
-		for (const env of ["staging", "production"] as const)
-		{
-			expect((await bootstrapDeploy(deps, env)).secrets).toEqual({
-				BT_SESSION_KEY: "from-github",
-			});
-		}
+		// Staging's Worker never gets production's machine-to-machine secret, even from a job that carried it (S116 AC 5).
+		expect((await bootstrapDeploy(deps, "staging")).secrets).toEqual({
+			BT_SESSION_KEY: "from-github",
+		});
+		expect((await bootstrapDeploy(deps, "production")).secrets).toEqual({
+			BT_SESSION_KEY: "from-github",
+			LOGTO_S2S_APP_ID: "m2m-from-github",
+			LOGTO_S2S_SECRET: "gh-secret",
+		});
+		expect(() => workerSecrets({
+			BT_SESSION_KEY: "k",
+		}, "production")).toThrow(/missing Worker secrets[^]*LOGTO_S2S_APP_ID, LOGTO_S2S_SECRET/);
 		const before = writes().length;
 		await expect(bootstrapDeploy({
 			...deps,

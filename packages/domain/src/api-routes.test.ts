@@ -9,7 +9,7 @@ import type { GameSnapshot, ScheduleDay } from "./types.js";
 
 describe("ApiRoutes", () =>
 {
-	it("is a runtime-enumerable table covering the schedule, game, digest, standings, scoreboard default-date and account routes", () =>
+	it("is a runtime-enumerable table covering the schedule, game, digest, standings, scoreboard default-date, account and sign-in routes", () =>
 	{
 		expect(Object.keys(ApiRoutes)).toEqual([
 			"GET /api/v1/schedule",
@@ -24,6 +24,8 @@ describe("ApiRoutes", () =>
 			"POST /api/v1/me/delete",
 			"GET /api/v1/me/settings",
 			"PUT /api/v1/me/settings",
+			"GET /api/v1/sign-in",
+			"POST /api/v1/sign-in",
 		]);
 		expect(ApiRoutes["GET /api/v1/schedule"]).toBe("ScheduleDayResponse");
 		expect(ApiRoutes["GET /api/v1/games/:gamePk"]).toBe("GameSnapshotResponse");
@@ -36,10 +38,13 @@ describe("ApiRoutes", () =>
 		expect(ApiRoutes["GET /api/v1/me/download/:downloadId"]).toBe("MeDownloadFileResponse");
 		expect(ApiRoutes["POST /api/v1/me/delete"]).toBe("MeDeleteResponse");
 		expect(ApiRoutes["GET /api/v1/me/settings"]).toBe("SettingsResponse");
-		// Only the delete (S77) and settings write (S6) routes take a body.
+		expect(ApiRoutes["GET /api/v1/sign-in"]).toBe("SignInConfigResponse");
+		expect(ApiRoutes["POST /api/v1/sign-in"]).toBe("SignInResponse");
+		// Only the delete (S77), settings write (S6) and sign-in hand-off (S116) routes take a body.
 		expect(ApiRequestBodies).toEqual({
 			"POST /api/v1/me/delete": "MeDeleteRequest",
 			"PUT /api/v1/me/settings": "SettingsRequest",
+			"POST /api/v1/sign-in": "SignInRequest",
 		});
 	});
 });

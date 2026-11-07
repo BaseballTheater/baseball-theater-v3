@@ -16,6 +16,14 @@ explicitly where that's the case. For what's still ahead, see
 
 ## Baseball Theater can go live
 
+- **Before, nobody could sign in on the real site: accounts and settings only worked on a developer's machine. Now
+  fans sign in on production with a one-time code emailed to them, deleting an account also deletes it at the
+  sign-in service, and every release sets up the sign-in service's addresses itself.** The test site
+  (`stage.baseball.theater`) has no sign-in until it gets its own sign-in service, so it still never holds a fan's
+  account; pull-request previews have none. Details: S116 — `LogtoIdentityProvider` / `LogtoIdentityAdmin`
+  (`functions/src/adapters/logto/`), `GET`/`POST /api/v1/sign-in`, the web `AuthClient` and `/sign-in/callback`,
+  production-only `LOGTO_*` vars in `wrangler.jsonc` and `LOGTO_S2S_*` secrets in the `production` job,
+  `pnpm deploy:logto`; README lists the owner's remaining Logto console steps. _(2026-11-07)_
 - **Before, the owner's first release would have instantly replaced the current baseball.theater site with the new
   app. Now the new app goes live at `next.baseball.theater` while the current site keeps serving fans, and moving
   baseball.theater over is a separate step the owner takes on purpose, with written steps to undo it.** Details:

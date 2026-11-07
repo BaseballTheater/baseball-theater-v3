@@ -22,6 +22,17 @@ export type AuthDeps = {
 	 * an invalid session.
 	 */
 	dev?: IdentityProvider;
+	/**
+	 * The deployed sign-in (S116): Logto, wherever the Worker's vars name its tenant
+	 * (`LOGTO_ENDPOINT`, `LOGTO_APP_ID`). The web app reads `config` to start a sign-in and hands
+	 * the ID token it gets back to `POST /api/v1/sign-in` ({@link completeProviderSignIn}).
+	 * Absent locally, on previews, and on staging until its own tenant exists.
+	 */
+	logto?: {
+		provider: IdentityProvider;
+		config: { endpoint: string;
+			appId: string; };
+	};
 	now?: () => Date;
 };
 
@@ -90,6 +101,19 @@ export async function signIn(
 		token,
 		session,
 	};
+}
+
+/**
+ * A sign-in hand-off (S116 AC 2): the provider checks `credential` (Logto's ID token) and BT
+ * finds or creates the user and issues its own session, through the same {@link signIn} the dev
+ * provider uses. Null when this deployment offers no provider sign-in; throws when the
+ * credential doesn't verify or carries no email. A `dev:` token never signs in here: it isn't
+ * a Logto ID token.
+ */
+export async function completeProviderSignIn(deps: AuthDeps, credential: string): Promise<SignedIn | null>
+{
+	if (!deps.logto) return null;
+	return signIn(deps, await deps.logto.provider.completeSignIn(credential));
 }
 
 /**
