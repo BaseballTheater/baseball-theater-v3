@@ -230,6 +230,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 79 | [S114](#s114--cloudflare-deploy-preview-staging-and-production-through-github-actions) | Cloudflare deploy | `done` |
 | 79 | [S118](#s118--branch-flow-stage-deploys-staging-main-deploys-production) | Stage and main branch flow | `done` |
 | 79 | [S119](#s119--production-deploys-to-nextbaseballtheater-until-the-owners-dns-cutover) | Production at next.baseball.theater | `done` |
+| 79 | [S120](#s120--sign-in-hardening-recent-sign-in-from-logtos-auth_time-per-account-settings-jwks-cooldown-5xx-for-outages-per-tab-sign-in-state-no-stale-session-loads) | Sign-in hardening | `todo` |
 | 80 | [S93](#s93--ingest-mlb-play-metrics-win-probability-key-moments-abs-challenges) | Ingest play metrics | `done` |
 | 80 | [S116](#s116--sign-in-with-logto-email-one-time-code-on-the-deployed-sites) | Logto sign-in | `done` |
 | 80 | [S117](#s117--copy-productions-baseball-data-into-staging-on-request-with-no-fans-data) | Baseball-data copy to staging | `todo` |
@@ -269,7 +270,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 116 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
 | 117 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
 
-**Next (generated):** **80 / S117** — the lowest **Priority** `todo` story not waiting on a design.
+**Next (generated):** **79 / S120** — the lowest **Priority** `todo` story not waiting on a design.
 
 **Before starting it:** confirm no [backlog review](#backlog-reviews) is due — the review-debt line in that section counts stories, but a drift event makes one due regardless.
 
@@ -6222,6 +6223,62 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 ```
 
 **Status:** `done`
+
+### S120 — Sign-in hardening: recent sign-in from Logto's auth_time, per-account settings, JWKS cooldown, 5xx for outages, per-tab sign-in state, no stale session loads
+
+**Gap:** GitHub Copilot's review of PR #1 (`stage` → `main`) found six problems in S116's Logto sign-in (`b08a42d`), each checked against the code before this story was written:
+
+- **Recent sign-in can be faked by re-exchange (high).** `deleteAccount` checks that the BT session is under 10 minutes old (`session.issuedAt`, `functions/src/services/account-deletion.ts:61`), but `POST /api/v1/sign-in` (`completeProviderSignIn`, `functions/src/services/accounts.ts:113`) issues a fresh BT session for any Logto ID token that hasn't expired (about an hour). Trading the same ID token again gives a new `issuedAt` without a new emailed code, which defeats ADR-028's recent sign-in. Nothing carries the provider's own signed `auth_time` through.
+- **One account's settings can reach another (high).** `SettingsSync` (`web/src/settings/SettingsSync.tsx:12–17`) re-reads settings only when `status` changes. A sign-in that finishes as a different account while already signed in (`finishSignIn`, `web/src/session/SessionProvider.tsx:118–139`) goes `signedIn` → `signedIn`, so account A's settings stay in the store, and the next change saves them to account B; a settings response for A that lands late is applied over B's.
+- **Unknown key ids refetch the JWKS every time (medium).** `LogtoIdentityProvider.keyFor` (`functions/src/adapters/logto/identity.ts:175–186`) fetches the tenant's keys again for every token naming a key id it doesn't hold, before checking any signature, so anyone can make the Worker call Logto once per request, and concurrent sign-ins each fetch.
+- **Outages answer "refused" (medium).** `POST /api/v1/sign-in` (`functions/src/handlers/api.ts:361–371`) answers every thrown error as `401 sign_in_refused`, so a JWKS fetch failure, a Postgres error or a missing session key tells the fan their sign-in was refused and leaves nothing in the logs.
+- **Two tabs share one in-flight sign-in (medium).** Logto's in-flight sign-in (its PKCE verifier and state, `logto.signInSession`) and `bt.signInReturnTo` live in `localStorage` (`web/src/storage/storage.ts`, `web/src/session/AuthClient.ts:59–72`), shared by every tab, so starting a sign-in in a second tab overwrites the first's and the first callback fails or returns to the wrong page.
+- **A late startup load can undo a new sign-in (medium).** On the callback route `SessionProvider`'s startup `loadSession()` runs with the old stored token (`web/src/session/SessionProvider.tsx:85–97`); if it finishes after the callback's hand-off, its result overwrites the new signed-in state, and a late 401 clears the new token.
+
+Inserted by the owner, 2026-11-07: told the findings and offered "a small follow-up story, 'sign-in hardening,' that fixes items 2 through 7, with a test for each", the owner answered: *"Fix all the things you think should be fixed that you control"*.
+
+**Impact:** Before S120, someone holding a fan's sign-in for up to an hour could delete their account without a fresh emailed code, a second sign-in could carry one fan's settings into another's account, sign-in outages looked like refused sign-ins, and signing in from two tabs at once could fail. After it, deleting an account really needs a sign-in from the last ten minutes, settings always belong to the account that's signed in, outages are reported as outages, and each tab signs in on its own.
+
+**Source:** Feature: Modern membership
+
+**Depends on:** **S116** (the Logto sign-in, sign-in route, `AuthClient` and storage adapter this story hardens).
+
+**Scope files:** `functions/`, `web/`, `packages/domain/src/` (the session type, `BtSession`), `packages/domain/vitest.config.ts` (rule 21), `packages/ports/src/` (`IdentityClaims`), `openapi/bt-api.v1.json` (the sign-in route's new 5xx response, regenerated by `pnpm api:spec`), `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`, `scripts/verify-S120.sh` (plus the generated `docs/v3/INDEX.md` and `docs/v3/audit.jsonl`).
+
+**Work**
+
+0. Write `scripts/verify-S120.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** writing any product code (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S120.sh` performs)
+
+1. **Recent sign-in comes from the provider's `auth_time`.** `IdentityClaims` carries the provider's sign-in time (`authTime`, Unix seconds): the Logto adapter reads it from the ID token's signed `auth_time` claim, and the dev provider gives the time of its sign-in. `signIn` carries it into BT's session (`BtSession.authTime`), and `deleteAccount` checks it, not `issuedAt`: a session whose `authTime` is missing or more than `RECENT_SIGN_IN_SECONDS` old is refused `403 reauth_required`. The web `AuthClient` asks Logto for `max_age=0` with `prompt=login`, so OIDC requires `auth_time` in the ID token. Through `POST /api/v1/sign-in` and `POST /api/v1/me/delete`: a token with a fresh `auth_time` deletes, and re-exchanging a still-valid token whose `auth_time` is 11 minutes old, or one with no `auth_time`, gets a new session that deletion refuses (vitest tests named `S120 AC 1` in `functions/src/adapters/logto/identity.test.ts`, `functions/src/services/account-deletion.test.ts`, `functions/src/worker-app.test.ts` and `web/src/session/AuthClient.test.ts`; grep: `account-deletion.ts` no longer reads `issuedAt`).
+2. **Settings follow the signed-in account.** When the signed-in account's uid changes without `status` changing, the settings store goes back to the house defaults and reads the new account's settings; a settings read or save answered for the previous account is discarded, never applied to the new one (RTL tests named `S120 AC 2` in `web/src/settings/`).
+3. **JWKS refetch cooldown.** A token naming a key id the cached keys don't hold refetches the tenant's JWKS at most once per cooldown per isolate; during the cooldown such a token is refused (`IdTokenError`) without a fetch, and concurrent sign-ins share one in-flight fetch (vitest test named `S120 AC 3` in `functions/src/adapters/logto/identity.test.ts`).
+4. **401 only for a refused credential.** `POST /api/v1/sign-in` answers `401 sign_in_refused` only when the credential itself is refused (a token that doesn't verify or is malformed, or carries no email); any other failure (the JWKS can't be fetched, the database or the session key fails) answers `503 sign_in_failed` and is logged. `openapi/bt-api.v1.json` lists the 503 for `POST /api/v1/sign-in`, regenerated by `pnpm api:spec` (vitest test named `S120 AC 4` in `functions/src/worker-app.test.ts`; grep of the spec).
+5. **Per-tab sign-in state.** Logto's keys (its in-flight sign-in `logto.signInSession` and its transient tokens) and `bt.signInReturnTo` are kept in the tab's own `sessionStorage` through `web/src/storage/` (still labeled personal in `STORAGE_KEYS`), never `localStorage`, and `clearPersonalData()` clears them; `bt/no-browser-storage` is not disabled anywhere (unit/RTL tests named `S120 AC 5` in `web/src/storage/storage.test.ts` and `web/src/session/SessionProvider.test.tsx`; grep).
+6. **No stale session loads.** A session load started for a token that has since been replaced (the startup load on the callback route, racing the hand-off) neither sets the session state nor clears the newer token, whether it answers the old account, a 401 or a network error (RTL test named `S120 AC 6` in `web/src/session/SessionProvider.test.tsx`).
+7. This file's S120 **Status** (story heading and top table) is `done`.
+8. The story changed nothing outside its Scope files.
+
+**Notes:**
+
+- **Copilot's item 1 is not here.** The coordinator's summary numbered Copilot's findings 1–7 and the owner's answer covers 2–7, the ones the code controls; this story doesn't reopen 1.
+- **Why `max_age=0`.** OIDC Core 3.1.2.1: "When max_age is used, the ID Token returned MUST include an auth_time Claim Value". Logto's SDK passes it through `extraParams`; `prompt=login` already forces a fresh emailed code, and `max_age=0` asks the same, so the sign-in a fan sees doesn't change. A session issued before this story carries no `authTime`, so deleting with it asks for a fresh sign-in first, as a session over 10 minutes old did.
+- **Sessions stay valid.** `authTime` is optional in the session's shape, so a BT session issued before this story still verifies; only deletion's recent-sign-in check reads it.
+
+**Reuse check** (ADR-025): before writing code, read `functions/src/services/accounts.ts` (`signIn`, `completeProviderSignIn`, `NoEmailError`), `functions/src/services/session.ts` (`isSession`, `SessionGrant`), `functions/src/services/account-deletion.ts` (`RECENT_SIGN_IN_SECONDS`), `functions/src/adapters/logto/identity.ts`, `functions/src/test/logto-tokens.ts`, `web/src/storage/storage.ts`, `web/src/session/` and `web/src/settings/`; reuse `applyIfNewer` and the store's setters, extend `STORAGE_KEYS` rather than add a second storage module, and record what was reused in the commit's `Reuse check:` paragraph.
+
+**Turn cap:** 12 — assumes six contained fixes in code S116 wrote (one optional field through claims, session and deletion; a store generation guard; a cooldown and shared promise in one adapter; one catch split and a regenerated spec; one storage area flag; one obsolete-load guard), a test for each, and the grader; no UI to design.
+
+**Goal condition:** scripts/verify-S120.sh exits 0, pnpm verify exits 0, no files outside functions/, web/, packages/domain/src/, packages/domain/vitest.config.ts, packages/ports/src/, openapi/bt-api.v1.json, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S120.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S120. Work item 0 first: if scripts/verify-S120.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S120.sh exits 0, pnpm verify exits 0, no files outside functions/, web/, packages/domain/src/, packages/domain/vitest.config.ts, packages/ports/src/, openapi/bt-api.v1.json, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S120.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
+
+**Status:** `todo`
 
 ---
 
