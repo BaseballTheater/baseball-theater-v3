@@ -16134,3 +16134,19 @@ Fresh-context review at `cd88229`. Scope: the six stories done since `03a72ef` (
 **For the next backlog review**
 
 - Still unserved: FEATURES, Video play links — "A video played from Search's floating player links to its play too" (owner, 2026-11-05: "Yes"); no design amendment or story builds it yet (S5's note :119 waits on one).
+
+---
+
+## 2026-11-07 — backlog review answers (2026-11-07)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-07 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-07T09:20:38Z` |
+| HEAD at capture | `86ea13e` (tree clean) |
+| Applied in | `86ea13e` — S73: AC 6's Playwright flows are proven by CI's flows job (owner's answer, 2026-11-07 review) |
+
+**Answers and what was applied**
+
+- **Question 3** ("S73 is done except AC 6's Playwright flows, which need Docker this cloud session can't pull (CI runs them on every pull request). Will you finish it on a machine with Docker, or should its AC 6 accept the flows passing in CI on its pull request?"; put to the owner as "Will you finish S73 yourself on a machine with Docker, or should its AC 6 count the Playwright flows passing in CI on its pull request?"). Owner, 2026-11-07: "4 passing in ci". **Applied** in `86ea13e`: S73's note records the answer; AC 6's S62 flows are proven by GitHub CI's `flows` job concluding `success` on a commit in HEAD's history that descends from S73's checkpoint `9d64162` and holds `e2e/flows/update.spec.ts` as in the tree; the S54 size budget stays a local check. `scripts/verify-S73.sh` check 6 reads that run through the GitHub REST API (rule 7: updated before S73 shipped; shown red when the spec differs from what CI ran). AC wording unchanged.
+- Questions 1 (ADR-013 dated note) and 2 (ADR-028 Browser row) are not answered here and stay pending.
