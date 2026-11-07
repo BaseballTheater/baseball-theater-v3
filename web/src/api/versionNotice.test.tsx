@@ -78,12 +78,16 @@ function serve()
  * check that a failed update never reloads a page the old worker controls (`controlled`).
  * The `takeover-during-*` faults have another tab activate the new worker while this one
  * waits, so nothing is left waiting or installing here; `lookup-fails` and `no-registration`
- * leave Update Now with no registration to ask (Copilot review of PR #5).
+ * leave Update Now with no registration to ask (Copilot review of PR #5). `activation-before-takeover`
+ * has another tab start the new worker's activation before this page hears `controllerchange`:
+ * nothing waits or installs, `active` is the new worker, and the takeover lands later (Copilot
+ * review of PR #6).
  */
 function fakeServiceWorkers(log: string[], { controlled = false, fault }: {
 	controlled?: boolean;
 	fault?: "update-stalls" | "update-fails" | "install-fails" | "install-stalls" | "takeover-stalls"
-		| "takeover-during-update" | "takeover-during-install" | "lookup-fails" | "no-registration";
+		| "takeover-during-update" | "takeover-during-install" | "lookup-fails" | "no-registration"
+		| "activation-before-takeover";
 } = {}): ServiceWorkerContainer
 {
 	const container = new EventTarget();
@@ -100,9 +104,21 @@ function fakeServiceWorkers(log: string[], { controlled = false, fault }: {
 	const registration = {
 		waiting: null as typeof worker | null,
 		installing: null as typeof worker | null,
+		active: null as typeof worker | null,
 		update: () =>
 		{
 			log.push("update");
+			if (fault === "activation-before-takeover")
+			{
+				worker.state = "activating";
+				registration.active = worker;
+				setTimeout(() =>
+				{
+					worker.state = "activated";
+					container.dispatchEvent(new Event("controllerchange"));
+				}, 100);
+				return Promise.resolve(registration);
+			}
 			if (fault === "update-stalls") return new Promise<never>(() => undefined);
 			if (fault === "update-fails") return Promise.reject(new TypeError("Failed to update a ServiceWorker"));
 			if (fault === "takeover-during-update")
@@ -311,6 +327,21 @@ describe("a retired API version (S28)", () =>
 				expect(log).toEqual(["update", "reload"]);
 			});
 		}
+	}
+
+	// Another tab started activating the new worker before this page heard `controllerchange`: the takeover is coming, so wait for it and reload.
+	for (const controlled of [true, false])
+	{
+		it(`426: activation-before-takeover: an activation already under way is waited for, then reloads (${controlled ? "controlled" : "uncontrolled"} page)`, async () =>
+		{
+			const log: string[] = [];
+			const finished = await updateWithTimeouts(fakeServiceWorkers(log, {
+				controlled,
+				fault: "activation-before-takeover",
+			}), () => log.push("reload"));
+			expect(finished).toBe(true);
+			expect(log).toEqual(["update", "reload"]);
+		});
 	}
 
 	// No registration doesn't mean no controller: an unregistered worker can still serve the retired shell.

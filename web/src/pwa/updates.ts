@@ -112,7 +112,9 @@ function installed(worker: ServiceWorker | null): Promise<ServiceWorker | null>
  * lookup failed): an unregistered worker can still control this page, so it reloads only
  * when nothing does. And a takeover seen at any point (another tab may activate the new
  * worker while this one waits, leaving nothing waiting or installing here) counts as success:
- * the page is on the new worker, so it reloads (Copilot review of PR #5). `container` and
+ * the page is on the new worker, so it reloads (Copilot review of PR #5). If that activation
+ * is still under way when the install wait ends (`registration.active` is a worker other than
+ * the controller), it waits for the takeover, bounded the same way (Copilot review of PR #6). `container` and
  * `reload` are this browser's by default; tests pass stand-ins.
  */
 export async function updateToNewVersion(
@@ -155,11 +157,12 @@ export async function updateToNewVersion(
 		return;
 	}
 	const next = registration.waiting ?? await Promise.race([installed(registration.installing), after(ACTIVATE_TIMEOUT_MS)]);
-	if (next && !tookOver)
-	{
-		next.postMessage(SKIP_WAITING);
-		await Promise.race([tookControl, after(ACTIVATE_TIMEOUT_MS)]);
-	}
+	// Another tab may already have started activating the new worker: nothing waits or installs here,
+	// but `active` is no longer this page's controller and `controllerchange` is on its way (Copilot
+	// review of PR #6). Only a page the old worker controls needs to wait; any other reloads anyway.
+	const activating = !next && controlledByOld && Boolean(registration.active) && registration.active !== container.controller;
+	if (next && !tookOver) next.postMessage(SKIP_WAITING);
+	if ((next || activating) && !tookOver) await Promise.race([tookControl, after(ACTIVATE_TIMEOUT_MS)]);
 	reloadIfSafe();
 }
 
