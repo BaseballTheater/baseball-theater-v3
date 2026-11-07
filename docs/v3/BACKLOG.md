@@ -231,6 +231,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 79 | [S118](#s118--branch-flow-stage-deploys-staging-main-deploys-production) | Stage and main branch flow | `done` |
 | 79 | [S119](#s119--production-deploys-to-nextbaseballtheater-until-the-owners-dns-cutover) | Production at next.baseball.theater | `done` |
 | 79 | [S120](#s120--sign-in-hardening-recent-sign-in-from-logtos-auth_time-per-account-settings-jwks-cooldown-5xx-for-outages-per-tab-sign-in-state-no-stale-session-loads) | Sign-in hardening | `done` |
+| 79 | [S121](#s121--release-flow-stories-land-as-auto-merged-pull-requests-into-stage-a-published-github-release-deploys-production) | Releases from pull requests | `todo` |
 | 80 | [S93](#s93--ingest-mlb-play-metrics-win-probability-key-moments-abs-challenges) | Ingest play metrics | `done` |
 | 80 | [S116](#s116--sign-in-with-logto-email-one-time-code-on-the-deployed-sites) | Logto sign-in | `done` |
 | 80 | [S117](#s117--copy-productions-baseball-data-into-staging-on-request-with-no-fans-data) | Baseball-data copy to staging | `todo` |
@@ -270,7 +271,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 116 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
 | 117 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
 
-**Next (generated):** **80 / S117** — the lowest **Priority** `todo` story not waiting on a design.
+**Next (generated):** **79 / S121** — the lowest **Priority** `todo` story not waiting on a design.
 
 **Before starting it:** confirm no [backlog review](#backlog-reviews) is due — the review-debt line in that section counts stories, but a drift event makes one due regardless.
 
@@ -6279,6 +6280,53 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 ```
 
 **Status:** `done`
+
+### S121 — Release flow: stories land as auto-merged pull requests into stage; a published GitHub Release deploys production
+
+**Gap:** Since S118, agents commit and push straight to `stage` (staging), and a push to `main` deploys production (`.github/workflows/deploy.yml`, job `production`: bootstrap → `pnpm db:migrate` → `pnpm db:reapply-deletions` → `wrangler deploy` → `pnpm deploy:logto production`). A release is "whatever `main` holds", with no record of what went into it. The owner, 2026-11-07: *"I think releases to main probably should use GitHub releases, if that's actually possible. I want a release to be a set of PRs basically"*. Asked (1) who merges each story's pull request into `stage` — the agent, automatically, once CI is green, or the owner — and (2) whether `main` is kept as a mirror of production or retired: *"1. You automatically 2. Mirror"*.
+
+**Impact:** Before S121, agents' work went straight onto the staging branch and production went live whenever `main` changed, with no list of what a release contained. After it, every story arrives as its own pull request that merges itself once its checks pass, and production only changes when the owner publishes a GitHub Release, whose notes list the pull requests it ships; `main` follows along to show what is live.
+
+**Source:** Pillar: Dependable — releases are a deliberate, listed set of reviewed pull requests the owner publishes, so nothing reaches production by accident, the same reason S114, S118 and S119 cite. Asked "Can this story cite the Dependable pillar, like S114, S118 and S119?" Approved by owner 2026-11-07: "Yes"
+
+**Depends on:** **S118** (the stage/main branch flow and its rule text), **S119** (production at `next.baseball.theater`), **S120** (the last change to the production job's Logto step).
+
+**Scope files:** `.github/workflows/`, `.github/release.yml`, `CLAUDE.md`, `.claude/skills/run-stories/SKILL.md`, `docs/v3/LOOP.md`, `README.md`, `functions/` (only if a deploy script must change), `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`, `scripts/verify-S121.sh` (plus the generated `docs/v3/INDEX.md` and `docs/v3/audit.jsonl`). The frozen graders `scripts/verify-S114.sh`, `scripts/verify-S116.sh`, `scripts/verify-S118.sh`, `scripts/verify-S119.sh` and `scripts/verify-S120.sh` are not edited.
+
+**Work**
+
+0. Write `scripts/verify-S121.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** changing any workflow, README or rule text (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S121.sh` performs)
+
+1. `.github/workflows/deploy.yml`: production deploys only when a GitHub Release is published (`on: release: types: [published]`), checking out and deploying exactly the release's tag; its steps are the existing production steps unchanged in order and idempotency (bootstrap, `pnpm db:migrate`, `pnpm db:reapply-deletions`, `wrangler deploy`, `pnpm deploy:logto production`). A push to `main` no longer deploys production (the workflow no longer runs on a push to `main`). Staging still deploys on a push to `stage`; per-pull-request previews are unchanged (pull requests into `stage` get previews) (workflow parse, compared with the workflow before this story).
+2. After the production deploy job succeeds, a job moves `main` to the released commit as a fast-forward only — never forced, failing loudly when it is not a fast-forward — so `main` mirrors production. It uses the workflow's token (`contents: write` on that job only); `README.md` names the owner setting it needs (GitHub Actions in the `main` ruleset's bypass list) (workflow parse; grep).
+3. Release notes come from merged pull requests: `.github/release.yml` exists (categories optional), so "Generate release notes" lists the pull requests merged into `stage` since the last release. `README.md`'s release section says: publish a release targeting `stage` (or a `stage` commit) with a `v*` tag; its notes list its pull requests; and how to roll back, as checked against the workflow (re-run the previous release's deploy, or publish a new release at the older commit, and what the `main` mirror does then) (file parse; grep).
+4. Story flow: `CLAUDE.md`, `.claude/skills/run-stories/SKILL.md` and `docs/v3/LOOP.md` say each story lands as its own branch (`story/S<N>`) and pull request into `stage`, opened by the coordinator with auto-merge enabled so it merges when the required checks pass; agents never push directly to `stage` or `main`, never merge into `main`, and never publish releases (publishing a release is the owner's release step). run-stories still pushes once at the end of a run and says how a run's several stories become one pull request each. Each quotes the owner. No rule text still tells an agent to push to `stage` (grep).
+5. `README.md` documents the owner's GitHub settings: Settings → General "Allow auto-merge" on; a `stage` ruleset requiring a pull request and the `ci-passed` check; GitHub Actions in the `main` ruleset's bypass list; the `production` environment's deployment rules allowing the `v*` tag pattern (a release run's ref is the tag, so a `main`-only branch policy would block it) (grep).
+6. This file's S121 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- **The owner sets the GitHub settings, not an agent** (CLAUDE.md: agents don't change repo settings). Until "Allow auto-merge" is on, `gh pr merge --auto` fails and the coordinator says so; until the `production` environment allows `v*` tags, a release's deploy is refused at the environment; until GitHub Actions can bypass the `main` ruleset, the mirror job fails after a successful deploy (production is still live).
+- **Changing CI and deploy workflows needs the owner's go-ahead** (CLAUDE.md): the owner directed this flow in the session that wrote this story; it covers `.github/workflows/deploy.yml` and the new `.github/release.yml`, nothing more. Agents still never deploy, publish a release or push `main`.
+- A release published with the workflow's own token would not start a workflow; the owner publishes releases, so that never applies. The mirror job's push to `main` with that token likewise starts no workflow, which is fine: `main` deploys nothing now.
+- S118's and S119's graders are frozen at their shipping commits; their checks that a push to `main` deploys production held there and are not re-run at HEAD.
+- `docs/v3/INTENT.md`'s Hosting row is the doc-parity review's to edit; this story leaves it.
+
+**Reuse check** (ADR-025): before writing, read S118's `deploy.yml` jobs and `verify-S118.sh`'s workflow parser; reuse the production job's steps as they are and change only its trigger, its checkout ref and the new mirror job.
+
+**Turn cap:** 12 — assumes one workflow's triggers and one new job, a release-notes config, README's deploy section, the rule text in CLAUDE.md, the run-stories skill and LOOP.md, and the grader; no product code.
+
+**Goal condition:** scripts/verify-S121.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/, .github/release.yml, CLAUDE.md, .claude/skills/run-stories/SKILL.md, docs/v3/LOOP.md, README.md, functions/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ are modified except creating scripts/verify-S121.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S121. Work item 0 first: if scripts/verify-S121.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before changing any workflow, README or rule text. Then: scripts/verify-S121.sh exits 0, pnpm verify exits 0, no files outside .github/workflows/, .github/release.yml, CLAUDE.md, .claude/skills/run-stories/SKILL.md, docs/v3/LOOP.md, README.md, functions/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ are modified except creating scripts/verify-S121.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
+
+**Status:** `todo`
 
 ---
 
