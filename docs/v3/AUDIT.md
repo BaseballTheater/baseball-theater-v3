@@ -15484,3 +15484,18 @@ Owner, 2026-11-07, asked "Should I log skips for the backlog and doc parity revi
 **What changed, and the owner's answer**
 
 Owner, 2026-11-07, asked "Should I log skips for the backlog and doc parity reviews that S119 triggered, or run them? I'd skip both.": "1. Skip"
+
+---
+
+## 2026-11-07 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T02:57:06Z` |
+| HEAD at capture | `38a6692` (tree clean) |
+| Change | `38a6692` — Owner-directed: S116 back to todo — fence gains packages/domain, production's Logto tenant ID is rnrngs |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Should I log a skip for the review, or run a backlog review first?" after S116's fence was widened to packages/domain/src/ and packages/domain/vitest.config.ts with the owner's "Yes it's okay": "Skip"
