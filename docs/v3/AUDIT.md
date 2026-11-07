@@ -15884,3 +15884,33 @@ export const label = game.abbreviation + " @ ";  996ms
 ```
 
 </details>
+
+---
+
+## 2026-11-07 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T07:10:09Z` |
+| HEAD at capture | `7556829` (tree clean) |
+| Change | `b3f4d05` — Backlog: S121 release flow (stories land as auto-merged PRs into stage; a published GitHub Release deploys production) |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Should I skip the backlog and doc parity reviews for S121, or run them? I'd skip.": "2 skip"
+
+---
+
+## 2026-11-07 — doc parity review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a doc parity review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-07T07:10:09Z` |
+| HEAD at capture | `7556829` (tree dirty) |
+| Change | `b3f4d05` — Backlog: S121 release flow (stories land as auto-merged PRs into stage; a published GitHub Release deploys production) |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-07, asked "Should I skip the backlog and doc parity reviews for S121, or run them? I'd skip.": "2 skip"
