@@ -17479,3 +17479,34 @@ Fresh-context subagent review. Trigger: S131–S135 inserted outside a review (o
 4. The API accepts impossible dates like `2026-02-30` in `/api/v1/schedule` and its siblings (shape check only). Should they become a 400 through the same date check the backfill uses? If yes, it folds into S124.
 
 **Verdict: `amended`** — S124, S130, S131, S132, S133, S134, S135 and the Backlog reviews scheduling notes edited; `pnpm backlog:build` and `pnpm backlog:check` pass.
+
+---
+
+## 2026-11-08 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-08T23:15:04Z` |
+| HEAD at review | `9443dc1` (tree dirty) |
+| Trigger | FEATURES.md changed (Update / changelist UX row, cd2eac9); S131, S132, S133, S134, S135 added |
+| Stories `done` since last review | none done since 317d682 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Scope: S131–S135 (named by `pnpm parity:debt`) plus the next 3 `todo` by priority (S123, S124, S125). No `Open:` stories in the backlog; no pillar-cited story is in scope (the not-done pillar stories S7 and S9 are superseded).
+
+1. Citation honesty — S131 (approved notes, `release:check`, v3.1.0's file): cites Feature: Update / changelist UX. Holds: the row records "The change log and bucketing need to be manually approved by me for each release", "Draft, you approve in session" and "No, start at v3.1.0"; S131's buckets (headline / items by kind / one fixes-and-polish line) are the owner's "Minor bugs and fixes should fall into a single bucket. Others … should get their own items".
+2. S132 (releases API, `?after=`): holds — the row quotes "Really big new additions should show on the update notification itself (via API data comparing versions)".
+3. S133 (design amendment): holds — the row names the page, the link from the update dialog, the auto-dismissing after-update notification, and "Both" for where big additions show; rule 18 needs it drawn first.
+4. S134 (changelist page): holds — "a user-facing changelist page which lists the changes in each release simplified to just those things which impact users", starting at v3.1.0.
+5. S135 (links and big additions on both notices, after-update notification): holds — "The update dialog should link to it and a notification that auto dismisses after updating should show a link to it" and "Both".
+6. S123, S124, S125: cite Feature: Calendar date picker; the row quotes the owner's 2026-11-07 ask (type a date, switch year, weekday grid, games per day), which is exactly what the design (S123), the per-month counts request (S124) and the picker (S125) deliver. Holds.
+7. Doc reflects reality — AMENDED: FEATURES' Installable app (PWA) section listed only 'an "update available" notice when a new version is ready', silent on the changelist link, the big additions and the after-update notification the owner asked for on 2026-11-08 (recorded in the Update / changelist UX row, cd2eac9). Added one clause there pointing to that row, recording only the owner's existing decision.
+8. No contradiction found between the changelist row and VISUAL-DESIGN / ARCHITECTURE (ARCHITECTURE's PWA table, lines 1240–1241, says the update notice needs a ratified amendment first, which S133 is). The open design questions (the page's address and entry points, the after-update notification's duration and stacking, the rail's version line versus the release, additions on the retired-version notice) are S133's to put to the owner when it shows its frames, not product gaps for this review.
+9. Coverage: every clause of the owner's 2026-11-08 ask maps to a story (approval S131, API comparison S132, design S133, page S134, both notices S135, start at v3.1.0 S131). Ordering ("No, release v3.1.0 first") is in S131's notes.
+
+For the next backlog review: none.
+
+Owner questions: none.
