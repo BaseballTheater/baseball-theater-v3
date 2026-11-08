@@ -14,6 +14,16 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## Testing on staging
+
+- **Before, staging started empty and filled in only as people browsed it. Now, when the owner asks, it gets every
+  game, schedule and video production has, with no fan's account or settings, and nothing overwrites it in between.**
+  The copy only ever adds: anything being tried on staging ahead of production, new data or new columns, stays as it
+  is, and it can never write to production. Details: **S117** — `pnpm db:copy-baseball`
+  (`functions/src/services/baseball-copy.ts`: the manifest's `none` tables, matching columns, version-guarded
+  upserts, no delete/truncate/drop), `checkCopyTarget` refuses production, run by hand from the `Copy baseball data`
+  workflow (`workflow_dispatch` only).
+
 ## Every game since 1901
 
 - **Before, BT knew only the few days someone had looked at. Now one command fills it with every game between two

@@ -17241,3 +17241,87 @@ export const label = game.abbreviation + " @ ";  956ms
 ```
 
 </details>
+
+---
+
+## 2026-11-08 — S117 completed
+
+**Baseball-data copy to staging**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T21:35:56Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `12ee905` (tree dirty) |
+| Grader | `scripts/verify-S117.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: one command copies only DATA_CLASSIFICATION's 'none' tables; a PGlite-to-PGlite test finds every baseball row copied and every personal table and the deletion log never written in the target
+check 2 PASS: idempotent: a second copy writes nothing, and a newer target row survives (version-guarded writes, ADR-022)
+check 3 PASS: additive: never deletes, truncates or drops; matching columns only; a target one migration ahead keeps its extra column and staging-only row; it migrates the target first and never changes production
+check 4 PASS: runs only by hand: a workflow_dispatch-only workflow on stage runs it, and no other workflow does; package.json has db:copy-baseball; connection strings are masked
+check 5 PASS: refuses to write production: the production branch and bt-production are refused (test), through S122's databaseTarget host reading, with no new URL().hostname check
+check 6 PASS: README says what it copies, what it never does, how to run it, and that deploys never run it
+check 7 PASS: backlog Status is done (story heading and Story status table), and the story stays inside its scope files
+```
+
+**7/7 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S117 check results ---
+check 1 PASS: one command copies only DATA_CLASSIFICATION's 'none' tables; a PGlite-to-PGlite test finds every baseball row copied and every personal table and the deletion log never written in the target
+check 2 PASS: idempotent: a second copy writes nothing, and a newer target row survives (version-guarded writes, ADR-022)
+check 3 PASS: additive: never deletes, truncates or drops; matching columns only; a target one migration ahead keeps its extra column and staging-only row; it migrates the target first and never changes production
+check 4 PASS: runs only by hand: a workflow_dispatch-only workflow on stage runs it, and no other workflow does; package.json has db:copy-baseball; connection strings are masked
+check 5 PASS: refuses to write production: the production branch and bt-production are refused (test), through S122's databaseTarget host reading, with no new URL().hostname check
+check 6 PASS: README says what it copies, what it never does, how to run it, and that deploys never run it
+check 7 PASS: backlog Status is done (story heading and Story status table), and the story stays inside its scope files
+--- verify-S117: 7/7 checks passed ---
+verify-S117: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 837ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  395ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  433ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 98ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 95ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1086ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  1010ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 83ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 18ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 44ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  21:39:21
+   Duration  3.15s (transform 121ms, setup 0ms, collect 4.38s, tests 2.41s, environment 1ms, prepare 440ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155463,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

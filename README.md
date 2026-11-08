@@ -196,7 +196,8 @@ automatically 2. Mirror"):
 - **Staging.** Every push to `stage` deploys `stage.baseball.theater` on the Neon `staging` branch.
   The branch is created schema-only from production the first time (production's tables, none of its
   rows) and filled only by `pnpm db:migrate`, so it never holds a fan's data. Copying production's
-  baseball data into it is a separate step the owner runs by hand (S117); no deploy copies data.
+  baseball data into it is a separate step the owner runs by hand (S117, **Copy baseball data**
+  below); no deploy copies data.
 - **Releasing.** On GitHub, Releases → Draft a new release: choose a new tag `v*` (e.g. `v3.0.0`)
   with its target the exact `stage` commit that passed the release checks (not the moving branch), then press
   **Generate release notes**: `.github/release.yml` makes the notes the list of pull requests merged
@@ -284,6 +285,43 @@ production's deploy then registers its Logto sign-in addresses (`pnpm deploy:log
    its ref (`refs/tags/v…`), so a `main`-only policy would refuse it. Keep no required reviewers.
 5. Default branch: `stage` (S118), so pull requests, `gh workflow run` and new clones start there.
 
+### Copy baseball data (production → staging, by hand)
+
+`pnpm db:copy-baseball` (S117) gives staging production's baseball data, so testing on
+`stage.baseball.theater` starts from every game, schedule and video production has (owner,
+2026-11-06: "Delightful, bc it makes testing much faster in stage").
+
+- **What it copies:** only the Postgres tables the data classification manifest
+  (`functions/src/services/data-classification.ts`) labels `none`: `schedule_days`, `games`,
+  `game_projections` and `replay_artifacts`. It never reads or writes a fan's account, settings,
+  sign-in links or entitlements, or the deletion log, so none of them ever reaches staging, not even
+  for a moment. A new table is copied only once the manifest labels it `none`.
+- **It only adds.** It never deletes, truncates or drops anything in the target, and rows only
+  staging has stay as they are. Every write is version-guarded like ingest's (ADR-022): a row
+  staging already holds at a newer version is kept, so running it again changes nothing and never
+  rolls staging back. It copies only the columns both sides have: a column or table only staging
+  has (a migration production hasn't had yet) is left untouched, and a column only production has is
+  skipped. A column a staging-only migration renamed or reshaped gets nothing from production under
+  its new name.
+- **Migrations:** it migrates the target first (with the checked-out code's migrations; the workflow
+  checks out `stage`) and never migrates or changes production, which it reads over a read-only
+  session.
+- **Never production:** the target can't be production, by name (`production`, `bt-production`), by
+  Neon branch (the project's default branch) or by host (the same guard as `pnpm mlb:backfill`, with
+  no override), and can't be the database it reads from.
+- **No deploy runs it.** No deploy, pull request or push workflow runs it; it runs only when someone
+  asks. From GitHub: Actions → **Copy baseball data** → Run workflow (target `staging`). It reads
+  both connection strings from Neon's API with the `NEON_API_KEY` secret, masks them, and logs hosts,
+  tables and row counts only. From a terminal, with both connection strings:
+
+```bash
+BT_SOURCE_DATABASE_URL="<production>" BT_DATABASE_URL="<target>" pnpm db:copy-baseball
+NEON_API_KEY=… NEON_PROJECT_ID=… pnpm db:copy-baseball --neon staging   # both from Neon, as the workflow does
+```
+
+A local target (`localhost`, compose.yaml's `postgres`) is always allowed; a hosted one only when
+`NEON_API_KEY` and `NEON_PROJECT_ID` show it is a Neon branch other than production's.
+
 ### Sign-in (Logto)
 
 Fans sign in with Logto (ADR-019, S116): Logto's hosted page emails a one-time code, and Baseball
@@ -355,6 +393,7 @@ Still to finish before a public launch (the _Cloudflare deploy_ Later theme):
 | `pnpm seed:refresh`     | Record the dev seed from live MLB (see above)    |
 | `pnpm mlb:backfill`     | Every game between two dates (see above)         |
 | `pnpm db:migrate`       | Migrate the database `BT_DATABASE_URL` names     |
+| `pnpm db:copy-baseball` | Copy production's baseball data (by hand only)   |
 | `pnpm deploy:bootstrap` | A deploy's bootstrapping (GitHub Actions only)   |
 | `pnpm test`             | Vitest (all packages)                            |
 | `pnpm test:coverage`    | Coverage + thresholds                            |
