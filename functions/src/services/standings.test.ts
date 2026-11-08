@@ -224,6 +224,71 @@ describe("getStandings (S128)", () =>
 		expect(teams(table.divisions)).toBe(30);
 	});
 
+	it("an unreachable calendar for the day's year is no calendar, not an unpublished one: mid-season is the day's table, not last season's final (AC 7)", async () =>
+	{
+		const seasonsDown = recordedClient((url) => url.pathname === "/api/v1/seasons/2026" ? json({}, 500) : undefined);
+		const table = await getStandings({
+			mlb: seasonsDown.mlb,
+		}, "2026-07-01");
+		expect(table).toMatchObject({
+			phase: "regularSeason",
+			season: 2026,
+			date: "2026-07-01",
+		});
+		expect(seasonsDown.asked.some((u) => u.includes("season=2026&date=2026-07-01&hydrate=team"))).toBe(true);
+	});
+
+	it("an unreachable World Series schedule for the day's year is likewise no calendar: mid-season is the day's table (AC 7)", async () =>
+	{
+		const worldSeriesDown = recordedClient((url) => url.searchParams.get("gameType") === "W" && url.searchParams.get("season") === "2026" ? json({}, 500) : undefined);
+		expect(await getStandings({
+			mlb: worldSeriesDown.mlb,
+		}, "2026-07-01")).toMatchObject({
+			phase: "regularSeason",
+			season: 2026,
+			date: "2026-07-01",
+		});
+	});
+
+	it("an unreachable calendar for the year before never puts another season's final in its place (January: the day's own table)", async () =>
+	{
+		const { mlb } = recordedClient((url) => url.pathname === "/api/v1/seasons/2026" ? json({}, 500) : undefined);
+		expect(await getStandings({
+			mlb,
+		}, "2027-01-15")).toMatchObject({
+			phase: "regularSeason",
+			season: 2027,
+			date: "2027-01-15",
+		});
+	});
+
+	it("an unpublished next season (MLB's empty seasons list) keeps the last season's final table (2027-03-01 with 2027 unpublished)", async () =>
+	{
+		const { mlb } = recordedClient((url) =>
+		{
+			if (url.pathname === "/api/v1/seasons/2027") return json({
+				copyright: "",
+				seasons: [],
+			});
+			if (url.searchParams.get("gameType") === "W" && url.searchParams.get("season") === "2027") return json({
+				copyright: "",
+				totalItems: 0,
+				totalEvents: 0,
+				totalGames: 0,
+				totalGamesInProgress: 0,
+				dates: [],
+			});
+			return undefined;
+		});
+		expect(await getStandings({
+			mlb,
+		}, "2027-03-01")).toMatchObject({
+			phase: "final",
+			season: 2026,
+			date: "2026-09-27",
+		});
+	});
+
 	it("an MLB error on the table is an error, not an empty table", async () =>
 	{
 		const { mlb } = recordedClient((url) => url.pathname === "/api/v1/standings" ? json({}, 500) : undefined);

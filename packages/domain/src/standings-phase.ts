@@ -12,6 +12,10 @@
  * - **spring** — from `springStartDate` through the day before `regularSeasonStartDate`: that
  *   spring's training table as of the day.
  *
+ * "Not published" means MLB answered with no such season; a calendar MLB couldn't be reached
+ * for is not passed as unpublished — the caller passes none instead (S128 AC 7), since leaving
+ * only last year's would keep its final table on a mid-season day.
+ *
  * Before every known season, or with no calendar, it is the day's regular-season table. A
  * calendar missing either regular-season date is unknown here. Dates are `YYYY-MM-DD`, which
  * compare as strings. MLB's season id is the year a date falls in, so a January day's final

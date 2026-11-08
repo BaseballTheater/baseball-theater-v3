@@ -162,7 +162,7 @@ describe("HttpMlbStatsClient (S2)", () =>
 		expect(await mlb.fetchGameGraphContent(1)).toBeNull();
 	});
 
-	it("season calendar: the recorded 2026 calendar with its World Series final; null when unpublished", async () =>
+	it("season calendar: the recorded 2026 calendar with its World Series final; a failed request rejects", async () =>
 	{
 		const { mlb, urls } = client();
 		expect(await mlb.fetchSeasonCalendar(2026)).toEqual({
@@ -176,7 +176,8 @@ describe("HttpMlbStatsClient (S2)", () =>
 			"https://statsapi.mlb.com/api/v1/seasons/2026?sportId=1",
 			"https://statsapi.mlb.com/api/v1/schedule?sportId=1&gameType=W&season=2026",
 		]);
-		// No recording for 2031: the calendar answers 404, so the season is unknown.
-		expect(await mlb.fetchSeasonCalendar(2031)).toBeNull();
+		// No recording for 2031: the calendar answers 404, a failed request — it rejects rather than
+		// answering null, so the standings can tell unreachable from unpublished (S128 AC 7).
+		await expect(mlb.fetchSeasonCalendar(2031)).rejects.toThrow("404");
 	});
 });

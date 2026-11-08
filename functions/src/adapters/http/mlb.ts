@@ -276,22 +276,19 @@ export class HttpMlbStatsClient implements MlbStatsClient
 
 	/**
 	 * The season's calendar with its World Series final (S111) and its regular season's first and
-	 * last days (S128, which the dev seed's default range also reads); null when unpublished or unreachable.
+	 * last days (S128, which the dev seed's default range also reads); null when MLB answers that
+	 * the season is unpublished (an empty seasons list). A failed request (an HTTP error, no
+	 * answer, an unparseable one) rejects instead of answering null: the standings must not
+	 * mistake an unreachable calendar for an unpublished one, which would keep last season's
+	 * final table on a mid-season day (S128 AC 7).
 	 */
 	async fetchSeasonCalendar(season: number): Promise<SeasonCalendar | null>
 	{
-		try
-		{
-			const [seasons, worldSeries] = await Promise.all([
-				this.getJson(seasonsUrl(season, this.baseUrl)),
-				this.getJson(worldSeriesUrl(season, this.baseUrl)),
-			]);
-			return mapSeasonCalendar(parseSeasonsResponse(seasons), parseScheduleResponse(worldSeries));
-		}
-		catch
-		{
-			return null;
-		}
+		const [seasons, worldSeries] = await Promise.all([
+			this.getJson(seasonsUrl(season, this.baseUrl)),
+			this.getJson(worldSeriesUrl(season, this.baseUrl)),
+		]);
+		return mapSeasonCalendar(parseSeasonsResponse(seasons), parseScheduleResponse(worldSeries));
 	}
 
 	private async fetchContent(gamePk: number): Promise<GameContentResponse | undefined>

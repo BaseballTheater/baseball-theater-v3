@@ -5,7 +5,7 @@ import {
 	mlbToday, previousStandingsPhase, standingsPhase,
 } from "@bt/domain";
 import type { IngestDeps } from "./ingest.js";
-import { calendarsAround } from "./scoreboard-date.js";
+import { standingsCalendars } from "./scoreboard-date.js";
 
 /** One picked table from MLB, labelled with what it is: its phase, season and the day it stands as of. */
 async function fetchPick(mlb: IngestDeps["mlb"], pick: StandingsPick): Promise<StandingsSnapshot>
@@ -36,13 +36,15 @@ function isEmpty(table: StandingsSnapshot): boolean
  * previous phase's table is returned instead, labelled as what it is; any other day's empty
  * table is returned as it is, labelled with its own phase. MLB requests: two
  * calendars (four requests), one table, and one more only for that fallback. An MLB error on a
- * table is thrown, never turned into an empty one; a calendar MLB can't give is left out, so
- * with none it is the day's regular-season table.
+ * table is thrown, never turned into an empty one. An unpublished calendar is left out; an
+ * unreachable one is not treated as unpublished (`standingsCalendars`): when the day's own
+ * year's can't be had no calendar is used, so it is the day's regular-season table, never last
+ * season's final.
  */
 export async function getStandings(deps: Pick<IngestDeps, "mlb" | "now">, day?: string): Promise<StandingsResponse>
 {
 	const date = day ?? mlbToday(deps.now?.() ?? new Date());
-	const seasons = await calendarsAround(deps.mlb, date);
+	const seasons = await standingsCalendars(deps.mlb, date);
 	const pick = standingsPhase(date, seasons);
 	const table = await fetchPick(deps.mlb, pick);
 	if (!isEmpty(table)) return table;
