@@ -1,6 +1,7 @@
 import type {
 	GameGraphContent,
 	GamePlayMetrics,
+	GameRecap,
 	GameSnapshot,
 	MediaHighlight,
 	PlayerProfile,
@@ -33,10 +34,17 @@ export interface MlbStatsClient {
 	 * throw. Ingest calls it (ADR-002); `fetchGame` attaches `videoPlayRefs` / `relatedArticles`.
 	 */
 	fetchGameGraphContent(gamePk: number): Promise<GameGraphContent | null>;
+	/** The regular season's standings as of `date` (S4); MLB has none outside the regular season. */
 	fetchStandings(date: string): Promise<StandingsSnapshot>;
+	/** A season's final regular-season table (S128): MLB's standings for the season with no date. */
+	fetchFinalStandings(season: number): Promise<StandingsSnapshot>;
+	/** A season's spring training standings as of `date` (S128); empty before its first spring game is final. */
+	fetchSpringStandings(season: number, date: string): Promise<StandingsSnapshot>;
 	/**
 	 * One season's calendar — its first spring game and its last postseason game (S111) — or
-	 * null when MLB has not published the season or it can't be had.
+	 * null when MLB has not published the season. Rejects when it can't be had (MLB unreachable
+	 * or erroring), so a caller can tell unreachable from unpublished (S128 standings); callers
+	 * that treat both alike catch the rejection as null.
 	 */
 	fetchSeasonCalendar(season: number): Promise<SeasonCalendar | null>;
 	/** Identity + season lines for the given player ids, in the order returned. */
@@ -55,4 +63,22 @@ export interface MlbStatsClient {
 		startTimecode: string,
 		endTimecode: string,
 	): Promise<GameDiffPatchResponse>;
+}
+
+/** A game's content-endpoint payload as BT keeps it: its videos and its editorial recap (S10). */
+export type GameEditorial = {
+	highlights: MediaHighlight[];
+	recap?: GameRecap;
+};
+
+/**
+ * A game's sources one at a time (S122), for the backfill: it must tell, per source, whether
+ * it answered, and stop asking one it has given up, which `fetchGame`'s fan-out can't do.
+ * `fetchGame` is the live feed with all three extras attached; these are its parts.
+ */
+export interface MlbGameSources extends Pick<MlbStatsClient, "fetchSchedule" | "fetchPlayMetrics" | "fetchGameGraphContent"> {
+	/** The live feed alone, mapped, with no highlights or extras; throws when it can't be had. */
+	fetchGameFeed(gamePk: number): Promise<Unversioned<GameSnapshot>>;
+	/** The content endpoint's videos and recap; null when it fails or has neither, never a throw. */
+	fetchGameEditorial(gamePk: number): Promise<GameEditorial | null>;
 }

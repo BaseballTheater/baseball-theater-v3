@@ -4,7 +4,8 @@
  * Series schedule. MLB's `postSeasonEndDate` is the scheduled end of the window and is
  * corrected to the real final only later (2026 read 10-31 after a 10-28 final), so the
  * World Series' last game wins once one is listed; before the Series is scheduled the
- * calendar's date stands in. An unpublished season (`seasons: []`) maps to null.
+ * calendar's date stands in. An unpublished season (`seasons: []`) maps to null. The regular
+ * season's first and last days (S128) are carried when MLB lists them; standings need both.
  */
 import type { SeasonCalendar } from "@bt/domain";
 import type { ScheduleResponse, SeasonsResponse } from "@bt/mlb-api";
@@ -28,5 +29,11 @@ export function mapSeasonCalendar(seasons: SeasonsResponse, worldSeries: Schedul
 		season: Number(season.seasonId),
 		springStartDate: season.springStartDate,
 		lastGameDate,
+		...(season.regularSeasonStartDate ? {
+			regularSeasonStartDate: season.regularSeasonStartDate,
+		} : {}),
+		...(season.regularSeasonEndDate ? {
+			regularSeasonEndDate: season.regularSeasonEndDate,
+		} : {}),
 	};
 }

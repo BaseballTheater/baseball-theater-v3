@@ -54,6 +54,58 @@ database without asking MLB again, so it needs no network. Re-run the command to
 file. CI and `pnpm verify` never use the seed: they run on the committed fixtures, and the
 seed's tests record through a stand-in for MLB into a temporary directory.
 
+### Every game since 1901 (backfill)
+
+To fill a database with every game between two dates, newest first:
+
+```bash
+pnpm mlb:backfill                                        # one year before MLB's today through today
+pnpm mlb:backfill --from 1901-04-18                      # everything, back to 1901's opening day
+pnpm mlb:backfill --from 2024-03-20 --to 2024-11-02      # any range, both dates inclusive
+```
+
+- **Defaults.** `--to` is MLB's today (the day the scoreboard shows, New York time) and `--from` one year before
+  `--to`. Nothing before `1901-04-18` is ever asked for: an earlier `--from` is clamped to it.
+- **The off-season is skipped.** Every day from November 15 through February 15 is skipped without a request.
+- **What is stored.** Each day's schedule, and each final game hydrated like the live ingest stores it (live feed,
+  videos and recap, play metrics, the GraphQL game content) into the same Postgres tables the app reads
+  (`schedule_days`, `games`, `game_projections`). A game already stored unchanged is not rewritten.
+- **Pacing.** At most 2 requests in flight per host (statsapi.mlb.com, bdfed.stitch.mlbinfra.com and
+  data-graph.mlb.com counted separately), at least 1 s between request starts to a host, and 3 s for games more
+  than 10 years old (`--gap-ms N` and `--old-gap-ms N` change them). A `429` or `5xx` backs off exponentially for
+  that host (waiting at least as long as `Retry-After` asks). A `429` is retried for as long as it takes, so
+  throttling never makes it give up on a day; a `5xx` or a dropped connection is tried 6 times and then counts as
+  that request failing (an extra source's failure, or for a schedule or live feed a day left for the next run).
+- **Giving up on old-game extras.** Videos, play metrics and the GraphQL content exist only for recent games.
+  Each is tracked on its own and given up once it fails (or comes back empty) for 14 consecutive days of games;
+  after that it isn't asked for any older date. The live feed itself is never given up: a game whose feed fails
+  leaves its day for the next run.
+- **Stopping and resuming.** Stop it any time (Ctrl-C finishes the day in progress; a kill is fine too) and run
+  the same command again to resume: a day already complete in the database (its schedule stored, every game
+  settled, every final game stored) asks MLB nothing and writes nothing, so it picks up at the first incomplete
+  day. Days with games not yet settled (today's, say) are checked again on every run. Each extra source's
+  failure streak and give-up date are kept in `.backfill/<host>--<database>.json` (git-ignored), so a resumed run
+  doesn't re-probe a source it gave up, and a different database starts fresh. To ask a given-up source again
+  (or if the command says the file is unreadable), delete that file: every source's streak starts over.
+- **Which database.** It writes the database `BT_DATABASE_URL` names, else the local Docker Postgres (as
+  `pnpm db:seed` does), and migrates it first. It refuses production: any host that isn't local is refused
+  unless `NEON_API_KEY` and `NEON_PROJECT_ID` show it is a Neon branch other than the default (production)
+  branch, or you pass `--allow-production`. Logs name the host and database only, never the connection string.
+- **How big it is.** It prints progress per day (games stored, sources given up) and, at the end, the row count
+  and on-disk size (`pg_total_relation_size`: table, indexes and TOAST) of each game table.
+- **Moving it to Neon.** The data is ordinary rows in the app's own tables on the same Postgres version Neon
+  runs, so it can be copied table by table into a Neon branch. Migrate the branch first
+  (`BT_DATABASE_URL="$NEON" pnpm db:migrate`), then copy the rows in Postgres's custom format, which
+  `pg_restore` reads:
+  `pg_dump -Fc --data-only -t schedule_days -t games -t game_projections "$LOCAL" | pg_restore --data-only --no-owner -d "$NEON"`.
+  This only adds rows: a row already in the branch (the same date or game) makes that table's restore fail on its
+  primary key, so restore into a branch without those rows, or empty those three tables first. Alternatively,
+  point the backfill at the branch itself (`BT_DATABASE_URL`). Whether it ever goes to production is the owner's
+  call.
+
+It asks live MLB, so like `pnpm seed:refresh` it is never run by CI or `pnpm verify`; its tests use fake MLB
+clients and the committed recordings.
+
 ### What local can't represent
 
 Local runs the deployed code on the same database engine, but some things exist only on
@@ -144,7 +196,8 @@ automatically 2. Mirror"):
 - **Staging.** Every push to `stage` deploys `stage.baseball.theater` on the Neon `staging` branch.
   The branch is created schema-only from production the first time (production's tables, none of its
   rows) and filled only by `pnpm db:migrate`, so it never holds a fan's data. Copying production's
-  baseball data into it is a separate step the owner runs by hand (S117); no deploy copies data.
+  baseball data into it is a separate step the owner runs by hand (S117, **Copy baseball data**
+  below); no deploy copies data.
 - **Releasing.** On GitHub, Releases → Draft a new release: choose a new tag `v*` (e.g. `v3.0.0`)
   with its target the exact `stage` commit that passed the release checks (not the moving branch), then press
   **Generate release notes**: `.github/release.yml` makes the notes the list of pull requests merged
@@ -232,6 +285,48 @@ production's deploy then registers its Logto sign-in addresses (`pnpm deploy:log
    its ref (`refs/tags/v…`), so a `main`-only policy would refuse it. Keep no required reviewers.
 5. Default branch: `stage` (S118), so pull requests, `gh workflow run` and new clones start there.
 
+### Copy baseball data (production → staging, by hand)
+
+`pnpm db:copy-baseball` (S117) gives staging production's baseball data, so testing on
+`stage.baseball.theater` starts from every game, schedule and video production has (owner,
+2026-11-06: "Delightful, bc it makes testing much faster in stage").
+
+- **What it copies:** only the Postgres tables the data classification manifest
+  (`functions/src/services/data-classification.ts`) labels `none`: `schedule_days`, `games`,
+  `game_projections` and `replay_artifacts`. It never reads or writes a fan's account, settings,
+  sign-in links or entitlements, or the deletion log, so none of them ever reaches staging, not even
+  for a moment. A new table is copied only once the manifest labels it `none`.
+- **It only adds.** It never deletes, truncates or drops anything in the target, and rows only
+  staging has stay as they are. Every write is version-guarded like ingest's (ADR-022): a row
+  staging already holds at a newer version is kept, so running it again changes nothing and never
+  rolls staging back. It copies only the columns both sides have: a column or table only staging
+  has (a migration production hasn't had yet) is left untouched, and a column only production has is
+  skipped. A column a staging-only migration renamed or reshaped gets nothing from production under
+  its new name. A column staging generates itself is left to staging. A column only staging has that
+  is required with no default (`NOT NULL`, nothing to fill it) makes that table be skipped: it gets
+  none of production's rows, the log says why, and the other tables are still copied.
+- **Migrations:** it migrates the target first (with the checked-out code's migrations; the workflow
+  checks out `stage`) and never migrates or changes production. Every read of production runs in a
+  read-only transaction of its own, which holds through Neon's pooler too; nothing is set on
+  production's session.
+- **Never production:** the target can't be production, by name (`production`, `bt-production`), by
+  Neon branch (the project's default branch) or by host (the same guard as `pnpm mlb:backfill`, with
+  no override), and can't be the database it reads from.
+- **No deploy runs it.** No deploy, pull request or push workflow runs it; it runs only when someone
+  asks. From GitHub: Actions → **Copy baseball data** → Run workflow (target `staging`). It reads
+  both connection strings from Neon's API with the `NEON_API_KEY` secret, masks them, and logs hosts,
+  tables and row counts only. From a terminal, with both connection strings:
+
+```bash
+BT_SOURCE_DATABASE_URL="<production>" BT_DATABASE_URL="<target>" pnpm db:copy-baseball
+NEON_API_KEY=… NEON_PROJECT_ID=… pnpm db:copy-baseball --neon staging   # both from Neon, as the workflow does
+```
+
+`--neon staging` writes only the `staging` branch that deploys already made: with none yet it
+refuses and says to deploy staging first, and never creates a branch itself.
+A local target (`localhost`, compose.yaml's `postgres`) is always allowed; a hosted one only when
+`NEON_API_KEY` and `NEON_PROJECT_ID` show it is a Neon branch other than production's.
+
 ### Sign-in (Logto)
 
 Fans sign in with Logto (ADR-019, S116): Logto's hosted page emails a one-time code, and Baseball
@@ -301,7 +396,9 @@ Still to finish before a public launch (the _Cloudflare deploy_ Later theme):
 | `pnpm dev`              | Postgres in Docker + Worker on workerd + Vite    |
 | `pnpm db:seed`          | Migrate and seed the local Postgres (idempotent) |
 | `pnpm seed:refresh`     | Record the dev seed from live MLB (see above)    |
+| `pnpm mlb:backfill`     | Every game between two dates (see above)         |
 | `pnpm db:migrate`       | Migrate the database `BT_DATABASE_URL` names     |
+| `pnpm db:copy-baseball` | Copy production's baseball data (by hand only)   |
 | `pnpm deploy:bootstrap` | A deploy's bootstrapping (GitHub Actions only)   |
 | `pnpm test`             | Vitest (all packages)                            |
 | `pnpm test:coverage`    | Coverage + thresholds                            |

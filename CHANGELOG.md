@@ -14,6 +14,33 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## Testing on staging
+
+- **Before, staging started empty and filled in only as people browsed it. Now, when the owner asks, it gets every
+  game, schedule and video production has, with no fan's account or settings, and nothing overwrites it in between.**
+  The copy only ever adds: anything being tried on staging ahead of production, new data or new columns, stays as it
+  is, and it can never write to production. Details: **S117** — `pnpm db:copy-baseball`
+  (`functions/src/services/baseball-copy.ts`: the manifest's `none` tables, matching columns, version-guarded
+  upserts, no delete/truncate/drop), `checkCopyTarget` refuses production, run by hand from the `Copy baseball data`
+  workflow (`workflow_dispatch` only).
+
+## Every game since 1901
+
+- **Before, BT knew only the few days someone had looked at. Now one command fills it with every game between two
+  dates, as far back as 1901, gently enough not to burden MLB; a stopped run picks up where it left off, and at the
+  end it says how much room the data takes.** It runs on a developer's machine into the local database first, so the
+  owner can see the real size before anything goes near production. Details: **S122** — `pnpm mlb:backfill`
+  (`functions/src/services/backfill.ts`), `isOffSeasonDay` / `recordSourceDay` (`packages/domain`), `PoliteFetch`
+  (2 requests in flight per host, backoff on 429/5xx), resume state in `.backfill/`, the table-size report.
+
+## Standings all year round
+
+- **Before, the Standings page was empty for half the year: MLB has no standings for any day outside the regular
+  season. Now, after the regular season ends, Standings shows how the season finished until spring training starts,
+  and during spring training it shows the spring standings.** On the morning a new phase starts, before any of its
+  games is final, it keeps showing the previous table. Details: **S128** — `standingsPhase` (`packages/domain`), the
+  final and spring-training standings requests, `phase` and `season` on `GET /api/v1/standings`, divisions in one order.
+
 ## Standings load again
 
 - **Before, the Standings page showed an error on staging and production, because MLB began refusing standings
@@ -161,6 +188,10 @@ explicitly where that's the case. For what's still ahead, see
 
 ## Each scoreboard game shows what you care about at a glance
 
+- **Before, tapping a folded-up game on the scoreboard only unfolded it, and a second tap was needed to open it.
+  Now tapping a folded-up game opens that game straight away, the same as tapping a full one.** Details: S126 —
+  `CollapsedBar` links to `/game/<gamePk>` like `ScoreboardModule`, and the scoreboard no longer tracks expanded
+  bars; the bar looks the same. _(2026-11-08)_
 - **Before, every game on the scoreboard took the same space and every score was always visible. Now games
   without your favorite teams can fold into slim bars (`CHC ● 1–0 ● MIA`, the inning and count underneath) that
   open with a tap, and one switch hides every score, record and pitcher of record for fans catching up later.**

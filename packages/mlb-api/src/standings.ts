@@ -59,6 +59,8 @@ export interface StandingsRecordEntry extends TeamRecord {
 	sportGamesBack?: string;
 	conferenceGamesBack?: string;
 	springLeagueGamesBack?: string;
+	/** A team's rank in its spring league (Cactus / Grapefruit), on a spring training table (S128). */
+	springLeagueRank?: string;
 
 	runsScored?: number;
 	runsAllowed?: number;
@@ -67,6 +69,8 @@ export interface StandingsRecordEntry extends TeamRecord {
 	divisionChamp?: boolean;
 	hasWildcard?: boolean;
 	clinched?: boolean;
+	/** How a team clinched, on a final table (S128): MLB's `w` wild card, `y` division, `z` best record in the league. */
+	clinchIndicator?: string;
 	wildCardRank?: string;
 	wildCardLeader?: boolean;
 

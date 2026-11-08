@@ -393,8 +393,20 @@ export type StandingsDivision = {
 	teams: StandingsTeamRecord[];
 };
 
+/**
+ * Which table a standings payload is (S128): the day's regular-season standings, a season's
+ * final regular-season table (after the regular season until the next spring), or spring
+ * training's standings as of the day.
+ */
+export type StandingsPhaseName = "regularSeason" | "final" | "spring";
+
 export type StandingsSnapshot = {
+	/** The day the table stands as of; for a `final` table, its season's `regularSeasonEndDate`. */
 	date: string; // YYYY-MM-DD
+	/** Which table this is (S128); absent on snapshots read before S128 (recorded fixtures). */
+	phase?: StandingsPhaseName;
+	/** MLB's season id of the table (S128): the year it was played. */
+	season?: number;
 	divisions: StandingsDivision[];
 	fetchedAt: string;
 	windowMode: "active" | "cache";

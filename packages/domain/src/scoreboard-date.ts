@@ -22,6 +22,14 @@ export interface SeasonCalendar {
 	 * MLB's scheduled postseason end before then.
 	 */
 	lastGameDate: string;
+	/**
+	 * The first regular-season game's day (MLB's `regularSeasonStartDate`; S128). Optional: a
+	 * calendar without it still sets the scoreboard's default day, and counts as unknown for
+	 * standings (`standingsPhase`).
+	 */
+	regularSeasonStartDate?: string;
+	/** The last scheduled regular-season day (MLB's `regularSeasonEndDate`; S128), optional as above. */
+	regularSeasonEndDate?: string;
 }
 
 /**

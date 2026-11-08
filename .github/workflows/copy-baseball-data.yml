@@ -1,0 +1,53 @@
+name: Copy baseball data
+
+# S117: copy production's baseball data (MLB schedules, games, projections, replay artifacts:
+# the tables the data classification manifest labels `none`) into staging, with no fan's data.
+# Run by hand only (owner, 2026-11-05: "it should be a manual step (to allow for local iteration
+# not getting stomped)"): Actions → Copy baseball data → Run workflow. No deploy, pull request or
+# push runs it. It only adds to staging (nothing there is deleted; rows already newer stay), migrates
+# staging first with `stage`'s migrations, reads production read-only and never migrates it, and
+# refuses production as a target. Agents never run it: only GitHub holds the Neon key.
+
+on:
+    workflow_dispatch:
+        inputs:
+            target:
+                description: "The database to copy into (never production)"
+                type: choice
+                options: [staging]
+                default: staging
+
+permissions:
+    contents: read
+
+concurrency:
+    group: copy-baseball-data
+    cancel-in-progress: false
+
+jobs:
+    copy:
+        runs-on: ubuntu-latest
+        timeout-minutes: 120
+        env:
+            NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+            NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  # Staging's schema comes from stage, so the target is migrated with stage's migrations.
+                  ref: stage
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 9.15.0
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: ".nvmrc"
+                  cache: pnpm
+
+            - name: Install
+              run: pnpm install --frozen-lockfile
+
+            - name: Copy production's baseball data into ${{ inputs.target }}
+              run: pnpm db:copy-baseball --neon "${{ inputs.target }}"

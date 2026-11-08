@@ -85,6 +85,32 @@ describe("mapStandings", () =>
 	});
 });
 
+describe("division order (S128)", () =>
+{
+	const ids = (name: string) => mapStandings(parseStandingsResponse(JSON.parse(readFileSync(
+		fileURLToPath(new URL(`../../../fixtures/${name}`, import.meta.url)),
+		"utf8",
+	))), "2026-03-01").divisions.map((d) => d.divisionId);
+
+	it("division order: the spring recording (West first) comes out AL East, Central, West, then NL East, Central, West", () =>
+	{
+		const asRecorded = (JSON.parse(readFileSync(fileURLToPath(new URL("../../../fixtures/raw/standings-2026-spring.json", import.meta.url)), "utf8")) as {
+			records: { division: { id: number } }[];
+		}).records.map((r) => r.division.id);
+		expect(asRecorded).toEqual([200, 201, 202, 205, 203, 204]);
+		expect(ids("raw/standings-2026-spring.json")).toEqual([201, 202, 200, 204, 205, 203]);
+		expect(ids("raw/standings-2026-final.json")).toEqual([201, 202, 200, 204, 205, 203]);
+	});
+
+	it("division order: the regular-season fixture standings-2026-09-05.json keeps the order it has", () =>
+	{
+		const fixture = JSON.parse(readFileSync(fileURLToPath(new URL("../../../fixtures/standings-2026-09-05.json", import.meta.url)), "utf8")) as {
+			divisions: { divisionId: number }[];
+		};
+		expect(ids("raw/standings-2026-09-05.json")).toEqual(fixture.divisions.map((d) => d.divisionId));
+	});
+});
+
 describe("mapStandingsTeam", () =>
 {
 	it("falls back to the league record when the row omits the top-level line", () =>

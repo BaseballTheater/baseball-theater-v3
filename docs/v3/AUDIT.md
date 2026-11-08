@@ -16535,3 +16535,877 @@ Owner-directed backlog change: S128 (Standings follow the season), S129 (design:
 **What changed, and the owner's answer**
 
 Owner-directed: FEATURES' Standings row quotes the owner ("Yes, it should always show the last standings for the prior season until spring training’s first game"; "Agreed"; "first regular season game"), and S128–S130 cite Feature: Standings. Asked whether they need a doc parity review or a skip: owner, 2026-11-07: "Skip".
+
+---
+
+## 2026-11-08 — S126 completed
+
+**Collapsed bar opens the game**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T18:58:14Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `d6d88fb` (tree dirty) |
+| Grader | `scripts/verify-S126.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: a collapsed bar is a link to /game/<gamePk>, the full module's destination; choosing it navigates there and never expands the bar in place (RTL: the route changes to the game, no full module appears)
+check 2 PASS: the scoreboard keeps no expanded-bar state: ScoreboardPage tracks no expanded games, CollapsedBar takes no onExpand, has no aria-expanded, and its comment and accessible name say it opens the game
+check 3 PASS: the bar looks as before: the existing collapsed-bar and hidden tests pass, their score, swatch-order, hidden-score and state assertions unchanged; CollapsedBar's drawn content and styles unchanged beyond what a link needs
+check 4 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**4/4 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S126 check results ---
+check 1 PASS: a collapsed bar is a link to /game/<gamePk>, the full module's destination; choosing it navigates there and never expands the bar in place (RTL: the route changes to the game, no full module appears)
+check 2 PASS: the scoreboard keeps no expanded-bar state: ScoreboardPage tracks no expanded games, CollapsedBar takes no onExpand, has no aria-expanded, and its comment and accessible name say it opens the game
+check 3 PASS: the bar looks as before: the existing collapsed-bar and hidden tests pass, their score, swatch-order, hidden-score and state assertions unchanged; CollapsedBar's drawn content and styles unchanged beyond what a link needs
+check 4 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S126: 4/4 checks passed ---
+verify-S126: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 1018ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  528ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  487ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 120ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 938ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  872ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 101ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 63ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 14ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 49ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  19:00:45
+   Duration  3.08s (transform 107ms, setup 0ms, collect 4.13s, tests 2.45s, environment 1ms, prepare 446ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155465,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-08 — S128 completed
+
+**Standings by season phase**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T19:20:42Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `bb38898` (tree dirty) |
+| Grader | `scripts/verify-S128.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**9/9 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S128 check results ---
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S128: 9/9 checks passed ---
+verify-S128: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 824ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  423ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  396ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 88ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 64ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1068ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  952ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 57ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 19ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 44ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  19:23:45
+   Duration  3.05s (transform 103ms, setup 0ms, collect 4.43s, tests 2.30s, environment 1ms, prepare 464ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155467,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-08 — S128 completed
+
+**Standings by season phase**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T19:34:29Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `8ff475d` (tree dirty) |
+| Grader | `scripts/verify-S128.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**9/9 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S128 check results ---
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S128: 9/9 checks passed ---
+verify-S128: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 928ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  451ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  470ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 142ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 111ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1132ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  1048ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 89ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 15ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 72ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  19:37:25
+   Duration  3.40s (transform 98ms, setup 0ms, collect 4.72s, tests 2.65s, environment 1ms, prepare 510ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155466,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-08 — S128 completed
+
+**Standings by season phase**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T19:45:46Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `1343a6b` (tree dirty) |
+| Grader | `scripts/verify-S128.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**9/9 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S128 check results ---
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S128: 9/9 checks passed ---
+verify-S128: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 826ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  401ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  422ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 138ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 954ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  862ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 104ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 52ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 17ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 58ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  19:48:42
+   Duration  3.13s (transform 86ms, setup 0ms, collect 4.34s, tests 2.30s, environment 1ms, prepare 450ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155460,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-08 — S128 completed
+
+**Standings by season phase**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T19:57:58Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `d2ded13` (tree dirty) |
+| Grader | `scripts/verify-S128.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**9/9 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S128 check results ---
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S128: 9/9 checks passed ---
+verify-S128: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 853ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  422ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  429ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 125ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 929ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  867ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 80ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 83ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 13ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 65ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  20:00:57
+   Duration  3.12s (transform 91ms, setup 0ms, collect 4.19s, tests 2.30s, environment 2ms, prepare 470ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155462,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-08 — S128 completed
+
+**Standings by season phase**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T20:10:15Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `3746ae7` (tree dirty) |
+| Grader | `scripts/verify-S128.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**9/9 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S128 check results ---
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S128: 9/9 checks passed ---
+verify-S128: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 906ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  469ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  435ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 152ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1015ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  945ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 72ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 81ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 17ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 50ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  20:13:13
+   Duration  2.99s (transform 63ms, setup 0ms, collect 4.12s, tests 2.44s, environment 1ms, prepare 432ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155465,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-08 — S122 completed
+
+**Game backfill since 1901**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T20:31:12Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `e25c276` (tree dirty) |
+| Grader | `scripts/verify-S122.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: pnpm mlb:backfill [--from] [--to]: --to defaults to mlbToday, --from to a year before, nothing before 1901-04-18; BT_DATABASE_URL else localConnectionString (one implementation, shared with db:seed); production refused without --allow-production (local always allowed, other hosts refused unless NEON_API_KEY shows a non-default branch)
+check 2 PASS: isOffSeasonDay in packages/domain skips Nov 15 through Feb 15 (boundaries 11-14, 11-15, 02-15, 02-16 tested) and the backfill makes no request for those days
+check 3 PASS: a day is stored through ingest's version-guarded path (storeSchedule / ingestGame); 823823 through PGlite is not rewritten when unchanged
+check 4 PASS: idempotent and resumable: a second run asks MLB nothing for complete days and writes nothing; a missing or older projection is repaired without MLB; unsettled days are re-checked; a stopped run resumes with total requests equal to one clean run's
+check 5 PASS: the walk goes newest to oldest
+check 6 PASS: per-host pacing: at most 2 requests in flight per host, minimum gaps (named constants, >= 1 s recent, >= 3 s older than 10 years, overridable by flag), exponential per-host backoff on 429/5xx honoring Retry-After
+check 7 PASS: each extra source (content, play metrics, GraphQL) is given up after 14 consecutive failed days of games, the streak survives a split run, and the live feed is never given up
+check 8 PASS: resume state lives in a git-ignored file keyed by the database's host and name; a different database starts fresh
+check 9 PASS: progress lines while running and a final report of rows and pg_total_relation_size for schedule_days, games and game_projections (tested on PGlite)
+check 10 PASS: tests never reach MLB: no statsapi.mlb.com request outside the HTTP adapter
+check 11 PASS: README documents the command, defaults, off-season skip, pacing, give-up rule, resuming, the local default and --allow-production
+check 12 PASS: backlog Status is done (story heading and Story status table), and the story stays inside its scope files
+```
+
+**12/12 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S122 check results ---
+check 1 PASS: pnpm mlb:backfill [--from] [--to]: --to defaults to mlbToday, --from to a year before, nothing before 1901-04-18; BT_DATABASE_URL else localConnectionString (one implementation, shared with db:seed); production refused without --allow-production (local always allowed, other hosts refused unless NEON_API_KEY shows a non-default branch)
+check 2 PASS: isOffSeasonDay in packages/domain skips Nov 15 through Feb 15 (boundaries 11-14, 11-15, 02-15, 02-16 tested) and the backfill makes no request for those days
+check 3 PASS: a day is stored through ingest's version-guarded path (storeSchedule / ingestGame); 823823 through PGlite is not rewritten when unchanged
+check 4 PASS: idempotent and resumable: a second run asks MLB nothing for complete days and writes nothing; a missing or older projection is repaired without MLB; unsettled days are re-checked; a stopped run resumes with total requests equal to one clean run's
+check 5 PASS: the walk goes newest to oldest
+check 6 PASS: per-host pacing: at most 2 requests in flight per host, minimum gaps (named constants, >= 1 s recent, >= 3 s older than 10 years, overridable by flag), exponential per-host backoff on 429/5xx honoring Retry-After
+check 7 PASS: each extra source (content, play metrics, GraphQL) is given up after 14 consecutive failed days of games, the streak survives a split run, and the live feed is never given up
+check 8 PASS: resume state lives in a git-ignored file keyed by the database's host and name; a different database starts fresh
+check 9 PASS: progress lines while running and a final report of rows and pg_total_relation_size for schedule_days, games and game_projections (tested on PGlite)
+check 10 PASS: tests never reach MLB: no statsapi.mlb.com request outside the HTTP adapter
+check 11 PASS: README documents the command, defaults, off-season skip, pacing, give-up rule, resuming, the local default and --allow-production
+check 12 PASS: backlog Status is done (story heading and Story status table), and the story stays inside its scope files
+--- verify-S122: 12/12 checks passed ---
+verify-S122: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 851ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  414ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  433ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 67ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 939ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  877ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 82ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 98ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 15ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 65ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  20:34:22
+   Duration  2.91s (transform 138ms, setup 0ms, collect 4.06s, tests 2.24s, environment 1ms, prepare 416ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155460,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-08 — S122 completed
+
+**Game backfill since 1901**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T21:17:47Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `d2223df` (tree dirty) |
+| Grader | `scripts/verify-S122.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: pnpm mlb:backfill [--from] [--to]: --to defaults to mlbToday, --from to a year before, nothing before 1901-04-18; BT_DATABASE_URL else localConnectionString (one implementation, shared with db:seed); production refused without --allow-production (local always allowed, other hosts refused unless NEON_API_KEY shows a non-default branch)
+check 2 PASS: isOffSeasonDay in packages/domain skips Nov 15 through Feb 15 (boundaries 11-14, 11-15, 02-15, 02-16 tested) and the backfill makes no request for those days
+check 3 PASS: a day is stored through ingest's version-guarded path (storeSchedule / ingestGame); 823823 through PGlite is not rewritten when unchanged
+check 4 PASS: idempotent and resumable: a second run asks MLB nothing for complete days and writes nothing; a missing or older projection is repaired without MLB; unsettled days are re-checked; a stopped run resumes with total requests equal to one clean run's
+check 5 PASS: the walk goes newest to oldest
+check 6 PASS: per-host pacing: at most 2 requests in flight per host, minimum gaps (named constants, >= 1 s recent, >= 3 s older than 10 years, overridable by flag), exponential per-host backoff on 429/5xx honoring Retry-After
+check 7 PASS: each extra source (content, play metrics, GraphQL) is given up after 14 consecutive failed days of games, the streak survives a split run, and the live feed is never given up
+check 8 PASS: resume state lives in a git-ignored file keyed by the database's host and name; a different database starts fresh
+check 9 PASS: progress lines while running and a final report of rows and pg_total_relation_size for schedule_days, games and game_projections (tested on PGlite)
+check 10 PASS: tests never reach MLB: no statsapi.mlb.com request outside the HTTP adapter
+check 11 PASS: README documents the command, defaults, off-season skip, pacing, give-up rule, resuming, the local default and --allow-production
+check 12 PASS: backlog Status is done (story heading and Story status table), and the story stays inside its scope files
+```
+
+**12/12 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S122 check results ---
+check 1 PASS: pnpm mlb:backfill [--from] [--to]: --to defaults to mlbToday, --from to a year before, nothing before 1901-04-18; BT_DATABASE_URL else localConnectionString (one implementation, shared with db:seed); production refused without --allow-production (local always allowed, other hosts refused unless NEON_API_KEY shows a non-default branch)
+check 2 PASS: isOffSeasonDay in packages/domain skips Nov 15 through Feb 15 (boundaries 11-14, 11-15, 02-15, 02-16 tested) and the backfill makes no request for those days
+check 3 PASS: a day is stored through ingest's version-guarded path (storeSchedule / ingestGame); 823823 through PGlite is not rewritten when unchanged
+check 4 PASS: idempotent and resumable: a second run asks MLB nothing for complete days and writes nothing; a missing or older projection is repaired without MLB; unsettled days are re-checked; a stopped run resumes with total requests equal to one clean run's
+check 5 PASS: the walk goes newest to oldest
+check 6 PASS: per-host pacing: at most 2 requests in flight per host, minimum gaps (named constants, >= 1 s recent, >= 3 s older than 10 years, overridable by flag), exponential per-host backoff on 429/5xx honoring Retry-After
+check 7 PASS: each extra source (content, play metrics, GraphQL) is given up after 14 consecutive failed days of games, the streak survives a split run, and the live feed is never given up
+check 8 PASS: resume state lives in a git-ignored file keyed by the database's host and name; a different database starts fresh
+check 9 PASS: progress lines while running and a final report of rows and pg_total_relation_size for schedule_days, games and game_projections (tested on PGlite)
+check 10 PASS: tests never reach MLB: no statsapi.mlb.com request outside the HTTP adapter
+check 11 PASS: README documents the command, defaults, off-season skip, pacing, give-up rule, resuming, the local default and --allow-production
+check 12 PASS: backlog Status is done (story heading and Story status table), and the story stays inside its scope files
+--- verify-S122: 12/12 checks passed ---
+verify-S122: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  379ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  373ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 53ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 71ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 62ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1032ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  956ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 13ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 52ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  21:21:08
+   Duration  2.87s (transform 90ms, setup 0ms, collect 3.88s, tests 2.17s, environment 1ms, prepare 574ms)
+
+ WARN  Unsupported engine: wanted: {"node":">=24"} (current: {"node":"v22.23.4","pnpm":"9.15.0"})
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155465,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-08 — S117 completed
+
+**Baseball-data copy to staging**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T21:35:56Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `12ee905` (tree dirty) |
+| Grader | `scripts/verify-S117.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: one command copies only DATA_CLASSIFICATION's 'none' tables; a PGlite-to-PGlite test finds every baseball row copied and every personal table and the deletion log never written in the target
+check 2 PASS: idempotent: a second copy writes nothing, and a newer target row survives (version-guarded writes, ADR-022)
+check 3 PASS: additive: never deletes, truncates or drops; matching columns only; a target one migration ahead keeps its extra column and staging-only row; it migrates the target first and never changes production
+check 4 PASS: runs only by hand: a workflow_dispatch-only workflow on stage runs it, and no other workflow does; package.json has db:copy-baseball; connection strings are masked
+check 5 PASS: refuses to write production: the production branch and bt-production are refused (test), through S122's databaseTarget host reading, with no new URL().hostname check
+check 6 PASS: README says what it copies, what it never does, how to run it, and that deploys never run it
+check 7 PASS: backlog Status is done (story heading and Story status table), and the story stays inside its scope files
+```
+
+**7/7 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S117 check results ---
+check 1 PASS: one command copies only DATA_CLASSIFICATION's 'none' tables; a PGlite-to-PGlite test finds every baseball row copied and every personal table and the deletion log never written in the target
+check 2 PASS: idempotent: a second copy writes nothing, and a newer target row survives (version-guarded writes, ADR-022)
+check 3 PASS: additive: never deletes, truncates or drops; matching columns only; a target one migration ahead keeps its extra column and staging-only row; it migrates the target first and never changes production
+check 4 PASS: runs only by hand: a workflow_dispatch-only workflow on stage runs it, and no other workflow does; package.json has db:copy-baseball; connection strings are masked
+check 5 PASS: refuses to write production: the production branch and bt-production are refused (test), through S122's databaseTarget host reading, with no new URL().hostname check
+check 6 PASS: README says what it copies, what it never does, how to run it, and that deploys never run it
+check 7 PASS: backlog Status is done (story heading and Story status table), and the story stays inside its scope files
+--- verify-S117: 7/7 checks passed ---
+verify-S117: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 837ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  395ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  433ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 98ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 95ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1086ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  1010ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 83ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 18ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 44ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  21:39:21
+   Duration  3.15s (transform 121ms, setup 0ms, collect 4.38s, tests 2.41s, environment 1ms, prepare 440ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155463,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-08 — S117 completed
+
+**Baseball-data copy to staging**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T22:17:07Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `c2e3f90` (tree dirty) |
+| Grader | `scripts/verify-S117.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: one command copies only DATA_CLASSIFICATION's 'none' tables; a PGlite-to-PGlite test finds every baseball row copied and every personal table and the deletion log never written in the target
+check 2 PASS: idempotent: a second copy writes nothing, and a newer target row survives (version-guarded writes, ADR-022)
+check 3 PASS: additive: never deletes, truncates or drops; matching columns only; a target one migration ahead keeps its extra column and staging-only row; it migrates the target first and never changes production
+check 4 PASS: runs only by hand: a workflow_dispatch-only workflow on stage runs it, and no other workflow does; package.json has db:copy-baseball; connection strings are masked
+check 5 PASS: refuses to write production: the production branch and bt-production are refused (test), through S122's databaseTarget host reading, with no new URL().hostname check
+check 6 PASS: README says what it copies, what it never does, how to run it, and that deploys never run it
+check 7 PASS: backlog Status is done (story heading and Story status table), and the story stays inside its scope files
+```
+
+**7/7 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S117 check results ---
+check 1 PASS: one command copies only DATA_CLASSIFICATION's 'none' tables; a PGlite-to-PGlite test finds every baseball row copied and every personal table and the deletion log never written in the target
+check 2 PASS: idempotent: a second copy writes nothing, and a newer target row survives (version-guarded writes, ADR-022)
+check 3 PASS: additive: never deletes, truncates or drops; matching columns only; a target one migration ahead keeps its extra column and staging-only row; it migrates the target first and never changes production
+check 4 PASS: runs only by hand: a workflow_dispatch-only workflow on stage runs it, and no other workflow does; package.json has db:copy-baseball; connection strings are masked
+check 5 PASS: refuses to write production: the production branch and bt-production are refused (test), through S122's databaseTarget host reading, with no new URL().hostname check
+check 6 PASS: README says what it copies, what it never does, how to run it, and that deploys never run it
+check 7 PASS: backlog Status is done (story heading and Story status table), and the story stays inside its scope files
+--- verify-S117: 7/7 checks passed ---
+verify-S117: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 857ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  407ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  448ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 61ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 924ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  850ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 106ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 94ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 12ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 44ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  22:21:43
+   Duration  2.90s (transform 119ms, setup 0ms, collect 3.97s, tests 2.23s, environment 1ms, prepare 406ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155462,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

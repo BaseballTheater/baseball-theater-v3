@@ -10,7 +10,9 @@ import { fileURLToPath } from "node:url";
 import {
 	describe, expect, it,
 } from "vitest";
-import { HttpMlbStatsClient } from "./mlb.js";
+import {
+	finalStandingsUrl, HttpMlbStatsClient, springStandingsUrl,
+} from "./mlb.js";
 
 const RAW = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../../fixtures/raw");
 
@@ -71,6 +73,23 @@ describe("HttpMlbStatsClient (S2)", () =>
 		expect(asked.searchParams.get("season")).toBe("2026");
 		expect(asked.searchParams.get("date")).toBe("2026-09-05");
 		expect(asked.searchParams.get("leagueId")).toBe("103,104");
+	});
+
+	it("fetchFinalStandings and fetchSpringStandings ask their own standings URLs (S128)", async () =>
+	{
+		const { mlb, urls } = client();
+		await mlb.fetchFinalStandings(2026);
+		await mlb.fetchSpringStandings(2026, "2026-03-01");
+		expect(urls).toEqual([
+			finalStandingsUrl(2026),
+			springStandingsUrl(2026, "2026-03-01"),
+		]);
+		const final = new URL(urls[0]!);
+		expect(final.searchParams.get("season")).toBe("2026");
+		expect(final.searchParams.has("date")).toBe(false);
+		const spring = new URL(urls[1]!);
+		expect(spring.searchParams.get("standingsTypes")).toBe("springTraining");
+		expect(spring.searchParams.get("date")).toBe("2026-03-01");
 	});
 
 	it("fetchPlayers asks for this season's stats, and asks nothing for no ids", async () =>
@@ -143,19 +162,67 @@ describe("HttpMlbStatsClient (S2)", () =>
 		expect(await mlb.fetchGameGraphContent(1)).toBeNull();
 	});
 
-	it("season calendar: the recorded 2026 calendar with its World Series final; null when unpublished", async () =>
+	it("season calendar: the recorded 2026 calendar with its World Series final; a failed request rejects", async () =>
 	{
 		const { mlb, urls } = client();
 		expect(await mlb.fetchSeasonCalendar(2026)).toEqual({
 			season: 2026,
 			springStartDate: "2026-02-20",
 			lastGameDate: "2026-10-28",
+			regularSeasonStartDate: "2026-03-25",
+			regularSeasonEndDate: "2026-09-27",
 		});
 		expect(urls).toEqual([
 			"https://statsapi.mlb.com/api/v1/seasons/2026?sportId=1",
 			"https://statsapi.mlb.com/api/v1/schedule?sportId=1&gameType=W&season=2026",
 		]);
-		// No recording for 2031: the calendar answers 404, so the season is unknown.
-		expect(await mlb.fetchSeasonCalendar(2031)).toBeNull();
+		// No recording for 2031: the calendar answers 404, a failed request — it rejects rather than
+		// answering null, so the standings can tell unreachable from unpublished (S128 AC 7).
+		await expect(mlb.fetchSeasonCalendar(2031)).rejects.toThrow("404");
+	});
+});
+
+describe("HttpMlbStatsClient fetchGameEditorial (S122)", () =>
+{
+	const recorded = JSON.parse(readFileSync(path.join(RAW, "content-823823.json"), "utf8")) as Record<string, unknown>;
+
+	/** A client whose content endpoint answers `content` (or 404 when it is undefined); nothing else is asked. */
+	function contentClient(content: unknown): HttpMlbStatsClient
+	{
+		return new HttpMlbStatsClient({
+			fetchImpl: async (input) =>
+			{
+				expect(new URL(String(input)).pathname).toBe("/api/v1/game/823823/content");
+				return content === undefined ? new Response("{}", {
+					status: 404,
+				}) : Response.json(content);
+			},
+		});
+	}
+
+	it("an empty content answer (no videos, no recap — most old games) is null, so the backfill counts it a failure", async () =>
+	{
+		const empty = {
+			...recorded,
+			editorial: {},
+			highlights: {
+				highlights: {
+					items: [],
+				},
+			},
+		};
+		expect(await contentClient(empty).fetchGameEditorial(823823)).toBeNull();
+	});
+
+	it("a 404 is null", async () =>
+	{
+		expect(await contentClient(undefined).fetchGameEditorial(823823)).toBeNull();
+	});
+
+	it("an answer with videos is a value carrying them", async () =>
+	{
+		const editorial = await contentClient(recorded).fetchGameEditorial(823823);
+		expect(editorial?.highlights.length).toBeGreaterThan(0);
+		expect(editorial?.recap).toBeTruthy();
 	});
 });

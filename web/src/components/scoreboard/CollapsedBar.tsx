@@ -1,6 +1,7 @@
 import {
-	Box, Group, Text, UnstyledButton,
+	Box, Group, Text,
 } from "@mantine/core";
+import { Link } from "react-router-dom";
 import {
 	collapsedBarState, formatGameTime, gamePhase, inningLabel,
 } from "@bt/domain";
@@ -29,11 +30,12 @@ function Team({ team, side }: { team: ScoreboardGame["teams"]["away"];
  * under it — the inning and count while live, `Final` after, the start time before first
  * pitch. With scores hidden, or before any runs, `@` stands where the score would. What
  * it says comes from `collapsedBarState` (`packages/domain`), whose inning reads through
- * `inningLabel` like every live label. The bar is a button: choosing it opens the full
- * module.
+ * `inningLabel` like every live label. The bar is a link: choosing it opens the game, at
+ * `/game/<gamePk>` like the full module's link, so it lands in the room Settings' Opens
+ * First picks; it never expands in place (S126; owner, 2026-11-07: "collapsed games in the
+ * game list should not expand on click, they should go to the game page.").
  */
-export function CollapsedBar({ game, onExpand }: { game: ScoreboardGame;
-	onExpand: () => void; })
+export function CollapsedBar({ game }: { game: ScoreboardGame })
 {
 	const hidden = useScoresHidden(game);
 	const bar = collapsedBarState(game, hidden);
@@ -41,14 +43,16 @@ export function CollapsedBar({ game, onExpand }: { game: ScoreboardGame;
 	// Only a live game has an inning to name; a pre-game linescore already says "Top 1st".
 	const live = gamePhase(game.status.codedGameState) === "live" ? inningLabel(game.linescore) : null;
 	return (
-		<UnstyledButton
-			onClick={onExpand}
+		<Box
+			component={Link}
+			to={`/game/${game.gamePk}`}
 			data-testid="collapsed-bar"
-			aria-expanded={false}
-			aria-label={`${game.teams.away.abbreviation} at ${game.teams.home.abbreviation}${live ? `, ${live}` : ""}: show the game`}
+			aria-label={`${game.teams.away.abbreviation} at ${game.teams.home.abbreviation}${live ? `, ${live}` : ""}: open the game`}
 			style={{
 				display: "block",
 				width: "100%",
+				color: "inherit",
+				textDecoration: "none",
 				borderRadius: "var(--mantine-radius-md)",
 				border: "1px solid var(--bt-hairline)",
 				background: "var(--bt-raised)",
@@ -67,6 +71,6 @@ export function CollapsedBar({ game, onExpand }: { game: ScoreboardGame;
 				<Team team={game.teams.home} side="home" />
 			</Box>
 			<Text fz={11} c="var(--bt-muted)" ta="center" truncate mih={16} data-testid="collapsed-state">{state}</Text>
-		</UnstyledButton>
+		</Box>
 	);
 }
