@@ -16459,3 +16459,18 @@ The other question (whether S127 comes before or after S5) is still open.
 **Answers and what was applied**
 
 Asked by the 2026-11-07 backlog review (196b98b): "I added a design story, S127, for the play link in Search's floating player (you said "Yes" on 2026-11-05 to that link, but nothing drew or built it). Is that the right next step, and should it come before S5 (Search) or after?" Owner, 2026-11-07: "S127: make it “Go to: Game ->  •  At-Bat ->” instead of the one link that us there now, but with actual arrow Unicode characters". Applied in 2c7326c: S127 kept at priority 89 (before S5); its ACs and FEATURES' Video play links row now specify Search's player link as `Go to: Game →  •  At-Bat →`.
+
+---
+
+## 2026-11-07 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-08T05:35:28Z` |
+| HEAD at capture | `6fdee19` (tree clean) |
+| Change | `6fdee19` — Backlog: S122 repairs half-written games and keeps failure streaks across resumes; S124 freshness follows ADR-021 |
+
+**What changed, and the owner's answer**
+
+S122's AC 4, 7 and 8 and S124's AC 3 were rewritten in 6fdee19 to answer Copilot's review of PR #10. Standing owner answer (2026-11-07, asked whether such a rewrite needed a backlog review): "This shouldn't even trigger a question. Always skip."
