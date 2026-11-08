@@ -1,8 +1,10 @@
 /**
  * Law P11 (docs/v3/LAWS.md; S62; owner, 2026-10-29: "Yes", to running all of
  * `pnpm verify` in CI): CI runs `pnpm verify`, so every law the gate holds —
- * including `pnpm dup:check` (L7) and `pnpm size` (L5) — also holds on every push,
- * not only where someone runs it locally.
+ * including `pnpm dup:check` (L7) and `pnpm size` (L5) — also holds on every change to
+ * code, not only where someone runs it locally. A docs-only change runs only the docs
+ * checks (owner, 2026-11-07: "Things like this shouldn't trigger CI."), as
+ * `scripts/ci-changes.sh` decides; nothing else may skip the gate.
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -11,6 +13,7 @@ import {
 } from "vitest";
 
 const CI_YML = fileURLToPath(new URL("../../.github/workflows/ci.yml", import.meta.url));
+const DEPLOY_YML = fileURLToPath(new URL("../../.github/workflows/deploy.yml", import.meta.url));
 
 /** The commands of a workflow's `run:` steps, one per step (single-line runs only). */
 export function runSteps(workflow: string): string[]
@@ -28,5 +31,34 @@ describe("CI runs pnpm verify (law P11)", () =>
 	it("catches a workflow that runs only parts of the gate", () =>
 	{
 		expect(runSteps("steps:\n  - run: pnpm lint\n  - run: pnpm build\n")).not.toContain("pnpm verify");
+	});
+
+	it("the verify job is skipped only for a docs-only change, and ci-passed requires it for code", () =>
+	{
+		const ci = readFileSync(CI_YML, "utf8");
+		const verifyJob = ci.slice(ci.indexOf("\n    verify:\n"), ci.indexOf("\n    flows:\n"));
+		expect(verifyJob).toContain("if: needs.changes.outputs.code == 'true'");
+		expect([...verifyJob.matchAll(/^ {8}if:/gm)]).toHaveLength(1);
+		expect(ci).toContain('test "$VERIFY $FLOWS $DESIGN $LIGHTHOUSE" = "success success success success"');
+	});
+
+	it("a pull request is compared with its base and a push with the last commit whose run passed, in CI and Deploy", () =>
+	{
+		for (const [file, workflow] of [[CI_YML, "ci.yml"], [DEPLOY_YML, "deploy.yml"]] as const)
+		{
+			const text = readFileSync(file, "utf8");
+			const start = text.indexOf("\n    changes:\n");
+			const changesJob = text.slice(start, text.indexOf("\n    # ", start + 1));
+			expect(changesJob, file).toContain('scripts/ci-changes.sh pr "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}"');
+			expect(changesJob, file).toContain(`actions/workflows/${workflow}/runs?branch=\${{ github.ref_name }}&event=push&status=success&per_page=1`);
+			expect(changesJob, file).toContain('scripts/ci-changes.sh push "$checked" "${{ github.sha }}"');
+			expect(changesJob, file).not.toContain("github.event.before");
+		}
+		const deploy = readFileSync(DEPLOY_YML, "utf8");
+		expect(deploy).toMatch(/= release \]; then\n\s+echo "code=true" >> "\$GITHUB_OUTPUT"/);
+		const staging = deploy.slice(deploy.indexOf("\n    staging:\n"), deploy.indexOf("\n    production:\n"));
+		expect(staging).toContain("needs.verify.result == 'success' || (needs.verify.result == 'skipped' && needs.changes.outputs.code == 'false')");
+		expect(staging).toContain("!cancelled()");
+		expect(staging).not.toMatch(/always\(\)/);
 	});
 });

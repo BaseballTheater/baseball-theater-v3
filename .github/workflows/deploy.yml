@@ -1,7 +1,7 @@
 name: Deploy
 
 # S114: Baseball Theater on Cloudflare Workers (ADR-017).
-# - Every pull request gets its own preview Worker on workers.dev, on staging's database (owner,
+# - Every pull request that changes code gets its own preview Worker on workers.dev, on staging's database (owner,
 #   2026-11-05: "Previews share staging db"), and its address is posted on the pull request. It is
 #   deleted when the pull request closes.
 # - Every push to stage deploys staging at stage.baseball.theater, on the Neon `staging` branch: a
@@ -44,9 +44,43 @@ permissions:
     pull-requests: write
 
 jobs:
+    # Docs-only changes (Markdown, docs/, .claude/) skip verify (owner, 2026-11-07: "Things like
+    # this shouldn't trigger CI."): a docs-only pull request gets no preview, and a docs-only push
+    # to stage deploys staging without re-running verify. A push is compared with the last stage
+    # commit whose Deploy run passed, so code that hasn't passed verify there yet always runs it
+    # first. A release always runs everything. scripts/ci-changes.sh decides, the same script CI asks.
+    changes:
+        if: github.event.action != 'closed'
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            actions: read
+        outputs:
+            code: ${{ steps.diff.outputs.code }}
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Does this change anything besides docs?
+              id: diff
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  if [ "${{ github.event_name }}" = release ]; then
+                      echo "code=true" >> "$GITHUB_OUTPUT"
+                  elif [ "${{ github.event_name }}" = pull_request ]; then
+                      scripts/ci-changes.sh pr "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}"
+                  else
+                      # The last commit on this branch whose push run of this workflow passed.
+                      checked="$(gh api "repos/${{ github.repository }}/actions/workflows/deploy.yml/runs?branch=${{ github.ref_name }}&event=push&status=success&per_page=1" --jq '.workflow_runs[0].head_sha // ""' || true)"
+                      scripts/ci-changes.sh push "$checked" "${{ github.sha }}"
+                  fi
+
     # The same gate CI runs (pnpm verify), plus a dry run of every env's Worker bundle.
     verify:
-        if: github.event.action != 'closed'
+        needs: changes
+        if: needs.changes.outputs.code == 'true'
         runs-on: ubuntu-latest
         timeout-minutes: 30
         steps:
@@ -76,10 +110,10 @@ jobs:
                       pnpm --filter @bt/functions exec wrangler deploy --config ../wrangler.jsonc --env "$env" --dry-run --outdir "$RUNNER_TEMP/dry-run-$env"
                   done
 
-    # One Worker per pull request, on the shared staging database (bt-staging). Pull requests from
+    # One Worker per pull request that changes code (a docs-only one gets none), on the shared staging database (bt-staging). Pull requests from
     # forks get no secrets, so they get no preview.
     preview:
-        if: github.event_name == 'pull_request' && github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+        if: github.event_name == 'pull_request' && github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository && needs.verify.result == 'success'
         needs: [verify]
         runs-on: ubuntu-latest
         timeout-minutes: 20
@@ -165,8 +199,10 @@ jobs:
 
     # Every push to stage: stage.baseball.theater on the Neon staging branch (bt-staging).
     staging:
-        if: github.event_name == 'push' && github.ref == 'refs/heads/stage'
-        needs: [verify]
+        # After verify passed, or after a docs-only push skipped it; never after it failed or was
+        # cancelled.
+        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/stage' && needs.changes.result == 'success' && (needs.verify.result == 'success' || (needs.verify.result == 'skipped' && needs.changes.outputs.code == 'false')) }}
+        needs: [changes, verify]
         runs-on: ubuntu-latest
         timeout-minutes: 20
         concurrency:
