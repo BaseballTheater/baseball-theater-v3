@@ -405,7 +405,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `47–432` Every grader, sorted
   - `433–449` Graders edited after their story shipped
   - `450–514` Re-verified at shipping commits
-- [LOOP.md — Loop-ready automation guide](LOOP.md) — 12 KB
+- [LOOP.md — Loop-ready automation guide](LOOP.md) — 16 KB
   - `5–19` Checklist status
   - `20–32` 1 — Baseline
   - `33–53` 2 — Verify
@@ -413,10 +413,10 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `58–67` 4 — Backlog
   - `68–75` 5 — Boundaries
   - `76–79` 6 — Pilot (do this next, watched)
-  - `80–113` 7 — Reviewer pass
-    - `94–113` Copilot-class checklist
-  - `114–123` 8 — Scale → loop
-  - `124–128` Habit
+  - `80–132` 7 — Reviewer pass
+    - `113–132` Copilot-class checklist
+  - `133–142` 8 — Scale → loop
+  - `143–147` Habit
 - [ORIGIN.md — Baseball Theater v3 — Origin](ORIGIN.md) — 4 KB
 - [SAVANT-DATA.md — Baseball Savant data](SAVANT-DATA.md) — 8 KB
   - `10–15` Terms of use
