@@ -8,6 +8,8 @@
  * connects to (`databaseTarget`, which reads `?host=` as pg does); a string carrying `hostaddr`
  * or naming no host is refused even with `--allow-production`, since where it would connect
  * isn't one clear place. Messages name the host and the database only, never the connection string.
+ * S117's baseball-data copy reuses this guard (through `checkCopyTarget`) with `allowProduction:
+ * "never"`, so it has no override at all.
  */
 import { databaseTarget, isLocalDbHost } from "../adapters/postgres/local.js";
 import type { NeonApi } from "../deploy/bootstrap.js";
@@ -29,7 +31,7 @@ export type TargetCheck =
 		why: string; };
 
 /** A Neon host without its pooler suffix: `ep-x-1-pooler.region.aws.neon.tech` → `ep-x-1.region.aws.neon.tech`. */
-function endpointHost(host: string): string
+export function endpointHost(host: string): string
 {
 	const [first = "", ...rest] = host.split(".");
 	return [first.replace(/-pooler$/, ""), ...rest].join(".");
@@ -38,11 +40,14 @@ function endpointHost(host: string): string
 /**
  * Decides whether the backfill may write `connectionString`'s database. `neon` is the Neon
  * project's API when `NEON_API_KEY` and `NEON_PROJECT_ID` are set; it is asked only for a
- * hosted database, and never with `--allow-production`.
+ * hosted database, and never with `--allow-production`. `"never"` is for a command with no
+ * such flag (S117's copy, which must never write production): it refuses as `false` does,
+ * without suggesting a flag the command doesn't have.
  */
-export async function checkBackfillTarget(connectionString: string, options: { allowProduction: boolean;
+export async function checkBackfillTarget(connectionString: string, options: { allowProduction: boolean | "never";
 	neon?: NeonApi; }): Promise<TargetCheck>
 {
+	const never = options.allowProduction === "never";
 	const { hostaddr, ...target } = databaseTarget(connectionString);
 	if (hostaddr !== undefined) return {
 		allowed: false,
@@ -59,7 +64,7 @@ export async function checkBackfillTarget(connectionString: string, options: { a
 		target,
 		why: "local database",
 	};
-	if (options.allowProduction) return {
+	if (options.allowProduction === true) return {
 		allowed: true,
 		target,
 		why: "--allow-production",
@@ -67,7 +72,7 @@ export async function checkBackfillTarget(connectionString: string, options: { a
 	if (!options.neon) return {
 		allowed: false,
 		target,
-		why: `${target.host} is not local and can't be shown not to be production (set NEON_API_KEY and NEON_PROJECT_ID, or pass --allow-production)`,
+		why: `${target.host} is not local and can't be shown not to be production (set NEON_API_KEY and NEON_PROJECT_ID${never ? "" : ", or pass --allow-production"})`,
 	};
 	const production = (await findOrCreateBranch(options.neon, "production")).value;
 	const endpoint = (await projectEndpoints(options.neon)).find((e) => endpointHost(e.host) === endpointHost(target.host));
@@ -79,7 +84,7 @@ export async function checkBackfillTarget(connectionString: string, options: { a
 	if (endpoint.branch_id === production.id) return {
 		allowed: false,
 		target,
-		why: `${target.host} is the Neon project's default branch, production (pass --allow-production to write it)`,
+		why: `${target.host} is the Neon project's default branch, production${never ? "" : " (pass --allow-production to write it)"}`,
 	};
 	return {
 		allowed: true,

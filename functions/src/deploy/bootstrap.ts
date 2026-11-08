@@ -171,6 +171,43 @@ export type NeonBranch = {
 const SCHEMA_ONLY_SOURCES = new Set(["schema-only", "parent-schema"]);
 
 /**
+ * The project's default (production) branch and the existing branch `env` deploys on, if any,
+ * with the refusals both {@link findOrCreateBranch} and {@link findBranch} rely on: no default
+ * branch, or a staging branch that is production's or began as a copy of production's data.
+ * It only reads; creating a missing branch is `findOrCreateBranch`'s job alone.
+ */
+async function lookUpBranch(api: NeonApi, env: DeployEnv): Promise<{ production: NeonBranch;
+	branch: NeonBranch | undefined; }>
+{
+	const { branches } = await neon<{ branches: NeonBranch[] }>(api, "/branches");
+	const production = branches.find((branch) => branch.default);
+	if (!production) throw new Error("Neon: the project has no default (production) branch");
+	if (env === "production") return {
+		production,
+		branch: production,
+	};
+	const staging = branches.find((branch) => branch.name === STAGING_BRANCH);
+	if (staging && (staging.id === production.id || (staging.init_source !== undefined && !SCHEMA_ONLY_SOURCES.has(staging.init_source))))
+	{
+		throw new Error(`Neon: the ${STAGING_BRANCH} branch began as a copy of production's data (init_source ${staging.init_source ?? "default"}); staging never holds a fan's data, so delete it and deploy again to recreate it schema-only`);
+	}
+	return {
+		production,
+		branch: staging,
+	};
+}
+
+/**
+ * The branch `env` deploys on when it already exists, never creating one (S117's copy: writing
+ * into a branch the copy had just made would skip the deploy that sets it up). Undefined when
+ * `env`'s branch doesn't exist yet; refused like {@link findOrCreateBranch} otherwise.
+ */
+export async function findBranch(api: NeonApi, env: DeployEnv): Promise<NeonBranch | undefined>
+{
+	return (await lookUpBranch(api, env)).branch;
+}
+
+/**
  * The branch `env` deploys on. Production's is the project's default branch (README: the owner kept
  * it as the production branch). Previews' and staging's is {@link STAGING_BRANCH}, created when
  * missing as a **schema-only** branch of production: production's tables with none of its rows,
@@ -179,25 +216,11 @@ const SCHEMA_ONLY_SOURCES = new Set(["schema-only", "parent-schema"]);
  */
 export async function findOrCreateBranch(api: NeonApi, env: DeployEnv): Promise<Found<NeonBranch>>
 {
-	const { branches } = await neon<{ branches: NeonBranch[] }>(api, "/branches");
-	const production = branches.find((branch) => branch.default);
-	if (!production) throw new Error("Neon: the project has no default (production) branch");
-	if (env === "production") return {
-		value: production,
+	const { production, branch: existing } = await lookUpBranch(api, env);
+	if (existing) return {
+		value: existing,
 		created: false,
 	};
-	const staging = branches.find((branch) => branch.name === STAGING_BRANCH);
-	if (staging)
-	{
-		if (staging.id === production.id || (staging.init_source !== undefined && !SCHEMA_ONLY_SOURCES.has(staging.init_source)))
-		{
-			throw new Error(`Neon: the ${STAGING_BRANCH} branch began as a copy of production's data (init_source ${staging.init_source ?? "default"}); staging never holds a fan's data, so delete it and deploy again to recreate it schema-only`);
-		}
-		return {
-			value: staging,
-			created: false,
-		};
-	}
 	const { branch } = await neon<{ branch: NeonBranch }>(api, "/branches", {
 		method: "POST",
 		body: JSON.stringify({
