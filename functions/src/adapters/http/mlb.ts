@@ -107,7 +107,7 @@ export function seasonsUrl(season: number, baseUrl = DEFAULT_BASE_URL): string
 
 /**
  * Both leagues' standings as of `date` (S4), with each team hydrated. MLB answers a `date` only
- * together with its `season` — since 2026-11, `date` alone gets a 500 (found smoke-testing v3.0.0)
+ * together with its `season` — as of 2026-11-07, `date` without `season` gets a 500 for every date (found smoke-testing v3.0.0)
  * — so the season is the date's year. The recorder (S14) records the same URL.
  */
 export function standingsUrl(date: string, baseUrl = DEFAULT_BASE_URL): string

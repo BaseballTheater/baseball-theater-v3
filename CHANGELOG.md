@@ -17,7 +17,8 @@ explicitly where that's the case. For what's still ahead, see
 ## Standings load again
 
 - **Before, the Standings page showed an error on staging and production, because MLB began refusing standings
-  requests that give a date without a season. Now each request names the season too, and the tables load.** Details:
+  requests that give a date without a season. Now each request names the season too, so standings for any date in
+  the regular season load again.** Outside the regular season MLB has no standings for the date, and the page says so. Details:
   found smoke-testing v3.0.0 (2026-11-07); `standingsUrl` (`functions/src/adapters/http/mlb.ts`) adds `season=` (the
   date's year), and the recorder asks the same URL.
 
