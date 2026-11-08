@@ -16282,3 +16282,57 @@ Owner, 2026-11-07, asked "May ADR-013 get a dated note at its head saying deploy
 **What changed, and the owner's answer**
 
 Owner, 2026-11-07, asked "Should I skip the doc parity review for the ADR-013 and ADR-028 wording fixes, or run it? I'd skip.": "Skip"
+
+---
+
+## 2026-11-07 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-08T00:15:40Z` |
+| HEAD at review | `797e868` (tree dirty) |
+| Trigger | drift: S122, S123, S124, S125, S126 inserted outside a review (owner: "I want the reviews") |
+| Stories `done` since last review | S73 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context backlog review, one reviewer, at `797e868` on `backlog/backfill-and-calendar` (PR #10 into `stage`). Trigger: drift — S122, S123, S124, S125, S126 inserted outside a review (owner-directed 2026-11-07 in `91ec3d6` and `797e868`; asked whether they need a review, owner: "I want the reviews"). Stories done since the last review entry (AUDIT.md:16043): S73. Read: CLAUDE.md; the skill; INDEX.md; the S122–S126 notes, S5 (:119), S107 (template), S117 (:62); frame 00 (:160–200, :366–405), 01 Current baseline, 02 Stories, 05 Gap map; AUDIT.md:16043–16285 (the 2026-11-07 backlog and parity reviews, their answers, S73's completion, the parity skip); `git show --stat 91ec3d6 797e868` and their frame/VISUAL-DESIGN/FEATURES diffs; `git diff f34576a..HEAD` of non-doc files.
+
+**Weighed as drift, not counted:** `737b5a1` and `b2ce322` (CLAUDE.md release, milestone and Copilot-review rules; `.claude/skills/run-stories`) change no story, fence or gate; `git diff f34576a..HEAD` touches no `package.json`, `LAWS.md` or `scripts/` other than `scripts/verify-S73.sh` (S73's own grader before it shipped). No new ADR, no new workspace package.
+
+**Next 3 by priority:** S126 (69), S122 (70), S123 (71). S124 (72) and S125 (73) checked too, since they were inserted with them.
+
+**1. Coverage**
+
+- **Parity queue item (2026-11-07 parity review, "For the next backlog review": Search's floating player linking to its play, owner 2026-11-05 "Yes", no design or story).** Confirmed unserved: `PlayerDialog.tsx:76–81` shows "Go to game" *or* the play link, never both, and Search shows the game link; standings-search-settings A6 draws no play link; game-shell A5:42 left the surface out. **Inserted S127** (design, priority 89, Source: Feature: Video play links): a standings-search-settings amendment drawing both links at three widths, owner-ratified. S5 doesn't wait on it; its intake re-scopes S5 or slices the build (S5's note :119 updated).
+- Gap map had no rows for FEATURES' two new themes or S126: added (Every game since 1901 → S122; Calendar date picker → S123 → S124 → S125; collapsed bar → S126; Search play link → S127).
+- No ADR since the last review; no later theme promoted.
+
+**2. Ground truth**
+
+- **S126** (Depends on S68 `done`; no Design). At HEAD: `CollapsedBar.tsx:35–47` (`onExpand`, `UnstyledButton`, `aria-expanded={false}`, label "…: show the game"), `ScoreboardPage.tsx:33` (`expanded` state) and `:50`, `ScoreboardModule.tsx:124–125` (`component={Link}` to `/game/${gamePk}`), `/game/:gamePk` route (`routes.tsx:84`), Opens First read in `GamePage.tsx`. **Amended AC 3:** "the existing CollapsedBar tests … still pass unchanged" contradicted AC 2 — `CollapseHide.test.tsx:173–177` renders a standalone bar with `onExpand` and no router (a `Link` needs one), `:165`/`:181` assert "…: show the game", and `:146` is the `expands` test the story removes. AC 3 now keeps the score, swatch-order, hidden-score and state assertions unchanged and lets only the harness, the accessible-name strings and the `expands` test change. Notes: keep `data-testid="collapsed-bar"` (`e2e/design/S68.spec.ts:73` waits on it; `e2e/` is outside the fence); `scripts/verify-S68.sh:56` runs `-t "expands"`, so S68's frozen grader goes red at HEAD by design (S84: graders re-verify at their shipping commit). Fence (`web/src/`, `web/vitest.config.ts`, docs, CHANGELOG) holds every AC; cap 8 holds.
+- **S122** (no dependencies). At HEAD: `ingestScheduleDay` (`ingest.ts:87`), `ingestGame` (:73), private `storeGame` (:48); `HttpMlbStatsClient.fetchGame` (`mlb.ts:144`, fans out at :149), `fetchGameContent` (:193), `fetchPlayMetrics` (:219), `fetchGameGraphContent` (:205), private `getJson` (:278); hosts statsapi.mlb.com (:46, the feed and content share it), bdfed.stitch.mlbinfra.com (:99), data-graph.mlb.com (:84); `mlbToday` (`scoreboard-date.ts:32`), `addDays` (`calendar-date.ts:8`), `isFinalStatus` (`window.ts:47`); `HYPERDRIVE_CONFIG.production = "bt-production"` (`bootstrap.ts:31`), default-branch lookup (:180–184); `fixtures/game-823823.json`, `plays-823823.json`, `schedule-823823-moments.json`; `.gitignore:25` `.dev-seed/`. **Line drift:** `localConnectionString` is a private function in `functions/src/scripts/db-seed.ts:24`, not in `connect.ts` (which is `functions/src/adapters/postgres/connect.ts`, `openPostgres`). **Amended AC 4:** `--to` defaults to today, so "complete = schedule day stored and every final game stored" would mark today complete while its games are live and never revisit it; a day with any unsettled game (not final, postponed or cancelled) is now not complete. Notes added: fail closed on production (a local URL carries no Hyperdrive name; only Neon's API knows the default branch); log host and name, never the connection string, and the resume file never holds the URL; reuse S112's `services/dev-seed.ts` (`seedDays`, `recordDevSeed`, `loadDevSeed`) and `seed-refresh.ts`'s range args, export `localConnectionString` once (ADR-025); the port has no feed-only fetch, which AC 7 needs. Reuse check names `dev-seed.ts`/`seed-refresh.ts` and corrects the `connect.ts` path. Fence (`functions/`, `packages/domain/`, `packages/ports/`, root `package.json`, lockfile, README, `.gitignore`, docs) holds every AC (`wrangler.jsonc` is only read); cap 20 kept.
+- **S123** (no dependencies). At HEAD: `docs/v3/visual/shell-scoreboard/{DESIGN.md,RATIFIED.md}`, `amendments/A1–A7.md` (A7 unratified, S107's); `DateControl.tsx` exists; prior design stories (A1 `91e17ff`, A3 `8c31942`, A5 `31818ce`) touched only the amendments folder, the story note, the baseline frame and CHANGELOG, all inside S123's fence. `@mantine/dates` 7 has `DatePicker` levels, `DateInput` and `renderDay`, as AC 2 names. No amendment; cap 12 holds.
+- **S124** (Depends: see below). At HEAD: `ApiRoutes` (`api-routes.ts:189–203`, all `/api/v1/…`, params as `:name`); `games_official_date` index (`schema.ts:35`), `listByDate` (`repos.ts:112`); `cacheLifetimeMs` (`cache-lifetime.ts:59`), `edgeCacheControl` (`handlers/cache-control.ts`); `MlbStatsClient.fetchSchedule(date)` only (`packages/ports/src/mlb.ts:20`). **Amended:** (a) its Depends-on line said "Prefer after **S122**", which `parse.ts` reads as a dependency (the 2026-11-02 pending-drift class), so `depends_on` held S122; moved to a **Prefer after** line (frontmatter `depends_on: []`, `prefer_after: [S122]`); (b) route corrected from `/api/schedule/month/{YYYY-MM}` to `/api/v1/schedule/month/:month` (ADR-015, the route table's spelling); (c) fence gains `web/src/api/` (frontmatter, Scope files, Goal condition, `/goal`): a new route changes `openapi/bt-api.v1.json`, and `web/src/api/codegen.test.ts:15`'s drift gate plus `generated.types.test.ts` need `web/src/api/generated/` regenerated (S71's commit changed all three) — a sure rule-10 stop otherwise (the 2026-11-02 pending-drift class). Note: AC 2 needs a schedule date-range method on the port and both adapters, mapped per day through `mapScheduleResponse` so the fixture byte-compare holds. Cap 12 kept.
+- **S125** (Depends S124 `todo`, S81 `done`; Design S123 `todo`). `web/package.json:18–19` has `@mantine/core`/`hooks` `^7.17.1`, no `@mantine/dates`, no `dayjs`. Note added: `dayjs` is `@mantine/dates`' peer (AC 4 adds both, rule 14); entry chunk is 155,520 of 200,000 bytes (S73 ledger), so load the calendar on demand if needed. Fence holds `web/package.json`, lockfile, `e2e/design/`, `docs/v3/design-checks/`.
+
+**3. Prioritization challenge**
+
+- S126 first is right: smallest, no dependencies, owner-requested. S122 before S123 is fine; S123 needs only the owner and can run whenever the owner is available.
+- **S117 (80) now sits below S122–S126.** The previous review had it next "before the owner's DNS cutover". The insert commits don't quote a priority decision, so asked (non-blocking); order stands meanwhile.
+- With S124's false dependency removed, S124 can start without S122 (tests use PGlite and fakes); S125 still waits on S123's ratification and S124.
+- This machine reaches MLB, so S5, S72 and S99–S105's live recordings are no longer blocked here (they were for cloud sessions).
+- Nothing obsolete or quietly done. Underestimated class: new-route stories keep missing `web/src/api/generated/` (S94 in November, S124 now) and Depends-on asides keep becoming dependencies (S75, S124). Both are in pending drift already; recorded again as evidence for a `scripts/` fix.
+- **Baseline:** As of (S73) current; Scoreboard row already names S122–S126 (`91ec3d6`, `797e868`); Video play links row now names S127.
+
+**Duplication sweep (ADR-025).** Code added since the last review: S73's finish (`web/src/pwa/updates.ts` `updateToNewVersion`, `web/src/api/versionNotice.test.tsx`, `scripts/verify-S73.sh`). `pnpm dup:check`: 0 clones in 218 files. `ACTIVATE_TIMEOUT_MS` is the one timeout, read only in `updates.ts`; no second takeover helper. None found in the added code. **Forward risks recorded as S122 notes:** `localConnectionString` (private in `db-seed.ts:24`), the range walk in `dev-seed.ts` (`seedDays`), and `storeGame` (private) — each must be shared, not copied.
+
+**Personal-data sweep (ADR-028).** S73's finish adds no store, browser key or log line (`bt.updateSnoozedUntil` already labeled `none` in `web/src/storage/storage.ts`). Next stories: S126 adds nothing; S122 writes only `schedule_days`, `games`, `game_projections` (`none` in `DATA_CLASSIFICATION`) and a git-ignored resume file keyed by database host and name (no personal data); its logs must carry host and name only, never the connection string (note added); S123 and S127 are docs; S124 reads `none` tables; S125 adds no browser key (the date is in the URL). None found.
+
+**Amendments:** S126 (AC 3; notes), S122 (AC 4; notes; reuse check), S124 (Depends/Prefer after and frontmatter; AC 1 route; fence + `web/src/api/` in frontmatter, Scope files, Goal condition, `/goal`; notes), S125 (notes), S5 (note → S127), **S127 inserted** (`02 Stories.md` embed before S5), `05 Gap map` (four rows), `01 Current baseline` (Video play links row), `00 …Checkable backlog` (Last review block; two pending-drift items).
+
+**Questions for the owner (non-blocking):**
+1. S117 (copy production's baseball data into staging) was next before the DNS cutover, and now sits below the five stories you added today (S126, S122–S125). Should S117 go first, or does the new order stand?
+2. I added a design story, S127, for the play link in Search's floating player (you said "Yes" on 2026-11-05 to that link, but nothing drew or built it). Is that the right next step, and should it come before S5 (Search) or after?

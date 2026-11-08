@@ -12,12 +12,12 @@
 
 Assembled, in this order and around the stories, into BACKLOG.md.
 
-- [00 Baseball Theater v3 — Checkable backlog](<backlog/frame/00 Baseball Theater v3 — Checkable backlog.md>) — 103 KB
+- [00 Baseball Theater v3 — Checkable backlog](<backlog/frame/00 Baseball Theater v3 — Checkable backlog.md>) — 105 KB
   - `127–145` Verify-script contract
   - `146–159` Story status
-  - `160–452` Backlog reviews
-  - `453–472` Doc parity reviews
-  - `473–477` Goal command for multiple stories
+  - `160–464` Backlog reviews
+  - `465–484` Doc parity reviews
+  - `485–489` Goal command for multiple stories
   - Rules, by number:
     - `10–10` 1. Acceptance criteria map to commands, tests, or file invariants (exit codes / assertions).
     - `11–11` 2. Vague phrases (“works correctly”, “handles errors gracefully”) are forbidden until rewrit…
@@ -41,7 +41,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
     - `120–120` 20. Every story has a Reuse check section (ADR-025, owner, 2026-10-19: "I would prefer that a…
     - `121–121` 21. Coverage floors ratchet up, never down (ADR-026; owner, 2026-10-19: ratchet).
     - `123–123` 22. A UI story is checked against its ratified frames by the owner's eye (ADR-026, amended 20…
-- [01 Current baseline](<backlog/frame/01 Current baseline.md>) — 32 KB
+- [01 Current baseline](<backlog/frame/01 Current baseline.md>) — 33 KB
   - `1–43` Current baseline
 - [02 Stories](<backlog/frame/02 Stories.md>) — 2 KB
 - [03 Data platform — MLB access & types](<backlog/frame/03 Data platform — MLB access & types.md>) — 2 KB
@@ -49,7 +49,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `1–80` Live data plane — ADR-002 ingest + client freshness
     - `55–80` Later themes (not yet story-sliced)
 - [05 Gap map (doc → story)](<backlog/frame/05 Gap map (doc → story).md>) — 8 KB
-  - `1–38` Gap map (doc → story)
+  - `1–42` Gap map (doc → story)
 - [06 Baseline history](<backlog/frame/06 Baseline history.md>) — 38 KB
   - `1–120` Baseline history
 
@@ -485,9 +485,10 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 | 69 | [S126](backlog/stories/S126.md) Collapsed bar opens the game | `todo` | S68 | — |
 | 70 | [S122](backlog/stories/S122.md) Game backfill since 1901 | `todo` | — | — |
 | 71 | [S123](backlog/stories/S123.md) Design: calendar date picker | `todo` | — | — |
-| 72 | [S124](backlog/stories/S124.md) Games-per-day counts API | `todo` | S122 | — |
+| 72 | [S124](backlog/stories/S124.md) Games-per-day counts API | `todo` | — | — |
 | 73 | [S125](backlog/stories/S125.md) Calendar date picker | `todo` | S124, S81 | S123 |
 | 80 | [S117](backlog/stories/S117.md) Baseball-data copy to staging | `todo` | S114 | — |
+| 89 | [S127](backlog/stories/S127.md) Design: play link in Search's player | `todo` | — | — |
 | 90 | [S5](backlog/stories/S5.md) Search page queries highlights fixture | `todo` | S70, S61, S68, S81 | S34, S56 |
 | 91 | [S72](backlog/stories/S72.md) Search chips: date / team / tag | `todo` | S5, S69, S81 | S34 |
 | 94 | [S74](backlog/stories/S74.md) Offline reading + prefetch | `todo` | S73, S68, S75, S76, S81 | S55, S57 |
