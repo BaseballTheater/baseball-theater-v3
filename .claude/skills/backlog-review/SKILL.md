@@ -62,6 +62,14 @@ For **each** of the next 3 stories:
 - Its **turn cap**: is the stated assumption still true given what has landed since?
 - Its **Goal condition** fence: can the ACs actually be met inside it? (This is what rule 10 exists to catch — catching it here is cheaper than mid-run.)
 
+### 2b. Adversarial pass — try to break every acceptance criterion
+
+Check 2 confirms a story's names exist; this check asks whether its plan holds. The goal is that Copilot finds nothing in the backlog's pull request (owner, 2026-11-07: "Our goal should be zero Copilot discoveries for each pull request"); on 2026-11-07 it found twelve real problems in S122 and S124 after two reviews passed them, all of this kind.
+
+Scope: every acceptance criterion and note of the next 3 stories **and of every story inserted, re-scoped or rewritten since the last review**. For each, apply the [Copilot-class checklist](../../../docs/v3/LOOP.md#copilot-class-checklist) in `docs/v3/LOOP.md` §7 — interrupted work, state that must survive a restart, partly present data, the real source of truth, unsettled states, ADR conformance, request budgets, import side effects, generated files inside the fence, parser-read lines, contradictions, boundaries, untrusted stored values, over-broad matching, shared state — reading the code each criterion touches at HEAD, not just its name.
+
+Each finding names the **exact input or sequence that breaks the criterion** (for example "stopped after 13 failed days, the resumed run skips those days and never reaches 14") and becomes an amendment to that story. The ledger entry lists, for each story in scope, the checklist items that applied and what was checked; a story recorded with no items checked fails the evidence requirement below.
+
 ### 3. Prioritization challenge — the whole backlog, not just the next few
 
 Argue **against** the current order, using what has changed since the last logged review:
@@ -106,7 +114,7 @@ Each miss becomes an amendment naming the story and the missing entry. Record "n
 
 ## Evidence requirement (anti-rubber-stamp)
 
-A `continue` verdict is only valid if the log entry records, for each of the next 3 stories, that check 2 was actually performed — the paths and commands looked at, and the dependency statuses. A review with no findings and no cited evidence is not a review; treat it as not having happened.
+A `continue` verdict is only valid if the log entry records, for each of the next 3 stories, that check 2 was actually performed — the paths and commands looked at, and the dependency statuses — and, for every story in check 2b's scope, the checklist items applied and what was checked. A review with no findings and no cited evidence is not a review; treat it as not having happened.
 
 Findings that are real but out of scope to fix now become **backlog amendments**, not chat commentary. Chat-only conclusions die at compaction.
 
@@ -141,4 +149,4 @@ This review never edits `docs/v3/INTENT.md`, `docs/v3/FEATURES.md`, or an existi
 
 ## Recipe maintenance
 
-If a drift class slips through — a review said `continue` and the next story still went sideways — add the signal to the drift-event list above and to check 2, then note it in the review log entry that caught it.
+If a drift class slips through — a review said `continue` and the next story still went sideways — add the signal to the drift-event list above and to check 2, then note it in the review log entry that caught it. If Copilot finds a real problem in a backlog pull request this review passed, that is a miss of check 2b: add its class to the checklist in `docs/v3/LOOP.md` §7 in the same pull request as the fix.

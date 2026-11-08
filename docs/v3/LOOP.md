@@ -84,12 +84,32 @@ Loop output reaches `stage` only through pull requests, one per story (S121; own
 Before a story's pull request merges into `stage`:
 
 1. Ensure `pnpm verify` is green on the branch (CI's `ci-passed` gates the auto-merge)
-2. Run a **fresh-context** review (no prior loop transcript) when one is asked for:
-   - Claude Code: `/code-review`
+2. Run a **fresh-context pre-PR review** (no prior loop transcript) on the branch's whole diff, **every time**, for every pull request (a story, a backlog change, a fix, a rule change): the goal is that Copilot finds nothing (owner, 2026-11-07: "Our goal should be zero Copilot discoveries for each pull request"). The reviewer reads every changed file in full, applies the [Copilot-class checklist](#copilot-class-checklist) below to each change (for a backlog change, to every acceptance criterion it adds or rewrites), and reports each finding with the **exact input or sequence that breaks it**, as Copilot does. "Looks fine" without the checklist items it checked is not a review.
+   - Claude Code: a fresh-context `general-purpose` subagent given this section and the diff (`git diff origin/stage...HEAD`), or `/code-review` with the checklist
    - Cursor: Bugbot review and/or Security Review on the diff
-3. Fix anything the reviewer flags that violates BACKLOG AC or CLAUDE.md, on the story's branch
+3. Fix every real finding on the branch (a test that fails without the fix, for code), then re-run the review on the new commits until it reports none
 4. Only then push the branch and open its pull request
-5. Wait for Copilot's review, handle every comment (fix with a test, or reply why not, and resolve the thread), and only then turn on auto-merge; repeated feedback already handled doesn't hold it back (CLAUDE.md → "Copilot's review is handled before a pull request merges"; owner, 2026-11-07: "If Copilot continues giving the same feedback you can merge when you feel the real stuff is all handled")
+5. Wait for Copilot's review, handle every comment (fix with a test, or reply why not, and resolve the thread), and only then turn on auto-merge; repeated feedback already handled doesn't hold it back (CLAUDE.md → "Copilot's review is handled before a pull request merges"; owner, 2026-11-07: "If Copilot continues giving the same feedback you can merge when you feel the real stuff is all handled"). **Every real Copilot finding is a miss of step 2:** besides fixing it, add its class to the checklist below (or sharpen the item that should have caught it) in the same pull request, so the next review catches it
+
+### Copilot-class checklist
+
+What Copilot (and the 2026-11-07 ultrareview of `stage`) caught after our own reviews passed. Each item is a question to ask of every change; answer it with the input that breaks the change, or with why none can.
+
+1. **Interrupted work.** A stop, crash or error between two writes or two steps (a snapshot written but not its projection): what is left behind, and does the next run detect and repair it, without redoing finished work?
+2. **State that must survive a restart.** Every counter, streak, cursor or "given up" flag a resumed or retried run depends on is persisted, not rebuilt from what the run skips.
+3. **Partly present data.** A range or collection that is empty, partly stored, or stored but stale: each case says what happens (fill only what's missing, refresh what's stale), and a "nothing yet" answer is told apart from "zero".
+4. **The real source of truth.** A value is read from the store that actually holds it for every case (a day's schedule summaries hold games a `games` row doesn't exist for yet).
+5. **Unsettled states.** Live, scheduled, postponed or suspended items are never treated as finished (today is never "done" while its games are live).
+6. **ADR conformance.** Routes under `/api/v1/` with `:name` parameters (ADR-015); freshness from `cacheLifetimeMs` by last change, not by "past vs current" (ADR-021); version-guarded writes (ADR-022); one named implementation per calculation (ADR-025); personal data in the inventory (ADR-028).
+7. **Upstream request budget.** A read path or loop that fans out to MLB (per-day requests, `fetchGame`'s three extra calls) has a bounded request count and fits a Worker's subrequest limit; a range request beats one per item.
+8. **Import side effects.** Reusing a helper never imports a module whose top level runs a script (seeding, migrating, guards); move the helper to an import-safe module.
+9. **Generated files inside the fence.** Every file the work regenerates (`docs/v3/BACKLOG.md`, `docs/v3/INDEX.md`, `docs/v3/audit.jsonl`, `openapi/`, `web/src/api/generated/`, the types fidelity test) is inside the story's scope files, Goal condition and `/goal`.
+10. **Structured lines read by parsers.** Text a script parses (a **Depends on** line makes every story ID on it a hard dependency) says only what it should; preferences go on **Prefer after**.
+11. **Contradictions inside a story.** No AC requires what another AC or note forbids (existing tests "pass unchanged" while the behavior they test is removed).
+12. **Boundaries.** Inclusive ranges and their edge days, time zones (`mlbToday`), the earliest and latest allowed values, and each tested.
+13. **Untrusted stored values.** Browser storage can throw (blocked site data, private modes) and can hold stale or out-of-range values (a clock corrected backwards): keep an in-memory fallback, and bound what is read back.
+14. **Matching too broadly.** A glob, prefix or pattern matches only what it should (a `settings-*` override must not swallow frames another amendment draws).
+15. **Shared state between unrelated features.** One flag or key serving two features (one snooze hiding both the update notice and the retired-version notice) is split, or the coupling is intended and said.
 
 ## 8 — Scale → loop
 
