@@ -17409,3 +17409,73 @@ export const label = game.abbreviation + " @ ";  850ms
 ```
 
 </details>
+
+---
+
+## 2026-11-08 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-08T23:13:09Z` |
+| HEAD at review | `c6f283f` (tree dirty) |
+| Trigger | drift: S131–S135 inserted outside a review (owner-directed 2026-11-08: "Yes, run both reviews") |
+| Stories `done` since last review | S126, S128, S122, S117 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context subagent review. Trigger: S131–S135 inserted outside a review (owner-directed 2026-11-08; asked whether a review was needed: "Yes, run both reviews"). Also in check 2b's scope: S129–S130 (inserted after the 2026-11-07 review; their skip said the next review checks them). Done since the last review: S126, S128, S122, S117 (4 of 6). Weighed and not counted as drift: LOOP.md §7's parallel-reviewer rule (19723b8) changes no story or gate; `pnpm verify` and LAWS.md unchanged.
+
+**1. Coverage**
+- The changelist loop (FEATURES "Update / changelist UX", owner 2026-11-08) is carried by S131 → S132 → S133 → S134 / S135 (gap map row 39). Gap found: v3.1.0 publishes before S131 (owner: "No, release v3.1.0 first"), and the page starts at v3.1.0 ("No, start at v3.1.0"), but no story puts v3.1.0's notes in `releases/`: after S131 every build's `currentRelease` would be null (no approved file), S132 would serve `current: null`, and S134's page would be empty while v3.1.0 is live. **S131 AC 6 added** (`releases/v3.1.0.json`, approval as recorded at release time or given in S131's session, never assumed) and a note that S131 starts only once v3.1.0 is published.
+- Gap: the rail's version line (`web/src/layout/version.ts:13–21`, A2/A5) prints `v3.0.<GITHUB_RUN_NUMBER> (<commit>)`, so once v3.1.0 is live and the changelist names v3.1.0, the rail would name a different version. A ratified design decision: **S133 AC 1** now asks the design to say what the rail shows, and the question goes to the owner.
+- Newest parity review (2026-11-07, `continue`) queued nothing for this review. No new ADR. ADR-021 does not cover release notes (it is about games and schedules), so S132's fixed 5-minute lifetime is not a conformance miss.
+
+**2. Ground truth — next 3 (S123, S124, S125)**
+- S123: `docs/v3/visual/shell-scoreboard/DESIGN.md`, `web/src/components/scoreboard/DateControl.tsx`, amendments A1–A7 exist; depends on nothing; fence holds (amendment + PNGs only). Turn cap 12 holds.
+- S124: route table `packages/domain/src/api-routes.ts:193` (`GET /api/v1/schedule`, no month route yet: red-first); `mapScheduleResponse`'s `dates[0]` fallback at `functions/src/mappers/schedule.ts:206` holds; test fakes `tick-ingest.test.ts:34`, `cache-control.test.ts:129`, `refresh.test.ts:40`, `overlay-mlb.test.ts:39` hold. Drifted: S122 (done) exported `storeSchedule` (`ingest.ts:62`), added `scheduleWindowMode` (`packages/domain/src/window.ts`, used at `ingest.ts:123`) and added **no** range method (backfill reads one day at a time, `backfill.ts:217`); `ingestScheduleDay` moved to `:113`, `fetchGame` to `http/mlb.ts:185`, port `fetchSchedule` to `ports/src/mlb.ts:21`; a fifth port fake, `FakeMlbStatsClient` (`recorder.test.ts:53`), wasn't listed; the backfill fake types as `MlbGameSources` (a `Pick`), so it needs nothing. **Note added.** Prefer-after S122: done. Commands `pnpm api:spec`, `pnpm api:breaking` exist (`package.json:36`).
+- S125: depends S124 (todo), S81 (done); design S123 (todo, so it can't start: rule 18 holds). `web/package.json:18–19` has `@mantine/core`/`@mantine/hooks` `^7.17.1` and no `@mantine/dates`; `addDays` (`calendar-date.ts:8`), `mlbToday` (`scoreboard-date.ts:40`), `formatDate` (`web/src/format/datetime.ts`) exist. Entry chunk 155,465 of 200,000 bytes (S117's ledger size run), so the on-demand note still holds.
+
+**2b. Adversarial pass (Copilot-class checklist, LOOP.md §7)**
+- **S131** (items 1, 9, 10, 11, 12, 14 applied; read `.github/workflows/deploy.yml`, `scripts/ci-changes.sh:60–62`, `package.json` scripts):
+  - 12: `v3.01.0` parses as numeric parts equal to `v3.1.0`, so `releases/v3.01.0.json` would pass AC 3's name check yet compare equal to another release; `date: "2026-02-30"` passes a shape check. AC 1 now rejects leading zeros and uses `isCalendarDate`.
+  - 11: an entry listed in both `headline` and `items` would show twice on S134's page; AC 1 now rejects it. "Notes with nothing in any bucket" didn't say pass or fail; now rejected.
+  - 14: `deploy.yml` has "Build the web app" in the verify, preview, staging and production jobs, so AC 4's whole-file grep passes with the check placed in the verify job; AC 4 now greps the `production:` block only, after Install (the check needs dependencies).
+  - 1/11: AC 5's flow lands approved notes at commit N; a milestone pull request merging into `stage` after N and before the release sha ships undescribed. AC 5 now requires the notes to describe every contained milestone pull request (redraft and re-approve, or release N and move it).
+  - 11: AC 5's "never writing an approval the owner didn't give in the current session" contradicted copying v3.1.0's earlier approval (new AC 6); AC 5 names the exception.
+  - Noted: `pnpm --filter … exec` runs in `functions/`, so `releases/` must resolve from the repo root; `releases/*.json` counts as code in `scripts/ci-changes.sh` (good: notes pull requests run verify and deploy staging); changing `deploy.yml` needs the owner's go-ahead per CLAUDE.md ("Ask before … changing CI/deploy workflows unless the user explicitly requested it").
+- **S132** (items 6, 9, 11, 12 applied; read `web/src/api/codegen.test.ts` pattern, ADR-021):
+  - 9: the bundle generated from `releases/` is a committed file; S131 AC 5's flow lands a notes file without regenerating it, so the notes pull request fails the drift test (AC 3). **AC 6 added** (the release rule names the command) and `CLAUDE.md` added to the fence (frontmatter, Scope files, Goal condition, `/goal`).
+  - 12: `releases/v3.2.0.json` holding `version: "v3.1.0"` gives two v3.1.0 entries in `releases`; the bundle command now refuses it (only `release:check` checked the name before, and only for the released version).
+  - 12: `Cache-Control: s-maxage=300, stale-while-revalidate=600` meets "cacheable for at most 5 minutes" literally yet serves stale notes for 15; AC 4 now counts SWR.
+  - 6: route under `/api/v1/`, `:name` not needed; additive `api:breaking`. Held.
+- **S133** (items 11, 15 applied; read `web/src/pwa/updates.ts:19–41`, `web/src/layout/NoticeSlot.tsx:5–16`, A2/A5):
+  - 15: A6 is raised by both S73 (waiting worker) and S28 (retired API version) with one message; AC 1 didn't say whether the additions show in the retired case. Added.
+  - 15: the after-update notification can be up with S74's offline marker or A6's box; AC 1 didn't place it. Added.
+  - 11: version line (above). Added.
+- **S134** (items 3, 12 applied): a release with only `items` (no headline) wasn't in the RTL case; added. Signed-out reachability and states held.
+- **S135** (items 1, 3, 12, 13, 15 applied; read `web/src/storage/storage.ts:13–20,82–113`, ADR-028 inventory row "Browser"):
+  - 15: AC 3's "records the release in browser storage" named no key; reusing `bt.updateSnoozedUntil` would couple the two notices. AC 3 now requires its own `STORAGE_KEYS` key labeled not personal (ADR-028's `none`, as S73's).
+  - 13: a stored `"banana"` or `"v9.9.9"` from a corrupted write: AC 3 now treats a non-version as nothing recorded and overwrites it (a too-new value is the rollback case, already covered).
+  - 3: a build with `release: null` (no approved notes) would record `"null"`; AC 3 now records nothing. The `?after=` request failing in AC 3 had no stated outcome; now the link alone.
+  - 1: within 5 minutes of a deploy S132's cached answer can be the old server's; noted as AC 2's/3's "none" case, not an error.
+  - ADR-025: three readers of `releases/` (S131's check, S132's bundle, S135's Vite config); reuse check now names the shared reader.
+- **S129** (items 11 applied): "as A1–A8 did" holds (`standings-search-settings/amendments/A1–A8.md` exist). No finding.
+- **S130** (items 3, 12 applied; generated spec `StandingsPhaseName: "regularSeason" | "final" | "spring"`, `phase?` optional at `bt-api.v1.ts:742`): AC 1 tested only `spring` and `final`; an absent `phase` (a payload cached before S128) or `regularSeason` was unstated. AC 1 now says no label, RTL with all four.
+
+**3. Prioritization**
+- S131 can't start before v3.1.0 is published; at priority 78 it sits after S123–S130, so no reorder is needed, but a run reaching it first parks it (note added). S133 is a design story like S123 and S129: all three can be put to the owner in one ratification session. No story became obsolete; S122 landing made nothing above cheaper except S124's reuse (noted). Underestimation class: stories that add a version/identity (S131, S135) keep missing the existing version line; caught here.
+- Baseline (`01 Current baseline.md`): As-of line names S117 (2026-11-08); S126, S128, S122 rows present; changelist row 39 and calendar row 37 in the gap map. No drift.
+
+**Duplication sweep (ADR-025)** — read the code S126/S128/S122/S117 added (`git diff --stat 317d682..HEAD`). S122's `isCalendarDate` (`calendar-date.ts`) and `scheduleWindowMode` (`window.ts`) are single implementations, used by ingest and backfill. Hit: the API's three date parameters are still shape-only regexes (`functions/src/handlers/api.ts:178`, `:197`, `:215`; also `seed-refresh.ts:15`, `web/src/format/datetime.ts:16`), so `2026-02-30` passes while `isCalendarDate` rejects it. Changing the handlers turns those into 400s (a behavior change), so it goes to the owner; S124's own month check is required to be one domain function beside `isCalendarDate` (AC 5).
+
+**Personal-data sweep (ADR-028)** — S131–S135, S123–S125, S129–S130 and the code added by S126/S128/S122/S117: no new table or outside service. S135's browser key now named (`STORAGE_KEYS`, not personal). New log lines (`backfill.ts` `[mlb:backfill]`, `db-copy-baseball.ts` host-only) carry no email or personal field. S131's `approval` holds the owner's words and a date, no account data. None else found.
+
+**Questions for the owner (not blocking the next 3 stories)**
+1. The rail's version line reads `v3.0.<build number> (<commit>)`. Once v3.1.0 is live and the changelist names v3.1.0, should the rail show the release (for example `v3.1.0 (c46e853)`), or stay a build counter? (S133 will draw your answer.)
+2. When v3.1.0 publishes, should its approved fan-facing notes and your approval words go in its GitHub Release notes so S131 can copy them into `releases/v3.1.0.json`, or would you rather re-approve that file when S131 runs?
+3. S131 adds a release-notes check to the production deploy workflow. CLAUDE.md says to ask before changing deploy workflows: is this story your go-ahead, or should the run ask you when it starts S131?
+4. The API accepts impossible dates like `2026-02-30` in `/api/v1/schedule` and its siblings (shape check only). Should they become a 400 through the same date check the backfill uses? If yes, it folds into S124.
+
+**Verdict: `amended`** — S124, S130, S131, S132, S133, S134, S135 and the Backlog reviews scheduling notes edited; `pnpm backlog:build` and `pnpm backlog:check` pass.
