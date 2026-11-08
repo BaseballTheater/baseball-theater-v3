@@ -142,6 +142,32 @@ describe("handleApiRequest", () =>
 		});
 	});
 
+	it("standings follow the season (S128): the final table in the off-season, without a date on MLB's today, spring's in the spring", async () =>
+	{
+		await withServer(async (base) =>
+		{
+			const body = (await (await fetch(`${base}/api/v1/standings`)).json()) as StandingsResponse;
+			expect(body).toMatchObject({
+				phase: "final",
+				season: 2026,
+				date: "2026-09-27",
+			});
+			expect(body.divisions.map((d) => d.divisionId)).toEqual([201, 202, 200, 204, 205, 203]);
+			const spring = (await (await fetch(`${base}/api/v1/standings?date=2026-03-01`)).json()) as StandingsResponse;
+			expect(spring).toMatchObject({
+				phase: "spring",
+				season: 2026,
+				date: "2026-03-01",
+			});
+			const regular = (await (await fetch(`${base}/api/v1/standings?date=2026-09-05`)).json()) as StandingsResponse;
+			expect(regular).toMatchObject({
+				phase: "regularSeason",
+				season: 2026,
+				date: "2026-09-05",
+			});
+		}, () => new Date("2026-11-08T03:00:00Z"));
+	});
+
 	it("serves the day digest (S71): every game's videos ranked together, the first to watch first", async () =>
 	{
 		await withServer(async (base) =>

@@ -28,7 +28,30 @@ describe("mapSeasonCalendar", () =>
 			season: 2026,
 			springStartDate: "2026-02-20",
 			lastGameDate: "2026-10-28",
+			regularSeasonStartDate: "2026-03-25",
+			regularSeasonEndDate: "2026-09-27",
 		});
+	});
+
+	it("carries the regular season's first and last days when MLB lists them (S128), and leaves them out when it doesn't", () =>
+	{
+		const s2027 = mapSeasonCalendar(parseSeasonsResponse(raw("seasons-2027.json")), parseScheduleResponse(raw("worldseries-2027.json")));
+		expect(s2027).toMatchObject({
+			season: 2027,
+			springStartDate: "2027-02-19",
+			regularSeasonStartDate: "2027-03-25",
+			regularSeasonEndDate: "2027-09-26",
+		});
+		const bare = parseSeasonsResponse({
+			seasons: [{
+				seasonId: "2028",
+				springStartDate: "2028-02-20",
+				postSeasonEndDate: "2028-10-31",
+			}],
+		});
+		const calendar = mapSeasonCalendar(bare, noSeries);
+		expect(calendar).not.toHaveProperty("regularSeasonStartDate");
+		expect(calendar).not.toHaveProperty("regularSeasonEndDate");
 	});
 
 	it("before the Series is scheduled, the calendar's postseason end stands in", () =>

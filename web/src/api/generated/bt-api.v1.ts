@@ -726,12 +726,22 @@ export interface components {
             name: string | null;
             teams: components["schemas"]["StandingsTeamRecord"][];
         };
+        /**
+         * @description Which table a standings payload is (S128): the day's regular-season standings, a season's final regular-season table (after the regular season until the next spring), or spring training's standings as of the day.
+         * @enum {string}
+         */
+        StandingsPhaseName: "regularSeason" | "final" | "spring";
         /** @description The division standings as of one day (S4): MLB's tables, projected to BT's shape. */
         StandingsResponse: components["schemas"]["StandingsSnapshot"];
         StandingsSnapshot: {
+            /** @description The day the table stands as of; for a `final` table, its season's `regularSeasonEndDate`. */
             date: string;
             divisions: components["schemas"]["StandingsDivision"][];
             fetchedAt: string;
+            /** @description Which table this is (S128); absent on snapshots read before S128 (recorded fixtures). */
+            phase?: components["schemas"]["StandingsPhaseName"];
+            /** @description MLB's season id of the table (S128): the year it was played. */
+            season?: number;
             /** @enum {string} */
             windowMode: "active" | "cache";
         };

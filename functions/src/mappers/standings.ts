@@ -66,15 +66,32 @@ export function mapStandingsDivision(group: StandingsRecordGroup): StandingsDivi
 	};
 }
 
+/**
+ * The order every table lists its divisions in (S128): the regular season's, AL East, Central,
+ * West, then NL East, Central, West. MLB's spring table comes West first, and the ids are not in
+ * this order (West is 200, East 201, Central 202), so it is a fixed list, not a sort by id.
+ */
+const DIVISION_ORDER: readonly number[] = [201, 202, 200, 204, 205, 203];
+
+/** A division's place in `DIVISION_ORDER`; one MLB doesn't list there keeps its place after them. */
+function divisionPlace(division: StandingsDivision): number
+{
+	const place = division.divisionId === null ? -1 : DIVISION_ORDER.indexOf(division.divisionId);
+	return place === -1 ? DIVISION_ORDER.length : place;
+}
+
 export function mapStandings(
 	response: StandingsResponse,
 	date: string,
 	fetchedAt = new Date().toISOString(),
 ): StandingsSnapshot
 {
+	const divisions = (response.records ?? []).map(mapStandingsDivision);
+	// A stable sort, so divisions outside the list keep MLB's order among themselves.
+	divisions.sort((a, b) => divisionPlace(a) - divisionPlace(b));
 	return {
 		date,
-		divisions: (response.records ?? []).map(mapStandingsDivision),
+		divisions,
 		fetchedAt,
 		windowMode: "cache",
 	};

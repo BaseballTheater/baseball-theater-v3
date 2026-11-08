@@ -1275,6 +1275,7 @@ const standingsRecordEntrySchema = z.object({
 	sportGamesBack: z.string().optional(),
 	conferenceGamesBack: z.string().optional(),
 	springLeagueGamesBack: z.string().optional(),
+	springLeagueRank: z.string().optional(),
 
 	runsScored: z.number().optional(),
 	runsAllowed: z.number().optional(),
@@ -1284,6 +1285,7 @@ const standingsRecordEntrySchema = z.object({
 	divisionChamp: z.boolean().optional(),
 	hasWildcard: z.boolean().optional(),
 	clinched: z.boolean().optional(),
+	clinchIndicator: z.string().optional(),
 	wildCardRank: z.string().optional(),
 	wildCardLeader: z.boolean().optional(),
 

@@ -33,7 +33,12 @@ export interface MlbStatsClient {
 	 * throw. Ingest calls it (ADR-002); `fetchGame` attaches `videoPlayRefs` / `relatedArticles`.
 	 */
 	fetchGameGraphContent(gamePk: number): Promise<GameGraphContent | null>;
+	/** The regular season's standings as of `date` (S4); MLB has none outside the regular season. */
 	fetchStandings(date: string): Promise<StandingsSnapshot>;
+	/** A season's final regular-season table (S128): MLB's standings for the season with no date. */
+	fetchFinalStandings(season: number): Promise<StandingsSnapshot>;
+	/** A season's spring training standings as of `date` (S128); empty before its first spring game is final. */
+	fetchSpringStandings(season: number, date: string): Promise<StandingsSnapshot>;
 	/**
 	 * One season's calendar — its first spring game and its last postseason game (S111) — or
 	 * null when MLB has not published the season or it can't be had.

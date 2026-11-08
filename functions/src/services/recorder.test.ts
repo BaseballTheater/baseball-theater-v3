@@ -29,9 +29,11 @@ import type {
 import type { GameDiffPatchResponse } from "@bt/mlb-api";
 import type { MlbStatsClient } from "@bt/ports";
 import { FixtureMlbStatsClient } from "../adapters/fixtures/mlb.js";
-import { graphContentRequest } from "../adapters/http/mlb.js";
 import {
-	rawEndpoints, recordNormalized, recordRaw,
+	finalStandingsUrl, graphContentRequest, seasonsUrl, springStandingsUrl, worldSeriesUrl,
+} from "../adapters/http/mlb.js";
+import {
+	rawEndpoints, recordEndpoints, recordNormalized, recordRaw, seasonEndpoints,
 } from "./recorder.js";
 
 const FIXTURES = path.resolve(
@@ -105,6 +107,16 @@ class FakeMlbStatsClient implements MlbStatsClient
 			fetchedAt: "",
 			windowMode: "cache",
 		};
+	}
+
+	async fetchFinalStandings(season: number): Promise<StandingsSnapshot>
+	{
+		return this.fetchStandings(`${season}-12-31`);
+	}
+
+	async fetchSpringStandings(_season: number, date: string): Promise<StandingsSnapshot>
+	{
+		return this.fetchStandings(date);
 	}
 
 	async fetchPlayers(): Promise<PlayerProfile[]>
@@ -214,6 +226,35 @@ describe("fixture recorder", () =>
 		expect(names).toContain(`graphql-content-${GAME_PK}`);
 		expect(names).toContain(`standings-${DATE}`);
 		expect(names).toContain(`people-${GAME_PK}`);
+	});
+
+	it("records a season's calendar, World Series, final and spring standings with the URLs the client asks (S128)", async () =>
+	{
+		expect(seasonEndpoints(2026, "2026-03-24")).toEqual([
+			{
+				name: "seasons-2026",
+				url: seasonsUrl(2026),
+			},
+			{
+				name: "worldseries-2026",
+				url: worldSeriesUrl(2026),
+			},
+			{
+				name: "standings-2026-final",
+				url: finalStandingsUrl(2026),
+			},
+			{
+				name: "standings-2026-spring",
+				url: springStandingsUrl(2026, "2026-03-24"),
+			},
+		]);
+		expect(seasonEndpoints(2027).map((e) => e.name)).toEqual(["seasons-2027", "worldseries-2027", "standings-2027-final"]);
+		const out = await mkdtemp(path.join(tmpdir(), "bt-season-rec-"));
+		const written = await recordEndpoints(seasonEndpoints(2027), out, {
+			fetchImpl: async (input) => new Response(`{"url":"${String(input)}"}`),
+		});
+		expect(written).toEqual(["seasons-2027.json", "worldseries-2027.json", "standings-2027-final.json"]);
+		expect(await readFile(path.join(out, "raw", "standings-2027-final.json"), "utf8")).toBe(`{"url":"${finalStandingsUrl(2027)}"}`);
 	});
 
 	it("records standings with the same URL the client asks, season included", () =>

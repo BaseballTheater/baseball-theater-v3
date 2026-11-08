@@ -24,7 +24,7 @@ import type {
 } from "@bt/domain";
 import type { MlbStatsClient } from "@bt/ports";
 import {
-	graphContentRequest, playMetricsUrl, standingsUrl,
+	finalStandingsUrl, graphContentRequest, playMetricsUrl, seasonsUrl, springStandingsUrl, standingsUrl, worldSeriesUrl,
 } from "../adapters/http/mlb.js";
 
 const DEFAULT_BASE_URL = "https://statsapi.mlb.com";
@@ -107,6 +107,38 @@ export function rawEndpoints(
 }
 
 /**
+ * One season's recordings (S111, S128): its calendar and World Series (`seasons-<season>`,
+ * `worldseries-<season>`), its final regular-season table (`standings-<season>-final`) and,
+ * with `springDate`, its spring training table as of that day (`standings-<season>-spring`) —
+ * each with the URL the HTTP client asks, so the fixtures answer what production would.
+ */
+export function seasonEndpoints(season: number, springDate?: string, baseUrl = DEFAULT_BASE_URL): RawEndpoint[]
+{
+	const endpoints: RawEndpoint[] = [
+		{
+			name: `seasons-${season}`,
+			url: seasonsUrl(season, baseUrl),
+		},
+		{
+			name: `worldseries-${season}`,
+			url: worldSeriesUrl(season, baseUrl),
+		},
+		{
+			name: `standings-${season}-final`,
+			url: finalStandingsUrl(season, baseUrl),
+		},
+	];
+	if (springDate)
+	{
+		endpoints.push({
+			name: `standings-${season}-spring`,
+			url: springStandingsUrl(season, springDate, baseUrl),
+		});
+	}
+	return endpoints;
+}
+
+/**
  * Raw path. Writes each upstream response verbatim into `<outDir>/raw/`.
  * Returns the basenames written, in order.
  */
@@ -116,6 +148,16 @@ export async function recordRaw(
 	options: RawRecorderOptions = {},
 ): Promise<string[]>
 {
+	return recordEndpoints(rawEndpoints(target, options.baseUrl ?? DEFAULT_BASE_URL), outDir, options);
+}
+
+/** Writes each endpoint's response verbatim into `<outDir>/raw/<name>.json`; returns the basenames, in order. */
+export async function recordEndpoints(
+	endpoints: readonly RawEndpoint[],
+	outDir: string,
+	options: Pick<RawRecorderOptions, "fetchImpl"> = {},
+): Promise<string[]>
+{
 	const doFetch = options.fetchImpl ?? ((input, init) => fetch(input, init));
 	const rawDir = path.join(outDir, "raw");
 	await mkdir(rawDir, {
@@ -123,7 +165,7 @@ export async function recordRaw(
 	});
 
 	const written: string[] = [];
-	for (const endpoint of rawEndpoints(target, options.baseUrl ?? DEFAULT_BASE_URL))
+	for (const endpoint of endpoints)
 	{
 		const response = await doFetch(endpoint.url, {
 			headers: {

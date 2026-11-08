@@ -13,13 +13,14 @@ import type {
 import { rankHighlightsByImpact } from "@bt/domain";
 import type { GameDiffPatchResponse, ReplayPatchEntry } from "@bt/mlb-api";
 import {
-	parseGameTimestamps, parseGraphContentResponse, parsePlayMetricsResponse, parseRecordedReplayWalk, parseScheduleResponse, parseSeasonsResponse,
+	parseGameTimestamps, parseGraphContentResponse, parsePlayMetricsResponse, parseRecordedReplayWalk, parseScheduleResponse, parseSeasonsResponse, parseStandingsResponse,
 } from "@bt/mlb-api";
 import type { MlbStatsClient } from "@bt/ports";
 import { withGameExtras } from "../../mappers/game-extras.js";
 import { mapGraphContent } from "../../mappers/graph-content.js";
 import { mapPlayMetrics } from "../../mappers/play-metrics.js";
 import { mapSeasonCalendar } from "../../mappers/season-calendar.js";
+import { mapStandings } from "../../mappers/standings.js";
 
 type ScheduleFixture = {
 	date: string;
@@ -201,6 +202,40 @@ export class FixtureClient implements MlbStatsClient
 		{
 			return null;
 		}
+	}
+
+	/**
+	 * A season's final table from the recording `fixtures/raw/standings-<season>-final.json`
+	 * (S128), mapped as the HTTP client maps it; an empty table for a season with no recording.
+	 */
+	async fetchFinalStandings(season: number): Promise<StandingsSnapshot>
+	{
+		return this.recordedStandings(`raw/standings-${season}-final.json`, `${season}-12-31`);
+	}
+
+	/**
+	 * A season's spring table from `fixtures/raw/standings-<season>-spring.json` (S128): one
+	 * recording per season, served for every spring day; an empty table for a season with none.
+	 */
+	async fetchSpringStandings(season: number, date: string): Promise<StandingsSnapshot>
+	{
+		return this.recordedStandings(`raw/standings-${season}-spring.json`, date);
+	}
+
+	private async recordedStandings(file: string, date: string): Promise<StandingsSnapshot>
+	{
+		let records: unknown;
+		try
+		{
+			records = await this.readJson(file);
+		}
+		catch
+		{
+			records = {
+				records: [],
+			};
+		}
+		return mapStandings(parseStandingsResponse(records), date);
 	}
 
 	/**

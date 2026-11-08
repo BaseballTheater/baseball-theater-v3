@@ -83,6 +83,16 @@ class CountingMlbClient implements MlbStatsClient
 		};
 	}
 
+	async fetchFinalStandings(): Promise<StandingsSnapshot>
+	{
+		return this.fetchStandings();
+	}
+
+	async fetchSpringStandings(): Promise<StandingsSnapshot>
+	{
+		return this.fetchStandings();
+	}
+
 	async fetchPlayers(): Promise<PlayerProfile[]>
 	{
 		return [];

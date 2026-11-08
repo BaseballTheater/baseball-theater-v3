@@ -1045,6 +1045,11 @@
 				"required": ["divisionId", "name", "leagueId", "teams"],
 				"type": "object"
 			},
+			"StandingsPhaseName": {
+				"description": "Which table a standings payload is (S128): the day's regular-season standings, a season's final regular-season table (after the regular season until the next spring), or spring training's standings as of the day.",
+				"enum": ["regularSeason", "final", "spring"],
+				"type": "string"
+			},
 			"StandingsResponse": {
 				"$ref": "#/components/schemas/StandingsSnapshot",
 				"description": "The division standings as of one day (S4): MLB's tables, projected to BT's shape."
@@ -1052,9 +1057,20 @@
 			"StandingsSnapshot": {
 				"additionalProperties": false,
 				"properties": {
-					"date": { "type": "string" },
+					"date": {
+						"description": "The day the table stands as of; for a `final` table, its season's `regularSeasonEndDate`.",
+						"type": "string"
+					},
 					"divisions": { "items": { "$ref": "#/components/schemas/StandingsDivision" }, "type": "array" },
 					"fetchedAt": { "type": "string" },
+					"phase": {
+						"$ref": "#/components/schemas/StandingsPhaseName",
+						"description": "Which table this is (S128); absent on snapshots read before S128 (recorded fixtures)."
+					},
+					"season": {
+						"description": "MLB's season id of the table (S128): the year it was played.",
+						"type": "number"
+					},
 					"windowMode": { "enum": ["active", "cache"], "type": "string" }
 				},
 				"required": ["date", "divisions", "fetchedAt", "windowMode"],
