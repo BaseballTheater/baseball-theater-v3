@@ -2,7 +2,7 @@ import {
 	describe, expect, it,
 } from "vitest";
 import {
-	BACKFILL_EARLIEST_DATE, backfillDays, defaultBackfillRange, GIVE_UP_AFTER_DAYS, isOffSeasonDay, isSettledGame, isSourceGivenUp, recordSourceDay,
+	BACKFILL_EARLIEST_DATE, backfillDays, defaultBackfillRange, GIVE_UP_AFTER_DAYS, isOffSeasonDay, isScheduleDaySettled, isSettledGame, isSourceGivenUp, recordSourceDay,
 } from "./backfill.js";
 import type { SourceStreak } from "./backfill.js";
 
@@ -134,5 +134,62 @@ describe("recordSourceDay (S122 AC 7)", () =>
 		expect(recordSourceDay(state, "2026-07-31", true)).toBe(state);
 		expect(recordSourceDay(state, "2026-07-29", true)).toBe(state);
 		expect(isSourceGivenUp(undefined, "2026-07-29")).toBe(false);
+	});
+});
+
+describe("isScheduleDaySettled (S122 AC 4)", () =>
+{
+	const final = {
+		status: {
+			abstractGameState: "Final",
+			codedGameState: "F",
+			detailedState: "Final",
+		},
+	};
+	const scheduled = {
+		status: {
+			abstractGameState: "Preview",
+			codedGameState: "S",
+			detailedState: "Scheduled",
+		},
+	};
+
+	it("empty day: unsettled on its own date or before, settled once MLB's today is past it", () =>
+	{
+		expect(isScheduleDaySettled({
+			date: "2026-07-04",
+			games: [],
+		}, "2026-07-04")).toBe(false);
+		expect(isScheduleDaySettled({
+			date: "2026-07-04",
+			games: [],
+		}, "2026-07-03")).toBe(false);
+		expect(isScheduleDaySettled({
+			date: "2026-07-04",
+			games: [],
+		}, "2026-07-05")).toBe(true);
+	});
+
+	it("a day with games is settled when every game is, whatever the date", () =>
+	{
+		expect(isScheduleDaySettled({
+			date: "2026-07-04",
+			games: [final] as never,
+		}, "2026-07-04")).toBe(true);
+		expect(isScheduleDaySettled({
+			date: "2026-07-04",
+			games: [final, scheduled] as never,
+		}, "2026-07-05")).toBe(false);
+	});
+});
+
+describe("defaultBackfillRange leap day (S122)", () =>
+{
+	it("a February 29 --to defaults --from to February 28 a year before", () =>
+	{
+		expect(defaultBackfillRange("2028-02-29")).toEqual({
+			from: "2027-02-28",
+			to: "2028-02-29",
+		});
 	});
 });

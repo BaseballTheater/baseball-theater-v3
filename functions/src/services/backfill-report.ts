@@ -10,6 +10,7 @@ import type { PostgresDb } from "../adapters/postgres/repos.js";
 /** The tables a backfill fills, in the order the report lists them. */
 export const GAME_TABLES = ["schedule_days", "games", "game_projections"] as const;
 
+/** One game table's row count and on-disk bytes (`pg_total_relation_size`), a line of the end-of-run report. */
 export type TableSize = {
 	table: (typeof GAME_TABLES)[number];
 	rows: number;

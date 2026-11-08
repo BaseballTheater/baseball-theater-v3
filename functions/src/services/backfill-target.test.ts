@@ -108,6 +108,42 @@ describe("checkBackfillTarget (S122 AC 1)", () =>
 		expect(unknown.why).toContain("not an endpoint");
 	});
 
+	it("production: a ?host= parameter pointing a local-looking string at a hosted database is refused, naming that host", async () =>
+	{
+		const check = await checkBackfillTarget(`postgres://u:s3cret@localhost/neondb?host=${HOST}&sslmode=require`, {
+			allowProduction: false,
+		});
+		expect(check.allowed).toBe(false);
+		expect(check.target.host).toBe(HOST);
+		expect(check.why).toContain(HOST);
+		expect(check.why).not.toContain("s3cret");
+
+		const { api } = fakeNeon([{
+			host: HOST,
+			branch_id: "br-prod",
+		}, {
+			host: "ep-dev-1.us-east-2.aws.neon.tech",
+			branch_id: "br-stage",
+		}]);
+		const pooled = await checkBackfillTarget(`postgres://u:p@ep-dev-1-pooler.us-east-2.aws.neon.tech/db?host=${HOST}`, {
+			allowProduction: false,
+			neon: api,
+		});
+		expect(pooled.allowed).toBe(false);
+		expect(pooled.why).toContain("default branch");
+	});
+
+	it("production: hostaddr or no host at all is refused, even with --allow-production", async () =>
+	{
+		for (const url of ["postgres://u:p@localhost/db?hostaddr=1.2.3.4", "postgres://u:p@/db"])
+		{
+			const check = await checkBackfillTarget(url, {
+				allowProduction: true,
+			});
+			expect(check.allowed, url).toBe(false);
+		}
+	});
+
 	it("production: --allow-production lets a hosted database through without asking Neon", async () =>
 	{
 		const { api, asked } = fakeNeon([]);

@@ -3,8 +3,8 @@
  * when it stops asking a source that has stopped answering. Pure, so the command, its tests
  * and any later production run share one decision for each (ADR-025).
  */
-import { addDays } from "./calendar-date.js";
-import type { GameSnapshot } from "./types.js";
+import { addDays, yearsBefore } from "./calendar-date.js";
+import type { GameSnapshot, ScheduleDay } from "./types.js";
 import { isFinalStatus, normalizeStatusCode } from "./window.js";
 
 /** The first day the backfill ever asks for: the 1901 American League's opening day (owner, 2026-11-07). */
@@ -47,12 +47,9 @@ export function defaultBackfillRange(today: string, from?: string, to?: string):
 	to: string; }
 {
 	const end = to ?? today;
-	const year = Number(end.slice(0, 4)) - 1;
-	// One year back by the calendar; 02-29 steps to 02-28 in a year without one.
-	const yearBefore = `${year}${end.slice(4)}`;
-	const valid = addDays(yearBefore, 0) === yearBefore ? yearBefore : addDays(`${year}-03-01`, -1);
 	return {
-		from: from ?? valid,
+		// One year back by the calendar; 02-29 steps to 02-28 in a year without one.
+		from: from ?? yearsBefore(end, 1),
 		to: end,
 	};
 }
@@ -66,6 +63,21 @@ export function isSettledGame(status: Pick<GameSnapshot["status"], "codedGameSta
 {
 	if (isFinalStatus(normalizeStatusCode(status.codedGameState))) return true;
 	return /^(postponed|cancell?ed)\b/i.test(status.detailedState);
+}
+
+/**
+ * Whether a stored schedule day needs no more asking (S122 AC 4): every game in it is settled
+ * ({@link isSettledGame}) and, when it lists no games at all, the day is before MLB's `today`
+ * (`mlbToday` of the run's clock). So an empty day is asked about again only while it is MLB's
+ * today (or still ahead); any run on a later day accepts a stored empty day without asking,
+ * whenever that empty answer was fetched. The run's clock decides rather than the stored
+ * `fetchedAt` because `storeSchedule` keeps the old row, and its old `fetchedAt`, when a
+ * re-fetch is unchanged (ADR-022): judging by `fetchedAt` would re-fetch such a day forever.
+ */
+export function isScheduleDaySettled(day: Pick<ScheduleDay, "date" | "games">, today: string): boolean
+{
+	if (!day.games.every((game) => isSettledGame(game.status))) return false;
+	return day.games.length > 0 || day.date < today;
 }
 
 /**

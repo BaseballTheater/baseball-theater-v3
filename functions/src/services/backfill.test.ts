@@ -7,7 +7,7 @@
  */
 import { readFileSync } from "node:fs";
 import {
-	mkdtemp, readdir, readFile, rm,
+	mkdtemp, readdir, readFile, rm, writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -516,6 +516,109 @@ describe("runBackfill (S122)", () =>
 		expect((await readdir(dir)).sort()).toEqual(["localhost--bt.json", "localhost--bt_other.json"]);
 	});
 
+	it("resume file: an empty, unreadable or misshapen file fails naming the file to delete", async () =>
+	{
+		const dir = await mkdtemp(path.join(tmpdir(), "bt-backfill-"));
+		dirs.push(dir);
+		const target = {
+			host: "localhost",
+			name: "bt",
+		};
+		const file = path.join(dir, "localhost--bt.json");
+		for (const text of ["", "{nope", "[]", "{\"sources\":{\"content\":{\"streak\":\"x\"}}}", "{\"sources\":{\"videos\":{\"streak\":1}}}", "{\"sources\":{\"content\":{\"streak\":1,\"givenUpAt\":\"2026-02-30\"}}}"])
+		{
+			await writeFile(file, text);
+			await expect(fileResumeStore(dir, target).load(), text).rejects.toThrow(`${file} is not a readable backfill resume file`);
+			await expect(fileResumeStore(dir, target).load(), text).rejects.toThrow("delete it");
+		}
+	});
+
+	it("resume file: two saves at once to one database both finish, leaving one whole file", async () =>
+	{
+		const dir = await mkdtemp(path.join(tmpdir(), "bt-backfill-"));
+		dirs.push(dir);
+		const target = {
+			host: "localhost",
+			name: "bt",
+		};
+		const a = fileResumeStore(dir, target);
+		const b = fileResumeStore(dir, target);
+		await Promise.all([a.save({
+			sources: {
+				content: {
+					streak: 1,
+				},
+			},
+		}), b.save({
+			sources: {
+				content: {
+					streak: 2,
+				},
+			},
+		})]);
+		expect([1, 2]).toContain((await a.load()).sources.content?.streak);
+		expect(await readdir(dir)).toEqual(["localhost--bt.json"]);
+	});
+
+	it("resume: a stop after a day's games are fetched but before its answers are saved can't lose them, so a source that answered isn't given up", async () =>
+	{
+		const mlb = new FakeMlb(1);
+		mlb.fails.content = (_pk, date) => date === "2026-07-09";
+		const repos = counted(memoryRepos());
+		const state = memoryStore();
+		state.saved = {
+			sources: {
+				content: {
+					streak: GIVE_UP_AFTER_DAYS - 1,
+					lastCountedDay: "2026-07-11",
+				},
+			},
+		};
+		const save = state.save.bind(state);
+		let saves = 0;
+		state.save = async (next) =>
+		{
+			if (saves++ === 0) throw new Error("killed before the resume file was written");
+			await save(next);
+		};
+		const range = {
+			from: "2026-07-09",
+			to: "2026-07-10",
+		};
+		await expect(runBackfill(deps(mlb, repos, state), range)).rejects.toThrow("killed");
+		const resumed = await runBackfill(deps(mlb, repos, state), range);
+		// 07-10's content answered, so the streak reset there; 07-09's failure is the first of a new one.
+		expect(resumed.givenUp).toEqual({});
+		expect(state.saved?.sources.content).toEqual({
+			streak: 1,
+			lastCountedDay: "2026-07-09",
+		});
+	});
+
+	it("empty day: a day MLB lists no games for is asked again while it is MLB's today, and settled once a run's today is past it", async () =>
+	{
+		const mlb = new FakeMlb(0);
+		const repos = counted(memoryRepos());
+		const range = {
+			from: "2026-11-08",
+			to: "2026-11-08",
+		};
+		const today = await runBackfill(deps(mlb, repos, memoryStore()), range);
+		expect(today.incomplete).toEqual(["2026-11-08"]);
+		mlb.requests.length = 0;
+		const later = await runBackfill(deps(mlb, repos, memoryStore()), range);
+		expect(mlb.requests).toEqual(["schedule 2026-11-08"]);
+		expect(later.incomplete).toEqual(["2026-11-08"]);
+		// The stored row keeps its first fetchedAt (unchanged, ADR-022), so the run's own clock decides.
+		const nextDay = () => new Date("2026-11-09T17:00:00.000Z");
+		mlb.requests.length = 0;
+		const after = await runBackfill(deps(mlb, repos, memoryStore(), {
+			now: nextDay,
+		}), range);
+		expect(mlb.requests).toEqual([]);
+		expect(after.alreadyComplete).toBe(1);
+	});
+
 	it("progress: a line per day with its games stored and any sources given up", async () =>
 	{
 		const mlb = new FakeMlb();
@@ -533,8 +636,13 @@ describe("runBackfill (S122)", () =>
 
 	it("pacing: the pacer is told each day before its first request, and older days get the longer gap", async () =>
 	{
+		// Only the pacer's day and gap are read here; a request through it would be a bug.
 		const polite = new PoliteFetch({
 			today: "2026-11-08",
+			fetchImpl: async () =>
+			{
+				throw new Error("no network in tests");
+			},
 		});
 		const mlb = new FakeMlb(1);
 		const seen: string[] = [];

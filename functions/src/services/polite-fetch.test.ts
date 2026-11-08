@@ -8,7 +8,7 @@ import {
 } from "vitest";
 import type { Clock } from "./polite-fetch.js";
 import {
-	BACKOFF_BASE_MS, MAX_IN_FLIGHT_PER_HOST, OLD_GAP_MS, PoliteFetch, RECENT_GAP_MS, RETRY_ATTEMPTS, retryAfterMs,
+	BACKOFF_BASE_MS, MAX_IN_FLIGHT_PER_HOST, OLD_GAP_MS, PoliteFetch, realClock, RECENT_GAP_MS, RETRY_ATTEMPTS, retryAfterMs,
 } from "./polite-fetch.js";
 
 class FakeClock implements Clock
@@ -94,6 +94,12 @@ function fakeFetch(clock: FakeClock, takesMs: number, answer: (url: URL, attempt
 	};
 }
 
+/** A fetch that fails loudly: tests that only read the pacer's settings must never reach the network. */
+const noNetwork: typeof fetch = async () =>
+{
+	throw new Error("no network in tests");
+};
+
 const HOSTS = ["https://statsapi.mlb.com/a", "https://bdfed.stitch.mlbinfra.com/b", "https://data-graph.mlb.com/c"];
 
 function startsOf(seen: Seen[], host: string): number[]
@@ -172,6 +178,7 @@ describe("PoliteFetch (S122 AC 6)", () =>
 
 		const custom = new PoliteFetch({
 			today: "2026-11-08",
+			fetchImpl: noNetwork,
 			clock,
 			recentGapMs: 2_500,
 			oldGapMs: 9_000,
@@ -179,6 +186,62 @@ describe("PoliteFetch (S122 AC 6)", () =>
 		expect(custom.gapMs).toBe(2_500);
 		custom.setDay("1950-05-01");
 		expect(custom.gapMs).toBe(9_000);
+	});
+
+	it("older: on a February 29 the 10-year line is February 28, the same anniversary the default range counts", () =>
+	{
+		const polite = new PoliteFetch({
+			today: "2028-02-29",
+			fetchImpl: noNetwork,
+		});
+		polite.setDay("2018-02-28");
+		expect(polite.gapMs).toBe(RECENT_GAP_MS);
+		polite.setDay("2018-02-27");
+		expect(polite.gapMs).toBe(OLD_GAP_MS);
+	});
+
+	it("gap: starts to one host stay a whole gap apart across a 429's backoff, retry and queued requests alike", async () =>
+	{
+		const clock = new FakeClock();
+		const fake = fakeFetch(clock, 100, (url, attempt) => url.pathname === "/a/a" && attempt === 1 ? new Response("", {
+			status: 429,
+		}) : new Response("{}"));
+		const polite = new PoliteFetch({
+			today: "2026-11-08",
+			fetchImpl: fake.impl,
+			clock,
+		});
+		await clock.run(Promise.all(["a", "b", "c"].map((p) => polite.fetch(`${HOSTS[0]}/${p}`))));
+		const starts = startsOf(fake.seen, "statsapi.mlb.com");
+		expect(starts).toHaveLength(4);
+		for (const gap of gapsOf(starts)) expect(gap).toBeGreaterThanOrEqual(RECENT_GAP_MS);
+	});
+
+	it("real clock: reads the wall clock and sleeps on a timer", async () =>
+	{
+		const before = Date.now();
+		await realClock.sleep(1);
+		expect(realClock.now()).toBeGreaterThanOrEqual(before);
+	});
+
+	it("Retry-After: 0 doesn't skip the exponential backoff on repeated 429s", async () =>
+	{
+		const clock = new FakeClock();
+		const fake = fakeFetch(clock, 1, (_url, attempt) => attempt <= 2 ? new Response("", {
+			status: 429,
+			headers: {
+				"retry-after": "0",
+			},
+		}) : new Response("{}"));
+		const polite = new PoliteFetch({
+			today: "2026-11-08",
+			fetchImpl: fake.impl,
+			clock,
+		});
+		await clock.run(polite.fetch(`${HOSTS[0]}/zero`));
+		const starts = startsOf(fake.seen, "statsapi.mlb.com");
+		expect(starts[1]! - starts[0]!).toBeGreaterThanOrEqual(BACKOFF_BASE_MS);
+		expect(starts[2]! - starts[1]!).toBeGreaterThanOrEqual(2 * BACKOFF_BASE_MS);
 	});
 
 	it("429: a throttled request is retried after an exponential per-host backoff, and other hosts carry on", async () =>

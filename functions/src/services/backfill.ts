@@ -6,8 +6,8 @@
  * Postgres rows the app reads locally and that a production run would write to Neon.
  *
  * It is resumable without a progress file: a day is **complete** when its stored schedule day
- * holds only settled games (`isSettledGame`) and every final one is stored, final, with a
- * current projection. A complete day asks MLB nothing and writes nothing, so a second run, or
+ * is settled (`isScheduleDaySettled`: every game settled, and an empty day only once MLB's
+ * today is past it) and every final game is stored, final, with a current projection. A complete day asks MLB nothing and writes nothing, so a second run, or
  * a run after a stop, goes straight to the first incomplete day. A game whose projection fell
  * behind its snapshot (a stop between `storeGame`'s two writes) is repaired from the stored
  * snapshot. The only state outside the database is each extra source's give-up streak
@@ -17,12 +17,20 @@
  * game content — exist only for recent games, so each is asked on its own and given up after
  * {@link GIVE_UP_AFTER_DAYS} consecutive failed days of games (`recordSourceDay`). The live
  * feed is never given up: a game whose feed fails leaves its day incomplete for the next run.
+ *
+ * A day's games are all fetched first, its source answers counted and saved, and only then
+ * are its games written. A stop after the save re-fetches the day's games on resume but can't
+ * count the day twice (`recordSourceDay` skips a day it has counted); a stop before it leaves
+ * the games unwritten, so the resume fetches and counts them, where writing first would leave
+ * stored games the resume skips, with their answers never counted. A day is counted once,
+ * from the games fetched that run: if only some of its feeds succeed, the day is counted from
+ * those, and the rest, fetched by a later run, don't count toward the streak.
  */
 import type {
-	GameGraphContent, GamePlayMetrics, ScheduleDay, SourceStreak,
+	GameGraphContent, GamePlayMetrics, GameSnapshot, ScheduleDay, SourceStreak, Unversioned,
 } from "@bt/domain";
 import {
-	backfillDays, isFinalStatus, isGameInActiveWindow, isSettledGame, isSourceGivenUp, normalizeStatusCode, recordSourceDay,
+	backfillDays, isFinalStatus, isScheduleDaySettled, isSourceGivenUp, mlbToday, normalizeStatusCode, recordSourceDay, scheduleWindowMode,
 } from "@bt/domain";
 import type {
 	GameEditorial, GameProjectionRepository, GameRepository, MlbGameSources, ScheduleRepository,
@@ -34,6 +42,7 @@ import {
 
 /** The extra sources a game is hydrated from beside its live feed, each given up on its own. */
 export const EXTRA_SOURCES = ["content", "playMetrics", "graphContent"] as const;
+/** One of {@link EXTRA_SOURCES}: the key each give-up streak is kept under in {@link BackfillState}. */
 export type ExtraSource = (typeof EXTRA_SOURCES)[number];
 
 /** What a resumed run needs that the database doesn't hold: each extra source's give-up streak. */
@@ -48,6 +57,11 @@ export interface ResumeStore
 	save(state: BackfillState): Promise<void>;
 }
 
+/**
+ * What the walk reads and writes: MLB's game sources (the paced HTTP client in the command, a
+ * fake in tests), the same repositories ingest writes, and the resume store. Everything else
+ * is optional and only steers or reports the walk.
+ */
 export type BackfillDeps = {
 	mlb: MlbGameSources;
 	schedules: ScheduleRepository;
@@ -63,6 +77,7 @@ export type BackfillDeps = {
 	signal?: AbortSignal;
 };
 
+/** What a run did, for the command's summary and the tests: counts, days left, sources given up. */
 export type BackfillResult = {
 	/** Days visited (off-season days are never visited). */
 	days: number;
@@ -99,18 +114,21 @@ async function ask<T>(asked: boolean, call: () => Promise<T | null>): Promise<T 
 	}
 }
 
-/** What one game's hydration came to, for the day's tally. */
+/**
+ * What one game's fetch came to, for the day's tally. A fetched game is not yet written: the
+ * day's answers are saved first (see the module comment), then {@link ingestGame} writes it.
+ */
 type GameOutcome =
-	| { kind: "stored" | "unchanged" | "repaired" | "feedFailed" }
+	| { kind: "unchanged" | "repaired" | "feedFailed" }
 	| { kind: "fetched";
-		changed: boolean;
+		game: Unversioned<GameSnapshot>;
 		answered: Partial<Record<ExtraSource, boolean>>; };
 
 /**
- * Hydrates one final game: from the store when it is already there and final (repairing its
+ * Fetches one final game: from the store when it is already there and final (repairing its
  * projection if it fell behind), else from MLB, asking each extra source not given up for `day`.
  */
-async function hydrateGame(deps: BackfillDeps, gamePk: number, asking: Record<ExtraSource, boolean>, fetchedAt: string, windowMode: ScheduleDay["windowMode"]): Promise<GameOutcome>
+async function fetchGame(deps: BackfillDeps, gamePk: number, asking: Record<ExtraSource, boolean>, fetchedAt: string, windowMode: ScheduleDay["windowMode"]): Promise<GameOutcome>
 {
 	const stored = await deps.games.getByPk(gamePk);
 	if (stored && isFinalStatus(normalizeStatusCode(stored.status.codedGameState)))
@@ -135,18 +153,18 @@ async function hydrateGame(deps: BackfillDeps, gamePk: number, asking: Record<Ex
 		ask<GamePlayMetrics>(asking.playMetrics, () => deps.mlb.fetchPlayMetrics(gamePk)),
 		ask<GameGraphContent>(asking.graphContent, () => deps.mlb.fetchGameGraphContent(gamePk)),
 	]);
-	const { changed } = await ingestGame(deps, {
+	const game = {
 		...assembleGame(feed, editorial, playMetrics, graph),
 		fetchedAt,
 		windowMode,
-	});
+	};
 	const answered: Partial<Record<ExtraSource, boolean>> = {};
 	if (asking.content) answered.content = editorial !== null;
 	if (asking.playMetrics) answered.playMetrics = playMetrics !== null;
 	if (asking.graphContent) answered.graphContent = graph !== null;
 	return {
 		kind: "fetched",
-		changed,
+		game,
 		answered,
 	};
 }
@@ -185,12 +203,13 @@ export async function runBackfill(deps: BackfillDeps, range: { from: string;
 		result.days++;
 		deps.pace?.(day);
 		const now = deps.now?.() ?? new Date();
+		const today = mlbToday(now);
 		let complete = true;
 
-		// The stored day is enough when every game in it is settled; otherwise MLB is asked again.
+		// The stored day is enough when it is settled; otherwise MLB is asked again.
 		let scheduleDay = await deps.schedules.getByDate(day);
 		let askedMlb = false;
-		if (!scheduleDay || !scheduleDay.games.every((game) => isSettledGame(game.status)))
+		if (!scheduleDay || !isScheduleDaySettled(scheduleDay, today))
 		{
 			askedMlb = true;
 			try
@@ -199,7 +218,7 @@ export async function runBackfill(deps: BackfillDeps, range: { from: string;
 				scheduleDay = await storeSchedule(deps, {
 					...fetched,
 					fetchedAt: now.toISOString(),
-					windowMode: fetched.games.some((game) => isGameInActiveWindow(game, now)) ? "active" : "cache",
+					windowMode: scheduleWindowMode(fetched.games, now),
 				});
 			}
 			catch (error)
@@ -208,27 +227,21 @@ export async function runBackfill(deps: BackfillDeps, range: { from: string;
 				result.incomplete.push(day);
 				continue;
 			}
-			if (!scheduleDay.games.every((game) => isSettledGame(game.status))) complete = false;
+			if (!isScheduleDaySettled(scheduleDay, today)) complete = false;
 		}
 
 		const asking = Object.fromEntries(EXTRA_SOURCES.map((source) => [source, !isSourceGivenUp(state.sources[source], day)])) as Record<ExtraSource, boolean>;
 		const finals = scheduleDay.games.filter(isFinalSummary);
 		const windowMode = scheduleDay.windowMode;
-		const outcomes = await Promise.all(finals.map((game) => hydrateGame(deps, game.gamePk, asking, now.toISOString(), windowMode)));
+		const outcomes = await Promise.all(finals.map((game) => fetchGame(deps, game.gamePk, asking, now.toISOString(), windowMode)));
 
-		let stored = 0;
 		let repaired = 0;
 		for (const outcome of outcomes)
 		{
 			if (outcome.kind === "feedFailed") complete = false;
 			if (outcome.kind === "repaired") repaired++;
-			if (outcome.kind === "fetched")
-			{
-				askedMlb = true;
-				if (outcome.changed) stored++;
-			}
+			if (outcome.kind === "fetched") askedMlb = true;
 		}
-		result.gamesStored += stored;
 		result.repaired += repaired;
 		let stateChanged = false;
 
@@ -250,7 +263,15 @@ export async function runBackfill(deps: BackfillDeps, range: { from: string;
 				log(`${day}: gave up ${source} after ${after.streak} days of games without it; not asked again for older days`);
 			}
 		}
+		// Saved before the day's games are written, so a stop between the two can't lose the day's answers.
 		if (stateChanged) await deps.state.save(state);
+
+		let stored = 0;
+		for (const outcome of outcomes)
+		{
+			if (outcome.kind === "fetched" && (await ingestGame(deps, outcome.game)).changed) stored++;
+		}
+		result.gamesStored += stored;
 
 		if (!complete) result.incomplete.push(day);
 		if (!askedMlb && complete && repaired === 0)

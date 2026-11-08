@@ -101,3 +101,17 @@ export function isGameInActiveWindow(
     now.getTime() <= start.getTime() + trailMs
 	);
 }
+
+/**
+ * A schedule day's window mode (S122; ADR-025: one implementation): `"active"` while any of
+ * its games is in its active window at `now`, so the day is polled; `"cache"` otherwise. The
+ * live ingest and the backfill store a fetched day with this, so both judge a day alike.
+ */
+export function scheduleWindowMode(
+	games: readonly Parameters<typeof isGameInActiveWindow>[0][],
+	now: Date,
+	params: CadenceParams = DEFAULT_CADENCE,
+): "active" | "cache"
+{
+	return games.some((game) => isGameInActiveWindow(game, now, params)) ? "active" : "cache";
+}

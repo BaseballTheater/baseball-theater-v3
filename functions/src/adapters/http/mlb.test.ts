@@ -181,3 +181,48 @@ describe("HttpMlbStatsClient (S2)", () =>
 		await expect(mlb.fetchSeasonCalendar(2031)).rejects.toThrow("404");
 	});
 });
+
+describe("HttpMlbStatsClient fetchGameEditorial (S122)", () =>
+{
+	const recorded = JSON.parse(readFileSync(path.join(RAW, "content-823823.json"), "utf8")) as Record<string, unknown>;
+
+	/** A client whose content endpoint answers `content` (or 404 when it is undefined); nothing else is asked. */
+	function contentClient(content: unknown): HttpMlbStatsClient
+	{
+		return new HttpMlbStatsClient({
+			fetchImpl: async (input) =>
+			{
+				expect(new URL(String(input)).pathname).toBe("/api/v1/game/823823/content");
+				return content === undefined ? new Response("{}", {
+					status: 404,
+				}) : Response.json(content);
+			},
+		});
+	}
+
+	it("an empty content answer (no videos, no recap — most old games) is null, so the backfill counts it a failure", async () =>
+	{
+		const empty = {
+			...recorded,
+			editorial: {},
+			highlights: {
+				highlights: {
+					items: [],
+				},
+			},
+		};
+		expect(await contentClient(empty).fetchGameEditorial(823823)).toBeNull();
+	});
+
+	it("a 404 is null", async () =>
+	{
+		expect(await contentClient(undefined).fetchGameEditorial(823823)).toBeNull();
+	});
+
+	it("an answer with videos is a value carrying them", async () =>
+	{
+		const editorial = await contentClient(recorded).fetchGameEditorial(823823);
+		expect(editorial?.highlights.length).toBeGreaterThan(0);
+		expect(editorial?.recap).toBeTruthy();
+	});
+});

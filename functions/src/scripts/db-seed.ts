@@ -10,7 +10,9 @@ import {
 	FIXTURES_ROOT, FixtureMlbStatsClient, nodeFixtureFiles,
 } from "../adapters/fixtures/mlb.js";
 import { openPostgres } from "../adapters/postgres/connect.js";
-import { isLocalDbHost, localConnectionString } from "../adapters/postgres/local.js";
+import {
+	databaseTarget, isLocalDbHost, localConnectionString,
+} from "../adapters/postgres/local.js";
 import { migratePostgres } from "../adapters/postgres/migrate.js";
 import {
 	PostgresGameProjectionRepository, PostgresGameRepository, PostgresScheduleRepository,
@@ -21,10 +23,13 @@ import {
 import { seedFromFixtures } from "../services/seed.js";
 
 const url = process.env.BT_DATABASE_URL ?? localConnectionString();
-const host = new URL(url).hostname;
-if (!isLocalDbHost(host))
+// The host pg really connects to (a `?host=` parameter overrides the URL's); a `hostaddr` is refused outright.
+const { host, hostaddr } = databaseTarget(url);
+if (hostaddr !== undefined || !isLocalDbHost(host))
 {
-	console.error(`[db:seed] refusing to seed ${host}: db:seed is for the local database only`);
+	console.error(hostaddr !== undefined
+		? `[db:seed] refusing to seed ${host}: the connection string carries hostaddr=${hostaddr}, which pg ignores but psql and pg_dump connect to; name one host`
+		: `[db:seed] refusing to seed ${host}: db:seed is for the local database only`);
 	process.exit(2);
 }
 

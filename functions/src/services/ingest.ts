@@ -2,7 +2,7 @@ import type {
 	CadenceParams, GameSnapshot, ScheduleDay, Unversioned,
 } from "@bt/domain";
 import {
-	cacheLifetimeMs, DEFAULT_CADENCE, isFinalStatus, isGameInActiveWindow, normalizeStatusCode, projectGame, stampVersion,
+	cacheLifetimeMs, DEFAULT_CADENCE, isFinalStatus, isGameInActiveWindow, normalizeStatusCode, projectGame, scheduleWindowMode, stampVersion,
 } from "@bt/domain";
 import type {
 	GameProjectionRepository, GameRepository, MlbStatsClient, ScheduleRepository,
@@ -117,11 +117,10 @@ export async function ingestScheduleDay(
 {
 	const now = deps.now?.() ?? new Date();
 	const fetched = await deps.mlb.fetchSchedule(date);
-	const anyActive = fetched.games.some((g) => isGameInActiveWindow(g, now));
 	const day = await storeSchedule(deps, {
 		...fetched,
 		fetchedAt: now.toISOString(),
-		windowMode: anyActive ? "active" : "cache",
+		windowMode: scheduleWindowMode(fetched.games, now),
 	});
 
 	for (const summary of day.games)
@@ -252,7 +251,7 @@ export async function refreshTodaysWindow(
 	await storeSchedule(deps, {
 		...fetched,
 		fetchedAt: now.toISOString(),
-		windowMode: active.length > 0 ? "active" : "cache",
+		windowMode: scheduleWindowMode(fetched.games, now, params),
 	});
 	return {
 		date,

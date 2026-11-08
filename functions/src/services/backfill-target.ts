@@ -4,18 +4,22 @@
  * API shows the host is one of the project's endpoints on a branch other than the default
  * (production's — the owner kept the default branch as production, `findOrCreateBranch`). A
  * connection string carries no Hyperdrive name and no branch, so without that lookup a hosted
- * host can't be shown not to be production, and is refused. Messages name the host and the
- * database only, never the connection string.
+ * host can't be shown not to be production, and is refused. The host is the one pg really
+ * connects to (`databaseTarget`, which reads `?host=` as pg does); a string carrying `hostaddr`
+ * or naming no host is refused even with `--allow-production`, since where it would connect
+ * isn't one clear place. Messages name the host and the database only, never the connection string.
  */
 import { databaseTarget, isLocalDbHost } from "../adapters/postgres/local.js";
 import type { NeonApi } from "../deploy/bootstrap.js";
 import { findOrCreateBranch, projectEndpoints } from "../deploy/bootstrap.js";
 
+/** The database a run writes, by host and name only: what logs print and the resume file is named by. */
 export type BackfillTarget = {
 	host: string;
 	name: string;
 };
 
+/** The guard's verdict on a target, with the reason the command prints either way. */
 export type TargetCheck =
 	| { allowed: true;
 		target: BackfillTarget;
@@ -39,7 +43,17 @@ function endpointHost(host: string): string
 export async function checkBackfillTarget(connectionString: string, options: { allowProduction: boolean;
 	neon?: NeonApi; }): Promise<TargetCheck>
 {
-	const target = databaseTarget(connectionString);
+	const { hostaddr, ...target } = databaseTarget(connectionString);
+	if (hostaddr !== undefined) return {
+		allowed: false,
+		target,
+		why: `the connection string carries hostaddr=${hostaddr}, which pg ignores but psql and pg_dump connect to; name one host`,
+	};
+	if (target.host === "") return {
+		allowed: false,
+		target,
+		why: "the connection string names no host",
+	};
 	if (isLocalDbHost(target.host)) return {
 		allowed: true,
 		target,

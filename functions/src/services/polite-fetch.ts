@@ -4,7 +4,8 @@
  * API too hard"). Each host (statsapi.mlb.com, bdfed.stitch.mlbinfra.com, data-graph.mlb.com)
  * is paced on its own: at most {@link MAX_IN_FLIGHT_PER_HOST} requests in flight, a minimum gap
  * between request starts, longer for games more than {@link OLD_GAME_YEARS} years old, and an
- * exponential per-host backoff on a 429 or 5xx that honors `Retry-After`. Throttling (429) is
+ * exponential per-host backoff on a 429 or 5xx that honors `Retry-After` (waiting at least as
+ * long as it asks, never less than the exponential step). Throttling (429) is
  * retried for as long as it takes, so a day is never given up because MLB asked us to slow
  * down; a 5xx or a dropped connection is retried {@link RETRY_ATTEMPTS} times and then
  * answered as it is, so a host that always errors on old games can't stall the walk.
@@ -12,7 +13,7 @@
  * The backfill hands this to `HttpMlbStatsClient` as its `fetchImpl`, so the adapter's own
  * requests are what is paced. The clock is injected, so the tests run on a fake one.
  */
-import { addDays } from "@bt/domain";
+import { yearsBefore } from "@bt/domain";
 
 /** At most this many requests to one host at once (owner: "2 request threads per domain"). */
 export const MAX_IN_FLIGHT_PER_HOST = 2;
@@ -35,6 +36,7 @@ export type Clock = {
 	sleep(ms: number): Promise<void>;
 };
 
+/** The wall clock and `setTimeout`, for the command; tests hand {@link PoliteFetch} a fake one instead. */
 export const realClock: Clock = {
 	now: () => Date.now(),
 	sleep: (ms) => new Promise((resolve) =>
@@ -43,14 +45,25 @@ export const realClock: Clock = {
 	}),
 };
 
+/**
+ * How a {@link PoliteFetch} is built. Only `today` is required; the rest default to the real
+ * network and clock and to the owner's pacing, and are overridden by the command's flags
+ * (`--gap-ms`, `--old-gap-ms`) or by tests, which always pass a fake `fetchImpl`.
+ */
 export type PoliteFetchOptions = {
 	/** MLB's today (`mlbToday`): the 10-year line is measured from it. */
 	today: string;
+	/** The `fetch` actually sent; defaults to the global one (the network). */
 	fetchImpl?: typeof fetch;
+	/** Time and sleeping; defaults to {@link realClock}. */
 	clock?: Clock;
+	/** Gap between starts for recent games; defaults to {@link RECENT_GAP_MS}. */
 	recentGapMs?: number;
+	/** Gap between starts for old games; defaults to {@link OLD_GAP_MS}. */
 	oldGapMs?: number;
+	/** Requests in flight per host; defaults to {@link MAX_IN_FLIGHT_PER_HOST}. */
 	maxInFlight?: number;
+	/** Where backoff lines go (the command prints them). */
 	log?: (line: string) => void;
 };
 
@@ -78,6 +91,11 @@ export function retryAfterMs(header: string | null, now: number): number | undef
 	return Number.isNaN(at) ? undefined : Math.max(0, at - now);
 }
 
+/**
+ * The paced `fetch` itself: one per backfill run, its {@link PoliteFetch.fetch} handed to
+ * `HttpMlbStatsClient`, and {@link PoliteFetch.setDay} told each day so old games get the
+ * longer gap. Pacing state is kept per host and lives only as long as the run.
+ */
 export class PoliteFetch
 {
 	private readonly hosts = new Map<string, HostState>();
@@ -97,7 +115,7 @@ export class PoliteFetch
 		this.recentGapMs = options.recentGapMs ?? RECENT_GAP_MS;
 		this.oldGapMs = options.oldGapMs ?? OLD_GAP_MS;
 		this.maxInFlight = options.maxInFlight ?? MAX_IN_FLIGHT_PER_HOST;
-		this.oldBefore = `${Number(options.today.slice(0, 4)) - OLD_GAME_YEARS}${options.today.slice(4)}`;
+		this.oldBefore = yearsBefore(options.today, OLD_GAME_YEARS);
 		this.log = options.log ?? (() => undefined);
 		this.currentGapMs = this.recentGapMs;
 	}
@@ -105,7 +123,7 @@ export class PoliteFetch
 	/** Tells the pacer which day's games are being asked for, which picks the gap. */
 	setDay(day: string): void
 	{
-		this.currentGapMs = day < addDays(this.oldBefore, 0) ? this.oldGapMs : this.recentGapMs;
+		this.currentGapMs = day < this.oldBefore ? this.oldGapMs : this.recentGapMs;
 	}
 
 	/** The gap now in force between request starts to one host. */
@@ -142,12 +160,20 @@ export class PoliteFetch
 			await new Promise<void>((resolve) => state.waiters.push(resolve));
 		}
 		state.inFlight++;
-		// Reserve this start before sleeping, so the next caller waits a whole gap after it.
-		const start = Math.max(this.clock.now(), state.nextStartAt, state.blockedUntil);
-		state.nextStartAt = start + this.currentGapMs;
-		await this.sleepUntil(start);
-		// A backoff that began while this one waited holds it too.
-		while (state.blockedUntil > this.clock.now()) await this.sleepUntil(state.blockedUntil);
+		// Nothing is reserved while sleeping: a backoff or another start can land meanwhile, so
+		// each wake checks again, and only the request that actually starts moves the gap on.
+		for (;;)
+		{
+			const now = this.clock.now();
+			const start = Math.max(now, state.nextStartAt, state.blockedUntil);
+			if (start <= now)
+			{
+				// No await between this check and the reservation, so no other request can slip in.
+				state.nextStartAt = now + this.currentGapMs;
+				return;
+			}
+			await this.sleepUntil(start);
+		}
 	}
 
 	private async sleepUntil(at: number): Promise<void>
@@ -164,7 +190,8 @@ export class PoliteFetch
 
 	private backOff(state: HostState, host: string, why: string, retryAfter: number | undefined): void
 	{
-		const delay = retryAfter ?? Math.min(BACKOFF_BASE_MS * 2 ** state.failures, BACKOFF_MAX_MS);
+		// Never shorter than the exponential step: `Retry-After: 0` on repeated 429s must not turn into a tight loop.
+		const delay = Math.max(retryAfter ?? 0, Math.min(BACKOFF_BASE_MS * 2 ** state.failures, BACKOFF_MAX_MS));
 		state.failures++;
 		state.blockedUntil = Math.max(state.blockedUntil, this.clock.now() + delay);
 		this.log(`${host}: ${why}; backing off ${Math.round(delay / 1000)} s`);

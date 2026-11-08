@@ -129,7 +129,21 @@ while read -r f; do
   [ -f "$f" ] || continue
   if grep -qE 'fetch\([^)]*statsapi\.mlb\.com' "$f"; then bad 10 "$f requests statsapi.mlb.com"; fi
   case "$f" in *.test.ts)
-    if grep -qE 'new HttpMlbStatsClient\(\)' "$f"; then bad 10 "$f builds an HttpMlbStatsClient on the real fetch"; fi ;;
+    if grep -qE 'new HttpMlbStatsClient\(\)' "$f"; then bad 10 "$f builds an HttpMlbStatsClient on the real fetch"; fi
+    # Every HttpMlbStatsClient or PoliteFetch a test builds must be handed a fake fetchImpl: without
+    # one it falls back to the global fetch, the network. Reads each constructor's whole argument
+    # block (to its matching paren), so a multi-line options object is checked, not just `()`.
+    while read -r hit; do
+      [ -n "$hit" ] && bad 10 "$f:$hit builds a client without a fetchImpl, so it would reach the network"
+    done < <(perl -0777 -ne '
+      while (/new\s+(HttpMlbStatsClient|PoliteFetch)\s*\(/g) {
+        my ($name, $start, $depth, $i) = ($1, pos(), 1, pos());
+        while ($depth > 0 && $i < length) { my $c = substr($_, $i++, 1); $depth++ if $c eq "("; $depth-- if $c eq ")"; }
+        my $args = substr($_, $start, $i - $start);
+        my $line = 1 + (substr($_, 0, $start) =~ tr/\n//);
+        print "$line ($name)\n" unless $args =~ /\bfetchImpl\b/;
+      }' "$f")
+    ;;
   esac
 done <"$TMP/files.txt"
 grep -qE 'new HttpMlbStatsClient\(' functions/src/scripts/backfill.ts 2>/dev/null || bad 10 "the command does not use the HTTP adapter"
