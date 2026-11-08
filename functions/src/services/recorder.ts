@@ -23,7 +23,9 @@ import type {
 	Unversioned,
 } from "@bt/domain";
 import type { MlbStatsClient } from "@bt/ports";
-import { graphContentRequest, playMetricsUrl } from "../adapters/http/mlb.js";
+import {
+	graphContentRequest, playMetricsUrl, standingsUrl,
+} from "../adapters/http/mlb.js";
 
 const DEFAULT_BASE_URL = "https://statsapi.mlb.com";
 
@@ -91,7 +93,7 @@ export function rawEndpoints(
 		},
 		{
 			name: `standings-${date}`,
-			url: `${baseUrl}/api/v1/standings?leagueId=103,104&date=${date}&hydrate=team`,
+			url: standingsUrl(date, baseUrl),
 		},
 	];
 	if (ids.length > 0)

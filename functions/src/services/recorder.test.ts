@@ -216,6 +216,19 @@ describe("fixture recorder", () =>
 		expect(names).toContain(`people-${GAME_PK}`);
 	});
 
+	it("records standings with the same URL the client asks, season included", () =>
+	{
+		const standings = rawEndpoints({
+			date: DATE,
+			gamePk: GAME_PK,
+			playerIds: [1],
+		}).find((e) => e.name === `standings-${DATE}`);
+		const url = new URL(standings?.url ?? "");
+		expect(url.pathname).toBe("/api/v1/standings");
+		expect(url.searchParams.get("season")).toBe(DATE.slice(0, 4));
+		expect(url.searchParams.get("date")).toBe(DATE);
+	});
+
 	it("normalized path round-trips non-empty through FixtureMlbStatsClient", async () =>
 	{
 		const out = await mkdtemp(path.join(tmpdir(), "bt-norm-"));
