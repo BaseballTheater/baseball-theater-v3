@@ -7,6 +7,7 @@ import {
 	isGameInActiveWindow,
 	isLiveStatus,
 	normalizeStatusCode,
+	scheduleWindowMode,
 } from "./window.js";
 import type { ScheduleGameSummary } from "./types.js";
 
@@ -248,5 +249,25 @@ describe("isGameInActiveWindow reads the schedule's own start time", () =>
 		// Same instant, without a start time: the fallback has already trailed off.
 		const { gameDate: _drop, ...noStart } = lateGame;
 		expect(isGameInActiveWindow(noStart, during)).toBe(false);
+	});
+});
+
+describe("scheduleWindowMode (S122)", () =>
+{
+	it("a day is active while any game is in its window, cache otherwise; params pass through", () =>
+	{
+		const now = new Date("2024-07-04T18:00:00Z");
+		expect(scheduleWindowMode([], now)).toBe("cache");
+		expect(scheduleWindowMode([game("F", "2024-07-01T17:00:00Z"), game("I", "2024-07-04T17:00:00Z")], now)).toBe("active");
+		expect(scheduleWindowMode([game("F", "2024-07-01T17:00:00Z")], now)).toBe("cache");
+		const later = game("S", "2024-07-04T23:00:00Z");
+		expect(scheduleWindowMode([later], now, {
+			...DEFAULT_CADENCE,
+			leadHours: 1,
+		})).toBe("cache");
+		expect(scheduleWindowMode([later], now, {
+			...DEFAULT_CADENCE,
+			leadHours: 6,
+		})).toBe("active");
 	});
 });

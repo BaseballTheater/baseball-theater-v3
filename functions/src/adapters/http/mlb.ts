@@ -32,9 +32,11 @@ import {
 	parseSeasonsResponse,
 	parseStandingsResponse,
 } from "@bt/mlb-api";
-import type { MlbStatsClient } from "@bt/ports";
+import type {
+	GameEditorial, MlbGameSources, MlbStatsClient,
+} from "@bt/ports";
 import { mapContentHighlights, mapRecap } from "../../mappers/content.js";
-import { withGameExtras } from "../../mappers/game-extras.js";
+import { assembleGame } from "../../mappers/game-extras.js";
 import { mapGraphContent } from "../../mappers/graph-content.js";
 import { mapPeople } from "../../mappers/players.js";
 import { mapStandings } from "../../mappers/standings.js";
@@ -141,6 +143,15 @@ export function worldSeriesUrl(season: number, baseUrl = DEFAULT_BASE_URL): stri
 	return `${baseUrl}/api/v1/schedule?sportId=1&gameType=W&season=${season}`;
 }
 
+/** The content payload as BT keeps it: its mapped videos and recap. */
+function editorialOf(content: GameContentResponse): GameEditorial
+{
+	return {
+		highlights: mapContentHighlights(content),
+		recap: mapRecap(content),
+	};
+}
+
 const SCHEDULE_HYDRATE =
 	"team,linescore(matchup,runners),flags,liveLookin,review,decisions,person,probablePitcher,stats,game(content(media(featured,epg),summary))";
 
@@ -151,7 +162,7 @@ export interface HttpMlbStatsClientOptions {
 	now?: () => Date;
 }
 
-export class HttpMlbStatsClient implements MlbStatsClient
+export class HttpMlbStatsClient implements MlbStatsClient, MlbGameSources
 {
 	private readonly baseUrl: string;
 	private readonly fetchImpl: typeof fetch;
@@ -173,15 +184,26 @@ export class HttpMlbStatsClient implements MlbStatsClient
 
 	async fetchGame(gamePk: number): Promise<Unversioned<GameSnapshot>>
 	{
+		const feed = await this.fetchGameFeed(gamePk);
+		const [content, playMetrics, graph] = await Promise.all([this.fetchContent(gamePk), this.fetchPlayMetrics(gamePk), this.fetchGameGraphContent(gamePk)]);
+		return assembleGame(feed, content ? editorialOf(content) : null, playMetrics, graph);
+	}
+
+	/** The live feed alone (S122): what `fetchGame` adds its extras to. */
+	async fetchGameFeed(gamePk: number): Promise<Unversioned<GameSnapshot>>
+	{
 		const feedUrl = `${this.baseUrl}/api/v1.1/game/${gamePk}/feed/live`;
 		const feed = parseLiveFeedResponse(await this.getJson(feedUrl));
-		const snapshot = mapLiveFeed(feed, this.now().toISOString(), "active");
-		const [content, playMetrics, graph] = await Promise.all([this.fetchContent(gamePk), this.fetchPlayMetrics(gamePk), this.fetchGameGraphContent(gamePk)]);
-		return withGameExtras({
-			...snapshot,
-			highlights: content ? mapContentHighlights(content) : [],
-			recap: content ? mapRecap(content) : undefined,
-		}, playMetrics, graph);
+		return mapLiveFeed(feed, this.now().toISOString(), "active");
+	}
+
+	/** The content endpoint's videos and recap (S122); null when it fails or has neither. */
+	async fetchGameEditorial(gamePk: number): Promise<GameEditorial | null>
+	{
+		const content = await this.fetchContent(gamePk);
+		if (!content) return null;
+		const editorial = editorialOf(content);
+		return editorial.highlights.length > 0 || editorial.recap ? editorial : null;
 	}
 
 	async fetchStandings(date: string): Promise<StandingsSnapshot>

@@ -1,12 +1,14 @@
 /**
  * The fixture client's season calendars (S111): the recorded calendar and World Series
  * for a season, mapped as the HTTP client maps them, offline; null for one never recorded.
- * And its final and spring standings (S128), from the season's recorded tables.
+ * And its final and spring standings (S128), from the season's recorded tables. And a game's
+ * videos and recap on their own (S122), null when the game has neither or no recording.
  */
 import {
 	describe, expect, it,
 } from "vitest";
 import { createBundledFixtureClient } from "./bundled.js";
+import { FixtureClient } from "./fixture-client.js";
 import { FixtureMlbStatsClient } from "./mlb.js";
 
 describe("FixtureClient season calendar (S111)", () =>
@@ -55,5 +57,29 @@ describe("FixtureClient final and spring standings (S128)", () =>
 		const mlb = new FixtureMlbStatsClient();
 		expect((await mlb.fetchFinalStandings(2031)).divisions).toEqual([]);
 		expect((await mlb.fetchSpringStandings(2027, "2027-02-19")).divisions).toEqual([]);
+	});
+});
+
+describe("FixtureClient fetchGameEditorial (S122)", () =>
+{
+	it("a game with no videos and no recap is null, a missing game is null, a recorded one is its videos and recap", async () =>
+	{
+		const empty = new FixtureClient({
+			read: async (name) =>
+			{
+				if (name !== "game-1.json") throw new Error(`no fixture ${name}`);
+				return {
+					gamePk: 1,
+					highlights: [],
+				};
+			},
+			list: async () => ["game-1.json"],
+		});
+		expect(await empty.fetchGameEditorial(1)).toBeNull();
+		expect(await empty.fetchGameEditorial(2)).toBeNull();
+
+		const recorded = await new FixtureMlbStatsClient().fetchGameEditorial(823823);
+		expect(recorded?.highlights).toHaveLength(40);
+		expect(recorded?.recap).toBeTruthy();
 	});
 });

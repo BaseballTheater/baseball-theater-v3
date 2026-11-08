@@ -54,6 +54,58 @@ database without asking MLB again, so it needs no network. Re-run the command to
 file. CI and `pnpm verify` never use the seed: they run on the committed fixtures, and the
 seed's tests record through a stand-in for MLB into a temporary directory.
 
+### Every game since 1901 (backfill)
+
+To fill a database with every game between two dates, newest first:
+
+```bash
+pnpm mlb:backfill                                        # one year before MLB's today through today
+pnpm mlb:backfill --from 1901-04-18                      # everything, back to 1901's opening day
+pnpm mlb:backfill --from 2024-03-20 --to 2024-11-02      # any range, both dates inclusive
+```
+
+- **Defaults.** `--to` is MLB's today (the day the scoreboard shows, New York time) and `--from` one year before
+  `--to`. Nothing before `1901-04-18` is ever asked for: an earlier `--from` is clamped to it.
+- **The off-season is skipped.** Every day from November 15 through February 15 is skipped without a request.
+- **What is stored.** Each day's schedule, and each final game hydrated like the live ingest stores it (live feed,
+  videos and recap, play metrics, the GraphQL game content) into the same Postgres tables the app reads
+  (`schedule_days`, `games`, `game_projections`). A game already stored unchanged is not rewritten.
+- **Pacing.** At most 2 requests in flight per host (statsapi.mlb.com, bdfed.stitch.mlbinfra.com and
+  data-graph.mlb.com counted separately), at least 1 s between request starts to a host, and 3 s for games more
+  than 10 years old (`--gap-ms N` and `--old-gap-ms N` change them). A `429` or `5xx` backs off exponentially for
+  that host (waiting at least as long as `Retry-After` asks). A `429` is retried for as long as it takes, so
+  throttling never makes it give up on a day; a `5xx` or a dropped connection is tried 6 times and then counts as
+  that request failing (an extra source's failure, or for a schedule or live feed a day left for the next run).
+- **Giving up on old-game extras.** Videos, play metrics and the GraphQL content exist only for recent games.
+  Each is tracked on its own and given up once it fails (or comes back empty) for 14 consecutive days of games;
+  after that it isn't asked for any older date. The live feed itself is never given up: a game whose feed fails
+  leaves its day for the next run.
+- **Stopping and resuming.** Stop it any time (Ctrl-C finishes the day in progress; a kill is fine too) and run
+  the same command again to resume: a day already complete in the database (its schedule stored, every game
+  settled, every final game stored) asks MLB nothing and writes nothing, so it picks up at the first incomplete
+  day. Days with games not yet settled (today's, say) are checked again on every run. Each extra source's
+  failure streak and give-up date are kept in `.backfill/<host>--<database>.json` (git-ignored), so a resumed run
+  doesn't re-probe a source it gave up, and a different database starts fresh. To ask a given-up source again
+  (or if the command says the file is unreadable), delete that file: every source's streak starts over.
+- **Which database.** It writes the database `BT_DATABASE_URL` names, else the local Docker Postgres (as
+  `pnpm db:seed` does), and migrates it first. It refuses production: any host that isn't local is refused
+  unless `NEON_API_KEY` and `NEON_PROJECT_ID` show it is a Neon branch other than the default (production)
+  branch, or you pass `--allow-production`. Logs name the host and database only, never the connection string.
+- **How big it is.** It prints progress per day (games stored, sources given up) and, at the end, the row count
+  and on-disk size (`pg_total_relation_size`: table, indexes and TOAST) of each game table.
+- **Moving it to Neon.** The data is ordinary rows in the app's own tables on the same Postgres version Neon
+  runs, so it can be copied table by table into a Neon branch. Migrate the branch first
+  (`BT_DATABASE_URL="$NEON" pnpm db:migrate`), then copy the rows in Postgres's custom format, which
+  `pg_restore` reads:
+  `pg_dump -Fc --data-only -t schedule_days -t games -t game_projections "$LOCAL" | pg_restore --data-only --no-owner -d "$NEON"`.
+  This only adds rows: a row already in the branch (the same date or game) makes that table's restore fail on its
+  primary key, so restore into a branch without those rows, or empty those three tables first. Alternatively,
+  point the backfill at the branch itself (`BT_DATABASE_URL`). Whether it ever goes to production is the owner's
+  call.
+
+It asks live MLB, so like `pnpm seed:refresh` it is never run by CI or `pnpm verify`; its tests use fake MLB
+clients and the committed recordings.
+
 ### What local can't represent
 
 Local runs the deployed code on the same database engine, but some things exist only on
@@ -301,6 +353,7 @@ Still to finish before a public launch (the _Cloudflare deploy_ Later theme):
 | `pnpm dev`              | Postgres in Docker + Worker on workerd + Vite    |
 | `pnpm db:seed`          | Migrate and seed the local Postgres (idempotent) |
 | `pnpm seed:refresh`     | Record the dev seed from live MLB (see above)    |
+| `pnpm mlb:backfill`     | Every game between two dates (see above)         |
 | `pnpm db:migrate`       | Migrate the database `BT_DATABASE_URL` names     |
 | `pnpm deploy:bootstrap` | A deploy's bootstrapping (GitHub Actions only)   |
 | `pnpm test`             | Vitest (all packages)                            |
