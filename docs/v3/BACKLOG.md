@@ -222,12 +222,13 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 70 | [S69](#s69--videos-room-impact-sorted-grid-list-search-quick-filters) | Videos room grid / list / search | `done` |
 | 70 | [S122](#s122--backfill-every-game-between-two-dates-gently-resumably-back-to-1901) | Game backfill since 1901 | `todo` |
 | 71 | [S70](#s70--video-player-dialog-by-default-persistent-stage-by-setting) | Video player (dialog / stage) | `done` |
-| 71 | [S123](#s123--design-the-scoreboards-calendar-date-picker) | Design: calendar date picker | `todo` |
+| 71 | [S117](#s117--copy-productions-baseball-data-into-staging-on-request-with-no-fans-data) | Baseball-data copy to staging | `todo` |
 | 72 | [S109](#s109--live-status-the-inning-count-and-outs-in-one-place) | Live status, one place | `done` |
-| 72 | [S124](#s124--games-per-day-for-a-month-from-bts-store) | Games-per-day counts API | `todo` |
-| 73 | [S125](#s125--the-scoreboards-calendar-date-picker) | Calendar date picker | `todo` |
+| 72 | [S123](#s123--design-the-scoreboards-calendar-date-picker) | Design: calendar date picker | `todo` |
+| 73 | [S124](#s124--games-per-day-for-a-month-from-bts-store) | Games-per-day counts API | `todo` |
 | 73 | [S20](#s20--scoreboard-live-refresh-for-in-window-games) | Scoreboard live refresh for in-window games | `done` |
 | 74 | [S110](#s110--entry-bundle-headroom-pages-past-the-scoreboard-load-on-demand) | Entry bundle headroom | `done` |
+| 74 | [S125](#s125--the-scoreboards-calendar-date-picker) | Calendar date picker | `todo` |
 | 75 | [S111](#s111--the-scoreboard-opens-on-today-or-on-the-seasons-final-day-in-the-off-season) | Scoreboard opens on the right day | `done` |
 | 76 | [S51](#s51--representative-local-dev-pnpm-dev-on-postgres-in-docker) | `pnpm dev` on Postgres in Docker | `done` |
 | 77 | [S112](#s112--dev-seed-the-last-month-of-the-season-and-the-postseason-refreshable-by-date-range) | Dev seed (season end + postseason) | `done` |
@@ -239,7 +240,6 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 79 | [S121](#s121--release-flow-stories-land-as-auto-merged-pull-requests-into-stage-a-published-github-release-deploys-production) | Releases from pull requests | `done` |
 | 80 | [S93](#s93--ingest-mlb-play-metrics-win-probability-key-moments-abs-challenges) | Ingest play metrics | `done` |
 | 80 | [S116](#s116--sign-in-with-logto-email-one-time-code-on-the-deployed-sites) | Logto sign-in | `done` |
-| 80 | [S117](#s117--copy-productions-baseball-data-into-staging-on-request-with-no-fans-data) | Baseball-data copy to staging | `todo` |
 | 81 | [S75](#s75--hide-scores-in-the-game-rooms-and-the-recap-video-title) | Hide Scores in the rooms | `done` |
 | 82 | [S71](#s71--day-highlights-digest-best-of-date) | Day highlights digest | `done` |
 | 83 | [S45](#s45--api-runs-as-a-worker-on-the-local-workers-runtime) | Worker entry + local Workers runtime + Workers tests | `done` |
@@ -6213,6 +6213,7 @@ Reuse `shipping_commit` and `reverify_at` from `scripts/lib/reverify.sh` and the
 
 **Notes:**
 
+- **Order: right after S122's backfill** (owner, 2026-11-07, asked whether S117 should go before the new stories S122–S126: *"No, it should go after the hydration story"*). Priority 71, between S122 and the calendar stories.
 - Split out of S114's AC 9 on the owner's 2026-11-05 answer to the backlog review's question; S114 AC 9 keeps the guarantee that staging never holds fans' data.
 - "Local iteration not getting stomped" means staging's own changes survive (owner, 2026-11-05: "if I make changes to data and schemas that's different from production, it'll need to have data in staging that isn't present in production"): data and schema changes being tried on staging, ahead of production, are never overwritten, which is why the copy is manual (AC 4) and additive (AC 3).
 - A column renamed or reshaped by a staging-only migration gets nothing from production under that new name (AC 3 copies matching columns only); say so in README, and if the owner needs those values carried over, that's a question for when it comes up.
