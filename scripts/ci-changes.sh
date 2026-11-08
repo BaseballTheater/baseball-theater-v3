@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Does a push or pull request change anything besides docs? (owner, 2026-11-07, of a pull request
+# Does a pull request change anything besides docs? (owner, 2026-11-07, of a pull request
 # that changed only Markdown and the generated ledger index: "Things like this shouldn't trigger
 # CI.") CI (.github/workflows/ci.yml) and Deploy (.github/workflows/deploy.yml) both ask this one
-# script, so they never disagree about what counts as docs.
+# script, so they never disagree about what counts as docs. Only pull requests ask: every push
+# (a merge into stage) runs the full gate, because a docs-only push can land on top of a code
+# merge whose own run it would otherwise cancel or race (pre-PR review, 2026-11-07).
 #
-# Usage: scripts/ci-changes.sh <base-sha> <head-sha>
+# Usage: scripts/ci-changes.sh <pull request base sha> <head sha>
 # Prints `code=true|false`, and appends it to $GITHUB_OUTPUT when that is set. A missing or
 # all-zero base (a new branch's first push) or a base git can't find counts as code, so the full
 # gate runs whenever the diff isn't known.
@@ -32,8 +34,9 @@ if [[ -z "$base" || "$base" =~ ^0+$ ]] || ! git cat-file -e "$base^{commit}" 2>/
 fi
 
 # Three dots: what the head adds since it left the base (a pull request's own changes). Paths
-# unquoted, so a note named with an em dash still matches `docs/*`.
-changed="$(git -c core.quotePath=false diff --name-only "$base...$head")"
+# unquoted, so a note named with an em dash still matches `docs/*`; no rename detection, so a
+# code file moved under docs/ or renamed to .md still lists its old path, which is code.
+changed="$(git -c core.quotePath=false diff --no-renames --name-only "$base...$head")"
 
 code=false
 while IFS= read -r file; do

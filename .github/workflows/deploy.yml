@@ -1,7 +1,7 @@
 name: Deploy
 
 # S114: Baseball Theater on Cloudflare Workers (ADR-017).
-# - Every pull request gets its own preview Worker on workers.dev, on staging's database (owner,
+# - Every pull request that changes code gets its own preview Worker on workers.dev, on staging's database (owner,
 #   2026-11-05: "Previews share staging db"), and its address is posted on the pull request. It is
 #   deleted when the pull request closes.
 # - Every push to stage deploys staging at stage.baseball.theater, on the Neon `staging` branch: a
@@ -44,10 +44,10 @@ permissions:
     pull-requests: write
 
 jobs:
-    # Docs-only pushes and pull requests (Markdown, docs/, .claude/) skip verify and get no preview
-    # (owner, 2026-11-07: "Things like this shouldn't trigger CI."); staging still deploys, so
-    # stage.baseball.theater always serves stage's head, and a release always runs everything.
-    # scripts/ci-changes.sh decides, the same script CI asks.
+    # Docs-only pull requests (Markdown, docs/, .claude/) skip verify and get no preview (owner,
+    # 2026-11-07: "Things like this shouldn't trigger CI."). Pushes to stage and releases always
+    # run verify, so staging never deploys code that hasn't passed it. scripts/ci-changes.sh
+    # decides, the same script CI asks.
     changes:
         if: github.event.action != 'closed'
         runs-on: ubuntu-latest
@@ -61,10 +61,10 @@ jobs:
             - name: Does this change anything besides docs?
               id: diff
               run: |
-                  if [ "${{ github.event_name }}" = release ]; then
-                      echo "code=true" >> "$GITHUB_OUTPUT"
+                  if [ "${{ github.event_name }}" = pull_request ]; then
+                      scripts/ci-changes.sh "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}"
                   else
-                      scripts/ci-changes.sh "${{ github.event.pull_request.base.sha || github.event.before }}" "${{ github.sha }}"
+                      echo "code=true" >> "$GITHUB_OUTPUT"
                   fi
 
     # The same gate CI runs (pnpm verify), plus a dry run of every env's Worker bundle.
@@ -100,7 +100,7 @@ jobs:
                       pnpm --filter @bt/functions exec wrangler deploy --config ../wrangler.jsonc --env "$env" --dry-run --outdir "$RUNNER_TEMP/dry-run-$env"
                   done
 
-    # One Worker per pull request, on the shared staging database (bt-staging). Pull requests from
+    # One Worker per pull request that changes code (a docs-only one gets none), on the shared staging database (bt-staging). Pull requests from
     # forks get no secrets, so they get no preview.
     preview:
         if: github.event_name == 'pull_request' && github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository && needs.verify.result == 'success'
@@ -189,9 +189,8 @@ jobs:
 
     # Every push to stage: stage.baseball.theater on the Neon staging branch (bt-staging).
     staging:
-        # Runs after verify passed, or after a docs-only push skipped it; never after it failed.
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/stage' && needs.changes.result == 'success' && (needs.verify.result == 'success' || (needs.verify.result == 'skipped' && needs.changes.outputs.code == 'false'))
-        needs: [changes, verify]
+        if: github.event_name == 'push' && github.ref == 'refs/heads/stage'
+        needs: [verify]
         runs-on: ubuntu-latest
         timeout-minutes: 20
         concurrency:

@@ -1,5 +1,5 @@
 /**
- * `scripts/ci-changes.sh` decides whether a push or pull request changes anything besides docs, for
+ * `scripts/ci-changes.sh` decides whether a pull request changes anything besides docs, for
  * CI and Deploy alike (owner, 2026-11-07, of a docs-only pull request: "Things like this shouldn't
  * trigger CI."; law P11). These tests run it against a throwaway git repository.
  */
@@ -98,6 +98,20 @@ describe("scripts/ci-changes.sh", () =>
 			});
 			expect(classify(base, head), file).toBe("code=true");
 		}
+	});
+
+	it("calls a code file moved under docs/ or renamed to .md code", () =>
+	{
+		commit({
+			"web/src/x.ts": "export const x = 1;\n",
+		});
+		const base = git("rev-parse", "HEAD");
+		mkdirSync(join(repo, "docs"), {
+			recursive: true,
+		});
+		git("mv", "web/src/x.ts", "docs/x.md");
+		git("commit", "-q", "-m", "move");
+		expect(classify(base, git("rev-parse", "HEAD"))).toBe("code=true");
 	});
 
 	it("runs the full gate when the base is missing, all zeros, or unknown", () =>

@@ -16,11 +16,12 @@ concurrency:
 # S89: the checks run as separate jobs that start together, so a push learns sooner whether it
 # is green. Each job sets itself up the same way (checkout, pnpm, Node from .nvmrc, install).
 jobs:
-    # Docs-only changes (Markdown, docs/, .claude/) skip the build, tests, browsers and Lighthouse
-    # and run only the docs checks below (owner, 2026-11-07, of a pull request that changed only
+    # Docs-only pull requests (Markdown, docs/, .claude/) skip the build, tests, browsers and
+    # Lighthouse and run only the docs checks below (owner, 2026-11-07, of a pull request that changed only
     # Markdown and the generated ledger index: "Things like this shouldn't trigger CI."). Law P11:
-    # every change to code still runs all of pnpm verify. scripts/ci-changes.sh decides, for CI and
-    # Deploy alike.
+    # every push, and every pull request that changes code, still runs all of pnpm verify: a push
+    # never skips, since a docs-only merge can land right after a code merge whose run it would
+    # cancel. scripts/ci-changes.sh decides, for CI and Deploy alike.
     changes:
         runs-on: ubuntu-latest
         outputs:
@@ -32,10 +33,16 @@ jobs:
 
             - name: Does this change anything besides docs?
               id: diff
-              run: scripts/ci-changes.sh "${{ github.event.pull_request.base.sha || github.event.before }}" "${{ github.sha }}"
+              run: |
+                  if [ "${{ github.event_name }}" = pull_request ]; then
+                      scripts/ci-changes.sh "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}"
+                  else
+                      echo "code=true" >> "$GITHUB_OUTPUT"
+                  fi
 
     # What a docs-only change can break: the generated backlog (pnpm backlog:check, also the first
-    # step of pnpm lint), the backlog vault's own tests (ledger, laws, index) and Markdown format.
+    # step of pnpm lint), the backlog vault's own tests (ledger, laws, index) and the format of the
+    # Markdown Prettier checks (outside docs/, which .prettierignore leaves out).
     docs:
         needs: changes
         if: needs.changes.outputs.code == 'false'
