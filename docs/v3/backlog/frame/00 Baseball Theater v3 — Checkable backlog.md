@@ -171,7 +171,14 @@ scripts/audit.sh review --trigger "…" --since "S23, S21, S13" --verdict amende
 
 This section keeps only the *forward-looking* scheduling state: what is due next, and the drift the next review has to weigh.
 
-**Last review:** 2026-11-07 at HEAD `797e868`, verdict **`amended`**. **Trigger: drift** — S122–S126 inserted outside a review (owner-directed 2026-11-07; asked whether they need a review: "I want the reviews"). Fresh-context subagent; see [AUDIT](./AUDIT.md). Weighed and not counted as drift: the release and Copilot-review rules in CLAUDE.md (`737b5a1`, `b2ce322`) change no story or gate; `pnpm verify` and LAWS.md are unchanged since `f34576a`.
+**Last review:** 2026-11-07 at HEAD `e7deda1`, verdict **`amended`**. **Trigger: drift** — S124's AC 1 and AC 2 rewritten in `e7deda1` (Copilot's review of PR #10; the same commit added `docs/v3/audit.jsonl` and `docs/v3/INDEX.md` to S122–S127's fences). Fresh-context subagent; see [AUDIT](./AUDIT.md). No story done and no code changed since `797e868`.
+
+- **S124 AC 2 tightened:** the month fill stores schedule days only, through ingest's version-guarded schedule write, and fetches no games (read as `ingestScheduleDay`, it would hydrate every final game of every filled day — hundreds of MLB requests in one month read). Notes: a range answer omits no-game days and `mapScheduleResponse` falls back to `dates[0]` for a missing date, so absent days are stored empty (`0`), `null` only when the request failed; every `MlbStatsClient` (HTTP, fixture, `overlayMlbClient`, four test fakes) gains the range method; reuse S122's if it lands first. Reuse check names the schedule repositories and the mapper instead of the `games` table's `listByDate`. AC 1 holds at HEAD (`schedule_days.document` is jsonb; one count query per adapter).
+- **S122 note:** after the run, put AC 9's sizes to the owner with the production question and ARCHITECTURE.md:649's open retention (the parity review's queued item).
+- **Still unanswered from the review at `797e868`:** whether S117 goes before S122–S126, and whether S127 comes before or after S5. Not re-asked.
+- **Next 3 by priority:** S126, S122, S123 — unchanged.
+
+**Earlier review:** 2026-11-07 at HEAD `797e868`, verdict **`amended`**. **Trigger: drift** — S122–S126 inserted outside a review (owner-directed 2026-11-07; asked whether they need a review: "I want the reviews"). Fresh-context subagent; see [AUDIT](./AUDIT.md). Weighed and not counted as drift: the release and Copilot-review rules in CLAUDE.md (`737b5a1`, `b2ce322`) change no story or gate; `pnpm verify` and LAWS.md are unchanged since `f34576a`.
 
 - **S126 AC 3 tightened:** "tests pass unchanged" contradicted AC 2 (the standalone test passes `onExpand` with no router; the accessible name and the `expands` test change). Notes: keep `data-testid="collapsed-bar"` (`e2e/design/S68.spec.ts`); S68's frozen grader goes red at HEAD by design.
 - **S122 AC 4:** a day with any unsettled game (today's) isn't complete. Notes: fail closed on production (a local URL carries no Hyperdrive name); log hosts, never connection strings; reuse S112's `dev-seed.ts` range walk and `db-seed.ts`'s `localConnectionString` (private today); the port has no feed-only fetch.
@@ -392,7 +399,7 @@ This section keeps only the *forward-looking* scheduling state: what is due next
 
 **Pending drift for the next review to weigh:**
 
-- **New (2026-11-07, review at `797e868`): S117 now sits below the five owner-directed stories (S122–S126, priorities 69–73).** The 2026-11-07 review at `f34576a` had S117 next "before the owner's DNS cutover". Asked of the owner whether S117 should go first; until answered, the order stands as the owner inserted it.
+- **New (2026-11-07, review at `797e868`): S117 now sits below the five owner-directed stories (S122–S126, priorities 69–73).** The 2026-11-07 review at `f34576a` had S117 next "before the owner's DNS cutover". Asked of the owner whether S117 should go first; until answered, the order stands as the owner inserted it. Also asked then and still open: whether S127 (Search's play-link design, priority 89) comes before or after S5 (90). Both still unanswered at the review at `e7deda1`.
 - **New (2026-11-07): S122's production run is the owner's call, asked separately** (S122 note). If the owner says yes, the next review checks how the backfill reaches Neon (Hyperdrive isn't in the path for a local command) and what it costs in storage.
 
 - **New (2026-11-07, review at `f34576a`): `wrangler.jsonc:116` still says production deploys on "Every push to main".** Since S121 a published GitHub Release deploys it and a push to `main` deploys nothing (`deploy.yml:12`). No `todo` story fences `wrangler.jsonc`; the owner's DNS cutover edits the same block (S119), or the next story that fences it fixes the comment.

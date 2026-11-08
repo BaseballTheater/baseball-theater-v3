@@ -16381,3 +16381,49 @@ Fresh-context doc parity review at `196b98b` on `backlog/backfill-and-calendar` 
 **Edits:** `docs/v3/FEATURES.md` (Video play links row, one clause). `pnpm backlog:build` and `pnpm backlog:check` clean.
 
 **Questions for the owner:** none.
+
+---
+
+## 2026-11-07 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-08T00:22:22Z` |
+| HEAD at review | `e7deda1` (tree dirty) |
+| Trigger | drift: S124's AC 1 and AC 2 rewritten (e7deda1, Copilot's review of PR #10) |
+| Stories `done` since last review | none |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context backlog review, one reviewer, at `e7deda1` on `backlog/backfill-and-calendar` (PR #10 into `stage`). Trigger: drift — S124's AC 1 and AC 2 rewritten in `e7deda1` (Copilot's review of PR #10), which also added `docs/v3/audit.jsonl` and `docs/v3/INDEX.md` to S122–S127's fences. `git log 196b98b..HEAD`: only `6c465c9` (parity review) and `e7deda1`; no code, `package.json`, `scripts/` or LAWS.md changed, no story done, no ADR, no new package. Read: CLAUDE.md; the skill; INDEX.md (open stories); the S122, S123, S124, S126 notes; `git show e7deda1 -- S124.md`; AUDIT.md:16288–16384 (the last backlog and parity reviews); frame 00 (:168–193, :372–407); frame 01's As of line.
+
+**Next 3 by priority:** S126 (69), S122 (70), S123 (71); S124 (72) checked in full because its ACs are the trigger.
+
+**1. Coverage**
+
+- **Parity queue (2026-11-07 parity review, "For the next backlog review"):** (1) S127 only designs Search's play link; building it is left to the design intake its ratification triggers — no amendment needed now. (2) The backfill beyond local and ARCHITECTURE.md:649's open "retention/TTL for old games": not a gap now (the owner deferred it until the size is known); **S122 note added** to put AC 9's sizes to the owner with that question when it finishes.
+- No ADR since the last review; no Later theme promoted.
+
+**2. Ground truth**
+
+- **S124 (rewritten ACs).** At HEAD: `ScheduleRepository` is `getByDate`/`upsert` only (`packages/ports/src/repositories.ts:14–16`); `schedule_days` is `date` PK, `version`, `document jsonb` (`functions/src/adapters/postgres/schema.ts:22–26`), so AC 1's count from each stored day's `games` summaries is one query over `document->'games'` for the month's dates in Postgres and one pass in `InMemoryScheduleRepository` (`functions/src/adapters/memory/repos.ts:71`), both inside the fence. `ScheduleDay.games` holds every summary, scheduled and postponed included (`packages/domain/src/types.ts:305`), so AC 1's "a day with scheduled games and no stored snapshots" is testable. Route table `packages/domain/src/api-routes.ts:189` (`GET /api/v1/schedule`); `edgeCacheControl` (`functions/src/handlers/cache-control.ts:22`) for AC 3; `api:spec`/`api:breaking` exist (root `package.json:34–35`). **Amended AC 2:** "filled … through the existing ingest path" read as `ingestScheduleDay` (`functions/src/services/ingest.ts:87`) calls `fetchGame` for every final or in-window game of each filled day (`:110`), and `HttpMlbStatsClient.fetchGame` fans out to three more requests (`functions/src/adapters/http/mlb.ts:149`) — hundreds of MLB requests inside one month read, contradicting "one schedule request" in spirit, hard on MLB and over a Worker's subrequest budget. AC 2 now stores each day's schedule through ingest's version-guarded schedule write (`stampVersion`, ADR-022; `storeSchedule`, `ingest.ts:59`, private) without hydrating games, and its test asserts no game request. **Notes added:** (b) MLB's range answer lists only days with games, and `mapScheduleResponse` (`functions/src/mappers/schedule.ts:206`) falls back to `response.dates[0]` for a missing date, so per-day mapping of a range answer unchanged would give an empty day the first day's games and date; absent days are stored with no games (`0`), `null` only when the request failed; the single-day path keeps its behavior (fixture byte-compare). (c) Every `MlbStatsClient` needs the range method: `HttpMlbStatsClient`, `FixtureMlbStatsClient`, `overlayMlbClient` (`functions/src/adapters/overlay-mlb.ts`, the local Worker's store overlay — the earlier note said "both adapters") and the fakes typed as the port (`tick-ingest.test.ts:34`, `cache-control.test.ts:128`, `refresh.test.ts:40`, `overlay-mlb.test.ts:39`); all in `functions/src/`. (d) S122 may add the same method: reuse it if it lands first (ADR-025). Reuse check now names `storeSchedule`, the schedule repositories and the mapper instead of the `games` table's `listByDate`, which AC 1 no longer reads. Fence (`functions/src/`, `packages/ports/`, `packages/domain/`, `openapi/`, `web/src/api/`, docs) holds every AC; cap 12 kept (one range method across three adapters and the fakes, plus one count query per repository).
+- **S126** (Depends S68 `done`). Unchanged at HEAD: `CollapsedBar.tsx:35–45` (`onExpand`, `onClick={onExpand}`), `web/src/pages/ScoreboardPage.tsx:33` (`expanded` state) and `:50`, `ScoreboardModule.tsx:124–125` (`component={Link}` to `/game/${game.gamePk}`), `CollapseHide.test.tsx:146/165/176/181`, `e2e/design/S68.spec.ts:73` (`collapsed-bar`), `scripts/verify-S68.sh:56` (`-t "expands"`). Fence gained only the generated index files. Holds; cap 8.
+- **S122** (no dependencies). Unchanged at HEAD: `localConnectionString` private (`functions/src/scripts/db-seed.ts:24`), local-host list `:36`; `fetchGame` `mlb.ts:144`, fan-out `:149`; `dev-seed.ts` `seedDays` (:79), `recordDevSeed` (:110), `loadDevSeed` (:191); `seed-refresh.ts`; `findOrCreateBranch` default-branch lookup (`bootstrap.ts:180–184`); `mlbToday` (`scoreboard-date.ts:32`), `addDays` (`calendar-date.ts:8`), `isFinalStatus` (`window.ts:47`); `pnpm mlb:backfill` absent (the story creates it). Holds; cap 20.
+- **S123** (no dependencies). No change since the last review except the fence's generated index files. Holds; cap 12.
+
+**3. Prioritization challenge**
+
+- Order unchanged: S126 is smallest and unblocked; S122 and S124 are independent (S124's tests use PGlite and fakes); S123 waits only on the owner; S125 on S123 and S124. Nothing obsolete or quietly done.
+- **Owner questions from the review at `797e868` still unanswered, not re-asked:** whether S117 should go before S122–S126, and whether S127 should come before or after S5. Recorded in frame 00's pending drift.
+- Underestimated class, again: a PR review rewrote an AC after both reviews passed it. The rewrite was right (counting `games` would have missed scheduled games) but left AC 2's "existing ingest path" ambiguous about game hydration; the same reading risk applies to any AC that says "through the existing ingest path" where ingest hydrates games (S122's AC 3 names `storeGame` explicitly, so it is fine).
+- **Baseline:** As of (S73) current; no story done since.
+
+**Duplication sweep (ADR-025).** No code added since the last review (`git log 196b98b..HEAD` touches only docs). `pnpm dup:check`: 0 clones. Forward risk recorded in S124's notes: one schedule range method shared with S122, and `storeSchedule` reused, not a second schedule write. None found.
+
+**Personal-data sweep (ADR-028).** S124 reads and writes only `schedule_days` (`none` in `DATA_CLASSIFICATION`, `functions/src/services/data-classification.ts:119`), adds no table, field, browser key or outside service; S126 adds nothing; S122 as the last review recorded (game tables `none`, resume file keyed by host and name); S123 is docs. None found.
+
+**Amendments:** S124 (AC 2; four notes; reuse check), S122 (note), frame 00 (Last review block; pending-drift item records the S127-vs-S5 question as still open).
+
+**Questions for the owner:** none new. Pending from the review at `797e868`: S117 before S122–S126?; S127 before or after S5?
