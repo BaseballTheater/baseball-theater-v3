@@ -20,6 +20,7 @@ import {
 import type { ApiUsageLog } from "../services/api-usage.js";
 import { getDayDigest } from "../services/digest.js";
 import { getDefaultScoreboardDate } from "../services/scoreboard-date.js";
+import { getStandings } from "../services/standings.js";
 import type { IngestDeps } from "../services/ingest.js";
 import { getOrRefreshGame, getOrRefreshSchedule } from "../services/ingest.js";
 import { edgeCacheControl } from "./cache-control.js";
@@ -209,16 +210,16 @@ export const API_ROUTER: readonly RouteEntry[] = [
 		route: "GET /api/v1/standings",
 		handle: async (url, _params, ctx) =>
 		{
-			// The day the tables stand as of; today (UTC, as the ingest cron reads it) when absent.
-			const date = url.searchParams.get("date") ?? (ctx.ingest.now?.() ?? new Date()).toISOString().slice(0, 10);
-			if (!/^\d{4}-\d{2}-\d{2}$/.test(date))
+			// The day to show standings for; MLB's today when absent (S128).
+			const date = url.searchParams.get("date") ?? undefined;
+			if (date !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(date))
 			{
 				return sendError(400, {
 					error: "date_invalid",
 					hint: "YYYY-MM-DD",
 				});
 			}
-			return sendJson(200, "GET /api/v1/standings", await ctx.ingest.mlb.fetchStandings(date));
+			return sendJson(200, "GET /api/v1/standings", await getStandings(ctx.ingest, date));
 		},
 	},
 	{

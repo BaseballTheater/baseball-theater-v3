@@ -93,6 +93,19 @@ describe("seed:refresh (S112 AC 1)", () =>
 		expect(last.start < last.end).toBe(true);
 	});
 
+	it("S112 AC 1: with this year's calendar unreachable, the default range is the year before's finished season", async () =>
+	{
+		// fetchSeasonCalendar rejects on a 500 (S128); defaultSeedRange treats it like an unpublished season.
+		const { mlb } = recordedClient((url) => url.pathname.endsWith("/api/v1/seasons/2026") ? new Response("{}", {
+			status: 500,
+		}) : undefined);
+		// 2025's regular season ended 2025-09-28 and its World Series on 2025-11-01.
+		expect(await defaultSeedRange(mlb, "2026-07-01")).toEqual({
+			start: "2025-08-29",
+			end: "2025-11-01",
+		});
+	});
+
 	it("S112 AC 1: a missing seed file reads as none", async () =>
 	{
 		expect(await readDevSeed(await tempFile())).toBeNull();

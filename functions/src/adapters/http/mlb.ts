@@ -115,6 +115,26 @@ export function standingsUrl(date: string, baseUrl = DEFAULT_BASE_URL): string
 	return `${baseUrl}/api/v1/standings?leagueId=103,104&season=${date.slice(0, 4)}&date=${date}&hydrate=team`;
 }
 
+/**
+ * A season's final regular-season table (S128): MLB's standings for the season with no `date`,
+ * which after the regular season is how it finished (checked 2026-11-07: 6 records, 30 teams;
+ * every date after the regular season answers 0). The recorder (S14) records the same URL.
+ */
+export function finalStandingsUrl(season: number, baseUrl = DEFAULT_BASE_URL): string
+{
+	return `${baseUrl}/api/v1/standings?leagueId=103,104&season=${season}&hydrate=team`;
+}
+
+/**
+ * A season's spring training standings as of `date` (S128): `standingsTypes=springTraining`,
+ * which MLB groups by spring league (Cactus / Grapefruit divisions) under the same division ids.
+ * The recorder (S14) records the same URL.
+ */
+export function springStandingsUrl(season: number, date: string, baseUrl = DEFAULT_BASE_URL): string
+{
+	return `${baseUrl}/api/v1/standings?leagueId=103,104&season=${season}&standingsTypes=springTraining&date=${date}&hydrate=team`;
+}
+
 /** One season's World Series schedule (S111): its last listed game is the season's final. */
 export function worldSeriesUrl(season: number, baseUrl = DEFAULT_BASE_URL): string
 {
@@ -166,7 +186,24 @@ export class HttpMlbStatsClient implements MlbStatsClient
 
 	async fetchStandings(date: string): Promise<StandingsSnapshot>
 	{
-		const payload = parseStandingsResponse(await this.getJson(standingsUrl(date, this.baseUrl)));
+		return this.standingsAt(standingsUrl(date, this.baseUrl), date);
+	}
+
+	/** Dated by the season's year until the caller (the standings service) names its `regularSeasonEndDate`. */
+	async fetchFinalStandings(season: number): Promise<StandingsSnapshot>
+	{
+		return this.standingsAt(finalStandingsUrl(season, this.baseUrl), `${season}-12-31`);
+	}
+
+	async fetchSpringStandings(season: number, date: string): Promise<StandingsSnapshot>
+	{
+		return this.standingsAt(springStandingsUrl(season, date, this.baseUrl), date);
+	}
+
+	/** One standings request, mapped; `date` is the day the table is labelled with. */
+	private async standingsAt(url: string, date: string): Promise<StandingsSnapshot>
+	{
+		const payload = parseStandingsResponse(await this.getJson(url));
 		return {
 			...mapStandings(payload, date, this.now().toISOString()),
 			windowMode: "active",
@@ -237,38 +274,21 @@ export class HttpMlbStatsClient implements MlbStatsClient
 		}
 	}
 
-	/** The season's calendar with its World Series final (S111); null when unpublished or unreachable. */
+	/**
+	 * The season's calendar with its World Series final (S111) and its regular season's first and
+	 * last days (S128, which the dev seed's default range also reads); null when MLB answers that
+	 * the season is unpublished (an empty seasons list). A failed request (an HTTP error, no
+	 * answer, an unparseable one) rejects instead of answering null: the standings must not
+	 * mistake an unreachable calendar for an unpublished one, which would keep last season's
+	 * final table on a mid-season day (S128 AC 7).
+	 */
 	async fetchSeasonCalendar(season: number): Promise<SeasonCalendar | null>
 	{
-		try
-		{
-			const [seasons, worldSeries] = await Promise.all([
-				this.getJson(seasonsUrl(season, this.baseUrl)),
-				this.getJson(worldSeriesUrl(season, this.baseUrl)),
-			]);
-			return mapSeasonCalendar(parseSeasonsResponse(seasons), parseScheduleResponse(worldSeries));
-		}
-		catch
-		{
-			return null;
-		}
-	}
-
-	/**
-	 * The season's last regular-season day (MLB's `regularSeasonEndDate`), or null when MLB has not
-	 * published it. Not on the port: only the dev seed's default range (S112) needs it, and the
-	 * domain's `SeasonCalendar` carries just what the scoreboard uses.
-	 */
-	async fetchRegularSeasonEndDate(season: number): Promise<string | null>
-	{
-		try
-		{
-			return parseSeasonsResponse(await this.getJson(seasonsUrl(season, this.baseUrl))).seasons[0]?.regularSeasonEndDate ?? null;
-		}
-		catch
-		{
-			return null;
-		}
+		const [seasons, worldSeries] = await Promise.all([
+			this.getJson(seasonsUrl(season, this.baseUrl)),
+			this.getJson(worldSeriesUrl(season, this.baseUrl)),
+		]);
+		return mapSeasonCalendar(parseSeasonsResponse(seasons), parseScheduleResponse(worldSeries));
 	}
 
 	private async fetchContent(gamePk: number): Promise<GameContentResponse | undefined>

@@ -183,7 +183,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** The division standings as of one day: each division's teams in rank order, with wins, losses, winning percentage and games back (null for the leader). */
+        /** The division standings for one day of the season — the regular season's table, the final table once it has ended, or spring training's (see `phase`): each division's teams in rank order, with wins, losses, winning percentage and games back (null for the leader). */
         get: operations["getStandings"];
         put?: never;
         post?: never;
@@ -726,12 +726,22 @@ export interface components {
             name: string | null;
             teams: components["schemas"]["StandingsTeamRecord"][];
         };
-        /** @description The division standings as of one day (S4): MLB's tables, projected to BT's shape. */
+        /**
+         * @description Which table a standings payload is (S128): the day's regular-season standings, a season's final regular-season table (after the regular season until the next spring), or spring training's standings as of the day.
+         * @enum {string}
+         */
+        StandingsPhaseName: "regularSeason" | "final" | "spring";
+        /** @description The division standings for one day (S4, S128): MLB's tables projected to BT's shape — the regular season's as of that day, the season's final table after it ends, spring training's in the spring (see `phase`). */
         StandingsResponse: components["schemas"]["StandingsSnapshot"];
         StandingsSnapshot: {
+            /** @description The day the table stands as of; for a `final` table, its season's `regularSeasonEndDate`. */
             date: string;
             divisions: components["schemas"]["StandingsDivision"][];
             fetchedAt: string;
+            /** @description Which table this is (S128); absent on snapshots read before S128 (recorded fixtures). */
+            phase?: components["schemas"]["StandingsPhaseName"];
+            /** @description MLB's season id of the table (S128): the year it was played. */
+            season?: number;
             /** @enum {string} */
             windowMode: "active" | "cache";
         };
@@ -1367,7 +1377,7 @@ export interface operations {
     getStandings: {
         parameters: {
             query?: {
-                /** @description Day the standings stand as of, as `YYYY-MM-DD`; today (UTC) when absent. */
+                /** @description The day to show standings for, `YYYY-MM-DD`; MLB's today when absent. After the regular season the answer is that season's final table, dated its `regularSeasonEndDate`; during spring training it is spring training's table (see `phase`). */
                 date?: string;
             };
             header?: never;

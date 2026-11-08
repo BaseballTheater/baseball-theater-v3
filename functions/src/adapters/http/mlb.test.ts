@@ -10,7 +10,9 @@ import { fileURLToPath } from "node:url";
 import {
 	describe, expect, it,
 } from "vitest";
-import { HttpMlbStatsClient } from "./mlb.js";
+import {
+	finalStandingsUrl, HttpMlbStatsClient, springStandingsUrl,
+} from "./mlb.js";
 
 const RAW = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../../fixtures/raw");
 
@@ -71,6 +73,23 @@ describe("HttpMlbStatsClient (S2)", () =>
 		expect(asked.searchParams.get("season")).toBe("2026");
 		expect(asked.searchParams.get("date")).toBe("2026-09-05");
 		expect(asked.searchParams.get("leagueId")).toBe("103,104");
+	});
+
+	it("fetchFinalStandings and fetchSpringStandings ask their own standings URLs (S128)", async () =>
+	{
+		const { mlb, urls } = client();
+		await mlb.fetchFinalStandings(2026);
+		await mlb.fetchSpringStandings(2026, "2026-03-01");
+		expect(urls).toEqual([
+			finalStandingsUrl(2026),
+			springStandingsUrl(2026, "2026-03-01"),
+		]);
+		const final = new URL(urls[0]!);
+		expect(final.searchParams.get("season")).toBe("2026");
+		expect(final.searchParams.has("date")).toBe(false);
+		const spring = new URL(urls[1]!);
+		expect(spring.searchParams.get("standingsTypes")).toBe("springTraining");
+		expect(spring.searchParams.get("date")).toBe("2026-03-01");
 	});
 
 	it("fetchPlayers asks for this season's stats, and asks nothing for no ids", async () =>
@@ -143,19 +162,22 @@ describe("HttpMlbStatsClient (S2)", () =>
 		expect(await mlb.fetchGameGraphContent(1)).toBeNull();
 	});
 
-	it("season calendar: the recorded 2026 calendar with its World Series final; null when unpublished", async () =>
+	it("season calendar: the recorded 2026 calendar with its World Series final; a failed request rejects", async () =>
 	{
 		const { mlb, urls } = client();
 		expect(await mlb.fetchSeasonCalendar(2026)).toEqual({
 			season: 2026,
 			springStartDate: "2026-02-20",
 			lastGameDate: "2026-10-28",
+			regularSeasonStartDate: "2026-03-25",
+			regularSeasonEndDate: "2026-09-27",
 		});
 		expect(urls).toEqual([
 			"https://statsapi.mlb.com/api/v1/seasons/2026?sportId=1",
 			"https://statsapi.mlb.com/api/v1/schedule?sportId=1&gameType=W&season=2026",
 		]);
-		// No recording for 2031: the calendar answers 404, so the season is unknown.
-		expect(await mlb.fetchSeasonCalendar(2031)).toBeNull();
+		// No recording for 2031: the calendar answers 404, a failed request — it rejects rather than
+		// answering null, so the standings can tell unreachable from unpublished (S128 AC 7).
+		await expect(mlb.fetchSeasonCalendar(2031)).rejects.toThrow("404");
 	});
 });

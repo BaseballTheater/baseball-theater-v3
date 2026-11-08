@@ -1,5 +1,9 @@
 /**
  * `pnpm --filter @bt/functions record-fixtures -- --date=… --game=…`
+ * `pnpm --filter @bt/functions record-fixtures -- --season=YYYY [--spring-date=YYYY-MM-DD]`
+ *
+ * The `--season` form records one season's calendar, World Series, final standings and (with
+ * `--spring-date`) its spring training standings as of that day, through `seasonEndpoints` (S128).
  *
  * Re-records the committed fixture corpus from live MLB: the Stats API payloads
  * and MLB's play-metrics feed (`raw/playmetrics-<gamePk>.json`, from
@@ -13,8 +17,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { HttpMlbStatsClient } from "../adapters/http/mlb.js";
 import {
+	recordEndpoints,
 	recordNormalized,
 	recordRaw,
+	seasonEndpoints,
 	type RecorderTarget,
 } from "../services/recorder.js";
 
@@ -31,6 +37,13 @@ function arg(name: string): string | undefined
 
 async function main(): Promise<void>
 {
+	const season = arg("season");
+	if (season)
+	{
+		const written = await recordEndpoints(seasonEndpoints(Number(season), arg("spring-date")), arg("out") ?? FIXTURES_ROOT);
+		for (const file of written) console.log(`wrote raw/${file}`);
+		return;
+	}
 	const date = arg("date");
 	const game = arg("game");
 	if (!date || !game)

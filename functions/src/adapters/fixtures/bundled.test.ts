@@ -16,11 +16,12 @@ const FIXTURES = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../
 /**
  * What `FixtureClient` reads by name: `schedule-<date>`, `game-<pk>`, `plays-<pk>`, `standings-<date>`,
  * `players-*`, and from `raw/` the play-metrics recordings (S93), the GraphQL game content (S94)
- * and the season calendars and World Series (S111).
+ * the season calendars and World Series (S111), and each season's final and spring standings (S128).
  */
 const SERVED = new RegExp(`^(${[
 	String.raw`schedule-\d{4}-\d{2}-\d{2}`, String.raw`game-\d+`, String.raw`plays-\d+`, String.raw`standings-\d{4}-\d{2}-\d{2}`, "players-.+",
 	String.raw`raw/playmetrics-\d+`, String.raw`raw/graphql-content-\d+`, String.raw`raw/seasons-\d{4}`, String.raw`raw/worldseries-\d{4}`,
+	String.raw`raw/standings-\d{4}-(?:final|spring)`,
 ].join("|")})\\.json$`);
 
 describe("bundled fixtures (S45)", () =>

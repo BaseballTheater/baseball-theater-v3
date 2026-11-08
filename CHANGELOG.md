@@ -14,6 +14,14 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## Standings all year round
+
+- **Before, the Standings page was empty for half the year: MLB has no standings for any day outside the regular
+  season. Now, after the regular season ends, Standings shows how the season finished until spring training starts,
+  and during spring training it shows the spring standings.** On the morning a new phase starts, before any of its
+  games is final, it keeps showing the previous table. Details: **S128** — `standingsPhase` (`packages/domain`), the
+  final and spring-training standings requests, `phase` and `season` on `GET /api/v1/standings`, divisions in one order.
+
 ## Standings load again
 
 - **Before, the Standings page showed an error on staging and production, because MLB began refusing standings

@@ -45,10 +45,12 @@ export interface DevSeed {
 	games: Unversioned<GameSnapshot>[];
 }
 
-/** What the default range needs from MLB: S111's calendar plus the regular season's last day. */
+/**
+ * What the default range needs from MLB: S111's calendar, which carries the regular season's last day (S128).
+ * It rejects when MLB can't be reached; the default range treats that like an unpublished season and tries the year before.
+ */
 export interface SeasonDates {
 	fetchSeasonCalendar(season: number): Promise<SeasonCalendar | null>;
-	fetchRegularSeasonEndDate(season: number): Promise<string | null>;
 }
 
 /**
@@ -63,9 +65,9 @@ export async function defaultSeedRange(mlb: SeasonDates, today: string): Promise
 	const year = Number(today.slice(0, 4));
 	for (const season of [year, year - 1])
 	{
-		const calendar = await mlb.fetchSeasonCalendar(season);
+		const calendar = await mlb.fetchSeasonCalendar(season).catch(() => null);
 		if (!calendar || calendar.lastGameDate >= today) continue;
-		const regularEnd = await mlb.fetchRegularSeasonEndDate(season);
+		const regularEnd = calendar.regularSeasonEndDate;
 		if (!regularEnd) break;
 		return {
 			start: addDays(regularEnd, -DEFAULT_REGULAR_SEASON_DAYS),

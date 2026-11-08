@@ -16613,3 +16613,443 @@ export const label = game.abbreviation + " @ ";  872ms
 ```
 
 </details>
+
+---
+
+## 2026-11-08 — S128 completed
+
+**Standings by season phase**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T19:20:42Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `bb38898` (tree dirty) |
+| Grader | `scripts/verify-S128.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**9/9 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S128 check results ---
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S128: 9/9 checks passed ---
+verify-S128: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 824ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  423ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  396ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 88ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 64ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1068ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  952ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 57ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 19ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 44ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  19:23:45
+   Duration  3.05s (transform 103ms, setup 0ms, collect 4.43s, tests 2.30s, environment 1ms, prepare 464ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155467,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-08 — S128 completed
+
+**Standings by season phase**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T19:34:29Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `8ff475d` (tree dirty) |
+| Grader | `scripts/verify-S128.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**9/9 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S128 check results ---
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S128: 9/9 checks passed ---
+verify-S128: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 928ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  451ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  470ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 142ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 111ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1132ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  1048ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 89ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 15ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 72ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  19:37:25
+   Duration  3.40s (transform 98ms, setup 0ms, collect 4.72s, tests 2.65s, environment 1ms, prepare 510ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155466,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-08 — S128 completed
+
+**Standings by season phase**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T19:45:46Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `1343a6b` (tree dirty) |
+| Grader | `scripts/verify-S128.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**9/9 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S128 check results ---
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S128: 9/9 checks passed ---
+verify-S128: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 826ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  401ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  422ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 138ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 954ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  862ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 104ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 52ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 17ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 58ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  19:48:42
+   Duration  3.13s (transform 86ms, setup 0ms, collect 4.34s, tests 2.30s, environment 1ms, prepare 450ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155460,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-08 — S128 completed
+
+**Standings by season phase**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T19:57:58Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `d2ded13` (tree dirty) |
+| Grader | `scripts/verify-S128.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**9/9 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S128 check results ---
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S128: 9/9 checks passed ---
+verify-S128: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 853ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  422ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  429ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 125ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 929ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  867ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 80ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 83ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 13ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 65ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  20:00:57
+   Duration  3.12s (transform 91ms, setup 0ms, collect 4.19s, tests 2.30s, environment 2ms, prepare 470ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155462,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
+
+---
+
+## 2026-11-08 — S128 completed
+
+**Standings by season phase**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T20:10:15Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `3746ae7` (tree dirty) |
+| Grader | `scripts/verify-S128.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**9/9 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S128 check results ---
+check 1 PASS: standingsPhase(day, seasons) in packages/domain picks regularSeason / final / spring at every boundary (2025, 2026, 2027 calendars; early opener; next season unpublished; no calendar); SeasonCalendar carries regularSeasonStartDate/EndDate; dev-seed reads the calendar's regular-season end, no second implementation
+check 2 PASS: GET /api/v1/standings answers the picked shape for ?date= or MLB's today: final (season, no date), spring (standingsTypes=springTraining), regular (standingsUrl), each one MlbStatsClient method with a named URL function the recorder also uses; payload carries phase, season and the table's date; past dates use their own calendars; spec has phase; pnpm api:breaking exits 0
+check 3 PASS: an empty spring or regular-season table falls back to the previous phase's table, and phase/season/date describe the table returned (2027-02-19 morning: final, 2026, 2026-09-27)
+check 4 PASS: fixtures/raw/standings-2026-final.json and standings-2026-spring.json (30 teams each), seasons-2027.json and worldseries-2027.json are committed, read by the fixture client, gated by the coverage test and scanned by pnpm mlb:scan-drift
+check 5 PASS: every shape lists divisions AL East, Central, West, then NL East, Central, West: the spring recording reordered, the 2026-09-05 fixture unchanged
+check 6 PASS: MLB request budget: at most two calendars (four requests) plus one standings request, plus one only for the fallback (counting client)
+check 7 PASS: with no calendar the day's regular-season standings are served; an MLB error stays an error
+check 8 PASS: no visual change: the story changes nothing under web/src outside web/src/api, and nothing outside its scope files
+check 9 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S128: 9/9 checks passed ---
+verify-S128: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 906ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  469ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  435ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 152ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 1015ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  945ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 72ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 81ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 17ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 50ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  20:13:13
+   Duration  2.99s (transform 63ms, setup 0ms, collect 4.12s, tests 2.44s, environment 1ms, prepare 432ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155465,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

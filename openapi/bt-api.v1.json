@@ -1045,16 +1045,32 @@
 				"required": ["divisionId", "name", "leagueId", "teams"],
 				"type": "object"
 			},
+			"StandingsPhaseName": {
+				"description": "Which table a standings payload is (S128): the day's regular-season standings, a season's final regular-season table (after the regular season until the next spring), or spring training's standings as of the day.",
+				"enum": ["regularSeason", "final", "spring"],
+				"type": "string"
+			},
 			"StandingsResponse": {
 				"$ref": "#/components/schemas/StandingsSnapshot",
-				"description": "The division standings as of one day (S4): MLB's tables, projected to BT's shape."
+				"description": "The division standings for one day (S4, S128): MLB's tables projected to BT's shape — the regular season's as of that day, the season's final table after it ends, spring training's in the spring (see `phase`)."
 			},
 			"StandingsSnapshot": {
 				"additionalProperties": false,
 				"properties": {
-					"date": { "type": "string" },
+					"date": {
+						"description": "The day the table stands as of; for a `final` table, its season's `regularSeasonEndDate`.",
+						"type": "string"
+					},
 					"divisions": { "items": { "$ref": "#/components/schemas/StandingsDivision" }, "type": "array" },
 					"fetchedAt": { "type": "string" },
+					"phase": {
+						"$ref": "#/components/schemas/StandingsPhaseName",
+						"description": "Which table this is (S128); absent on snapshots read before S128 (recorded fixtures)."
+					},
+					"season": {
+						"description": "MLB's season id of the table (S128): the year it was played.",
+						"type": "number"
+					},
 					"windowMode": { "enum": ["active", "cache"], "type": "string" }
 				},
 				"required": ["date", "divisions", "fetchedAt", "windowMode"],
@@ -1573,7 +1589,7 @@
 				"operationId": "getStandings",
 				"parameters": [
 					{
-						"description": "Day the standings stand as of, as `YYYY-MM-DD`; today (UTC) when absent.",
+						"description": "The day to show standings for, `YYYY-MM-DD`; MLB's today when absent. After the regular season the answer is that season's final table, dated its `regularSeasonEndDate`; during spring training it is spring training's table (see `phase`).",
 						"in": "query",
 						"name": "date",
 						"required": false,
@@ -1600,7 +1616,7 @@
 						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
 					}
 				},
-				"summary": "The division standings as of one day: each division's teams in rank order, with wins, losses, winning percentage and games back (null for the leader)."
+				"summary": "The division standings for one day of the season — the regular season's table, the final table once it has ended, or spring training's (see `phase`): each division's teams in rank order, with wins, losses, winning percentage and games back (null for the leader)."
 			}
 		}
 	}
