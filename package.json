@@ -30,6 +30,7 @@
 		"dup:check": "jscpd --config .jscpd.json",
 		"comments:stale": "node tools/comments-stale/comments-stale.js",
 		"verify": "pnpm build && pnpm dup:check && pnpm test:coverage && pnpm size",
+		"mlb:backfill": "pnpm --filter @bt/functions exec tsx src/scripts/backfill.ts",
 		"mlb:scan-drift": "pnpm --filter @bt/functions exec tsx src/scripts/scan-drift.ts",
 		"api:spec": "pnpm --filter @bt/functions exec tsx src/scripts/generate-openapi.ts",
 		"api:breaking": "pnpm --filter @bt/functions exec tsx src/scripts/api-breaking.ts",

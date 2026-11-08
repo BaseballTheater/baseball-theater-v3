@@ -7,9 +7,10 @@
  * source that failed leaves its field off and the game is served as before.
  */
 import type {
-	AtBat, GameGraphContent, GamePlayMetrics, MediaHighlight,
+	AtBat, GameGraphContent, GamePlayMetrics, GameSnapshot, MediaHighlight, Unversioned,
 } from "@bt/domain";
 import { rankHighlightsByImpact, videoPlayLinks } from "@bt/domain";
+import type { GameEditorial } from "@bt/ports";
 
 export function withGameExtras<T extends { plays: AtBat[];
 	highlights: MediaHighlight[]; }>(game: T, playMetrics: GamePlayMetrics | null, graph: GameGraphContent | null): T
@@ -34,4 +35,24 @@ export function withGameExtras<T extends { plays: AtBat[];
 			relatedArticles: graph.relatedArticles,
 		},
 	};
+}
+
+/**
+ * A whole game from its parts (S122): the live feed, the content endpoint's videos and recap,
+ * and the two extras, each null when it failed or wasn't asked. `fetchGame` (both adapters)
+ * and the backfill, which asks each source on its own, build a game here, so a game reads the
+ * same whichever path stored it.
+ */
+export function assembleGame(
+	feed: Unversioned<GameSnapshot>,
+	editorial: GameEditorial | null,
+	playMetrics: GamePlayMetrics | null,
+	graph: GameGraphContent | null,
+): Unversioned<GameSnapshot>
+{
+	return withGameExtras({
+		...feed,
+		highlights: editorial?.highlights ?? [],
+		recap: editorial?.recap,
+	}, playMetrics, graph);
 }

@@ -45,7 +45,7 @@ function runRefresh<T>(
  * never the upstream tree, so the snapshot upsert stays the raw-ish record and
  * the projection is what the UI binds to. Returns what is now stored.
  */
-async function storeGame(deps: IngestDeps, fetched: Unversioned<GameSnapshot>): Promise<GameSnapshot>
+async function storeGame(deps: Pick<IngestDeps, "games" | "projections">, fetched: Unversioned<GameSnapshot>): Promise<GameSnapshot>
 {
 	const stored = await deps.games.getByPk(fetched.gamePk);
 	const snapshot = stampVersion(stored, fetched, fetched.fetchedAt);
@@ -55,8 +55,11 @@ async function storeGame(deps: IngestDeps, fetched: Unversioned<GameSnapshot>): 
 	return snapshot;
 }
 
-/** The schedule-day counterpart of {@link storeGame}. */
-async function storeSchedule(deps: IngestDeps, fetched: Unversioned<ScheduleDay>): Promise<ScheduleDay>
+/**
+ * The schedule-day counterpart of {@link storeGame}. Exported for the backfill (S122), which
+ * asks a day's games one source at a time and so can't go through {@link ingestScheduleDay}.
+ */
+export async function storeSchedule(deps: Pick<IngestDeps, "schedules">, fetched: Unversioned<ScheduleDay>): Promise<ScheduleDay>
 {
 	const stored = await deps.schedules.getByDate(fetched.date);
 	const day = stampVersion(stored, fetched, fetched.fetchedAt);
@@ -71,7 +74,7 @@ async function storeSchedule(deps: IngestDeps, fetched: Unversioned<ScheduleDay>
  * ingest object (S48) publishes only then.
  */
 export async function ingestGame(
-	deps: IngestDeps,
+	deps: Pick<IngestDeps, "games" | "projections">,
 	fetched: Unversioned<GameSnapshot>,
 ): Promise<{ snapshot: GameSnapshot;
 	changed: boolean; }>
@@ -82,6 +85,29 @@ export async function ingestGame(
 		snapshot,
 		changed: before?.version !== snapshot.version,
 	};
+}
+
+/**
+ * Whether a stored game's projection is current: present, and of its snapshot's version.
+ * {@link storeGame} writes the snapshot, then the projection, so a stop between the two
+ * leaves a snapshot ahead of its projection (S122 AC 4).
+ */
+export async function isProjectionCurrent(deps: Pick<IngestDeps, "projections">, snapshot: GameSnapshot): Promise<boolean>
+{
+	const projection = await deps.projections.getByPk(snapshot.gamePk);
+	return projection !== null && projection.header.version === snapshot.version;
+}
+
+/**
+ * Finishes {@link storeGame}'s second write for a stored snapshot whose projection is missing
+ * or older (S122 AC 4), from the stored snapshot, without asking MLB again. Says whether it
+ * wrote anything.
+ */
+export async function repairProjection(deps: Pick<IngestDeps, "projections">, snapshot: GameSnapshot): Promise<boolean>
+{
+	if (await isProjectionCurrent(deps, snapshot)) return false;
+	await deps.projections.upsert(projectGame(snapshot));
+	return true;
 }
 
 export async function ingestScheduleDay(

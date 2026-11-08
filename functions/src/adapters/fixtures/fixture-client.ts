@@ -15,8 +15,10 @@ import type { GameDiffPatchResponse, ReplayPatchEntry } from "@bt/mlb-api";
 import {
 	parseGameTimestamps, parseGraphContentResponse, parsePlayMetricsResponse, parseRecordedReplayWalk, parseScheduleResponse, parseSeasonsResponse, parseStandingsResponse,
 } from "@bt/mlb-api";
-import type { MlbStatsClient } from "@bt/ports";
-import { withGameExtras } from "../../mappers/game-extras.js";
+import type {
+	GameEditorial, MlbGameSources, MlbStatsClient,
+} from "@bt/ports";
+import { assembleGame } from "../../mappers/game-extras.js";
 import { mapGraphContent } from "../../mappers/graph-content.js";
 import { mapPlayMetrics } from "../../mappers/play-metrics.js";
 import { mapSeasonCalendar } from "../../mappers/season-calendar.js";
@@ -48,7 +50,7 @@ export interface FixtureFiles
  * The MLB client over committed fixtures (local dev and CI never touch the network).
  * Reads go through a `FixtureFiles` source, so the same client serves Node and the Worker.
  */
-export class FixtureClient implements MlbStatsClient
+export class FixtureClient implements MlbStatsClient, MlbGameSources
 {
 	/** The recorded diffPatch walk is 5+ MB; the capture command asks for every
    * adjacent pair, so parse it once per gamePk and index the pairs. */
@@ -88,19 +90,47 @@ export class FixtureClient implements MlbStatsClient
 
 	async fetchGame(gamePk: number): Promise<Unversioned<GameSnapshot>>
 	{
-		const file = `game-${gamePk}.json`;
-		const data = await this.readJson<GameFixture>(file);
-		const plays = await this.loadPlays(gamePk);
+		const feed = await this.fetchGameFeed(gamePk);
+		const editorial = await this.fetchGameEditorial(gamePk);
 		const playMetrics = await this.fetchPlayMetrics(gamePk);
 		const graph = await this.fetchGameGraphContent(gamePk);
-		const now = new Date().toISOString();
-		return withGameExtras({
+		return assembleGame(feed, editorial, playMetrics, graph);
+	}
+
+	/** The committed game without its videos or recap (S122): what the live feed alone gives. */
+	async fetchGameFeed(gamePk: number): Promise<Unversioned<GameSnapshot>>
+	{
+		const {
+			highlights: _highlights, recap: _recap, ...data
+		} = await this.readJson<GameFixture>(`game-${gamePk}.json`);
+		return {
 			...data,
-			plays,
-			highlights: data.highlights ?? [],
-			fetchedAt: now,
-			windowMode: "cache" as const,
-		}, playMetrics, graph);
+			plays: await this.loadPlays(gamePk),
+			highlights: [],
+			fetchedAt: new Date().toISOString(),
+			windowMode: "cache",
+		};
+	}
+
+	/** The committed game's videos and recap (S122); null for a game with neither or no fixture. */
+	async fetchGameEditorial(gamePk: number): Promise<GameEditorial | null>
+	{
+		try
+		{
+			const data = await this.readJson<GameFixture>(`game-${gamePk}.json`);
+			const highlights = data.highlights ?? [];
+			if (highlights.length === 0 && !data.recap) return null;
+			return {
+				highlights,
+				...data.recap && {
+					recap: data.recap,
+				},
+			};
+		}
+		catch
+		{
+			return null;
+		}
 	}
 
 	/** Highlights are already ranked onto the committed game fixture. */

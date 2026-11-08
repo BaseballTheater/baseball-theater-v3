@@ -6,11 +6,11 @@
  * nothing. It refuses a non-local host, so it can't seed a hosted database by mistake. Then it
  * loads the dev seed file (S112) when there is one, or says which command makes it.
  */
-import { readFileSync } from "node:fs";
 import {
 	FIXTURES_ROOT, FixtureMlbStatsClient, nodeFixtureFiles,
 } from "../adapters/fixtures/mlb.js";
 import { openPostgres } from "../adapters/postgres/connect.js";
+import { isLocalDbHost, localConnectionString } from "../adapters/postgres/local.js";
 import { migratePostgres } from "../adapters/postgres/migrate.js";
 import {
 	PostgresGameProjectionRepository, PostgresGameRepository, PostgresScheduleRepository,
@@ -20,20 +20,9 @@ import {
 } from "../services/dev-seed.js";
 import { seedFromFixtures } from "../services/seed.js";
 
-/** wrangler.jsonc's local Hyperdrive connection string (comments stripped; the file is JSONC). */
-function localConnectionString(): string
-{
-	const text = readFileSync(new URL("../../../wrangler.jsonc", import.meta.url), "utf8").replace(/^\s*\/\/.*$/gm, "");
-	const config = JSON.parse(text) as { hyperdrive?: { binding: string;
-		localConnectionString?: string; }[]; };
-	const local = config.hyperdrive?.find((h) => h.binding === "HYPERDRIVE")?.localConnectionString;
-	if (!local) throw new Error("wrangler.jsonc has no HYPERDRIVE localConnectionString");
-	return local;
-}
-
 const url = process.env.BT_DATABASE_URL ?? localConnectionString();
 const host = new URL(url).hostname;
-if (!["localhost", "127.0.0.1", "::1", "postgres"].includes(host))
+if (!isLocalDbHost(host))
 {
 	console.error(`[db:seed] refusing to seed ${host}: db:seed is for the local database only`);
 	process.exit(2);

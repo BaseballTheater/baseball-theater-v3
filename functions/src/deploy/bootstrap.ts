@@ -231,6 +231,18 @@ async function untilReady(api: NeonApi, branch: NeonBranch): Promise<NeonBranch>
 	return current;
 }
 
+/** One compute endpoint of the project: the host a connection string names, and its branch. */
+export type NeonEndpoint = {
+	host: string;
+	branch_id: string;
+};
+
+/** Every compute endpoint of the project (S122 tells production's apart from other branches' by them). */
+export async function projectEndpoints(api: NeonApi): Promise<NeonEndpoint[]>
+{
+	return (await neon<{ endpoints: NeonEndpoint[] }>(api, "/endpoints")).endpoints;
+}
+
 /**
  * The branch's direct (unpooled) connection string, for its first database and that database's
  * owner: what `pnpm db:migrate` and Hyperdrive connect with. It carries a password, so the caller

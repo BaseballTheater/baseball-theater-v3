@@ -14,6 +14,15 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## Every game since 1901
+
+- **Before, BT knew only the few days someone had looked at. Now one command fills it with every game between two
+  dates, as far back as 1901, gently enough not to burden MLB; a stopped run picks up where it left off, and at the
+  end it says how much room the data takes.** It runs on a developer's machine into the local database first, so the
+  owner can see the real size before anything goes near production. Details: **S122** — `pnpm mlb:backfill`
+  (`functions/src/services/backfill.ts`), `isOffSeasonDay` / `recordSourceDay` (`packages/domain`), `PoliteFetch`
+  (2 requests in flight per host, backoff on 429/5xx), resume state in `.backfill/`, the table-size report.
+
 ## Standings all year round
 
 - **Before, the Standings page was empty for half the year: MLB has no standings for any day outside the regular

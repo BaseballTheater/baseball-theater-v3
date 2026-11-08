@@ -17053,3 +17053,97 @@ export const label = game.abbreviation + " @ ";  945ms
 ```
 
 </details>
+
+---
+
+## 2026-11-08 — S122 completed
+
+**Game backfill since 1901**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T20:31:12Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `e25c276` (tree dirty) |
+| Grader | `scripts/verify-S122.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: pnpm mlb:backfill [--from] [--to]: --to defaults to mlbToday, --from to a year before, nothing before 1901-04-18; BT_DATABASE_URL else localConnectionString (one implementation, shared with db:seed); production refused without --allow-production (local always allowed, other hosts refused unless NEON_API_KEY shows a non-default branch)
+check 2 PASS: isOffSeasonDay in packages/domain skips Nov 15 through Feb 15 (boundaries 11-14, 11-15, 02-15, 02-16 tested) and the backfill makes no request for those days
+check 3 PASS: a day is stored through ingest's version-guarded path (storeSchedule / ingestGame); 823823 through PGlite is not rewritten when unchanged
+check 4 PASS: idempotent and resumable: a second run asks MLB nothing for complete days and writes nothing; a missing or older projection is repaired without MLB; unsettled days are re-checked; a stopped run resumes with total requests equal to one clean run's
+check 5 PASS: the walk goes newest to oldest
+check 6 PASS: per-host pacing: at most 2 requests in flight per host, minimum gaps (named constants, >= 1 s recent, >= 3 s older than 10 years, overridable by flag), exponential per-host backoff on 429/5xx honoring Retry-After
+check 7 PASS: each extra source (content, play metrics, GraphQL) is given up after 14 consecutive failed days of games, the streak survives a split run, and the live feed is never given up
+check 8 PASS: resume state lives in a git-ignored file keyed by the database's host and name; a different database starts fresh
+check 9 PASS: progress lines while running and a final report of rows and pg_total_relation_size for schedule_days, games and game_projections (tested on PGlite)
+check 10 PASS: tests never reach MLB: no statsapi.mlb.com request outside the HTTP adapter
+check 11 PASS: README documents the command, defaults, off-season skip, pacing, give-up rule, resuming, the local default and --allow-production
+check 12 PASS: backlog Status is done (story heading and Story status table), and the story stays inside its scope files
+```
+
+**12/12 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S122 check results ---
+check 1 PASS: pnpm mlb:backfill [--from] [--to]: --to defaults to mlbToday, --from to a year before, nothing before 1901-04-18; BT_DATABASE_URL else localConnectionString (one implementation, shared with db:seed); production refused without --allow-production (local always allowed, other hosts refused unless NEON_API_KEY shows a non-default branch)
+check 2 PASS: isOffSeasonDay in packages/domain skips Nov 15 through Feb 15 (boundaries 11-14, 11-15, 02-15, 02-16 tested) and the backfill makes no request for those days
+check 3 PASS: a day is stored through ingest's version-guarded path (storeSchedule / ingestGame); 823823 through PGlite is not rewritten when unchanged
+check 4 PASS: idempotent and resumable: a second run asks MLB nothing for complete days and writes nothing; a missing or older projection is repaired without MLB; unsettled days are re-checked; a stopped run resumes with total requests equal to one clean run's
+check 5 PASS: the walk goes newest to oldest
+check 6 PASS: per-host pacing: at most 2 requests in flight per host, minimum gaps (named constants, >= 1 s recent, >= 3 s older than 10 years, overridable by flag), exponential per-host backoff on 429/5xx honoring Retry-After
+check 7 PASS: each extra source (content, play metrics, GraphQL) is given up after 14 consecutive failed days of games, the streak survives a split run, and the live feed is never given up
+check 8 PASS: resume state lives in a git-ignored file keyed by the database's host and name; a different database starts fresh
+check 9 PASS: progress lines while running and a final report of rows and pg_total_relation_size for schedule_days, games and game_projections (tested on PGlite)
+check 10 PASS: tests never reach MLB: no statsapi.mlb.com request outside the HTTP adapter
+check 11 PASS: README documents the command, defaults, off-season skip, pacing, give-up rule, resuming, the local default and --allow-production
+check 12 PASS: backlog Status is done (story heading and Story status table), and the story stays inside its scope files
+--- verify-S122: 12/12 checks passed ---
+verify-S122: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 851ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  414ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  433ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 67ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 939ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  877ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 82ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 98ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 15ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 65ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  20:34:22
+   Duration  2.91s (transform 138ms, setup 0ms, collect 4.06s, tests 2.24s, environment 1ms, prepare 416ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155460,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

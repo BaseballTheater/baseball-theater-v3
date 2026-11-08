@@ -1,6 +1,7 @@
 import type {
 	GameGraphContent,
 	GamePlayMetrics,
+	GameRecap,
 	GameSnapshot,
 	MediaHighlight,
 	PlayerProfile,
@@ -62,4 +63,22 @@ export interface MlbStatsClient {
 		startTimecode: string,
 		endTimecode: string,
 	): Promise<GameDiffPatchResponse>;
+}
+
+/** A game's content-endpoint payload as BT keeps it: its videos and its editorial recap (S10). */
+export type GameEditorial = {
+	highlights: MediaHighlight[];
+	recap?: GameRecap;
+};
+
+/**
+ * A game's sources one at a time (S122), for the backfill: it must tell, per source, whether
+ * it answered, and stop asking one it has given up, which `fetchGame`'s fan-out can't do.
+ * `fetchGame` is the live feed with all three extras attached; these are its parts.
+ */
+export interface MlbGameSources extends Pick<MlbStatsClient, "fetchSchedule" | "fetchPlayMetrics" | "fetchGameGraphContent"> {
+	/** The live feed alone, mapped, with no highlights or extras; throws when it can't be had. */
+	fetchGameFeed(gamePk: number): Promise<Unversioned<GameSnapshot>>;
+	/** The content endpoint's videos and recap; null when it fails or has neither, never a throw. */
+	fetchGameEditorial(gamePk: number): Promise<GameEditorial | null>;
 }
