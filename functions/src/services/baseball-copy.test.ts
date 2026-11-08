@@ -66,6 +66,50 @@ async function forbid(db: PostgresDb, tables: string[], events: string[]): Promi
 
 const noMigration = async () => undefined;
 
+/** What a watched source saw: one entry per statement run inside a transaction, and how many of them were page reads. */
+type SourceWatch = { readOnlyAfter: string[];
+	pageReads: number; };
+
+/**
+ * Production as a pooler would serve it: a statement outside a transaction throws (through
+ * PgBouncer's transaction mode it could land on any server connection, so nothing may rely on
+ * one), and every statement inside a transaction is followed by `SHOW transaction_read_only`, so
+ * a read that ran before the transaction was made read-only is caught.
+ */
+function watchSource(db: PostgresDb): { db: PostgresDb;
+	seen: SourceWatch; }
+{
+	const seen: SourceWatch = {
+		readOnlyAfter: [],
+		pageReads: 0,
+	};
+	type Tx = Pick<PostgresDb, "execute">;
+	const watched = new Proxy(db, {
+		get(target, prop)
+		{
+			if (prop === "execute") return () =>
+			{
+				throw new Error("source statement outside a transaction");
+			};
+			if (prop === "transaction") return (run: (tx: Tx) => Promise<unknown>) => target.transaction(async (tx) => run({
+				execute: (async (query: ReturnType<typeof sql>) =>
+				{
+					const result = await tx.execute(query) as unknown as { rows: Record<string, unknown>[] };
+					const shown = await tx.execute(sql`SHOW transaction_read_only`) as unknown as { rows: { transaction_read_only: string }[] };
+					seen.readOnlyAfter.push(String(shown.rows[0]?.transaction_read_only));
+					if (result.rows[0] && "fetched" in result.rows[0]) seen.pageReads++;
+					return result;
+				}) as unknown as Tx["execute"],
+			}));
+			return Reflect.get(target, prop, target) as unknown;
+		},
+	});
+	return {
+		db: watched,
+		seen,
+	};
+}
+
 describe("copyBaseballData (S117)", () =>
 {
 	it("AC 1 personal: copies every baseball row and never writes a personal table or the deletion log", async () =>
@@ -99,6 +143,47 @@ describe("copyBaseballData (S117)", () =>
 			written: 3,
 		});
 		expect(await dump(target, "games")).toEqual(await dump(source, "games"));
+	});
+
+	it("AC 1 personal: pages by bytes as well as rows, so a page of big documents stays small", async () =>
+	{
+		const production_ = await production();
+		const { db: source, seen } = watchSource(production_);
+		const { db: target } = await migratedPglite();
+		const [games] = await copyBaseballData({
+			source,
+			target,
+			migrateTarget: noMigration,
+			batchRows: 100,
+			batchBytes: 1,
+		}).then((copies) => copies.filter((copy) => copy.table === "games"));
+		expect(games).toMatchObject({
+			read: 3,
+			written: 3,
+		});
+		// One row per page under a 1-byte cap: schedule_days 2, games 3, game_projections 1, replay_artifacts 1.
+		expect(seen.pageReads).toBe(7);
+		for (const table of baseballTables()) expect(await dump(target, table)).toEqual(await dump(production_, table));
+	});
+
+	it("AC 1 personal: never reads a personal table or the deletion log, only the baseball tables", async () =>
+	{
+		const source = await production();
+		await source.execute(sql`CREATE ROLE copier NOLOGIN`);
+		await source.execute(sql`GRANT USAGE ON SCHEMA public TO copier`);
+		await source.execute(sql.raw(`GRANT SELECT ON ${baseballTables().join(", ")} TO copier`));
+		// From here production lets the copy read the baseball tables and nothing else: reading a fan's table fails.
+		await source.execute(sql`SET ROLE copier`);
+		await expect(source.execute(sql`SELECT * FROM users`)).rejects.toThrow();
+		const { db: target } = await migratedPglite();
+		const copies = await copyBaseballData({
+			source,
+			target,
+			migrateTarget: noMigration,
+		});
+		await source.execute(sql`RESET ROLE`);
+		expect(copies.map((copy) => copy.read)).toEqual([2, 3, 1, 1]);
+		for (const table of baseballTables()) expect(await dump(target, table)).toEqual(await dump(source, table));
 	});
 
 	it("AC 2 twice: a second copy writes nothing and changes nothing", async () =>
@@ -170,6 +255,8 @@ describe("copyBaseballData (S117)", () =>
 		await target.execute(sql`CREATE TABLE staging_only (id integer PRIMARY KEY, version integer NOT NULL)`);
 		await target.execute(sql`INSERT INTO staging_only VALUES (1, 1)`);
 		await target.execute(sql`INSERT INTO games (game_pk, official_date, version, document, staging_note) VALUES (999, '2030-01-01', 1, '{"gamePk":999}', 'mine')`);
+		// A row both sides have, older on staging: production's columns win, staging's own column keeps its value.
+		await target.execute(sql`INSERT INTO games (game_pk, official_date, version, document, staging_note) VALUES (1, '2024-04-01', 0, '{"gamePk":1,"note":"old"}', 'kept')`);
 		await target.execute(sql`INSERT INTO drizzle.__drizzle_migrations (hash, created_at) VALUES ('staging-ahead', 99999999999999)`);
 		await forbid(target, [...baseballTables(), "staging_only"], ["DELETE", "TRUNCATE"]);
 		const order: string[] = [];
@@ -192,10 +279,15 @@ describe("copyBaseballData (S117)", () =>
 			sourceOnlyColumns: ["production_only"],
 			targetOnlyColumns: ["staging_note"],
 		});
+		expect(await all(target, sql`SELECT game_pk, version, staging_note FROM games WHERE game_pk = 1`)).toEqual([{
+			game_pk: 1,
+			version: 5,
+			staging_note: "kept",
+		}]);
 		expect(await all(target, sql`SELECT game_pk, staging_note FROM games ORDER BY game_pk`)).toEqual([
 			{
 				game_pk: 1,
-				staging_note: null,
+				staging_note: "kept",
 			},
 			{
 				game_pk: 2,
@@ -235,6 +327,76 @@ describe("copyBaseballData (S117)", () =>
 		}]);
 	});
 
+	it("AC 3 ahead: a target-only column that is required with a default gets its default", async () =>
+	{
+		const source = await production();
+		const { db: target } = await migratedPglite();
+		await target.execute(sql`ALTER TABLE games ADD COLUMN staging_flag text NOT NULL DEFAULT 'd'`);
+		await copyBaseballData({
+			source,
+			target,
+			migrateTarget: noMigration,
+		});
+		expect(await all(target, sql`SELECT game_pk, staging_flag FROM games ORDER BY game_pk`)).toEqual([1, 2, 3].map((gamePk) => ({
+			game_pk: gamePk,
+			staging_flag: "d",
+		})));
+	});
+
+	it("AC 3 ahead: a target-only column that is required with no default skips that table with the reason, and the others are still copied", async () =>
+	{
+		const source = await production();
+		const { db: target } = await migratedPglite();
+		await target.execute(sql`ALTER TABLE games ADD COLUMN required_note text NOT NULL`);
+		const lines: string[] = [];
+		const copies = await copyBaseballData({
+			source,
+			target,
+			migrateTarget: noMigration,
+			log: (line) => lines.push(line),
+		});
+		expect(copies.find((copy) => copy.table === "games")).toMatchObject({
+			read: 0,
+			written: 0,
+			skipped: "the target's column required_note is required (NOT NULL, no default) and production has no values for it",
+		});
+		expect(lines.find((line) => line.startsWith("games:"))).toContain("none of production's rows copied");
+		expect(await dump(target, "games")).toEqual([]);
+		for (const table of baseballTables().filter((name) => name !== "games")) expect(await dump(target, table)).toEqual(await dump(source, table));
+	});
+
+	it("AC 3 ahead: a column the target generates is left to the target, not written", async () =>
+	{
+		const source = await production();
+		await source.execute(sql`ALTER TABLE games ADD COLUMN derived integer`);
+		await source.execute(sql`UPDATE games SET derived = 77`);
+		const { db: target } = await migratedPglite();
+		await target.execute(sql`ALTER TABLE games ADD COLUMN derived integer GENERATED ALWAYS AS (version * 2) STORED`);
+		const copies = await copyBaseballData({
+			source,
+			target,
+			migrateTarget: noMigration,
+		});
+		expect(copies.find((copy) => copy.table === "games")).toMatchObject({
+			written: 3,
+			generatedColumns: ["derived"],
+		});
+		expect(await all(target, sql`SELECT game_pk, derived FROM games ORDER BY game_pk`)).toEqual([
+			{
+				game_pk: 1,
+				derived: 10,
+			},
+			{
+				game_pk: 2,
+				derived: 10,
+			},
+			{
+				game_pk: 3,
+				derived: 4,
+			},
+		]);
+	});
+
 	it("AC 3 ahead: an unmigrated target is migrated before anything is copied", async () =>
 	{
 		const source = await production();
@@ -250,7 +412,7 @@ describe("copyBaseballData (S117)", () =>
 		expect(await dump(target, "games")).toEqual(await dump(source, "games"));
 	});
 
-	it("AC 3 production unchanged: production is only read, over a read-only session, and is never migrated", async () =>
+	it("AC 3 production unchanged: production is only read and never migrated or written", async () =>
 	{
 		const source = await production();
 		const tables = (await all(source, sql`SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'`)).map((row) => String(row.table_name));
@@ -265,8 +427,23 @@ describe("copyBaseballData (S117)", () =>
 		});
 		expect(await Promise.all(tables.map((table) => dump(source, table)))).toEqual(before);
 		expect(await all(source, sql`SELECT hash FROM drizzle.__drizzle_migrations ORDER BY id`)).toEqual(migrations);
-		const refused = await source.execute(sql`CREATE TABLE written_after (id integer)`).then(() => undefined, (error: unknown) => error as Error);
-		expect(String(refused?.cause)).toMatch(/read-only transaction/);
+	});
+
+	it("AC 3 production unchanged: every production read runs in its own read-only transaction, safe through a pooler, and nothing is set on its session", async () =>
+	{
+		const production_ = await production();
+		const { db: source, seen } = watchSource(production_);
+		const { db: target } = await migratedPglite();
+		await copyBaseballData({
+			source,
+			target,
+			migrateTarget: noMigration,
+		});
+		expect(seen.readOnlyAfter.length).toBeGreaterThan(0);
+		expect(new Set(seen.readOnlyAfter)).toEqual(new Set(["on"]));
+		expect(await all(production_, sql`SHOW default_transaction_read_only`)).toEqual([{
+			default_transaction_read_only: "off",
+		}]);
 	});
 
 	it("refuses a table without one shared primary key or a version column, rather than write unguarded", async () =>

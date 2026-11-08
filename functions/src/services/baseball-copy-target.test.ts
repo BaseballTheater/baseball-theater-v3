@@ -23,17 +23,28 @@ function fakeNeon(branches: NeonBranch[] = [{
 	name: "staging",
 	init_source: "parent-schema",
 }]): { api: NeonApi;
-	asked: string[]; }
+	asked: string[];
+	methods: string[]; }
 {
 	const asked: string[] = [];
+	const methods: string[] = [];
 	return {
 		asked,
+		methods,
 		api: {
 			projectId: "proj",
 			apiKey: "key",
-			fetch: async (input) =>
+			fetch: async (input, init) =>
 			{
 				asked.push(input);
+				methods.push(init?.method ?? "GET");
+				if (init?.method === "POST") return Response.json({
+					branch: {
+						id: "br-new",
+						name: "staging",
+						current_state: "ready",
+					},
+				});
 				if (input.endsWith("/branches")) return Response.json({
 					branches,
 				});
@@ -167,5 +178,16 @@ describe("the copy's target (S117 AC 5)", () =>
 			init_source: "parent-data",
 		}]);
 		await expect(neonCopyDatabases(copied.api, "staging")).rejects.toThrow(/began as a copy of production's data/);
+	});
+
+	it("production: with no staging branch yet, the copy refuses and says to deploy staging first, creating nothing", async () =>
+	{
+		const none = fakeNeon([{
+			id: "br-prod",
+			name: "main",
+			default: true,
+		}]);
+		await expect(neonCopyDatabases(none.api, "staging")).rejects.toThrow(/deploy staging first/);
+		expect(none.methods.filter((method) => method !== "GET")).toEqual([]);
 	});
 });

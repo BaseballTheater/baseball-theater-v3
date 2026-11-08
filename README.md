@@ -302,10 +302,13 @@ production's deploy then registers its Logto sign-in addresses (`pnpm deploy:log
   rolls staging back. It copies only the columns both sides have: a column or table only staging
   has (a migration production hasn't had yet) is left untouched, and a column only production has is
   skipped. A column a staging-only migration renamed or reshaped gets nothing from production under
-  its new name.
+  its new name. A column staging generates itself is left to staging. A column only staging has that
+  is required with no default (`NOT NULL`, nothing to fill it) makes that table be skipped: it gets
+  none of production's rows, the log says why, and the other tables are still copied.
 - **Migrations:** it migrates the target first (with the checked-out code's migrations; the workflow
-  checks out `stage`) and never migrates or changes production, which it reads over a read-only
-  session.
+  checks out `stage`) and never migrates or changes production. Every read of production runs in a
+  read-only transaction of its own, which holds through Neon's pooler too; nothing is set on
+  production's session.
 - **Never production:** the target can't be production, by name (`production`, `bt-production`), by
   Neon branch (the project's default branch) or by host (the same guard as `pnpm mlb:backfill`, with
   no override), and can't be the database it reads from.
@@ -319,6 +322,8 @@ BT_SOURCE_DATABASE_URL="<production>" BT_DATABASE_URL="<target>" pnpm db:copy-ba
 NEON_API_KEY=… NEON_PROJECT_ID=… pnpm db:copy-baseball --neon staging   # both from Neon, as the workflow does
 ```
 
+`--neon staging` writes only the `staging` branch that deploys already made: with none yet it
+refuses and says to deploy staging first, and never creates a branch itself.
 A local target (`localhost`, compose.yaml's `postgres`) is always allowed; a hosted one only when
 `NEON_API_KEY` and `NEON_PROJECT_ID` show it is a Neon branch other than production's.
 

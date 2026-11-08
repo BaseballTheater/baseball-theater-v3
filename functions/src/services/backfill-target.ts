@@ -8,6 +8,8 @@
  * connects to (`databaseTarget`, which reads `?host=` as pg does); a string carrying `hostaddr`
  * or naming no host is refused even with `--allow-production`, since where it would connect
  * isn't one clear place. Messages name the host and the database only, never the connection string.
+ * S117's baseball-data copy reuses this guard (through `checkCopyTarget`) with `allowProduction:
+ * "never"`, so it has no override at all.
  */
 import { databaseTarget, isLocalDbHost } from "../adapters/postgres/local.js";
 import type { NeonApi } from "../deploy/bootstrap.js";
