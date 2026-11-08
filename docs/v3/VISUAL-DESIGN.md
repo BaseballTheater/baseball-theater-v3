@@ -304,7 +304,7 @@ Drop `v3 · local fixtures` on public builds.
 
 The slot is the same hole; contents swap. Do not invent a second row species for each occupant.
 
-**Collapsed non-favorites (accepted).** A setting collapses games that do not involve a favorite team into a **smaller bar** by default. Favorite-team games stay the full module. The bar is the same game (matchup + score, or hidden), not a different object. The user can expand a collapsed bar. House default for the setting is **on** once favorites exist; with no favorites, every game stays the full module.
+**Collapsed non-favorites (accepted).** A setting collapses games that do not involve a favorite team into a **smaller bar** by default. Favorite-team games stay the full module. The bar is the same game (matchup + score, or hidden), not a different object. Choosing a collapsed bar opens that game's page, as the full module does; it no longer expands in place (owner, 2026-11-07: *"collapsed games in the game list should not expand on click, they should go to the game page."*; S126). House default for the setting is **on** once favorites exist; with no favorites, every game stays the full module.
 
 ### Game (detail)
 
@@ -455,7 +455,7 @@ The test: a superfan can land on the scoreboard and reach any deeper fact (a pit
 | Change date | `/games/:date`; remember last date for the session |
 | Hover / focus | Border/contrast; optional 160ms lift — no bounce, no glow wash |
 | Live | Accent 2 blinking dot + status label; no colored background on the indicator |
-| Open collapsed bar | Expands that game to the full module |
+| Open collapsed bar | Opens the game page, like **Open game**; it does not expand in place (owner, 2026-11-07; S126) |
 | Structured score hidden | Score *fields* follow the setting; card size stays stable. Free-text titles need their own rule (§5a) — blanking numerals is not enough |
 
 ### Live updates (BT-backed)
