@@ -36,6 +36,7 @@
 | Every game since 1901 (FEATURES, owner 2026-11-07) | **S122** `pnpm mlb:backfill`, run locally first; whether it ever runs against production is the owner's call, asked separately |
 | Calendar date picker (FEATURES, owner 2026-11-07) | Design **S123** → **S124** games per day (prefers S122's stored seasons) → **S125** picker |
 | Collapsed bar opens the game (VISUAL-DESIGN §6 Scoreboard, owner 2026-11-07) | **S126** |
+| Changelist page and what's new on update notices (FEATURES Update / changelist UX, owner 2026-11-08) | **S131** approved release notes → **S132** API; design **S133** → **S134** page, **S135** notices |
 | Video play links from Search's floating player (FEATURES, owner 2026-11-05) | Design **S127**; its intake re-scopes **S5** or slices the build |
 | Budgets + coverage (ADR-026) | **S54** size + render counts + ratchet, **S81** Playwright + design-match captures (rule 22), **S62** Lighthouse CI + flows; bringing LCP under 2.5 s (both pages warn at about 3.2–3.3 s) — no story yet (owner, 2026-10-29: "we can figure out the problems later") |
 
