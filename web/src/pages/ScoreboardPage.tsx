@@ -1,7 +1,6 @@
 import {
 	Box, SimpleGrid, Stack, Text,
 } from "@mantine/core";
-import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { scoreboardRows } from "@bt/domain";
 import { useScheduleDay } from "../api/schedule.js";
@@ -21,7 +20,7 @@ import { useSettings } from "../settings/store.js";
 /**
  * The day's games under their `GAMES — SEP 21, 2026` label, or the empty sentence. With
  * Collapse Non-Favorites on, `scoreboardRows` folds games without a favorite team into
- * `CollapsedBar`s after the favorites; a bar opens to its full module when chosen. While
+ * `CollapsedBar`s after the favorites; choosing a bar opens its game (S126). While
  * anything is collapsed, a favorite's module spans the whole row at medium and desktop
  * (owner, 2026-10-30: "on desktop, when the collapsed mode is on, make the favorite one
  * full-width").
@@ -30,7 +29,6 @@ function Games({ day, variant }: { day: ScheduleDayPayload;
 	variant: LayoutVariant; })
 {
 	const { favoriteTeamIds, collapseNonFavorites } = useSettings();
-	const [expanded, setExpanded] = useState<ReadonlySet<number>>(new Set());
 	if (day.games.length === 0)
 	{
 		return <ViewState kind="empty" message="No games scheduled for this date." />;
@@ -45,11 +43,11 @@ function Games({ day, variant }: { day: ScheduleDayPayload;
 			<SimpleGrid cols={variant === "mobile" ? 1 : 2} spacing="md" verticalSpacing="md" data-testid="scoreboard-grid">
 				{rows.map(({ game, collapsed }) =>
 				{
-					if (collapsed && !expanded.has(game.gamePk))
+					if (collapsed)
 					{
-						return <CollapsedBar key={game.gamePk} game={game} onExpand={() => setExpanded(new Set(expanded).add(game.gamePk))} />;
+						return <CollapsedBar key={game.gamePk} game={game} />;
 					}
-					return wide && !collapsed ? (
+					return wide ? (
 						<Box key={game.gamePk} data-testid="scoreboard-wide" style={{
 							gridColumn: "1 / -1",
 						}}
