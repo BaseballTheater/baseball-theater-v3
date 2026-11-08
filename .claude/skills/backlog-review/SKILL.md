@@ -64,9 +64,9 @@ For **each** of the next 3 stories:
 
 ### 2b. Adversarial pass — try to break every acceptance criterion
 
-Check 2 confirms a story's names exist; this check asks whether its plan holds. The goal is that Copilot finds nothing in the backlog's pull request (owner, 2026-11-07: "Our goal should be zero Copilot discoveries for each pull request"); on 2026-11-07 it found twelve real problems in S122 and S124 after two reviews passed them, all of this kind.
+Check 2 confirms a story's names exist; this check asks whether its plan holds. The goal is that Copilot finds nothing in the backlog's pull request (owner, 2026-11-07: "Our goal should be zero Copilot discoveries for each pull request"); on 2026-11-07 it found twelve real problems in the backlog pull request #10 after two reviews had passed it, all of this kind.
 
-Scope: every acceptance criterion and note of the next 3 stories **and of every story inserted, re-scoped or rewritten since the last review**. For each, apply the [Copilot-class checklist](../../../docs/v3/LOOP.md#copilot-class-checklist) in `docs/v3/LOOP.md` §7 — interrupted work, state that must survive a restart, partly present data, the real source of truth, unsettled states, ADR conformance, request budgets, import side effects, generated files inside the fence, parser-read lines, contradictions, boundaries, untrusted stored values, over-broad matching, shared state — reading the code each criterion touches at HEAD, not just its name.
+Scope: every acceptance criterion and note of the next 3 stories **and of every story inserted, re-scoped or rewritten since the last review**. For each, apply the [Copilot-class checklist](../../../docs/v3/LOOP.md#copilot-class-checklist) in `docs/v3/LOOP.md` §7 (LOOP.md holds the authoritative list; read it there, every time) reading the code each criterion touches at HEAD, not just its name.
 
 Each finding names the **exact input or sequence that breaks the criterion** (for example "stopped after 13 failed days, the resumed run skips those days and never reaches 14") and becomes an amendment to that story. The ledger entry lists, for each story in scope, the checklist items that applied and what was checked; a story recorded with no items checked fails the evidence requirement below.
 
@@ -143,7 +143,7 @@ This review never edits `docs/v3/INTENT.md`, `docs/v3/FEATURES.md`, or an existi
 ## What this does not cover
 
 - Code correctness — that is `pnpm verify` plus the fresh-context code review in `LOOP.md` §7.
-- Whether a story's ACs are _achievable_ in practice; only whether they are still coherent, dependency-satisfied, and inside their fence.
+- Whether the code a `done` story shipped is correct; that is the pre-PR review and `pnpm verify`. Whether a story's acceptance criteria hold up _is_ covered, by check 2b.
 - Product decisions. Surface them as `blocked`; do not decide them.
 - Whether the product docs still match the backlog: that is the [doc parity review](../doc-parity-review/SKILL.md) (`pnpm parity:debt`).
 
