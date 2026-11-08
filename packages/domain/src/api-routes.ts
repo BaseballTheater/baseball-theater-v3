@@ -26,7 +26,11 @@ import type {
 export type ScheduleDayResponse = ScheduleDay;
 export type GameSnapshotResponse = GameSnapshot;
 
-/** The division standings as of one day (S4): MLB's tables, projected to BT's shape. */
+/**
+ * The division standings for one day (S4, S128): MLB's tables projected to BT's shape — the
+ * regular season's as of that day, the season's final table after it ends, spring training's
+ * in the spring (see `phase`).
+ */
 export type StandingsResponse = StandingsSnapshot;
 
 /** The day the scoreboard opens on (S111): today in season, the last final in the off-season. */

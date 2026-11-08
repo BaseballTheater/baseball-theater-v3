@@ -128,13 +128,13 @@ export const ROUTE_DESCRIPTIONS: Record<ApiRoute, RouteDescription> = {
 	},
 	"GET /api/v1/standings": {
 		operationId: "getStandings",
-		summary: "The division standings as of one day: each division's teams in rank order, with wins, losses, winning percentage and games back (null for the leader).",
+		summary: "The division standings for one day of the season — the regular season's table, the final table once it has ended, or spring training's (see `phase`): each division's teams in rank order, with wins, losses, winning percentage and games back (null for the leader).",
 		parameters: [
 			{
 				name: "date",
 				in: "query",
 				required: false,
-				description: "Day the standings stand as of, as `YYYY-MM-DD`; today (UTC) when absent.",
+				description: "The day to show standings for, `YYYY-MM-DD`; MLB's today when absent. After the regular season the answer is that season's final table, dated its `regularSeasonEndDate`; during spring training it is spring training's table (see `phase`).",
 				schema: {
 					type: "string",
 					pattern: "^\\d{4}-\\d{2}-\\d{2}$",

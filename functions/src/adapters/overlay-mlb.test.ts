@@ -29,10 +29,10 @@ describe("overlayMlbClient (S112)", () =>
 
 	it("passes every other call through unchanged", async () =>
 	{
-		const calls: string[] = [];
-		const answer = <T>(name: string, value: T) => async () =>
+		const calls: unknown[][] = [];
+		const answer = <T>(name: string, value: T) => async (...args: unknown[]) =>
 		{
-			calls.push(name);
+			calls.push([name, ...args]);
 			return value;
 		};
 		const inner = {
@@ -42,6 +42,8 @@ describe("overlayMlbClient (S112)", () =>
 			fetchPlayMetrics: answer("fetchPlayMetrics", null),
 			fetchGameGraphContent: answer("fetchGameGraphContent", null),
 			fetchStandings: answer("fetchStandings", null),
+			fetchFinalStandings: answer("fetchFinalStandings", null),
+			fetchSpringStandings: answer("fetchSpringStandings", null),
 			fetchSeasonCalendar: answer("fetchSeasonCalendar", null),
 			fetchPlayers: answer("fetchPlayers", []),
 			fetchGameTimestamps: answer("fetchGameTimestamps", []),
@@ -55,11 +57,24 @@ describe("overlayMlbClient (S112)", () =>
 		await mlb.fetchPlayMetrics(1);
 		await mlb.fetchGameGraphContent(1);
 		await mlb.fetchStandings("2026-09-05");
+		await mlb.fetchFinalStandings(2026);
+		await mlb.fetchSpringStandings(2026, "2026-03-01");
 		await mlb.fetchSeasonCalendar(2026);
 		await mlb.fetchPlayers([1]);
 		await mlb.fetchGameTimestamps(1);
 		await mlb.fetchGameDiffPatch(1, "a", "b");
-		expect(calls).toEqual(["fetchGameContent", "fetchPlayMetrics", "fetchGameGraphContent", "fetchStandings", "fetchSeasonCalendar", "fetchPlayers", "fetchGameTimestamps", "fetchGameDiffPatch"]);
+		expect(calls).toEqual([
+			["fetchGameContent", 1],
+			["fetchPlayMetrics", 1],
+			["fetchGameGraphContent", 1],
+			["fetchStandings", "2026-09-05"],
+			["fetchFinalStandings", 2026],
+			["fetchSpringStandings", 2026, "2026-03-01"],
+			["fetchSeasonCalendar", 2026],
+			["fetchPlayers", [1]],
+			["fetchGameTimestamps", 1],
+			["fetchGameDiffPatch", 1, "a", "b"],
+		]);
 	});
 
 	it("storeOverlay hands back a stored day or game without its version, and null for what isn't stored", async () =>
