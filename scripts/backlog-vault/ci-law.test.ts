@@ -1,8 +1,10 @@
 /**
  * Law P11 (docs/v3/LAWS.md; S62; owner, 2026-10-29: "Yes", to running all of
  * `pnpm verify` in CI): CI runs `pnpm verify`, so every law the gate holds —
- * including `pnpm dup:check` (L7) and `pnpm size` (L5) — also holds on every push,
- * not only where someone runs it locally.
+ * including `pnpm dup:check` (L7) and `pnpm size` (L5) — also holds on every change to
+ * code, not only where someone runs it locally. A docs-only change runs only the docs
+ * checks (owner, 2026-11-07: "Things like this shouldn't trigger CI."), as
+ * `scripts/ci-changes.sh` decides; nothing else may skip the gate.
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -28,5 +30,14 @@ describe("CI runs pnpm verify (law P11)", () =>
 	it("catches a workflow that runs only parts of the gate", () =>
 	{
 		expect(runSteps("steps:\n  - run: pnpm lint\n  - run: pnpm build\n")).not.toContain("pnpm verify");
+	});
+
+	it("the verify job is skipped only for a docs-only change, and ci-passed requires it for code", () =>
+	{
+		const ci = readFileSync(CI_YML, "utf8");
+		const verifyJob = ci.slice(ci.indexOf("\n    verify:\n"), ci.indexOf("\n    flows:\n"));
+		expect(verifyJob).toContain("if: needs.changes.outputs.code == 'true'");
+		expect([...verifyJob.matchAll(/^ {8}if:/gm)]).toHaveLength(1);
+		expect(ci).toContain('test "$VERIFY $FLOWS $DESIGN $LIGHTHOUSE" = "success success success success"');
 	});
 });

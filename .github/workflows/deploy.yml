@@ -44,9 +44,33 @@ permissions:
     pull-requests: write
 
 jobs:
+    # Docs-only pushes and pull requests (Markdown, docs/, .claude/) skip verify and get no preview
+    # (owner, 2026-11-07: "Things like this shouldn't trigger CI."); staging still deploys, so
+    # stage.baseball.theater always serves stage's head, and a release always runs everything.
+    # scripts/ci-changes.sh decides, the same script CI asks.
+    changes:
+        if: github.event.action != 'closed'
+        runs-on: ubuntu-latest
+        outputs:
+            code: ${{ steps.diff.outputs.code }}
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Does this change anything besides docs?
+              id: diff
+              run: |
+                  if [ "${{ github.event_name }}" = release ]; then
+                      echo "code=true" >> "$GITHUB_OUTPUT"
+                  else
+                      scripts/ci-changes.sh "${{ github.event.pull_request.base.sha || github.event.before }}" "${{ github.sha }}"
+                  fi
+
     # The same gate CI runs (pnpm verify), plus a dry run of every env's Worker bundle.
     verify:
-        if: github.event.action != 'closed'
+        needs: changes
+        if: needs.changes.outputs.code == 'true'
         runs-on: ubuntu-latest
         timeout-minutes: 30
         steps:
@@ -79,7 +103,7 @@ jobs:
     # One Worker per pull request, on the shared staging database (bt-staging). Pull requests from
     # forks get no secrets, so they get no preview.
     preview:
-        if: github.event_name == 'pull_request' && github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+        if: github.event_name == 'pull_request' && github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository && needs.verify.result == 'success'
         needs: [verify]
         runs-on: ubuntu-latest
         timeout-minutes: 20
@@ -165,8 +189,9 @@ jobs:
 
     # Every push to stage: stage.baseball.theater on the Neon staging branch (bt-staging).
     staging:
-        if: github.event_name == 'push' && github.ref == 'refs/heads/stage'
-        needs: [verify]
+        # Runs after verify passed, or after a docs-only push skipped it; never after it failed.
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/stage' && needs.changes.result == 'success' && (needs.verify.result == 'success' || (needs.verify.result == 'skipped' && needs.changes.outputs.code == 'false'))
+        needs: [changes, verify]
         runs-on: ubuntu-latest
         timeout-minutes: 20
         concurrency:

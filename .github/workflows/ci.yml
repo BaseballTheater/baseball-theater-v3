@@ -16,7 +16,58 @@ concurrency:
 # S89: the checks run as separate jobs that start together, so a push learns sooner whether it
 # is green. Each job sets itself up the same way (checkout, pnpm, Node from .nvmrc, install).
 jobs:
+    # Docs-only changes (Markdown, docs/, .claude/) skip the build, tests, browsers and Lighthouse
+    # and run only the docs checks below (owner, 2026-11-07, of a pull request that changed only
+    # Markdown and the generated ledger index: "Things like this shouldn't trigger CI."). Law P11:
+    # every change to code still runs all of pnpm verify. scripts/ci-changes.sh decides, for CI and
+    # Deploy alike.
+    changes:
+        runs-on: ubuntu-latest
+        outputs:
+            code: ${{ steps.diff.outputs.code }}
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Does this change anything besides docs?
+              id: diff
+              run: scripts/ci-changes.sh "${{ github.event.pull_request.base.sha || github.event.before }}" "${{ github.sha }}"
+
+    # What a docs-only change can break: the generated backlog (pnpm backlog:check, also the first
+    # step of pnpm lint), the backlog vault's own tests (ledger, laws, index) and Markdown format.
+    docs:
+        needs: changes
+        if: needs.changes.outputs.code == 'false'
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 9.15.0
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: ".nvmrc"
+                  cache: pnpm
+
+            - name: Install
+              run: pnpm install --frozen-lockfile
+
+            - name: Backlog notes and generated files in sync
+              run: pnpm backlog:check
+
+            - name: Backlog vault tests
+              run: pnpm test:backlog
+
+            - name: Markdown format
+              run: pnpm exec prettier --check "**/*.md"
+
     verify:
+        needs: changes
+        if: needs.changes.outputs.code == 'true'
         runs-on: ubuntu-latest
         timeout-minutes: 30
         steps:
@@ -57,6 +108,8 @@ jobs:
     # The main flows on several workers (S89), each run twice so no flow depends on another's
     # order. Browsers run only here and in the design-spec job, never in pnpm verify (law P8).
     flows:
+        needs: changes
+        if: needs.changes.outputs.code == 'true'
         runs-on: ubuntu-latest
         timeout-minutes: 30
         steps:
@@ -84,6 +137,8 @@ jobs:
     # written to the tree but a spec that breaks fails the push (S89 AC 2; it caught S97's at
     # 2b4de06). Taking the captures is `pnpm design:capture`, on request.
     design-specs:
+        needs: changes
+        if: needs.changes.outputs.code == 'true'
         runs-on: ubuntu-latest
         timeout-minutes: 30
         steps:
@@ -111,6 +166,8 @@ jobs:
     # 2026-10-29); TBT and layout shift fail over budget. Alone on its runner, so nothing else
     # shares the machine it times; it builds only the web app it serves.
     lighthouse:
+        needs: changes
+        if: needs.changes.outputs.code == 'true'
         runs-on: ubuntu-latest
         timeout-minutes: 30
         steps:
@@ -135,11 +192,27 @@ jobs:
               run: pnpm lighthouse
 
     # One check that stands for all of them, for a branch rule to require (so the rule needn't
-    # change when the jobs do).
+    # change when the jobs do). It passes only when the jobs this change needed ran and passed:
+    # all four for code, the docs job for a docs-only change; a skipped job is fine only when the
+    # change didn't need it.
     ci-passed:
         if: always()
-        needs: [verify, flows, design-specs, lighthouse]
+        needs: [changes, docs, verify, flows, design-specs, lighthouse]
         runs-on: ubuntu-latest
         steps:
-            - name: Every CI job passed
-              run: test "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}" = "false"
+            - name: Every CI job this change needed passed
+              env:
+                  CODE: ${{ needs.changes.outputs.code }}
+                  CHANGES: ${{ needs.changes.result }}
+                  DOCS: ${{ needs.docs.result }}
+                  VERIFY: ${{ needs.verify.result }}
+                  FLOWS: ${{ needs.flows.result }}
+                  DESIGN: ${{ needs.design-specs.result }}
+                  LIGHTHOUSE: ${{ needs.lighthouse.result }}
+              run: |
+                  test "$CHANGES" = success
+                  if [ "$CODE" = true ]; then
+                      test "$VERIFY $FLOWS $DESIGN $LIGHTHOUSE" = "success success success success"
+                  else
+                      test "$CODE" = false && test "$DOCS" = success
+                  fi
