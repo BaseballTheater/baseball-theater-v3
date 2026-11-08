@@ -16505,3 +16505,33 @@ Proportionate review of the one FEATURES change since 6c465c9 (2c7326c), plus th
 
 3. Coverage
 - No new FEATURES items. The row's "no story builds it yet" (the floating player's At-Bat link in code) was already carried to the backlog review by the 6c465c9 parity entry; still open, still S127-gated.
+
+---
+
+## 2026-11-07 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-08T07:44:00Z` |
+| HEAD at capture | `0b35af2` (tree clean) |
+| Change | `0b35af2` — Backlog: S128's regular season starts with its first game |
+
+**What changed, and the owner's answer**
+
+Owner-directed backlog change: S128 (Standings follow the season), S129 (design: spring training label), S130 (the label), inserted in 909e7e4 and refined in ea04055, e3f27a2, 0b35af2 after a three-pass pre-PR review (14 findings fixed, last pass clean). Asked whether they need a backlog review or a skip: owner, 2026-11-07: "Skip".
+
+---
+
+## 2026-11-07 — doc parity review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a doc parity review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-08T07:44:00Z` |
+| HEAD at capture | `0b35af2` (tree dirty) |
+| Change | `0b35af2` — Backlog: S128's regular season starts with its first game |
+
+**What changed, and the owner's answer**
+
+Owner-directed: FEATURES' Standings row quotes the owner ("Yes, it should always show the last standings for the prior season until spring training’s first game"; "Agreed"; "first regular season game"), and S128–S130 cite Feature: Standings. Asked whether they need a doc parity review or a skip: owner, 2026-11-07: "Skip".
