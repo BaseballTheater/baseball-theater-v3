@@ -142,8 +142,7 @@ This review never edits `docs/v3/INTENT.md`, `docs/v3/FEATURES.md`, or an existi
 
 ## What this does not cover
 
-- Code correctness — that is `pnpm verify` plus the fresh-context code review in `LOOP.md` §7.
-- Whether the code a `done` story shipped is correct; that is the pre-PR review and `pnpm verify`. Whether a story's acceptance criteria hold up _is_ covered, by check 2b.
+- Code correctness — that is `pnpm verify` plus the pre-PR review in `LOOP.md` §7. Whether a story's acceptance criteria hold up _is_ covered, by check 2b.
 - Product decisions. Surface them as `blocked`; do not decide them.
 - Whether the product docs still match the backlog: that is the [doc parity review](../doc-parity-review/SKILL.md) (`pnpm parity:debt`).
 
