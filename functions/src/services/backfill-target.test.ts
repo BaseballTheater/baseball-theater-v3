@@ -48,7 +48,7 @@ describe("checkBackfillTarget (S122 AC 1)", () =>
 	it("production: a local database is always allowed, without asking Neon", async () =>
 	{
 		const { api, asked } = fakeNeon([]);
-		for (const url of ["postgres://bt:bt@localhost:5432/bt", "postgres://bt:bt@127.0.0.1/bt", "postgres://bt@postgres:5432/bt"])
+		for (const url of ["postgres://bt:bt@localhost:5432/bt", "postgres://bt:bt@127.0.0.1/bt", "postgres://bt@postgres:5432/bt"]) // ggignore
 		{
 			const check = await checkBackfillTarget(url, {
 				allowProduction: false,
@@ -61,7 +61,7 @@ describe("checkBackfillTarget (S122 AC 1)", () =>
 
 	it("production: a hosted database is refused when Neon can't be asked, and the message names no password", async () =>
 	{
-		const check = await checkBackfillTarget(`postgres://owner:s3cret@${HOST}/neondb`, {
+		const check = await checkBackfillTarget(`postgres://owner:s3cret@${HOST}/neondb`, { // ggignore
 			allowProduction: false,
 		});
 		expect(check.allowed).toBe(false);
@@ -81,7 +81,7 @@ describe("checkBackfillTarget (S122 AC 1)", () =>
 		}]);
 		for (const host of [HOST, "ep-quiet-1234-pooler.us-east-2.aws.neon.tech"])
 		{
-			const check = await checkBackfillTarget(`postgres://o:p@${host}/neondb`, {
+			const check = await checkBackfillTarget(`postgres://o:p@${host}/neondb`, { // ggignore
 				allowProduction: false,
 				neon: api,
 			});
@@ -96,11 +96,11 @@ describe("checkBackfillTarget (S122 AC 1)", () =>
 			host: HOST,
 			branch_id: "br-stage",
 		}]);
-		expect((await checkBackfillTarget(`postgres://o:p@${HOST}/neondb`, {
+		expect((await checkBackfillTarget(`postgres://o:p@${HOST}/neondb`, { // ggignore
 			allowProduction: false,
 			neon: api,
 		})).allowed).toBe(true);
-		const unknown = await checkBackfillTarget("postgres://o:p@db.example.com/x", {
+		const unknown = await checkBackfillTarget("postgres://o:p@db.example.com/x", { // ggignore
 			allowProduction: false,
 			neon: api,
 		});
@@ -110,7 +110,7 @@ describe("checkBackfillTarget (S122 AC 1)", () =>
 
 	it("production: a ?host= parameter pointing a local-looking string at a hosted database is refused, naming that host", async () =>
 	{
-		const check = await checkBackfillTarget(`postgres://u:s3cret@localhost/neondb?host=${HOST}&sslmode=require`, {
+		const check = await checkBackfillTarget(`postgres://u:s3cret@localhost/neondb?host=${HOST}&sslmode=require`, { // ggignore
 			allowProduction: false,
 		});
 		expect(check.allowed).toBe(false);
@@ -125,7 +125,7 @@ describe("checkBackfillTarget (S122 AC 1)", () =>
 			host: "ep-dev-1.us-east-2.aws.neon.tech",
 			branch_id: "br-stage",
 		}]);
-		const pooled = await checkBackfillTarget(`postgres://u:p@ep-dev-1-pooler.us-east-2.aws.neon.tech/db?host=${HOST}`, {
+		const pooled = await checkBackfillTarget(`postgres://u:p@ep-dev-1-pooler.us-east-2.aws.neon.tech/db?host=${HOST}`, { // ggignore
 			allowProduction: false,
 			neon: api,
 		});
@@ -135,7 +135,7 @@ describe("checkBackfillTarget (S122 AC 1)", () =>
 
 	it("production: hostaddr or no host at all is refused, even with --allow-production", async () =>
 	{
-		for (const url of ["postgres://u:p@localhost/db?hostaddr=1.2.3.4", "postgres://u:p@/db"])
+		for (const url of ["postgres://u:p@localhost/db?hostaddr=1.2.3.4", "postgres://u:p@/db"]) // ggignore
 		{
 			const check = await checkBackfillTarget(url, {
 				allowProduction: true,
@@ -147,7 +147,7 @@ describe("checkBackfillTarget (S122 AC 1)", () =>
 	it("production: --allow-production lets a hosted database through without asking Neon", async () =>
 	{
 		const { api, asked } = fakeNeon([]);
-		const check = await checkBackfillTarget(`postgres://o:p@${HOST}/neondb`, {
+		const check = await checkBackfillTarget(`postgres://o:p@${HOST}/neondb`, { // ggignore
 			allowProduction: true,
 			neon: api,
 		});

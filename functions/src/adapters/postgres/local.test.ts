@@ -14,16 +14,16 @@ describe("databaseTarget (S122 AC 1)", () =>
 {
 	it("production: a ?host= parameter is where pg connects, so it is the host", () =>
 	{
-		expect(databaseTarget("postgres://u:p@localhost/neondb?host=ep-prod-123.us-east-2.aws.neon.tech&sslmode=require")).toEqual({
+		expect(databaseTarget("postgres://u:p@localhost/neondb?host=ep-prod-123.us-east-2.aws.neon.tech&sslmode=require")).toEqual({ // ggignore
 			host: "ep-prod-123.us-east-2.aws.neon.tech",
 			name: "neondb",
 		});
-		expect(databaseTarget("postgres://u:p@ep-dev-1-pooler.us-east-2.aws.neon.tech/db?host=ep-prod-123.us-east-2.aws.neon.tech").host).toBe("ep-prod-123.us-east-2.aws.neon.tech");
+		expect(databaseTarget("postgres://u:p@ep-dev-1-pooler.us-east-2.aws.neon.tech/db?host=ep-prod-123.us-east-2.aws.neon.tech").host).toBe("ep-prod-123.us-east-2.aws.neon.tech"); // ggignore
 	});
 
 	it("production: hostaddr is kept, so the guard can refuse a string libpq tools would send elsewhere", () =>
 	{
-		expect(databaseTarget("postgres://u:p@localhost/db?hostaddr=1.2.3.4")).toEqual({
+		expect(databaseTarget("postgres://u:p@localhost/db?hostaddr=1.2.3.4")).toEqual({ // ggignore
 			host: "localhost",
 			name: "db",
 			hostaddr: "1.2.3.4",
@@ -32,7 +32,7 @@ describe("databaseTarget (S122 AC 1)", () =>
 
 	it("production: certificate file parameters are never read from disk", () =>
 	{
-		expect(databaseTarget("postgres://u:p@localhost/db?sslrootcert=/nonexistent&sslcert=/nope&sslkey=/nope")).toEqual({
+		expect(databaseTarget("postgres://u:p@localhost/db?sslrootcert=/nonexistent&sslcert=/nope&sslkey=/nope")).toEqual({ // ggignore
 			host: "localhost",
 			name: "db",
 		});
@@ -40,11 +40,11 @@ describe("databaseTarget (S122 AC 1)", () =>
 
 	it("names: the database defaults to the user name, as pg's does; no host is an empty host", () =>
 	{
-		expect(databaseTarget("postgres://bt:pw@[::1]:5432")).toEqual({
+		expect(databaseTarget("postgres://bt:pw@[::1]:5432")).toEqual({ // ggignore
 			host: "::1",
 			name: "bt",
 		});
-		expect(databaseTarget("postgres://bt:pw@/bt").host).toBe("");
+		expect(databaseTarget("postgres://bt:pw@/bt").host).toBe(""); // ggignore
 	});
 });
 
