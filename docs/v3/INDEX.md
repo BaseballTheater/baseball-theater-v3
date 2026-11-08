@@ -482,6 +482,7 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 
 | Priority | Story | Status | Depends on | Design |
 |---|---|---|---|---|
+| 69 | [S126](backlog/stories/S126.md) Collapsed bar opens the game | `todo` | S68 | — |
 | 70 | [S122](backlog/stories/S122.md) Game backfill since 1901 | `todo` | — | — |
 | 71 | [S123](backlog/stories/S123.md) Design: calendar date picker | `todo` | — | — |
 | 72 | [S124](backlog/stories/S124.md) Games-per-day counts API | `todo` | S122 | — |

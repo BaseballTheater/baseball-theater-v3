@@ -218,6 +218,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 67 | [S66](#s66--scoreboard-to-the-ratified-frames-modules-date-control-states) | Scoreboard modules + states | `done` |
 | 68 | [S67](#s67--scoreboard-game-row-slot-occupants--its-setting) | Scoreboard slot occupants + setting | `done` |
 | 69 | [S68](#s68--favorites-driven-collapse--hide-scores-on-the-scoreboard) | Collapse non-favorites + Hide Scores | `done` |
+| 69 | [S126](#s126--a-collapsed-game-opens-its-game-page-instead-of-expanding) | Collapsed bar opens the game | `todo` |
 | 70 | [S69](#s69--videos-room-impact-sorted-grid-list-search-quick-filters) | Videos room grid / list / search | `done` |
 | 70 | [S122](#s122--backfill-every-game-between-two-dates-gently-resumably-back-to-1901) | Game backfill since 1901 | `todo` |
 | 71 | [S70](#s70--video-player-dialog-by-default-persistent-stage-by-setting) | Video player (dialog / stage) | `done` |
@@ -275,7 +276,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 116 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
 | 117 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
 
-**Next (generated):** **70 / S122** — the lowest **Priority** `todo` story not waiting on a design.
+**Next (generated):** **69 / S126** — the lowest **Priority** `todo` story not waiting on a design.
 
 **Before starting it:** confirm no [backlog review](#backlog-reviews) is due — the review-debt line in that section counts stories, but a drift event makes one due regardless.
 
@@ -606,7 +607,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 | Area | State |
 |------|-------|
-| Scoreboard (default date) | Working — reads through the query cache (**S25**); `/` and `/games` open on MLB's today in season, or the last World Series final in the off-season (**S111**, `defaultScoreboardDate`, `GET /api/v1/scoreboard/default-date`; design matched by the owner 2026-11-03). BT stores only the days someone has looked at; every game back to 1901 is **S122**'s backfill. The date control steps one day at a time; its calendar picker is **S123** (design), **S124** (games per day) and **S125** (owner, 2026-11-07) |
+| Scoreboard (default date) | Working — reads through the query cache (**S25**); `/` and `/games` open on MLB's today in season, or the last World Series final in the off-season (**S111**, `defaultScoreboardDate`, `GET /api/v1/scoreboard/default-date`; design matched by the owner 2026-11-03). BT stores only the days someone has looked at; every game back to 1901 is **S122**'s backfill. The date control steps one day at a time; its calendar picker is **S123** (design), **S124** (games per day) and **S125** (owner, 2026-11-07). A collapsed bar still expands in place; opening the game instead is **S126** (owner, 2026-11-07) |
 | Game → Videos (impact sort) | Done — the room is **S69**'s (below); a clip whose play MLB measured ranks by the win probability that play added, key moments then lead changes first among ties, and the rest follow by title keywords (**S98**: `rankHighlightsByImpact` with the play metrics in `withGameExtras`) |
 | Game → Plays (strike zone + trajectory) | **Done** (**S41**, design matched by the owner 2026-10-29): `PlaysPanel.tsx` — S2's boxed `Linescore`, a floating inning sidebar (every inning, then **Runs**), the latest inning with at-bats by default (`defaultPlaysInning`), top / bottom halves as at-bat accordions (`inningHalves`), Runs = every scoring play with the score after it (`scoringPlays`, `scoreAfterLabel`; `AtBat.result.awayScore` / `homeScore`). An open at-bat reuses S64's `MatchupCards` (totals through that at-bat), `StrikeZoneChart` and `PitchSequence` via `AtBatViewer` / `PitchTheater`; fixture `823823` |
 | Game → Live / Box / Recap | Inside the ratified chrome (**S40**: `GameTopBar`, tabs by phase from `gamePhase`, shared room states in `RoomState.tsx`). **Live** — done (**S3** status, **S64** pitch theater): `LiveStatus.tsx` with `BaseDiamond.tsx`; `MatchupCards` (`pitcherLine` / `batterLine`), the catcher's view `StrikeZoneChart.tsx` — one camera (`packages/domain/src/catcher-view.ts`) for the batter's own MLB zone, plate, boxes, the batter (sized from their height) and each flight (`pitchFlight`: release to plate from the pitch's data) — real-time replays (`pitchPlayback`, `useReplayClock`), to-scale side / top charts (`field-chart.ts`) behind links, and `PitchSequence`; a new live pitch replays itself. **Box** — done (**S2**): `BoxRoom.tsx` with the boxed-inning `Linescore.tsx` (content-width and centred for now, owner 2026-10-29), `TeamSwatch` switcher, one batting table and Game info, from `GameSnapshot.boxscore`. **Recap** — done (**S10**): `RecapRoom.tsx` from `GameSnapshot.recap`, shown only when a recap exists (`roomsForPhase(phase, hasRecap)`). |
@@ -6553,6 +6554,47 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 
 ```text
 /goal docs/v3/BACKLOG.md S125. Work item 0 first: if scripts/verify-S125.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S125.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/package.json, web/vitest.config.ts, pnpm-lock.yaml, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S125.sh, or stop after 14 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
+
+**Status:** `todo`
+
+### S126 — A collapsed game opens its game page instead of expanding
+
+**Gap:** Choosing a collapsed (non-favorite) game bar on the scoreboard expands it in place to the full module (`CollapsedBar`'s `onExpand`, `ScoreboardPage.tsx:50`; VISUAL-DESIGN's "Open collapsed bar" row said so). The owner wants it to go straight to the game (owner, 2026-11-07: *"collapsed games in the game list should not expand on click, they should go to the game page."*); VISUAL-DESIGN's collapse rule and interaction row now say so.
+
+**Impact:** Before S126, tapping a folded-up game only unfolded it, and a second tap was needed to open it. S126 impact: tapping a folded-up game opens that game straight away, the same as tapping a full one.
+
+**Source:** Feature: Settings (favorites, hide scores, playback prefs)
+
+**Depends on:** nothing new — `CollapsedBar` (S68) and the full module's link to `/game/<gamePk>` (`ScoreboardModule.tsx:124`) exist.
+
+**Scope files:** `web/src/`, `web/vitest.config.ts`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`
+
+**Work**
+
+0. Write `scripts/verify-S126.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** writing any product code (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S126.sh` performs)
+
+1. A collapsed bar is a link to `/game/<gamePk>`, the same destination as the full module's (so the game opens in the room Settings' Opens First picks, as it does from the full module); choosing it navigates there and never expands the bar in place (RTL: click a bar, the route changes to the game and no full module appears on the scoreboard).
+2. The scoreboard keeps no expanded-bar state: `ScoreboardPage` no longer tracks expanded games and `CollapsedBar` takes no `onExpand` (grep), and its comment and accessible name say it opens the game (no `aria-expanded`).
+3. The bar looks exactly as before: no change to its drawn content or styles beyond what a link needs (the existing `CollapsedBar` tests for score, hidden score and state still pass unchanged).
+4. This file's S126 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- No design story: the bar's look is unchanged and ratified (shell-scoreboard `scoreboard-collapsed-*`, A2, A3); only what choosing it does changes, which the owner decided in words and VISUAL-DESIGN now records (rule 18 covers drawn UI; nothing new is drawn). Hover / focus follows VISUAL-DESIGN's existing row.
+
+**Reuse check** (ADR-025): before writing code, read `CollapsedBar.tsx`, `ScoreboardModule.tsx` (its `Link` to the game) and `ScoreboardPage.tsx`; reuse the full module's link rather than building a second path to the game; record what was reused in the story's ledger notes.
+
+**Turn cap:** 8 — assumes swapping the button for the module's link, removing the expanded state, and updating the RTL tests.
+
+**Goal condition:** scripts/verify-S126.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S126. Work item 0 first: if scripts/verify-S126.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S126.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S126.sh, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
 **Status:** `todo`
