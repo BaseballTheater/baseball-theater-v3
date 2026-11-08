@@ -2047,7 +2047,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 **Source:** Feature: Standings
 
-**Depends on:** nothing new — S4's standings, S111's season calendar (`SeasonCalendar`, `fetchSeasonCalendar`) and the fix that adds `season=` to the standings request (PR #13) exist. If PR #13 hasn't merged when this starts, merge it first.
+**Depends on:** nothing new — S4's standings and S111's season calendar (`SeasonCalendar`, `fetchSeasonCalendar`) exist, and `standingsUrl` (with `season=`) is on `stage`. If `functions/src/adapters/http/mlb.ts` has no `standingsUrl` when this starts, stop and ask: the fix that adds it hasn't merged.
 
 **Scope files:** `functions/src/`, `functions/vitest.config.ts`, `packages/domain/`, `packages/ports/`, `packages/mlb-api/`, `fixtures/`, `openapi/`, `web/src/api/`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`
 
@@ -2057,30 +2057,34 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 **Acceptance criteria** (checks `scripts/verify-S128.sh` performs)
 
-1. One named, tested function in `packages/domain` (ADR-025) decides, for a day and the seasons MLB has published, which standings to show: inside a regular season, that day's standings; from the day after a regular season's last day until the next season's first spring training game, that season's final regular-season table; from the first spring training game until the day before opening day, that spring's training standings; before every known season, or with no calendar, the day itself as today. `SeasonCalendar` gains the regular season's first and last days (from MLB's season dates, which already carry them) so the function needs nothing else. Tested at each boundary: the last regular-season day and the day after, the day before the first spring game and that day, the day before opening day and opening day, a postseason day, a January day, and a year with the next season not yet published (keeps the final table).
-2. `GET /api/v1/standings` (with or without `?date=`) answers with what that function picks: the final table is MLB's standings for the season with no date (`season=<year>`, no `date`), spring training's is `standingsTypes=springTraining` for the new season; both through one `MlbStatsClient` method per shape, each with its URL built by one named function as `standingsUrl` is, and the recorder recording the same URLs. The payload says which it is, additively (`seasonType: "regularSeason" | "springTraining"`, and the season), and `pnpm api:breaking` exits 0 (tests on recorded fixtures).
-3. Recordings: `fixtures/raw/standings-2026-final.json` (2026's final table) and `fixtures/raw/standings-2027-spring.json` (or the latest spring MLB has, named for its season) are recorded once with `BT_USE_LIVE_MLB=1` and committed; tests and local dev read them, never the network; `pnpm mlb:scan-drift` covers them.
-4. The season calendar costs at most one extra MLB request per lifetime of its cache, the same cache the scoreboard's default day uses (S111): reuse it, no second calendar fetch (test with a counting client).
-5. With no calendar (the seasons request failed), the page still gets the day's standings as today, and an error from MLB is still an error, not an empty table (tests).
-6. No visual change in this story: the page shows the table it's given, and the spring label is S130's (S129 designs it). Until S130 lands, spring standings show unlabeled; spring 2027 starts in late February, so S129/S130 should land before then.
-7. This file's S128 **Status** (story heading and top table) is `done`.
+1. One named, tested function in `packages/domain` (ADR-025) decides, for a day and the season calendars it is given, which standings to show, as one of three phases: **regular season** (from the first day after spring training ends, MLB's `springEndDate`, through `regularSeasonEndDate`): that day's standings; **final** (from the day after `regularSeasonEndDate` until the day before the next season's `springStartDate`, the postseason included): that season's final regular-season table; **spring** (from `springStartDate` through `springEndDate`): that spring's training standings as of that day. Before every known season, or with no calendar, it is the regular-season shape for the day itself. `SeasonCalendar` gains `springEndDate` and `regularSeasonEndDate` (MLB's season dates carry both); a calendar missing either keeps working for the scoreboard's default day (S111 unchanged) and counts as unknown here. Tested at each boundary on the committed `seasons-2025.json` / `seasons-2026.json` and a 2027 calendar: the last regular-season day and the day after, a postseason day, a January day (the previous season's final table), the day before `springStartDate` and that day, `springEndDate` and the day after, a day in a regular season that began before spring ended (2025-03-20, the Tokyo Series: still spring, by this rule), and a final table kept while the next season's calendar isn't published.
+2. `GET /api/v1/standings` answers with what that function picks for `?date=`, or for MLB's today (`mlbToday`, not the UTC day) without one, given the calendars of that day's year and the year before (so a past date like `?date=2019-11-01` gets 2019's final table): the final table is MLB's standings for the season with no `date`; spring's is `standingsTypes=springTraining` for that season with the `date`; the regular season's is `standingsUrl`. Each shape is one `MlbStatsClient` method with its URL built by one named function as `standingsUrl` is, and the recorder records the same URLs. The payload says which it is, additively: `phase: "regularSeason" | "final" | "spring"` and `season`, and its `date` is the requested day for the regular season and spring, and the season's `regularSeasonEndDate` for the final table. `pnpm api:breaking` exits 0 (tests on recorded fixtures).
+3. When the picked spring or regular-season table comes back with no records (the morning of the first spring day or of opening day, before any game is final), the answer is the previous phase's table instead: the final table before spring, spring's before the regular season (test with an empty recording).
+4. Recordings: `fixtures/raw/standings-2026-final.json` (2026's final table, 30 teams) and `fixtures/raw/standings-2026-spring.json` (2026's spring standings, 30 teams) are recorded once with `BT_USE_LIVE_MLB=1` and committed, plus `fixtures/raw/seasons-2027.json`; tests and local dev read them, never the network; `pnpm mlb:scan-drift` covers them.
+5. Every shape lists divisions in the same order (MLB's spring standings come West first; the regular season's East, Central, West): the mapper orders them one way for all three, tested on the spring recording.
+6. MLB request budget per standings request: at most the two calendars it needs (each `fetchSeasonCalendar` is two requests today, `seasonsUrl` and `worldSeriesUrl`) plus one standings request, plus one more only for AC 3's fallback (test with a counting client). Reusing S111's `getDefaultScoreboardDate` path is fine; there is no server-side calendar cache to share (the default day's five minutes is a response header).
+7. With no calendar (the seasons request failed), the page still gets the day's regular-season standings, and an error from MLB is still an error, not an empty table (tests).
+8. No visual change in this story: the page shows the table it's given (S130 adds S129's label).
+9. This file's S128 **Status** (story heading and top table) is `done`.
 
 **Notes:**
 
 - **Season ids.** MLB's season id is the date's year for every date (its 2026 season runs 2026-01-01 to 2026-12-31, per `seasons-2026.json`), so the "final table" for a January day is the previous year's season, and the function must pick it, not `date.slice(0, 4)`.
-- **Checked against MLB (2026-11-07):** `season=2026` with no `date` gives the final 2026 table (98 wins at the top); `season=2026&standingsTypes=springTraining` gives 6 records, 30 teams; every date outside the regular season gives 0 records.
+- **Checked against MLB (2026-11-07):** `season=2026` with no `date` gives the final 2026 table (6 records, 30 teams); `season=2026&standingsTypes=springTraining` gives 6 records, 30 teams, and with `date=2026-02-20` the spring table as of that day; `season=2027&standingsTypes=springTraining` gives 0 records (spring hasn't started); every date outside the regular season gives 0 records. `seasons/2027` is published: spring 2027-02-19, regular season 2027-03-25 to 2027-09-26.
+- **Opening day is after `springEndDate`** (AC 1): in 2025 the Tokyo Series opened the regular season on 03-18 while 28 teams played spring games until 03-25. The owner's "until opening day" is read as the full opening day; if the owner wants the first regular-season game instead, change AC 1's boundary before this ships.
+- **Spring 2027 starts 2027-02-19**, so S129 and S130 (the label) should land before then.
 - **Postseason** counts as "after the regular season": October shows the final table, as the owner's rule says.
 
-**Reuse check** (ADR-025): before writing code, search `packages/domain/src/scoreboard-date.ts` (`SeasonCalendar`, `defaultScoreboardDate`, `mlbToday`), `functions/src/adapters/http/mlb.ts` (`standingsUrl`, `seasonsUrl`, `fetchSeasonCalendar`, `fetchStandings`), the default-day handler's cache in `functions/src/handlers/api.ts`, `functions/src/mappers/standings.ts` and the recorder for what this story needs; record what was reused in the story's ledger notes.
+**Reuse check** (ADR-025): before writing code, search `packages/domain/src/scoreboard-date.ts` (`SeasonCalendar`, `defaultScoreboardDate`, `mlbToday`), `functions/src/adapters/http/mlb.ts` (`standingsUrl`, `seasonsUrl`, `fetchSeasonCalendar`, `fetchStandings`, and `fetchRegularSeasonEndDate`, which `dev-seed.ts` uses: once `SeasonCalendar` carries the regular season's end, make it read that, not a second implementation, and fix its comment), `functions/src/services/scoreboard-date.ts` (`getDefaultScoreboardDate`), the standings handler in `functions/src/handlers/api.ts`, `functions/src/mappers/standings.ts` and the recorder for what this story needs; record what was reused in the story's ledger notes.
 
-**Turn cap:** 14 — assumes one domain function over an extended `SeasonCalendar`, two client methods with their URL functions, two recordings, an additive payload field, and tests.
+**Turn cap:** 16 — assumes one domain function over an extended `SeasonCalendar`, two client methods with their URL functions, three recordings, the empty-table fallback, one division order, an additive payload field, and tests.
 
-**Goal condition:** scripts/verify-S128.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, packages/domain/, packages/ports/, packages/mlb-api/, fixtures/, openapi/, web/src/api/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 14 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+**Goal condition:** scripts/verify-S128.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, packages/domain/, packages/ports/, packages/mlb-api/, fixtures/, openapi/, web/src/api/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 16 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 
 **`/goal` command**
 
 ```text
-/goal docs/v3/BACKLOG.md S128. Work item 0 first: if scripts/verify-S128.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S128.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, packages/domain/, packages/ports/, packages/mlb-api/, fixtures/, openapi/, web/src/api/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S128.sh, or stop after 14 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+/goal docs/v3/BACKLOG.md S128. Work item 0 first: if scripts/verify-S128.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S128.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, packages/domain/, packages/ports/, packages/mlb-api/, fixtures/, openapi/, web/src/api/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S128.sh, or stop after 16 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
 **Status:** `todo`
@@ -2097,7 +2101,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 **Depends on:** nothing.
 
-**Scope files:** `docs/v3/visual/standings-search-settings/amendments/`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`
+**Scope files:** `docs/v3/visual/standings-search-settings/amendments/`, `docs/v3/VISUAL-DESIGN.md`, `docs/v3/FEATURES.md`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`
 
 **Work**
 
@@ -2105,7 +2109,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 **Acceptance criteria** (checks `scripts/verify-S129.sh` performs)
 
-1. A ratified amendment to the standings-search-settings surface draws Standings at mobile, medium and desktop showing spring training standings with their label, and says whether anything marks the off-season final table (S128 shows it from the end of the regular season until the first spring game, owner, 2026-11-07: *"Yes, it should always show the last standings for the prior season until spring training’s first game"*) or it stays as drawn.
+1. A ratified amendment to the standings-search-settings surface draws Standings at mobile, medium and desktop showing spring training standings with their label (S128's `phase: "spring"`), and says whether anything marks the off-season final table (`phase: "final"`; if the owner wants one, FEATURES records it in their words in the same change set) (S128 shows it from the end of the regular season until the first spring game, owner, 2026-11-07: *"Yes, it should always show the last standings for the prior season until spring training’s first game"*) or it stays as drawn.
 2. The owner ratified it in the session it was shown (quoted), recorded the way the other amendments are.
 3. This file's S129 **Status** (story heading and top table) is `done`.
 
@@ -2118,19 +2122,19 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 **Turn cap:** 8 — assumes one label drawn on the existing Standings frames and one owner session to ratify; waiting on the owner parks the story rather than spending turns.
 
-**Goal condition:** scripts/verify-S129.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/standings-search-settings/amendments/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+**Goal condition:** scripts/verify-S129.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/standings-search-settings/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/FEATURES.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 
 **`/goal` command**
 
 ```text
-/goal docs/v3/BACKLOG.md S129. Work item 0 first: if scripts/verify-S129.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S129.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/standings-search-settings/amendments/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S129.sh, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+/goal docs/v3/BACKLOG.md S129. Work item 0 first: if scripts/verify-S129.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S129.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/standings-search-settings/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/FEATURES.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S129.sh, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
 **Status:** `todo`
 
 ### S130 — Standings label spring training standings
 
-**Gap:** S128's standings payload says when it holds spring training standings (`seasonType: "springTraining"`), but the Standings page draws them like the regular season's, and the owner agreed they're labeled (owner, 2026-11-07, asked what to show from the first spring game until opening day, with spring training standings, labeled as such, suggested: *"Agreed"*).
+**Gap:** S128's standings payload says when it holds spring training standings (`phase: "spring"`, or `"final"` for the off-season table), but the Standings page draws them like the regular season's, and the owner agreed they're labeled (owner, 2026-11-07, asked what to show from the first spring game until opening day, with spring training standings, labeled as such, suggested: *"Agreed"*).
 
 **Impact:** Before S130, spring training standings looked like the real ones. S130 impact: during spring training, Standings says plainly that these are spring training standings.
 
@@ -2138,7 +2142,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 **Design:** S129 — build to the approved frames. This story may only move to `doing` once every design story named here is `done` (rule 18; `pnpm backlog:check` enforces it).
 
-**Depends on:** **S128** (the payload's `seasonType`). Also **S81** (design capture).
+**Depends on:** **S128** (the payload's `phase`). Also **S81** (design capture).
 
 **Scope files:** `web/src/`, `web/vitest.config.ts`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`, `e2e/design/`, `docs/v3/design-checks/`
 
@@ -2148,7 +2152,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 **Acceptance criteria** (checks `scripts/verify-S130.sh` performs)
 
-1. The Standings page draws S129's label when the payload's `seasonType` is `springTraining`, and whatever S129 says (or nothing) for the off-season final table, reading the payload through `useStandings` (RTL with both payloads).
+1. The Standings page draws S129's label when the payload's `phase` is `spring`, and whatever S129 says (or nothing) for `final`, reading the payload through `useStandings` (RTL with both payloads).
 2. Files this story adds or edits don't call `useMediaQuery`, `hiddenFrom` or `visibleFrom` outside `web/src/layout/` (grep).
 3. Design match (rule 22): for each ratified frame this story builds (desktop captured at 1200px, owner 2026-10-28: *"Capture at 1200px"*), `pnpm design:capture S130` saves the built page to `docs/v3/design-checks/S130/<frame>.png` from `e2e/design/S130.spec.ts`; the grader checks each file exists at its pairing's width. The story parks `blocked` with its captures committed until the owner says each pair matches, recorded with `scripts/audit.sh story S130 --design-match -`.
 4. This file's S130 **Status** (story heading and top table) is `done`.
