@@ -161,6 +161,10 @@ explicitly where that's the case. For what's still ahead, see
 
 ## Each scoreboard game shows what you care about at a glance
 
+- **Before, tapping a folded-up game on the scoreboard only unfolded it, and a second tap was needed to open it.
+  Now tapping a folded-up game opens that game straight away, the same as tapping a full one.** Details: S126 —
+  `CollapsedBar` links to `/game/<gamePk>` like `ScoreboardModule`, and the scoreboard no longer tracks expanded
+  bars; the bar looks the same. _(2026-11-08)_
 - **Before, every game on the scoreboard took the same space and every score was always visible. Now games
   without your favorite teams can fold into slim bars (`CHC ● 1–0 ● MIA`, the inning and count underneath) that
   open with a tap, and one switch hides every score, record and pitcher of record for fans catching up later.**

@@ -15,7 +15,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
-	MemoryRouter, Route, Routes,
+	MemoryRouter, Route, Routes, useParams,
 } from "react-router-dom";
 import {
 	afterEach, describe, expect, it, vi,
@@ -90,7 +90,14 @@ function stubApi(stored: AccountSettings)
 	return puts;
 }
 
-/** The scoreboard with the store hydrated from `settings`. */
+/** Stands in for the game page: says which game the route opened (S126). */
+function GameRoute()
+{
+	const { gamePk } = useParams();
+	return <p data-testid="game-route">game {gamePk}</p>;
+}
+
+/** The scoreboard with the store hydrated from `settings`; `/game/:gamePk` renders `GameRoute`. */
 async function renderScoreboard(settings: Partial<AccountSettings>, variant: LayoutVariant = "mobile")
 {
 	stubApi({
@@ -105,6 +112,7 @@ async function renderScoreboard(settings: Partial<AccountSettings>, variant: Lay
 				<MemoryRouter initialEntries={["/games/2026-09-05"]}>
 					<Routes>
 						<Route path="/games/:date" element={<ScoreboardPage variant={variant} />} />
+						<Route path="/game/:gamePk" element={<GameRoute />} />
 					</Routes>
 				</MemoryRouter>
 			</QueryClientProvider>
@@ -143,16 +151,21 @@ describe("collapse non-favorites (S68)", () =>
 		expect(b.getByTestId("collapsed-state")).toHaveTextContent(/^Final$/);
 	});
 
-	it("expands: choosing a collapsed bar opens the full module", async () =>
+	it("opens the game: choosing a collapsed bar goes to /game/<gamePk>, the full module's destination, and never expands in place (S126)", async () =>
 	{
 		const user = userEvent.setup();
 		await renderScoreboard({
 			favoriteTeamIds: [112],
 			collapseNonFavorites: true,
 		});
-		await user.click(screen.getByTestId("collapsed-bar"));
+		const bar = screen.getByTestId("collapsed-bar");
+		expect(bar).toHaveAttribute("href", "/game/823577");
+		expect(bar).not.toHaveAttribute("aria-expanded");
+		expect(screen.getAllByTestId("scoreboard-module")).toHaveLength(2);
+		await user.click(bar);
+		expect(await screen.findByTestId("game-route")).toHaveTextContent("game 823577");
 		expect(screen.queryByTestId("collapsed-bar")).toBeNull();
-		expect(screen.getAllByTestId("scoreboard-module")).toHaveLength(3);
+		expect(screen.queryByTestId("scoreboard-module")).toBeNull();
 	});
 
 	it("collapsed bar: a live bar names its inning; a scheduled bar shows its start time, or nothing without one", async () =>
@@ -162,7 +175,7 @@ describe("collapse non-favorites (S68)", () =>
 			collapseNonFavorites: true,
 		});
 		const [live, pregame] = screen.getAllByTestId("collapsed-bar");
-		expect(live).toHaveAccessibleName("CHC at MIA, Top 3rd: show the game");
+		expect(live).toHaveAccessibleName("CHC at MIA, Top 3rd: open the game");
 		expect(within(live!).getByTestId("collapsed-score")).toHaveTextContent("1–0");
 		expect(within(live!).getByTestId("collapsed-state")).toHaveTextContent("Top 3rd · 2-2, 2 out");
 		expect(within(pregame!).getByTestId("collapsed-score")).toHaveTextContent("@");
@@ -170,15 +183,17 @@ describe("collapse non-favorites (S68)", () =>
 		cleanup();
 		render(
 			<MantineProvider>
-				<CollapsedBar game={{
-					...MOMENTS.pregame,
-					startTime: undefined,
-				}} onExpand={() => undefined}
-				/>
+				<MemoryRouter>
+					<CollapsedBar game={{
+						...MOMENTS.pregame,
+						startTime: undefined,
+					}}
+					/>
+				</MemoryRouter>
 			</MantineProvider>,
 		);
 		expect(screen.getByTestId("collapsed-state")).toBeEmptyDOMElement();
-		expect(screen.getByTestId("collapsed-bar")).toHaveAccessibleName("CHC at MIA: show the game");
+		expect(screen.getByTestId("collapsed-bar")).toHaveAccessibleName("CHC at MIA: open the game");
 	});
 
 	it("collapsed bar: at medium and desktop the favorite's module spans the row; on mobile, and with nothing collapsed, it doesn't", async () =>

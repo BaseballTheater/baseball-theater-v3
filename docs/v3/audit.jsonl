@@ -288,3 +288,4 @@
 {"line":16480,"date":"2026-11-07","kind":"review","review":"parity","verdict":"continue","heading":"## 2026-11-07 — doc parity review (`continue`)"}
 {"line":16511,"date":"2026-11-07","kind":"skip","review":"backlog","heading":"## 2026-11-07 — backlog review skipped"}
 {"line":16526,"date":"2026-11-07","kind":"skip","review":"parity","heading":"## 2026-11-07 — doc parity review skipped"}
+{"line":16541,"date":"2026-11-08","kind":"completed","story":"S126","heading":"## 2026-11-08 — S126 completed"}

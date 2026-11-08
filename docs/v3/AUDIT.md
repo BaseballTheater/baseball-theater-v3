@@ -16535,3 +16535,81 @@ Owner-directed backlog change: S128 (Standings follow the season), S129 (design:
 **What changed, and the owner's answer**
 
 Owner-directed: FEATURES' Standings row quotes the owner ("Yes, it should always show the last standings for the prior season until spring training’s first game"; "Agreed"; "first regular season game"), and S128–S130 cite Feature: Standings. Asked whether they need a doc parity review or a skip: owner, 2026-11-07: "Skip".
+
+---
+
+## 2026-11-08 — S126 completed
+
+**Collapsed bar opens the game**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-08T18:58:14Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `d6d88fb` (tree dirty) |
+| Grader | `scripts/verify-S126.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: a collapsed bar is a link to /game/<gamePk>, the full module's destination; choosing it navigates there and never expands the bar in place (RTL: the route changes to the game, no full module appears)
+check 2 PASS: the scoreboard keeps no expanded-bar state: ScoreboardPage tracks no expanded games, CollapsedBar takes no onExpand, has no aria-expanded, and its comment and accessible name say it opens the game
+check 3 PASS: the bar looks as before: the existing collapsed-bar and hidden tests pass, their score, swatch-order, hidden-score and state assertions unchanged; CollapsedBar's drawn content and styles unchanged beyond what a link needs
+check 4 PASS: backlog Status is done (story heading and Story status table)
+```
+
+**4/4 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S126 check results ---
+check 1 PASS: a collapsed bar is a link to /game/<gamePk>, the full module's destination; choosing it navigates there and never expands the bar in place (RTL: the route changes to the game, no full module appears)
+check 2 PASS: the scoreboard keeps no expanded-bar state: ScoreboardPage tracks no expanded games, CollapsedBar takes no onExpand, has no aria-expanded, and its comment and accessible name say it opens the game
+check 3 PASS: the bar looks as before: the existing collapsed-bar and hidden tests pass, their score, swatch-order, hidden-score and state assertions unchanged; CollapsedBar's drawn content and styles unchanged beyond what a link needs
+check 4 PASS: backlog Status is done (story heading and Story status table)
+--- verify-S126: 4/4 checks passed ---
+verify-S126: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 1018ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  528ms
+   ✓ jscpd duplication gate (.jscpd.json) > fails when a 30-line block is copied into a second file  487ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 120ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 938ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  872ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 101ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 63ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 14ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 49ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  19:00:45
+   Duration  3.08s (transform 107ms, setup 0ms, collect 4.13s, tests 2.45s, environment 1ms, prepare 446ms)
+
+
+> baseball-theater-v3@0.0.0 size /home/user/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155465,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>
