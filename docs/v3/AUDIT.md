@@ -16427,3 +16427,20 @@ Fresh-context backlog review, one reviewer, at `e7deda1` on `backlog/backfill-an
 **Amendments:** S124 (AC 2; four notes; reuse check), S122 (note), frame 00 (Last review block; pending-drift item records the S127-vs-S5 question as still open).
 
 **Questions for the owner:** none new. Pending from the review at `797e868`: S117 before S122–S126?; S127 before or after S5?
+
+---
+
+## 2026-11-07 — backlog review answers (2026-11-07)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-07 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-08T00:39:54Z` |
+| HEAD at capture | `953c8d9` (tree clean) |
+| Applied in | `953c8d9` — Backlog: S117 goes right after S122's backfill; review-feedback AC rewrites always skip the review |
+
+**Answers and what was applied**
+
+Asked by the 2026-11-07 backlog review (196b98b): "S117 (copy production's baseball data into staging) was next before the DNS cutover, and now sits below the five stories you added today (S126, S122–S125). Should S117 go first, or does the new order stand?" Owner, 2026-11-07: "No, it should go after the hydration story". Applied in 953c8d9: S117 priority 80 → 71 (right after S122 at 70); S123 → 72, S124 → 73, S125 → 74.
+Also asked whether S124's Copilot-driven AC rewrite needed a backlog review (it was run anyway, a5bdd5f). Owner: "This shouldn't even trigger a question. Always skip." CLAUDE.md now says review-feedback AC rewrites are always skipped without asking.
+The other question (whether S127 comes before or after S5) is still open.
