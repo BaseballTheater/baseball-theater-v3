@@ -7,9 +7,9 @@
 # merge whose own run it would otherwise cancel or race (pre-PR review, 2026-11-07).
 #
 # Usage: scripts/ci-changes.sh <pull request base sha> <head sha>
-# Prints `code=true|false`, and appends it to $GITHUB_OUTPUT when that is set. A missing or
-# all-zero base (a new branch's first push) or a base git can't find counts as code, so the full
-# gate runs whenever the diff isn't known.
+# Prints `code=true|false`, and appends it to $GITHUB_OUTPUT when that is set. A missing,
+# all-zero or unreachable base counts as code, so the full gate runs whenever the diff isn't
+# known.
 #
 # Docs are: any `*.md` file, anything under `docs/` (the backlog notes, the ledger and its
 # generated index, design PNGs and captures) and anything under `.claude/` (skills, agent

@@ -13,6 +13,7 @@ import {
 } from "vitest";
 
 const CI_YML = fileURLToPath(new URL("../../.github/workflows/ci.yml", import.meta.url));
+const DEPLOY_YML = fileURLToPath(new URL("../../.github/workflows/deploy.yml", import.meta.url));
 
 /** The commands of a workflow's `run:` steps, one per step (single-line runs only). */
 export function runSteps(workflow: string): string[]
@@ -39,5 +40,22 @@ describe("CI runs pnpm verify (law P11)", () =>
 		expect(verifyJob).toContain("if: needs.changes.outputs.code == 'true'");
 		expect([...verifyJob.matchAll(/^ {8}if:/gm)]).toHaveLength(1);
 		expect(ci).toContain('test "$VERIFY $FLOWS $DESIGN $LIGHTHOUSE" = "success success success success"');
+	});
+
+	it("only a pull request is classified; every push and release runs the full gate, in CI and Deploy", () =>
+	{
+		for (const file of [CI_YML, DEPLOY_YML])
+		{
+			const workflow = readFileSync(file, "utf8");
+			const changesJob = workflow.slice(workflow.indexOf("\n    changes:\n"), workflow.indexOf("\n    # ", workflow.indexOf("\n    changes:\n") + 1));
+			expect(changesJob, file).toContain('if [ "${{ github.event_name }}" = pull_request ]; then');
+			expect(changesJob, file).toContain('scripts/ci-changes.sh "${{ github.event.pull_request.base.sha }}"');
+			expect(changesJob, file).toMatch(/else\n\s+echo "code=true" >> "\$GITHUB_OUTPUT"/);
+			expect(changesJob, file).not.toContain("github.event.before");
+		}
+		const deploy = readFileSync(DEPLOY_YML, "utf8");
+		const staging = deploy.slice(deploy.indexOf("\n    staging:\n"), deploy.indexOf("\n    production:\n"));
+		expect(staging).toContain("needs: [verify]");
+		expect(staging).not.toMatch(/always\(\)/);
 	});
 });
