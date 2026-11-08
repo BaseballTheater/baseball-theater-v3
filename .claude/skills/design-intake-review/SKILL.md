@@ -76,7 +76,7 @@ Propose, as backlog amendments, not prose:
 - Slice every unowned item into stories that follow `docs/v3/BACKLOG.md`'s rules: Gap, Impact, Source, Design line, Depends on, scope fence, ACs that map to commands/tests, `/goal` line, turn cap, verify-script work item 0. A story should be the smallest thing that moves the loop (rule 4).
 - **Source lines (rule 19):** cite a feature FEATURES already names (most ratified frames are carried features — scoreboard, game rooms, standings, search, settings). If none fits, write `Open:` with the question. Never edit FEATURES or INTENT here — that is the [doc parity review](../doc-parity-review/SKILL.md)'s scope; queue the gap under **For the parity review** in the findings instead.
 - Re-scope existing UI stories whose ACs miss drawn states, rather than adding a parallel story.
-- Run the backlog review's checks 2 (ground truth for the next 3 stories) and 3 (argue against the whole order) on the amended backlog.
+- Run the backlog review's checks 2 (ground truth for the next 3 stories), 2b (the adversarial pass, on every story this intake inserts or re-scopes as well) and 3 (argue against the whole order) on the amended backlog.
 
 ### 5. Verdict
 
