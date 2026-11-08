@@ -16,8 +16,8 @@ import type { PostgresDb } from "../adapters/postgres/repos.js";
 import type { CopyRunDeps } from "./copy-baseball-run.js";
 import { runCopy } from "./copy-baseball-run.js";
 
-const SOURCE = "postgres://reader:source-pw@localhost:5432/production";
-const TARGET = "postgres://writer:target-pw@localhost:5432/staging";
+const SOURCE = "postgres://reader:source-pw@localhost:5432/production"; // ggignore
+const TARGET = "postgres://writer:target-pw@localhost:5432/staging"; // ggignore
 
 async function hashes(db: PostgresDb): Promise<string[]>
 {
@@ -92,7 +92,7 @@ describe("runCopy, the db:copy-baseball command (S117)", () =>
 	it("refused: a target that may be production is never opened, and nothing but the masks is printed before the refusal", async () =>
 	{
 		const { source, target } = await databases();
-		const hosted = "postgres://writer:target-pw@ep-somewhere.us-east-2.aws.neon.tech/neondb";
+		const hosted = "postgres://writer:target-pw@ep-somewhere.us-east-2.aws.neon.tech/neondb"; // ggignore
 		const run = deps({
 			[SOURCE]: source,
 			[hosted]: target,

@@ -11,8 +11,8 @@ import {
 
 const PROD_HOST = "ep-prod-1.us-east-2.aws.neon.tech";
 const STAGE_HOST = "ep-stage-2.us-east-2.aws.neon.tech";
-const PROD = `postgresql://owner:prod-secret@${PROD_HOST}/neondb?sslmode=require`;
-const STAGE = `postgresql://owner:stage-secret@${STAGE_HOST}/neondb?sslmode=require`;
+const PROD = `postgresql://owner:prod-secret@${PROD_HOST}/neondb?sslmode=require`; // ggignore
+const STAGE = `postgresql://owner:stage-secret@${STAGE_HOST}/neondb?sslmode=require`; // ggignore
 
 function fakeNeon(branches: NeonBranch[] = [{
 	id: "br-prod",
@@ -101,7 +101,7 @@ describe("the copy's target (S117 AC 5)", () =>
 		const pooled = PROD.replace("ep-prod-1", "ep-prod-1-pooler");
 		for (const target of [PROD, pooled])
 		{
-			const check = await checkCopyTarget("postgres://u:p@localhost/src", target, {
+			const check = await checkCopyTarget("postgres://u:p@localhost/src", target, { // ggignore
 				neon: api,
 			});
 			expect(check.allowed).toBe(false);
@@ -117,7 +117,7 @@ describe("the copy's target (S117 AC 5)", () =>
 			allowed: false,
 			why: "the target is the database the copy reads from (production)",
 		});
-		const local = "postgres://bt:bt@localhost:5432/bt";
+		const local = "postgres://bt:bt@localhost:5432/bt"; // ggignore
 		expect((await checkCopyTarget(local, local, {})).allowed).toBe(false);
 	});
 
@@ -129,14 +129,14 @@ describe("the copy's target (S117 AC 5)", () =>
 		})).toMatchObject({
 			allowed: true,
 		});
-		expect(await checkCopyTarget(PROD, "postgres://bt:bt@localhost:5432/bt", {})).toMatchObject({
+		expect(await checkCopyTarget(PROD, "postgres://bt:bt@localhost:5432/bt", {})).toMatchObject({ // ggignore
 			allowed: true,
 			why: "local database",
 		});
 		const unknown = await checkCopyTarget(PROD, STAGE, {});
 		expect(unknown.allowed).toBe(false);
 		expect(unknown.why).not.toContain("--allow-production");
-		const disguised = await checkCopyTarget("postgres://u:p@localhost/src", `postgres://owner:x@localhost/neondb?host=${PROD_HOST}`, {
+		const disguised = await checkCopyTarget("postgres://u:p@localhost/src", `postgres://owner:x@localhost/neondb?host=${PROD_HOST}`, { // ggignore
 			neon: api,
 		});
 		expect(disguised).toMatchObject({
