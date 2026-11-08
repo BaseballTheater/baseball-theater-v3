@@ -33,7 +33,8 @@ function isEmpty(table: StandingsSnapshot): boolean
  * The standings for `day`, or MLB's today when absent (S128): `standingsPhase` picks the table
  * from the day's year's and the year before's calendars (so a past date gets its own season's),
  * and when that table is empty — the morning of the first spring day or of opening day — the
- * previous phase's table is returned instead, labelled as what it is. MLB requests: two
+ * previous phase's table is returned instead, labelled as what it is; any other day's empty
+ * table is returned as it is, labelled with its own phase. MLB requests: two
  * calendars (four requests), one table, and one more only for that fallback. An MLB error on a
  * table is thrown, never turned into an empty one; a calendar MLB can't give is left out, so
  * with none it is the day's regular-season table.

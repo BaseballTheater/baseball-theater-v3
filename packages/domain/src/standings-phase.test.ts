@@ -175,6 +175,19 @@ describe("previousStandingsPhase", () =>
 		});
 	});
 
+	it("a mid-season day has no previous table: only opening day falls back (AC 3)", () =>
+	{
+		expect(previousStandingsPhase(standingsPhase("2026-03-26", ALL), ALL)).toBeNull();
+		expect(previousStandingsPhase(standingsPhase("2026-07-01", ALL), ALL)).toBeNull();
+		expect(previousStandingsPhase(standingsPhase("2026-09-27", ALL), ALL)).toBeNull();
+	});
+
+	it("a mid-spring day has no previous table: only spring's first day falls back (AC 3)", () =>
+	{
+		expect(previousStandingsPhase(standingsPhase("2027-02-20", ALL), ALL)).toBeNull();
+		expect(previousStandingsPhase(standingsPhase("2027-03-24", ALL), ALL)).toBeNull();
+	});
+
 	it("nothing comes before a final table, a first known spring, or a day with no calendar", () =>
 	{
 		expect(previousStandingsPhase(standingsPhase("2026-10-01", ALL), ALL)).toBeNull();

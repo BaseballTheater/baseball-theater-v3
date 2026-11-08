@@ -3,6 +3,7 @@
  * `fixtures/raw/` (`recordedClient`), so every table is MLB's own answer and every URL is the
  * one production asks. A test's own case (an empty table, a failed calendar) is an override.
  */
+import { readFileSync } from "node:fs";
 import {
 	describe, expect, it,
 } from "vitest";
@@ -10,6 +11,8 @@ import { recordedClient } from "../test/recorded-mlb.js";
 import { getStandings } from "./standings.js";
 
 const AL_EAST_FIRST = [201, 202, 200, 204, 205, 203];
+/** MLB's recorded regular-season table for 2026-09-05, served for a day with no recording of its own. */
+const SEPTEMBER_5: unknown = JSON.parse(readFileSync(new URL("../../../fixtures/raw/standings-2026-09-05.json", import.meta.url), "utf8"));
 
 /** The fixed answers a test can give a URL. */
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
@@ -108,15 +111,45 @@ describe("getStandings (S128)", () =>
 
 	it("without a date it is MLB's today, not the UTC day (03:00 UTC on 09-28 is still the last regular-season day)", async () =>
 	{
-		const { mlb, asked } = recordedClient((url) => url.searchParams.get("date") === "2026-09-27" ? emptyTable() : undefined);
+		// No 09-27 recording is committed, so that day is served 09-05's table (a full regular-season one).
+		const { mlb, asked } = recordedClient((url) => url.searchParams.get("date") === "2026-09-27" ? json(SEPTEMBER_5) : undefined);
 		const table = await getStandings({
 			mlb,
 			now: () => new Date("2026-09-28T03:00:00.000Z"),
 		});
 		expect(asked.some((u) => u.includes("season=2026&date=2026-09-27&hydrate=team"))).toBe(true);
 		expect(asked.some((u) => u.includes("date=2026-09-28"))).toBe(false);
-		// That recording is empty here, so the answer falls back — still labelled as what it is.
-		expect(table.phase).toBe("spring");
+		expect(table).toMatchObject({
+			phase: "regularSeason",
+			season: 2026,
+			date: "2026-09-27",
+		});
+		expect(teams(table.divisions)).toBe(30);
+	});
+
+	it("an empty mid-season or mid-spring table has no fallback: it is returned as it is, labelled with its own phase (AC 3)", async () =>
+	{
+		const midSeason = recordedClient((url) => url.searchParams.get("date") === "2026-07-01" ? emptyTable() : undefined);
+		expect(await getStandings({
+			mlb: midSeason.mlb,
+		}, "2026-07-01")).toMatchObject({
+			phase: "regularSeason",
+			season: 2026,
+			date: "2026-07-01",
+			divisions: [],
+		});
+		expect(midSeason.asked.filter((u) => u.includes("/api/v1/standings"))).toHaveLength(1);
+
+		const midSpring = recordedClient((url) => url.searchParams.get("date") === "2026-03-01" ? emptyTable() : undefined);
+		expect(await getStandings({
+			mlb: midSpring.mlb,
+		}, "2026-03-01")).toMatchObject({
+			phase: "spring",
+			season: 2026,
+			date: "2026-03-01",
+			divisions: [],
+		});
+		expect(midSpring.asked.filter((u) => u.includes("/api/v1/standings"))).toHaveLength(1);
 	});
 
 	it("an empty spring table falls back to the previous season's final table (2027-02-19 morning)", async () =>

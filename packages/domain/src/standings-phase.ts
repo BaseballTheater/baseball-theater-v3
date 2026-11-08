@@ -82,28 +82,32 @@ export function standingsPhase(day: string, seasons: readonly SeasonCalendar[]):
 }
 
 /**
- * The table to show instead when `pick` comes back empty (S128 AC 3) — the morning of the first
- * spring day or of opening day, before any game is final: spring falls back to the previous
- * season's final table, the regular season to its spring's table as of the last spring day.
- * Null when there is nothing before it (a final table, or no calendar to say what came before).
+ * The table to show instead when `pick` comes back empty (S128 AC 3). That happens on two
+ * mornings only, before any game of the new phase is final: spring's first day
+ * (`springStartDate`), which falls back to the previous season's final table, and opening day
+ * (`regularSeasonStartDate`), which falls back to that spring's table as of the last spring day.
+ * Any other day's table is the day's own answer, empty or not, so it is null there: a later
+ * empty table is shown as it is, never replaced by an older phase's under a stale label. Also
+ * null when there is nothing before it (a final table, the first known spring, no calendar).
  */
 export function previousStandingsPhase(pick: StandingsPick, seasons: readonly SeasonCalendar[]): StandingsPick | null
 {
 	const known = knownSeasons(seasons);
+	const season = known.find((s) => s.season === pick.season);
+	if (!season) return null;
 	if (pick.phase === "spring")
 	{
+		if (pick.date !== season.springStartDate) return null;
 		const previous = known.filter((s) => s.season < pick.season).at(-1);
 		return previous ? finalOf(previous) : null;
 	}
 	if (pick.phase === "regularSeason")
 	{
-		const season = known.find((s) => s.season === pick.season);
-		if (!season || pick.date < season.regularSeasonStartDate) return null;
-		const lastSpringDay = addDays(season.regularSeasonStartDate, -1);
+		if (pick.date !== season.regularSeasonStartDate) return null;
 		return {
 			phase: "spring",
 			season: season.season,
-			date: pick.date < lastSpringDay ? pick.date : lastSpringDay,
+			date: addDays(season.regularSeasonStartDate, -1),
 		};
 	}
 	return null;
