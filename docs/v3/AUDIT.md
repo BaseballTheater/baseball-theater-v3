@@ -16336,3 +16336,48 @@ Fresh-context backlog review, one reviewer, at `797e868` on `backlog/backfill-an
 **Questions for the owner (non-blocking):**
 1. S117 (copy production's baseball data into staging) was next before the DNS cutover, and now sits below the five stories you added today (S126, S122–S125). Should S117 go first, or does the new order stand?
 2. I added a design story, S127, for the play link in Search's floating player (you said "Yes" on 2026-11-05 to that link, but nothing drew or built it). Is that the right next step, and should it come before S5 (Search) or after?
+
+---
+
+## 2026-11-07 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-08T00:17:29Z` |
+| HEAD at review | `196b98b` (tree dirty) |
+| Trigger | FEATURES.md changed; VISUAL-DESIGN.md changed; S122, S123, S124, S125, S126, S127 added (owner: "I want the reviews") |
+| Stories `done` since last review | S73 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context doc parity review at `196b98b` on `backlog/backfill-and-calendar` (PR #10 into `stage`). Trigger (`pnpm parity:debt`, since `56684b5`): FEATURES.md and VISUAL-DESIGN.md changed; S122–S127 added. The owner directed S122–S126 and the two new FEATURES rows on 2026-11-07 (`91ec3d6`, `797e868`) and, asked about reviews, answered "I want the reviews"; the backlog review (`196b98b`, `amended`) added S127. Read: CLAUDE.md; the skill; the S122–S127 notes; `git diff 56684b5..HEAD` of FEATURES, VISUAL-DESIGN and INTENT; FEATURES' carry/cut table (:51–74) and new themes (:88–103); the 2026-11-07 backlog review (AUDIT.md:16288–16339); greps of INTENT/ARCHITECTURE/VISUAL-DESIGN for backfill, retention, date control and expand.
+
+**1. Citation honesty** (named stories S122–S127; the next 3 `todo` by priority are S126 (69), S122 (70), S123 (71), all among them)
+
+- **S122 → Feature: Every game since 1901** (FEATURES:100). Holds: the row is the owner's 2026-11-07 words (any date range, idempotent, Nov 15–Feb 15 skipped, back to 1901-04-18, two request threads per domain, stop a data kind after 14 days of failures, local first, resumable), exactly the story's Gap and Impact.
+- **S123 → Feature: Calendar date picker** (FEATURES:101). Holds: the design of that calendar (year switch, visible grid with weekdays, typed date, per-day counts, dimmed empty days, future dates).
+- **S124 → Feature: Calendar date picker.** Holds: the row includes the owner's "show the number of games on each day in that view"; S124 is the BT request that supplies those counts (clients read BT only, ADR-002). A data story citing the UI feature it exists to serve is the same pattern as S94/S96.
+- **S125 → Feature: Calendar date picker.** Holds: it builds the row.
+- **S126 → Feature: Settings (favorites, hide scores, playback prefs)** (FEATURES:63). Holds: the collapsed bar exists only through that row's **collapse non-favorites** setting, and the row points to VISUAL-DESIGN §5 / §5a, which now records the owner's 2026-11-07 rule ("collapsed games in the game list should not expand on click, they should go to the game page."; VISUAL-DESIGN:307, :458). "Daily scoreboard by date" (:54) was weighed as an alternative; it describes which day the scoreboard opens on, not the collapsed bar, so Settings is the closer fit.
+- **S127 → Feature: Video play links** (FEATURES:98). Holds: the row records the owner's 2026-11-05 "Yes" to a play link from Search's floating player.
+- **Pillar citations:** none among the named or next stories (S117 at 80 is the nearest pillar story; unchanged since its last check).
+- **Open questions:** no story's Source is `Open:`.
+
+**2. Doc reflects reality**
+
+- **Amended FEATURES, Video play links (:98):** it said the Search floating-player play link had "no design or story builds it yet"; the backlog review (`196b98b`, AUDIT.md:16309) inserted S127 to design it. Now: `(owner, 2026-11-05, asked whether it should: "Yes"); S127 designs it, and no story builds it yet`. A record of the backlog's state, no new intent.
+- VISUAL-DESIGN and FEATURES agree on the collapsed bar: VISUAL-DESIGN:307 and :458 say it opens the game page; FEATURES:63 only names the setting and defers to VISUAL-DESIGN. No contradiction.
+- The calendar matches VISUAL-DESIGN:291 ("Date control (prev / today / next / picker) first"); the picker it names is what S123 draws. No contradiction with "Daily scoreboard by date" (:54, which day it opens on).
+- **Every game since 1901 vs ARCHITECTURE:** ARCHITECTURE:649 still lists "retention/TTL for old games" as open. Not a contradiction (open, and the feature runs locally first to measure size), but the backlog review should know that a production backfill would settle it; see below. ARCHITECTURE is outside this review's write scope.
+- No relic found: both new rows are served; nothing walked back.
+
+**3. Coverage — For the next backlog review**
+
+1. **Video play links, Search's floating player:** S127 only designs it; no story builds it yet (S127 leaves it to the design intake its ratification triggers). Already queued; recorded so it is not lost.
+2. **Every game since 1901 beyond local:** the row says it runs locally first "and then see how big it actually is"; no story takes the backfill to staging or production, and ARCHITECTURE:649 (retention/TTL for old games) is still open. Not a gap to fill now (the owner deferred it to after the size is known); re-ask the owner once S122 reports the size.
+
+**Edits:** `docs/v3/FEATURES.md` (Video play links row, one clause). `pnpm backlog:build` and `pnpm backlog:check` clean.
+
+**Questions for the owner:** none.
