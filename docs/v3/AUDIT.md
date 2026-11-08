@@ -16474,3 +16474,34 @@ Asked by the 2026-11-07 backlog review (196b98b): "I added a design story, S127,
 **What changed, and the owner's answer**
 
 S122's AC 4, 7 and 8 and S124's AC 3 were rewritten in 6fdee19 to answer Copilot's review of PR #10. Standing owner answer (2026-11-07, asked whether such a rewrite needed a backlog review): "This shouldn't even trigger a question. Always skip."
+
+---
+
+## 2026-11-07 — doc parity review (`continue`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-08T05:39:44Z` |
+| HEAD at review | `17eb938` (tree clean) |
+| Trigger | FEATURES.md changed (Video play links row, 2c7326c) |
+| Stories `done` since last review | none done |
+| Verdict | `continue` |
+
+**Findings / amendments**
+
+Proportionate review of the one FEATURES change since 6c465c9 (2c7326c), plus the next 3 todo stories and every Open story.
+
+1. Citation honesty
+- FEATURES "Video play links" now says Search's floating player's one "Go to game" link becomes `Go to: Game →  •  At-Bat →`, quoting the owner (2026-11-07: "S127: make it “Go to: Game ->  •  At-Bat ->” instead of the one link that us there now, but with actual arrow Unicode characters"). It records an owner decision verbatim; no product intent was written by an agent.
+- S127 (Source: Feature: Video play links) holds: its Gap, Impact ("Search's player offers both, as `Go to: Game →  •  At-Bat →`") and AC 1–2 (the amendment replaces the one "Go to game: … →" link with the two links; Game opens the game as A6 does, At-Bat opens the Plays room on that play) say exactly what the FEATURES row now says. The row still says "S127 designs it, and no story builds it yet", which stays true.
+- S122 / S124 (6fdee19, Copilot AC rewrites; logged as a backlog-review skip): Sources unchanged (Feature: Every game since 1901 / Calendar date picker). The rewrites (failure streaks kept across resumes; a day absent from a range answer counts as zero games; freshness per ADR-021) stay inside those rows: "a stopped run resumes without starting over" and the per-day game counts. Feature-cited, so no approval to recheck.
+- Next 3 todo by priority: S126 (Feature: Settings — the row names "collapse non-favorites", VISUAL-DESIGN §5/§5a; holds, as the 6c465c9 review found), S122 (above), S117 (Pillar: Delightful, approved by owner 2026-11-06: "Delightful, bc it makes testing much faster in stage"). S117 changed since 6c465c9 only in priority (80 → 71) and an order note (953c8d9, owner: "No, it should go after the hydration story"); its Gap, Impact and ACs are unchanged, so the approval still covers it.
+- Open stories: none (`grep '^**Source:** Open'` over docs/v3/backlog/stories/ is empty).
+
+2. Doc reflects reality
+- No contradiction: VISUAL-DESIGN and INTENT have no "Go to game" wording to disagree with the new row (grep); the ratified A6 floating player still draws "Go to game", which is what S127's amendment is to change, so that is pending work, not drift.
+- No relic found in the changed row.
+
+3. Coverage
+- No new FEATURES items. The row's "no story builds it yet" (the floating player's At-Bat link in code) was already carried to the backlog review by the 6c465c9 parity entry; still open, still S127-gated.
