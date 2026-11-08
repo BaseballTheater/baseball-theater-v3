@@ -3,8 +3,8 @@ name: CI
 on:
     # Every pull request is checked, whichever branch it targets: each story's pull request into
     # stage auto-merges only once `ci-passed` is green (S121). Pushes to stage (each merge) are
-    # checked too; main only moves by the release workflow's fast-forward (S121), which starts no
-    # workflow, so its entry here covers a push the owner makes by hand.
+    # checked too; main moves only by the release workflow's fast-forward (S121), a deploy-key push
+    # that does start this workflow, so main is checked against its own last passing run.
     pull_request:
     push:
         branches: [stage, main]
