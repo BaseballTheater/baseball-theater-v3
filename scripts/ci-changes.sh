@@ -1,15 +1,19 @@
 #!/usr/bin/env bash
-# Does a pull request change anything besides docs? (owner, 2026-11-07, of a pull request
-# that changed only Markdown and the generated ledger index: "Things like this shouldn't trigger
-# CI.") CI (.github/workflows/ci.yml) and Deploy (.github/workflows/deploy.yml) both ask this one
-# script, so they never disagree about what counts as docs. Only pull requests ask: every push
-# (a merge into stage) runs the full gate, because a docs-only push can land on top of a code
-# merge whose own run it would otherwise cancel or race (pre-PR review, 2026-11-07).
+# Does a change touch anything besides docs? (owner, 2026-11-07, of docs-only changes: "Things like
+# this shouldn't trigger CI.") CI (.github/workflows/ci.yml) and Deploy (.github/workflows/deploy.yml)
+# both ask this one script, so they never disagree about what counts as docs.
 #
-# Usage: scripts/ci-changes.sh <pull request base sha> <head sha>
-# Prints `code=true|false`, and appends it to $GITHUB_OUTPUT when that is set. A missing,
-# all-zero or unreachable base counts as code, so the full gate runs whenever the diff isn't
-# known.
+# Usage:
+#   scripts/ci-changes.sh pr <pull request base sha> <head sha>
+#     What the pull request adds since it left its base (three dots).
+#   scripts/ci-changes.sh push <last checked sha> <head sha>
+#     What changed since the last commit on the branch whose run of the same workflow passed (two
+#     dots), not since the commit just before the push: a docs-only merge that lands right after a
+#     code merge whose run hasn't passed (still running, cancelled or failed) still sees that code,
+#     so it gets the full gate. The checked commit must be an ancestor of the head; a force-push or
+#     rewind past it counts as code.
+# Prints `code=true|false`, and appends it to $GITHUB_OUTPUT when that is set. A missing, all-zero
+# or unreachable base counts as code, so the full gate runs whenever the diff isn't known.
 #
 # Docs are: any `*.md` file, anything under `docs/` (the backlog notes, the ledger and its
 # generated index, design PNGs and captures) and anything under `.claude/` (skills, agent
@@ -17,8 +21,9 @@
 # fixtures — is code.
 set -euo pipefail
 
-base="${1:-}"
-head="${2:-HEAD}"
+mode="${1:-}"
+base="${2:-}"
+head="${3:-HEAD}"
 
 emit()
 {
@@ -28,15 +33,27 @@ emit()
 	fi
 }
 
+case "$mode" in
+	pr) range="$base...$head" ;;
+	push) range="$base..$head" ;;
+	*)
+		echo "usage: scripts/ci-changes.sh pr|push <base sha> <head sha>" >&2
+		exit 2
+		;;
+esac
+
 if [[ -z "$base" || "$base" =~ ^0+$ ]] || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
 	emit true
 	exit 0
 fi
+if [[ "$mode" == push ]] && ! git merge-base --is-ancestor "$base" "$head"; then
+	emit true
+	exit 0
+fi
 
-# Three dots: what the head adds since it left the base (a pull request's own changes). Paths
-# unquoted, so a note named with an em dash still matches `docs/*`; no rename detection, so a
+# Paths unquoted, so a note named with an em dash still matches `docs/*`; no rename detection, so a
 # code file moved under docs/ or renamed to .md still lists its old path, which is code.
-changed="$(git -c core.quotePath=false diff --no-renames --name-only "$base...$head")"
+changed="$(git -c core.quotePath=false diff --no-renames --name-only "$range")"
 
 code=false
 while IFS= read -r file; do

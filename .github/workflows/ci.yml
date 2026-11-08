@@ -16,14 +16,17 @@ concurrency:
 # S89: the checks run as separate jobs that start together, so a push learns sooner whether it
 # is green. Each job sets itself up the same way (checkout, pnpm, Node from .nvmrc, install).
 jobs:
-    # Docs-only pull requests (Markdown, docs/, .claude/) skip the build, tests, browsers and
-    # Lighthouse and run only the docs checks below (owner, 2026-11-07, of a pull request that changed only
-    # Markdown and the generated ledger index: "Things like this shouldn't trigger CI."). Law P11:
-    # every push, and every pull request that changes code, still runs all of pnpm verify: a push
-    # never skips, since a docs-only merge can land right after a code merge whose run it would
-    # cancel. scripts/ci-changes.sh decides, for CI and Deploy alike.
+    # Docs-only changes (Markdown, docs/, .claude/) skip the build, tests, browsers and Lighthouse
+    # and run only the docs checks below (owner, 2026-11-07, of docs-only changes: "Things like this
+    # shouldn't trigger CI."). Law P11: anything else runs all of pnpm verify. A pull request is
+    # compared with its base; a push with the last commit on its branch whose CI run passed, so a
+    # docs merge right after an unchecked code merge still gets the full gate. scripts/ci-changes.sh
+    # decides, for CI and Deploy alike.
     changes:
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            actions: read
         outputs:
             code: ${{ steps.diff.outputs.code }}
         steps:
@@ -33,11 +36,15 @@ jobs:
 
             - name: Does this change anything besides docs?
               id: diff
+              env:
+                  GH_TOKEN: ${{ github.token }}
               run: |
                   if [ "${{ github.event_name }}" = pull_request ]; then
-                      scripts/ci-changes.sh "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}"
+                      scripts/ci-changes.sh pr "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}"
                   else
-                      echo "code=true" >> "$GITHUB_OUTPUT"
+                      # The last commit on this branch whose push run of this workflow passed.
+                      checked="$(gh api "repos/${{ github.repository }}/actions/workflows/ci.yml/runs?branch=${{ github.ref_name }}&event=push&status=success&per_page=1" --jq '.workflow_runs[0].head_sha // ""' || true)"
+                      scripts/ci-changes.sh push "$checked" "${{ github.sha }}"
                   fi
 
     # What a docs-only change can break: the generated backlog (pnpm backlog:check, also the first

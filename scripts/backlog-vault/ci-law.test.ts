@@ -42,20 +42,23 @@ describe("CI runs pnpm verify (law P11)", () =>
 		expect(ci).toContain('test "$VERIFY $FLOWS $DESIGN $LIGHTHOUSE" = "success success success success"');
 	});
 
-	it("only a pull request is classified; every push and release runs the full gate, in CI and Deploy", () =>
+	it("a pull request is compared with its base and a push with the last commit whose run passed, in CI and Deploy", () =>
 	{
-		for (const file of [CI_YML, DEPLOY_YML])
+		for (const [file, workflow] of [[CI_YML, "ci.yml"], [DEPLOY_YML, "deploy.yml"]] as const)
 		{
-			const workflow = readFileSync(file, "utf8");
-			const changesJob = workflow.slice(workflow.indexOf("\n    changes:\n"), workflow.indexOf("\n    # ", workflow.indexOf("\n    changes:\n") + 1));
-			expect(changesJob, file).toContain('if [ "${{ github.event_name }}" = pull_request ]; then');
-			expect(changesJob, file).toContain('scripts/ci-changes.sh "${{ github.event.pull_request.base.sha }}"');
-			expect(changesJob, file).toMatch(/else\n\s+echo "code=true" >> "\$GITHUB_OUTPUT"/);
+			const text = readFileSync(file, "utf8");
+			const start = text.indexOf("\n    changes:\n");
+			const changesJob = text.slice(start, text.indexOf("\n    # ", start + 1));
+			expect(changesJob, file).toContain('scripts/ci-changes.sh pr "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}"');
+			expect(changesJob, file).toContain(`actions/workflows/${workflow}/runs?branch=\${{ github.ref_name }}&event=push&status=success&per_page=1`);
+			expect(changesJob, file).toContain('scripts/ci-changes.sh push "$checked" "${{ github.sha }}"');
 			expect(changesJob, file).not.toContain("github.event.before");
 		}
 		const deploy = readFileSync(DEPLOY_YML, "utf8");
+		expect(deploy).toMatch(/= release \]; then\n\s+echo "code=true" >> "\$GITHUB_OUTPUT"/);
 		const staging = deploy.slice(deploy.indexOf("\n    staging:\n"), deploy.indexOf("\n    production:\n"));
-		expect(staging).toContain("needs: [verify]");
+		expect(staging).toContain("needs.verify.result == 'success' || (needs.verify.result == 'skipped' && needs.changes.outputs.code == 'false')");
+		expect(staging).toContain("!cancelled()");
 		expect(staging).not.toMatch(/always\(\)/);
 	});
 });

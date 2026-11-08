@@ -1,5 +1,5 @@
 /**
- * `scripts/ci-changes.sh` decides whether a pull request changes anything besides docs, for
+ * `scripts/ci-changes.sh` decides whether a pull request or push changes anything besides docs, for
  * CI and Deploy alike (owner, 2026-11-07, of a docs-only pull request: "Things like this shouldn't
  * trigger CI."; law P11). These tests run it against a throwaway git repository.
  */
@@ -41,9 +41,9 @@ function commit(files: Record<string, string>): string
 	return git("rev-parse", "HEAD");
 }
 
-function classify(base: string, head: string): string
+function classify(base: string, head: string, mode: "pr" | "push" = "pr"): string
 {
-	return execFileSync("bash", [SCRIPT, base, head], {
+	return execFileSync("bash", [SCRIPT, mode, base, head], {
 		cwd: repo,
 		encoding: "utf8",
 		env: {
@@ -136,5 +136,27 @@ describe("scripts/ci-changes.sh", () =>
 		const movedBase = git("rev-parse", "HEAD");
 		expect(classify(movedBase, head)).toBe("code=false");
 		expect(classify(base, head)).toBe("code=false");
+	});
+
+	it("a push is compared with the last checked commit, so code merged after it still counts", () =>
+	{
+		const checked = git("rev-parse", "HEAD");
+		commit({
+			"web/src/a.ts": "unchecked code merge\n",
+		});
+		const docsMerge = commit({
+			"docs/b.md": "docs merge on top\n",
+		});
+		expect(classify(git("rev-parse", "HEAD~1"), docsMerge, "push")).toBe("code=false");
+		expect(classify(checked, docsMerge, "push")).toBe("code=true");
+	});
+
+	it("a push that rewinds past the checked commit counts as code", () =>
+	{
+		const old = git("rev-parse", "HEAD");
+		const checked = commit({
+			"docs/c.md": "c\n",
+		});
+		expect(classify(checked, old, "push")).toBe("code=true");
 	});
 });

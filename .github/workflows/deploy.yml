@@ -44,13 +44,17 @@ permissions:
     pull-requests: write
 
 jobs:
-    # Docs-only pull requests (Markdown, docs/, .claude/) skip verify and get no preview (owner,
-    # 2026-11-07: "Things like this shouldn't trigger CI."). Pushes to stage and releases always
-    # run verify, so staging never deploys code that hasn't passed it. scripts/ci-changes.sh
-    # decides, the same script CI asks.
+    # Docs-only changes (Markdown, docs/, .claude/) skip verify (owner, 2026-11-07: "Things like
+    # this shouldn't trigger CI."): a docs-only pull request gets no preview, and a docs-only push
+    # to stage deploys staging without re-running verify. A push is compared with the last stage
+    # commit whose Deploy run passed, so code that hasn't passed verify there yet always runs it
+    # first. A release always runs everything. scripts/ci-changes.sh decides, the same script CI asks.
     changes:
         if: github.event.action != 'closed'
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            actions: read
         outputs:
             code: ${{ steps.diff.outputs.code }}
         steps:
@@ -60,11 +64,17 @@ jobs:
 
             - name: Does this change anything besides docs?
               id: diff
+              env:
+                  GH_TOKEN: ${{ github.token }}
               run: |
-                  if [ "${{ github.event_name }}" = pull_request ]; then
-                      scripts/ci-changes.sh "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}"
-                  else
+                  if [ "${{ github.event_name }}" = release ]; then
                       echo "code=true" >> "$GITHUB_OUTPUT"
+                  elif [ "${{ github.event_name }}" = pull_request ]; then
+                      scripts/ci-changes.sh pr "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}"
+                  else
+                      # The last commit on this branch whose push run of this workflow passed.
+                      checked="$(gh api "repos/${{ github.repository }}/actions/workflows/deploy.yml/runs?branch=${{ github.ref_name }}&event=push&status=success&per_page=1" --jq '.workflow_runs[0].head_sha // ""' || true)"
+                      scripts/ci-changes.sh push "$checked" "${{ github.sha }}"
                   fi
 
     # The same gate CI runs (pnpm verify), plus a dry run of every env's Worker bundle.
@@ -189,8 +199,10 @@ jobs:
 
     # Every push to stage: stage.baseball.theater on the Neon staging branch (bt-staging).
     staging:
-        if: github.event_name == 'push' && github.ref == 'refs/heads/stage'
-        needs: [verify]
+        # After verify passed, or after a docs-only push skipped it; never after it failed or was
+        # cancelled.
+        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/stage' && needs.changes.result == 'success' && (needs.verify.result == 'success' || (needs.verify.result == 'skipped' && needs.changes.outputs.code == 'false')) }}
+        needs: [changes, verify]
         runs-on: ubuntu-latest
         timeout-minutes: 20
         concurrency:
