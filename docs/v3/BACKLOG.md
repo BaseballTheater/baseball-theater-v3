@@ -1995,7 +1995,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 **Depends on:** nothing.
 
-**Scope files:** `docs/v3/visual/standings-search-settings/amendments/`, `docs/v3/VISUAL-DESIGN.md`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`
+**Scope files:** `docs/v3/visual/standings-search-settings/amendments/`, `docs/v3/VISUAL-DESIGN.md`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`
 
 **Work**
 
@@ -2018,12 +2018,12 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 **Turn cap:** 10 — assumes one frame set drafted from A6's floating player and A5's link, and one owner session to ratify; waiting on the owner parks the story rather than spending turns.
 
-**Goal condition:** scripts/verify-S127.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/standings-search-settings/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 10 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+**Goal condition:** scripts/verify-S127.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/standings-search-settings/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 10 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 
 **`/goal` command**
 
 ```text
-/goal docs/v3/BACKLOG.md S127. Work item 0 first: if scripts/verify-S127.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S127.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/standings-search-settings/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S127.sh, or stop after 10 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+/goal docs/v3/BACKLOG.md S127. Work item 0 first: if scripts/verify-S127.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S127.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/standings-search-settings/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S127.sh, or stop after 10 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
 **Status:** `todo`
@@ -6443,7 +6443,7 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 
 **Depends on:** nothing new — the ingest path (`storeGame` / `ingestScheduleDay`), the HTTP adapter (`functions/src/adapters/http/mlb.ts`) and the Postgres repos exist.
 
-**Scope files:** `functions/`, `packages/domain/`, `packages/ports/`, `package.json`, `pnpm-lock.yaml`, `README.md`, `.gitignore`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`
+**Scope files:** `functions/`, `packages/domain/`, `packages/ports/`, `package.json`, `pnpm-lock.yaml`, `README.md`, `.gitignore`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`
 
 **Work**
 
@@ -6481,12 +6481,12 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 
 **Turn cap:** 20 — assumes a backfill service over the existing ingest path, a per-host limiter with backoff, the give-up tracker and resume file, the off-season domain function, a `package.json` script, PGlite and fake-clock tests, and README.
 
-**Goal condition:** scripts/verify-S122.sh exits 0, pnpm verify exits 0, no files outside functions/, packages/domain/, packages/ports/, package.json, pnpm-lock.yaml, README.md, .gitignore, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 20 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+**Goal condition:** scripts/verify-S122.sh exits 0, pnpm verify exits 0, no files outside functions/, packages/domain/, packages/ports/, package.json, pnpm-lock.yaml, README.md, .gitignore, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 20 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 
 **`/goal` command**
 
 ```text
-/goal docs/v3/BACKLOG.md S122. Work item 0 first: if scripts/verify-S122.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S122.sh exits 0, pnpm verify exits 0, no files outside functions/, packages/domain/, packages/ports/, package.json, pnpm-lock.yaml, README.md, .gitignore, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S122.sh, or stop after 20 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+/goal docs/v3/BACKLOG.md S122. Work item 0 first: if scripts/verify-S122.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S122.sh exits 0, pnpm verify exits 0, no files outside functions/, packages/domain/, packages/ports/, package.json, pnpm-lock.yaml, README.md, .gitignore, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S122.sh, or stop after 20 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
 **Status:** `todo`
@@ -6503,7 +6503,7 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 
 **Depends on:** nothing.
 
-**Scope files:** `docs/v3/visual/shell-scoreboard/amendments/`, `docs/v3/VISUAL-DESIGN.md`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`
+**Scope files:** `docs/v3/visual/shell-scoreboard/amendments/`, `docs/v3/VISUAL-DESIGN.md`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`
 
 **Work**
 
@@ -6525,12 +6525,12 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 
 **Turn cap:** 12 — assumes frames drafted from the ratified date control and Mantine's date components, and one owner session to ratify; waiting on the owner parks the story rather than spending turns.
 
-**Goal condition:** scripts/verify-S123.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/shell-scoreboard/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+**Goal condition:** scripts/verify-S123.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/shell-scoreboard/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 
 **`/goal` command**
 
 ```text
-/goal docs/v3/BACKLOG.md S123. Work item 0 first: if scripts/verify-S123.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S123.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/shell-scoreboard/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S123.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+/goal docs/v3/BACKLOG.md S123. Work item 0 first: if scripts/verify-S123.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S123.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/shell-scoreboard/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S123.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
 **Status:** `todo`
@@ -6547,7 +6547,7 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 
 **Prefer after:** **S122**: the counts for past seasons come from what its backfill stores.
 
-**Scope files:** `functions/src/`, `functions/vitest.config.ts`, `packages/domain/`, `packages/ports/`, `openapi/`, `fixtures/`, `web/src/api/`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`
+**Scope files:** `functions/src/`, `functions/vitest.config.ts`, `packages/domain/`, `packages/ports/`, `openapi/`, `fixtures/`, `web/src/api/`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`
 
 **Work**
 
@@ -6555,8 +6555,8 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 
 **Acceptance criteria** (checks `scripts/verify-S124.sh` performs)
 
-1. `GET /api/v1/schedule/month/:month` (`YYYY-MM`) (route in `packages/domain/src/api-routes.ts`) returns, for every day of that month, its date and the number of games BT has stored for it, read from BT's store (the schedule days, or the `games` table's `official_date` index) in one query, not one read per day (tests against PGlite and the memory repos).
-2. A month BT has no schedule days for that is in the future or the current season is filled from MLB through the existing ingest path with one schedule request for the month's date range, never one per day, and a day still unknown afterwards says so (`count: null`), distinct from a day with no games (`0`) (tests with a counting fake client).
+1. `GET /api/v1/schedule/month/:month` (`YYYY-MM`) (route in `packages/domain/src/api-routes.ts`) returns, for every day of that month, its date and the number of games on that day's stored schedule, counted from the stored schedule days' game summaries (which include games not yet final, postponed or out of the active window), not from the `games` table, which holds only the games ingest hydrated; one query, not one read per day (tests against PGlite and the memory repos, including a day whose schedule has scheduled games and no stored game snapshots).
+2. When any day of the month in the current season or the future has no stored schedule day (a month the scoreboard has visited usually holds some days and not others), those missing days are filled from MLB through the existing ingest path with one schedule request for their date range, never one per day, and a day still unknown afterwards says so (`count: null`), distinct from a day with no games (`0`) (tests with a counting fake client: an empty month, and a month already holding one day, each take one request).
 3. Cache headers follow ADR-021's graduated freshness: a month entirely in the past caches long, the current month short (test on the headers).
 4. The route is in the OpenAPI spec (`pnpm api:spec`) and `pnpm api:breaking` exits 0 (additive).
 5. Months before 1901-04 are rejected with a 400; a malformed month too (tests).
@@ -6572,12 +6572,12 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 
 **Turn cap:** 12 — assumes one route, one repository count query in each adapter, one month-range schedule fill through ingest, cache headers from existing functions, and the spec update.
 
-**Goal condition:** scripts/verify-S124.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, packages/domain/, packages/ports/, openapi/, fixtures/, web/src/api/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+**Goal condition:** scripts/verify-S124.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, packages/domain/, packages/ports/, openapi/, fixtures/, web/src/api/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 
 **`/goal` command**
 
 ```text
-/goal docs/v3/BACKLOG.md S124. Work item 0 first: if scripts/verify-S124.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S124.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, packages/domain/, packages/ports/, openapi/, fixtures/, web/src/api/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S124.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+/goal docs/v3/BACKLOG.md S124. Work item 0 first: if scripts/verify-S124.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S124.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, packages/domain/, packages/ports/, openapi/, fixtures/, web/src/api/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S124.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
 **Status:** `todo`
@@ -6594,7 +6594,7 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 
 **Depends on:** **S124** (the games-per-day counts). Also **S81** (design capture).
 
-**Scope files:** `web/src/`, `web/package.json`, `web/vitest.config.ts`, `pnpm-lock.yaml`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`, `e2e/design/`, `docs/v3/design-checks/`
+**Scope files:** `web/src/`, `web/package.json`, `web/vitest.config.ts`, `pnpm-lock.yaml`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`, `e2e/design/`, `docs/v3/design-checks/`
 
 **Work**
 
@@ -6620,12 +6620,12 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 
 **Turn cap:** 14 — assumes Mantine's date components in a popover off the existing control, one query hook over S124's route, RTL tests, and the rule 22 design match.
 
-**Goal condition:** scripts/verify-S125.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/package.json, web/vitest.config.ts, pnpm-lock.yaml, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified, or stop after 14 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+**Goal condition:** scripts/verify-S125.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/package.json, web/vitest.config.ts, pnpm-lock.yaml, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified, or stop after 14 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 
 **`/goal` command**
 
 ```text
-/goal docs/v3/BACKLOG.md S125. Work item 0 first: if scripts/verify-S125.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S125.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/package.json, web/vitest.config.ts, pnpm-lock.yaml, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S125.sh, or stop after 14 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+/goal docs/v3/BACKLOG.md S125. Work item 0 first: if scripts/verify-S125.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S125.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/package.json, web/vitest.config.ts, pnpm-lock.yaml, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S125.sh, or stop after 14 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
 **Status:** `todo`
@@ -6640,7 +6640,7 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 
 **Depends on:** nothing new — `CollapsedBar` (S68) and the full module's link to `/game/<gamePk>` (`ScoreboardModule.tsx:124`) exist.
 
-**Scope files:** `web/src/`, `web/vitest.config.ts`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`
+**Scope files:** `web/src/`, `web/vitest.config.ts`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`
 
 **Work**
 
@@ -6664,12 +6664,12 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 
 **Turn cap:** 8 — assumes swapping the button for the module's link, removing the expanded state, and updating the RTL tests.
 
-**Goal condition:** scripts/verify-S126.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+**Goal condition:** scripts/verify-S126.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 
 **`/goal` command**
 
 ```text
-/goal docs/v3/BACKLOG.md S126. Work item 0 first: if scripts/verify-S126.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S126.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S126.sh, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+/goal docs/v3/BACKLOG.md S126. Work item 0 first: if scripts/verify-S126.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S126.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S126.sh, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
 **Status:** `todo`
