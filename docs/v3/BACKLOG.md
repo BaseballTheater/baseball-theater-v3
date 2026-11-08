@@ -216,6 +216,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 65 | [S41](#s41--plays-room--inning-sidebar-at-bat-accordions-scoring-plays) | Plays room to the ratified design | `done` |
 | 66 | [S65](#s65--scoreboard-data-records-start-time-probables-decisions-live-count--runners) | Scoreboard data fields | `done` |
 | 67 | [S66](#s66--scoreboard-to-the-ratified-frames-modules-date-control-states) | Scoreboard modules + states | `done` |
+| 68 | [S128](#s128--standings-follow-the-season--the-final-table-in-the-off-season-spring-trainings-in-the-spring) | Standings by season phase | `todo` |
 | 68 | [S67](#s67--scoreboard-game-row-slot-occupants--its-setting) | Scoreboard slot occupants + setting | `done` |
 | 69 | [S68](#s68--favorites-driven-collapse--hide-scores-on-the-scoreboard) | Collapse non-favorites + Hide Scores | `done` |
 | 69 | [S126](#s126--a-collapsed-game-opens-its-game-page-instead-of-expanding) | Collapsed bar opens the game | `todo` |
@@ -230,7 +231,9 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 74 | [S110](#s110--entry-bundle-headroom-pages-past-the-scoreboard-load-on-demand) | Entry bundle headroom | `done` |
 | 74 | [S125](#s125--the-scoreboards-calendar-date-picker) | Calendar date picker | `todo` |
 | 75 | [S111](#s111--the-scoreboard-opens-on-today-or-on-the-seasons-final-day-in-the-off-season) | Scoreboard opens on the right day | `done` |
+| 76 | [S129](#s129--design-the-spring-training-label-on-standings) | Design: spring standings label | `todo` |
 | 76 | [S51](#s51--representative-local-dev-pnpm-dev-on-postgres-in-docker) | `pnpm dev` on Postgres in Docker | `done` |
+| 77 | [S130](#s130--standings-label-spring-training-standings) | Spring standings label | `todo` |
 | 77 | [S112](#s112--dev-seed-the-last-month-of-the-season-and-the-postseason-refreshable-by-date-range) | Dev seed (season end + postseason) | `done` |
 | 78 | [S113](#s113--production-database-neon-through-hyperdrive-migrated-composed-into-the-worker) | Production database (Neon) | `done` |
 | 79 | [S114](#s114--cloudflare-deploy-preview-staging-and-production-through-github-actions) | Cloudflare deploy | `done` |
@@ -277,7 +280,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 116 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
 | 117 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
 
-**Next (generated):** **69 / S126** — the lowest **Priority** `todo` story not waiting on a design.
+**Next (generated):** **68 / S128** — the lowest **Priority** `todo` story not waiting on a design.
 
 **Before starting it:** confirm no [backlog review](#backlog-reviews) is due — the review-debt line in that section counts stories, but a drift event makes one due regardless.
 
@@ -631,7 +634,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 | Game → Videos (impact sort) | Done — the room is **S69**'s (below); a clip whose play MLB measured ranks by the win probability that play added, key moments then lead changes first among ties, and the rest follow by title keywords (**S98**: `rankHighlightsByImpact` with the play metrics in `withGameExtras`) |
 | Game → Plays (strike zone + trajectory) | **Done** (**S41**, design matched by the owner 2026-10-29): `PlaysPanel.tsx` — S2's boxed `Linescore`, a floating inning sidebar (every inning, then **Runs**), the latest inning with at-bats by default (`defaultPlaysInning`), top / bottom halves as at-bat accordions (`inningHalves`), Runs = every scoring play with the score after it (`scoringPlays`, `scoreAfterLabel`; `AtBat.result.awayScore` / `homeScore`). An open at-bat reuses S64's `MatchupCards` (totals through that at-bat), `StrikeZoneChart` and `PitchSequence` via `AtBatViewer` / `PitchTheater`; fixture `823823` |
 | Game → Live / Box / Recap | Inside the ratified chrome (**S40**: `GameTopBar`, tabs by phase from `gamePhase`, shared room states in `RoomState.tsx`). **Live** — done (**S3** status, **S64** pitch theater): `LiveStatus.tsx` with `BaseDiamond.tsx`; `MatchupCards` (`pitcherLine` / `batterLine`), the catcher's view `StrikeZoneChart.tsx` — one camera (`packages/domain/src/catcher-view.ts`) for the batter's own MLB zone, plate, boxes, the batter (sized from their height) and each flight (`pitchFlight`: release to plate from the pitch's data) — real-time replays (`pitchPlayback`, `useReplayClock`), to-scale side / top charts (`field-chart.ts`) behind links, and `PitchSequence`; a new live pitch replays itself. **Box** — done (**S2**): `BoxRoom.tsx` with the boxed-inning `Linescore.tsx` (content-width and centred for now, owner 2026-10-29), `TeamSwatch` switcher, one batting table and Game info, from `GameSnapshot.boxscore`. **Recap** — done (**S10**): `RecapRoom.tsx` from `GameSnapshot.recap`, shown only when a recap exists (`roomsForPhase(phase, hasRecap)`). |
-| Standings / Search / Settings | Standings **done** (**S4**, design matched by the owner 2026-11-07): `StandingsPage` reads `GET /api/v1/standings` through `web/src/api/standings.ts` and draws one `DivisionTable` per division (`TeamSwatch`, team, W, L, PCT, GB with "—" for the leader; mobile puts the abbreviation beside the swatch, by the `variant` `routes.tsx` passes), loading / empty / error through `ViewState`, headings from `divisionName`. Search is a stub (see **S5**). Settings is signed-in only and lives on the account (ADR-027): signed out, its nav item is hidden and `/settings` redirects to the scoreboard (**S59**). **S6** built it to the ratified frames: Game List (Favorite Teams dropdown over `MLB_TEAMS`), Game Detail (Opens First: Videos / Live / Box, which `GamePage` opens via `openingRoom` when the phase offers it) and Account ("Signed in as {email}", "Sign out" text link), one column on mobile and two on medium / desktop. One Zustand store (`useSettings()`, `setFavoriteTeams` / `setOpensFirst`) saves to `PUT /api/v1/me/settings`. The slot, collapse, Hide Scores and Video Player controls land with **S67** / **S68** / **S70**; Patreon rows with the Patreon link theme; delete-your-data with **S79**, whose signed-out `/settings` shows A5's deleted page once (S86, S87) |
+| Standings / Search / Settings | Standings **done** (**S4**, design matched by the owner 2026-11-07): `StandingsPage` reads `GET /api/v1/standings` through `web/src/api/standings.ts` and draws one `DivisionTable` per division (`TeamSwatch`, team, W, L, PCT, GB with "—" for the leader; mobile puts the abbreviation beside the swatch, by the `variant` `routes.tsx` passes), loading / empty / error through `ViewState`, headings from `divisionName`. Outside the regular season MLB has no standings for a date, so the page is empty there until **S128** shows the final table in the off-season and spring training's standings in the spring (labeled by **S130**, designed by **S129**; owner, 2026-11-07). Search is a stub (see **S5**). Settings is signed-in only and lives on the account (ADR-027): signed out, its nav item is hidden and `/settings` redirects to the scoreboard (**S59**). **S6** built it to the ratified frames: Game List (Favorite Teams dropdown over `MLB_TEAMS`), Game Detail (Opens First: Videos / Live / Box, which `GamePage` opens via `openingRoom` when the phase offers it) and Account ("Signed in as {email}", "Sign out" text link), one column on mobile and two on medium / desktop. One Zustand store (`useSettings()`, `setFavoriteTeams` / `setOpensFirst`) saves to `PUT /api/v1/me/settings`. The slot, collapse, Hide Scores and Video Player controls land with **S67** / **S68** / **S70**; Patreon rows with the Patreon link theme; delete-your-data with **S79**, whose signed-out `/settings` shows A5's deleted page once (S86, S87) |
 | App shell (header, rail, drawer, footer, notices, layout host) | **Done** (**S60**) — `web/src/layout/`: `AppShellLayout` (only viewport read, passes `variant`), `AppHeader`, `NavRail` + drawer, `NoticeSlot`, `FooterMeta` (`fetchedAgo`), `version.ts`; `web/src/components/ViewState.tsx`, `components/game/LiveIndicator.tsx`; `web/public/favicon.svg`. Notices: the update notice (**S73**, and a retired API version's 426, **S28**); offline marker **S74**. Matched to the frames by **S83** (owner verdict "Matches", 2026-10-28): wordmark BT in `clarendon-urw-extra-narrow` from the Adobe Fonts kit, active rail item in Primary with its Primary Light marker, Figma text sizes; `e2e/design/shell-frames.ts` shares the six shell frames |
 | Scoreboard to the ratified frames | Modules done (**S66**: `ScoreboardModule` final / live / scheduled, `TeamEdge`, `teamRecordLabel`, `DateControl` with `addDays`, `ViewState` states, one column on mobile and two on medium / desktop; `fixtures/schedule-823823-moments.json`). Data done (**S65**: `ScheduleGameSummary` `startTime`, `teams.*.record`, `probablePitchers`, `decisions`, `live`; `fixtures/schedule-2026-09-05.json`; `formatGameTime`). Slot done (**S67**: `GameRowSlot` with `slotOccupant` — pitchers of record, the count as `countShorthand` text beside `BaseDiamond`, probables with `probableLine`, or the room menu — and the Game-Row Slot setting, Status default / Room Menu; design matched by the owner). Collapse + Hide Scores done (**S68**, design matched by the owner 2026-10-30: `CollapsedBar` centers the score between the teams with round `TeamSwatch` colors inside, by the score, and the state muted underneath; a favorite spans the row at medium / desktop while anything is collapsed; `useScoresHidden`, `HiddenValue`; the game rooms honor Hide Scores too — **S75**, design matched by the owner 2026-11-03: Live, Plays, Runs, Recap and the recap video's title masked, Box unchanged). Still to build: **S71** digest |
 | Videos room + player | Room done (**S69**, design matched by the owner 2026-10-30: `VideosRoom`, `VideoCard`, grid / list with icons, search, a sort (Impact / Newest / Oldest, `sortHighlights`), quick filters that show as many as fit then a Filters drawer (`QuickFilters`, `fittingFilters`), and collapsible Pre-game / Game highlights / Statcast / Post-game groups with empty ones left out (`highlightGroup` / `groupHighlights`), all in `packages/domain/src/highlights.ts`). Player done (**S70**, design matched by the owner 2026-10-31: `VideoPlayer` with the MLBAM disclaimer once, plays inline on iOS, in `PlayerDialog` (floating over the dimmed page with "Close ✕" in the overlay, game-shell A4; loaded on the first chosen clip) by default or `PlayerStage` by the Video Player setting; `PlayerHost` picks by setting; Space plays / pauses, Esc / Close / the empty overlay close; the dialog links to the clip's game unless played from it; `clipClock` in `packages/domain`) |
@@ -2032,6 +2035,138 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 ```text
 /goal docs/v3/BACKLOG.md S127. Work item 0 first: if scripts/verify-S127.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S127.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/standings-search-settings/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S127.sh, or stop after 10 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
+
+**Status:** `todo`
+
+### S128 — Standings follow the season — the final table in the off-season, spring training's in the spring
+
+**Gap:** `GET /api/v1/standings` asks MLB for the standings on one date (`standingsUrl`, `functions/src/adapters/http/mlb.ts`). MLB has none for any date after the regular season or before it (spring training, the postseason and the off-season all answer 0 records, checked 2026-11-07), so from the last regular-season day until the next opening day the Standings page says "No standings for this date." The owner wants the final table there (owner, 2026-11-07: *"Yes, it should always show the last standings for the prior season until spring training’s first game"*), and spring training's own standings from the first spring game until opening day (owner, 2026-11-07, asked what to show then, with spring training standings suggested: *"Agreed"*).
+
+**Impact:** Before S128, Standings was empty for half the year. S128 impact: after the regular season ends, Standings shows how the season finished until spring training starts, and during spring training it shows the spring standings.
+
+**Source:** Feature: Standings
+
+**Depends on:** nothing new — S4's standings, S111's season calendar (`SeasonCalendar`, `fetchSeasonCalendar`) and the fix that adds `season=` to the standings request (PR #13) exist. If PR #13 hasn't merged when this starts, merge it first.
+
+**Scope files:** `functions/src/`, `functions/vitest.config.ts`, `packages/domain/`, `packages/ports/`, `packages/mlb-api/`, `fixtures/`, `openapi/`, `web/src/api/`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`
+
+**Work**
+
+0. Write `scripts/verify-S128.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** writing any product code (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S128.sh` performs)
+
+1. One named, tested function in `packages/domain` (ADR-025) decides, for a day and the seasons MLB has published, which standings to show: inside a regular season, that day's standings; from the day after a regular season's last day until the next season's first spring training game, that season's final regular-season table; from the first spring training game until the day before opening day, that spring's training standings; before every known season, or with no calendar, the day itself as today. `SeasonCalendar` gains the regular season's first and last days (from MLB's season dates, which already carry them) so the function needs nothing else. Tested at each boundary: the last regular-season day and the day after, the day before the first spring game and that day, the day before opening day and opening day, a postseason day, a January day, and a year with the next season not yet published (keeps the final table).
+2. `GET /api/v1/standings` (with or without `?date=`) answers with what that function picks: the final table is MLB's standings for the season with no date (`season=<year>`, no `date`), spring training's is `standingsTypes=springTraining` for the new season; both through one `MlbStatsClient` method per shape, each with its URL built by one named function as `standingsUrl` is, and the recorder recording the same URLs. The payload says which it is, additively (`seasonType: "regularSeason" | "springTraining"`, and the season), and `pnpm api:breaking` exits 0 (tests on recorded fixtures).
+3. Recordings: `fixtures/raw/standings-2026-final.json` (2026's final table) and `fixtures/raw/standings-2027-spring.json` (or the latest spring MLB has, named for its season) are recorded once with `BT_USE_LIVE_MLB=1` and committed; tests and local dev read them, never the network; `pnpm mlb:scan-drift` covers them.
+4. The season calendar costs at most one extra MLB request per lifetime of its cache, the same cache the scoreboard's default day uses (S111): reuse it, no second calendar fetch (test with a counting client).
+5. With no calendar (the seasons request failed), the page still gets the day's standings as today, and an error from MLB is still an error, not an empty table (tests).
+6. No visual change in this story: the page shows the table it's given, and the spring label is S130's (S129 designs it). Until S130 lands, spring standings show unlabeled; spring 2027 starts in late February, so S129/S130 should land before then.
+7. This file's S128 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- **Season ids.** MLB's season id is the date's year for every date (its 2026 season runs 2026-01-01 to 2026-12-31, per `seasons-2026.json`), so the "final table" for a January day is the previous year's season, and the function must pick it, not `date.slice(0, 4)`.
+- **Checked against MLB (2026-11-07):** `season=2026` with no `date` gives the final 2026 table (98 wins at the top); `season=2026&standingsTypes=springTraining` gives 6 records, 30 teams; every date outside the regular season gives 0 records.
+- **Postseason** counts as "after the regular season": October shows the final table, as the owner's rule says.
+
+**Reuse check** (ADR-025): before writing code, search `packages/domain/src/scoreboard-date.ts` (`SeasonCalendar`, `defaultScoreboardDate`, `mlbToday`), `functions/src/adapters/http/mlb.ts` (`standingsUrl`, `seasonsUrl`, `fetchSeasonCalendar`, `fetchStandings`), the default-day handler's cache in `functions/src/handlers/api.ts`, `functions/src/mappers/standings.ts` and the recorder for what this story needs; record what was reused in the story's ledger notes.
+
+**Turn cap:** 14 — assumes one domain function over an extended `SeasonCalendar`, two client methods with their URL functions, two recordings, an additive payload field, and tests.
+
+**Goal condition:** scripts/verify-S128.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, packages/domain/, packages/ports/, packages/mlb-api/, fixtures/, openapi/, web/src/api/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 14 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S128. Work item 0 first: if scripts/verify-S128.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S128.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, packages/domain/, packages/ports/, packages/mlb-api/, fixtures/, openapi/, web/src/api/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S128.sh, or stop after 14 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
+
+**Status:** `todo`
+
+### S129 — Design: the spring training label on Standings
+
+**Gap:** From the first spring training game until opening day, Standings shows spring training's standings (S128), and the owner agreed they're labeled as such (owner, 2026-11-07, asked what to show from the first spring game until opening day, with spring training standings, labeled as such, suggested: *"Agreed"*). The ratified Standings frames (standings-search-settings, A7) draw only the regular-season tables, so nothing says where or how the label sits, and S130 can't build it without designing it in code (rule 18).
+
+**Impact:** Before S129, nothing showed how spring training standings are told apart from the real ones. S129 impact: the owner approves how Standings says "spring training" before S130 builds it.
+
+**Source:** Feature: Standings
+
+**Gates (rule 18):** S130 — it names S129 on its `**Design:**` line.
+
+**Depends on:** nothing.
+
+**Scope files:** `docs/v3/visual/standings-search-settings/amendments/`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`
+
+**Work**
+
+0. Write `scripts/verify-S129.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** building (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S129.sh` performs)
+
+1. A ratified amendment to the standings-search-settings surface draws Standings at mobile, medium and desktop showing spring training standings with their label, and says whether anything marks the off-season final table (S128 shows it from the end of the regular season until the first spring game, owner, 2026-11-07: *"Yes, it should always show the last standings for the prior season until spring training’s first game"*) or it stays as drawn.
+2. The owner ratified it in the session it was shown (quoted), recorded the way the other amendments are.
+3. This file's S129 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- A ratified file is never edited (CLAUDE.md), so the story writes only an amendment, as A1–A8 did.
+- Spring training 2027 starts in late February; S129 and S130 should land before then.
+
+**Reuse check** (ADR-025): before drawing, read the ratified Standings frames and A7, and the shared heading and muted-text tokens in VISUAL-DESIGN; a design story writes no code; record what was reused, or why nothing fit, in the story's ledger notes.
+
+**Turn cap:** 8 — assumes one label drawn on the existing Standings frames and one owner session to ratify; waiting on the owner parks the story rather than spending turns.
+
+**Goal condition:** scripts/verify-S129.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/standings-search-settings/amendments/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S129. Work item 0 first: if scripts/verify-S129.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S129.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/standings-search-settings/amendments/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S129.sh, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
+
+**Status:** `todo`
+
+### S130 — Standings label spring training standings
+
+**Gap:** S128's standings payload says when it holds spring training standings (`seasonType: "springTraining"`), but the Standings page draws them like the regular season's, and the owner agreed they're labeled (owner, 2026-11-07, asked what to show from the first spring game until opening day, with spring training standings, labeled as such, suggested: *"Agreed"*).
+
+**Impact:** Before S130, spring training standings looked like the real ones. S130 impact: during spring training, Standings says plainly that these are spring training standings.
+
+**Source:** Feature: Standings
+
+**Design:** S129 — build to the approved frames. This story may only move to `doing` once every design story named here is `done` (rule 18; `pnpm backlog:check` enforces it).
+
+**Depends on:** **S128** (the payload's `seasonType`). Also **S81** (design capture).
+
+**Scope files:** `web/src/`, `web/vitest.config.ts`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`, `e2e/design/`, `docs/v3/design-checks/`
+
+**Work**
+
+0. Write `scripts/verify-S130.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** building (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S130.sh` performs)
+
+1. The Standings page draws S129's label when the payload's `seasonType` is `springTraining`, and whatever S129 says (or nothing) for the off-season final table, reading the payload through `useStandings` (RTL with both payloads).
+2. Files this story adds or edits don't call `useMediaQuery`, `hiddenFrom` or `visibleFrom` outside `web/src/layout/` (grep).
+3. Design match (rule 22): for each ratified frame this story builds (desktop captured at 1200px, owner 2026-10-28: *"Capture at 1200px"*), `pnpm design:capture S130` saves the built page to `docs/v3/design-checks/S130/<frame>.png` from `e2e/design/S130.spec.ts`; the grader checks each file exists at its pairing's width. The story parks `blocked` with its captures committed until the owner says each pair matches, recorded with `scripts/audit.sh story S130 --design-match -`.
+4. This file's S130 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- Spring training 2027 starts in late February; this should land before then.
+
+**Reuse check** (ADR-025): before writing code, read `web/src/pages/StandingsPage.tsx`, `web/src/api/standings.ts` (`useStandings`) and the shared heading components; record what was reused in the story's ledger notes.
+
+**Turn cap:** 8 — assumes one label on the existing page from one payload field, RTL tests and the rule 22 design match.
+
+**Goal condition:** scripts/verify-S130.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S130. Work item 0 first: if scripts/verify-S130.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S130.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S130.sh, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
 **Status:** `todo`
