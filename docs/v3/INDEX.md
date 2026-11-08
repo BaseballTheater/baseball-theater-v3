@@ -497,16 +497,16 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 | 69 | [S126](backlog/stories/S126.md) Collapsed bar opens the game | `todo` | S68 | — |
 | 70 | [S122](backlog/stories/S122.md) Game backfill since 1901 | `todo` | — | — |
 | 71 | [S117](backlog/stories/S117.md) Baseball-data copy to staging | `todo` | S114 | — |
-| 71 | [S131](backlog/stories/S131.md) Approved release notes | `todo` | — | — |
 | 72 | [S123](backlog/stories/S123.md) Design: calendar date picker | `todo` | — | — |
 | 73 | [S124](backlog/stories/S124.md) Games-per-day counts API | `todo` | — | — |
 | 74 | [S125](backlog/stories/S125.md) Calendar date picker | `todo` | S124, S81 | S123 |
 | 76 | [S129](backlog/stories/S129.md) Design: spring standings label | `todo` | — | — |
 | 77 | [S130](backlog/stories/S130.md) Spring standings label | `todo` | S128, S81 | S129 |
-| 78 | [S132](backlog/stories/S132.md) Release notes API | `todo` | S131 | — |
-| 79 | [S133](backlog/stories/S133.md) Design: changelist + update notes | `todo` | — | — |
-| 80 | [S134](backlog/stories/S134.md) Changelist page | `todo` | S132, S81 | S133 |
-| 81 | [S135](backlog/stories/S135.md) What's new on update notices | `todo` | S132, S134, S81 | S133 |
+| 78 | [S131](backlog/stories/S131.md) Approved release notes | `todo` | — | — |
+| 79 | [S132](backlog/stories/S132.md) Release notes API | `todo` | S131 | — |
+| 80 | [S133](backlog/stories/S133.md) Design: changelist + update notes | `todo` | — | — |
+| 81 | [S134](backlog/stories/S134.md) Changelist page | `todo` | S132, S81 | S133 |
+| 82 | [S135](backlog/stories/S135.md) What's new on update notices | `todo` | S132, S134, S81 | S133 |
 | 89 | [S127](backlog/stories/S127.md) Design: play link in Search's player | `todo` | — | — |
 | 90 | [S5](backlog/stories/S5.md) Search page queries highlights fixture | `todo` | S70, S61, S68, S81 | S34, S56 |
 | 91 | [S72](backlog/stories/S72.md) Search chips: date / team / tag | `todo` | S5, S69, S81 | S34 |

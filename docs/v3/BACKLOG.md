@@ -224,7 +224,6 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 70 | [S122](#s122--backfill-every-game-between-two-dates-gently-resumably-back-to-1901) | Game backfill since 1901 | `todo` |
 | 71 | [S70](#s70--video-player-dialog-by-default-persistent-stage-by-setting) | Video player (dialog / stage) | `done` |
 | 71 | [S117](#s117--copy-productions-baseball-data-into-staging-on-request-with-no-fans-data) | Baseball-data copy to staging | `todo` |
-| 71 | [S131](#s131--each-releases-fan-facing-notes-approved-by-the-owner-before-it-publishes) | Approved release notes | `todo` |
 | 72 | [S109](#s109--live-status-the-inning-count-and-outs-in-one-place) | Live status, one place | `done` |
 | 72 | [S123](#s123--design-the-scoreboards-calendar-date-picker) | Design: calendar date picker | `todo` |
 | 73 | [S124](#s124--games-per-day-for-a-month-from-bts-store) | Games-per-day counts API | `todo` |
@@ -237,19 +236,20 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 77 | [S130](#s130--standings-label-spring-training-standings) | Spring standings label | `todo` |
 | 77 | [S112](#s112--dev-seed-the-last-month-of-the-season-and-the-postseason-refreshable-by-date-range) | Dev seed (season end + postseason) | `done` |
 | 78 | [S113](#s113--production-database-neon-through-hyperdrive-migrated-composed-into-the-worker) | Production database (Neon) | `done` |
-| 78 | [S132](#s132--the-approved-release-notes-and-whats-new-since-a-version-from-bts-api) | Release notes API | `todo` |
+| 78 | [S131](#s131--each-releases-fan-facing-notes-approved-by-the-owner-before-it-publishes) | Approved release notes | `todo` |
 | 79 | [S114](#s114--cloudflare-deploy-preview-staging-and-production-through-github-actions) | Cloudflare deploy | `done` |
 | 79 | [S118](#s118--branch-flow-stage-deploys-staging-main-deploys-production) | Stage and main branch flow | `done` |
 | 79 | [S119](#s119--production-deploys-to-nextbaseballtheater-until-the-owners-dns-cutover) | Production at next.baseball.theater | `done` |
 | 79 | [S120](#s120--sign-in-hardening-recent-sign-in-from-logtos-auth_time-per-account-settings-jwks-cooldown-5xx-for-outages-per-tab-sign-in-state-no-stale-session-loads) | Sign-in hardening | `done` |
 | 79 | [S121](#s121--release-flow-stories-land-as-auto-merged-pull-requests-into-stage-a-published-github-release-deploys-production) | Releases from pull requests | `done` |
-| 79 | [S133](#s133--design-the-changelist-page-and-whats-new-on-the-update-notifications) | Design: changelist + update notes | `todo` |
+| 79 | [S132](#s132--the-approved-release-notes-and-whats-new-since-a-version-from-bts-api) | Release notes API | `todo` |
 | 80 | [S93](#s93--ingest-mlb-play-metrics-win-probability-key-moments-abs-challenges) | Ingest play metrics | `done` |
 | 80 | [S116](#s116--sign-in-with-logto-email-one-time-code-on-the-deployed-sites) | Logto sign-in | `done` |
-| 80 | [S134](#s134--the-changelist-page-lists-each-releases-approved-notes) | Changelist page | `todo` |
+| 80 | [S133](#s133--design-the-changelist-page-and-whats-new-on-the-update-notifications) | Design: changelist + update notes | `todo` |
 | 81 | [S75](#s75--hide-scores-in-the-game-rooms-and-the-recap-video-title) | Hide Scores in the rooms | `done` |
-| 81 | [S135](#s135--the-update-notice-links-to-the-changelist-and-shows-big-additions-a-notification-after-updating-does-too-then-dismisses-itself) | What's new on update notices | `todo` |
+| 81 | [S134](#s134--the-changelist-page-lists-each-releases-approved-notes) | Changelist page | `todo` |
 | 82 | [S71](#s71--day-highlights-digest-best-of-date) | Day highlights digest | `done` |
+| 82 | [S135](#s135--the-update-notice-links-to-the-changelist-and-shows-big-additions-a-notification-after-updating-does-too-then-dismisses-itself) | What's new on update notices | `todo` |
 | 83 | [S45](#s45--api-runs-as-a-worker-on-the-local-workers-runtime) | Worker entry + local Workers runtime + Workers tests | `done` |
 | 84 | [S47](#s47--graduated-edge-caching--refresh-on-read) | Graduated edge caching + refresh-on-read | `done` |
 | 85 | [S48](#s48--per-game-ingest-durable-object--cron-ensure-running) | Ingest Durable Object + cron | `done` |
@@ -6859,7 +6859,7 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 - **Why the version comes from the notes.** A release's tag is cut from a `stage` commit (CLAUDE.md release rule), and that commit must already hold the release's approved notes (AC 4), so the newest approved notes in a build *are* its release. `currentRelease` gives every build, `stage` and preview included, a version with no build-time tag injection; S132 (the API) and S135 (the web app) both read it from here, never from a second source.
 - The page starts at v3.1.0 (owner, 2026-11-08: *"No, start at v3.1.0"*): no notes file for v3.0.0.
 - `CHANGELOG.md` stays the full, per-story record; release notes are the fan-facing, owner-approved subset of it.
-- v3.1.0 is the next release: S131 should land before it publishes, so its notes are the first ones approved this way.
+- v3.1.0 publishes first (owner, 2026-11-08, asked whether S131 should land before it: *"No, release v3.1.0 first"*): its notes are drafted and approved in session the same way, without S131's check behind them.
 
 **Reuse check** (ADR-025): before writing code, search `packages/domain/src/` for an existing version or date parser (`calendar-date`, the API version in `api-routes.ts`) and `functions/src/scripts/` for an existing CLI pattern (argument parsing, exit codes) to follow; record what was reused, or why nothing fit, in the story's ledger notes.
 
