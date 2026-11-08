@@ -377,7 +377,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `2167–2170` System Consistency
   - `2171–2174` Originality
   - `2175–2221` Small-Size Test
-- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 40 KB
+- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 41 KB
   - `12–19` North star
   - `20–34` Principles (product)
   - `35–46` Scope legend
@@ -493,12 +493,15 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 
 | Priority | Story | Status | Depends on | Design |
 |---|---|---|---|---|
+| 68 | [S128](backlog/stories/S128.md) Standings by season phase | `todo` | S4, S111 | — |
 | 69 | [S126](backlog/stories/S126.md) Collapsed bar opens the game | `todo` | S68 | — |
 | 70 | [S122](backlog/stories/S122.md) Game backfill since 1901 | `todo` | — | — |
 | 71 | [S117](backlog/stories/S117.md) Baseball-data copy to staging | `todo` | S114 | — |
 | 72 | [S123](backlog/stories/S123.md) Design: calendar date picker | `todo` | — | — |
 | 73 | [S124](backlog/stories/S124.md) Games-per-day counts API | `todo` | — | — |
 | 74 | [S125](backlog/stories/S125.md) Calendar date picker | `todo` | S124, S81 | S123 |
+| 76 | [S129](backlog/stories/S129.md) Design: spring standings label | `todo` | — | — |
+| 77 | [S130](backlog/stories/S130.md) Spring standings label | `todo` | S128, S81 | S129 |
 | 89 | [S127](backlog/stories/S127.md) Design: play link in Search's player | `todo` | — | — |
 | 90 | [S5](backlog/stories/S5.md) Search page queries highlights fixture | `todo` | S70, S61, S68, S81 | S34, S56 |
 | 91 | [S72](backlog/stories/S72.md) Search chips: date / team / tag | `todo` | S5, S69, S81 | S34 |
