@@ -1992,7 +1992,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 **Gap:** A video of a play links to that play (FEATURES, Video play links; S96–S98 built it in the game's Videos room and its player). The owner wants a video played from Search's floating player to link to its play too (owner, 2026-11-05, asked whether it should: "Yes"), but nothing ratified draws it: Search's floating player (standings-search-settings A6, `search-playing-floating-mobile`) shows "Go to game: … →" at top left, and the shared player shows the game link *or* the play link, never both (`web/src/components/videos/PlayerDialog.tsx:76–81`). game-shell A5 left this surface out (its open question 2). So S5, which builds Search's playback, can't add the link without designing it in code (rule 18).
 
-**Impact:** Before S127, a highlight played from Search could take you to its game but not to the play it shows. S127 impact: the owner approves where the "Play · Top 6th →" link sits in Search's player, next to the link to the game, before it is built.
+**Impact:** Before S127, a highlight played from Search could take you to its game but not to the play it shows. S127 impact: Search's player offers both, as `Go to: Game →  •  At-Bat →`, and the owner approves how it looks before it is built.
 
 **Source:** Feature: Video play links
 
@@ -2010,13 +2010,14 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 **Acceptance criteria** (checks `scripts/verify-S127.sh` performs)
 
-1. A ratified amendment to the standings-search-settings surface draws Search's floating player, at mobile, medium and desktop, for a clip with a play: both "Go to game: … →" and the play link (`Play · <half> <inning> →`, game-shell A5's wording and type), and says where each sits; and for a clip with no play, unchanged from A6.
-2. It says what the play link opens (game-shell A5: the Plays room on that play, its at-bat open and marked) and that it closes the player, as the game link does.
+1. A ratified amendment to the standings-search-settings surface draws Search's floating player, at mobile, medium and desktop, with its one "Go to game: … →" link replaced by `Go to: Game →  •  At-Bat →` (owner, 2026-11-07: *"S127: make it “Go to: Game ->  •  At-Bat ->” instead of the one link that us there now, but with actual arrow Unicode characters"*): the arrows are the Unicode `→` (U+2192), never `->`, and the two links are separated by `•` (U+2022). For a clip with no play it draws what replaces the link (presumably `Go to: Game →` alone; the owner confirms when ratifying).
+2. It says what each link opens and that each closes the player, as the game link does today: **Game** opens the game as "Go to game" did (A6), and **At-Bat** opens the Plays room on that play, its at-bat open and marked (game-shell A5).
 3. The owner ratified it in the session it was shown (quoted), recorded the way the other amendments are.
 4. This file's S127 **Status** (story heading and top table) is `done`.
 
 **Notes:**
 
+- **The owner's wording, 2026-11-07:** (owner, 2026-11-07: *"S127: make it “Go to: Game ->  •  At-Bat ->” instead of the one link that us there now, but with actual arrow Unicode characters"*). It replaces A6's "Go to game: … →" in Search's player; the game's own Videos room is not part of this (there the game is already open).
 - Inserted by the 2026-11-07 backlog review, answering the doc parity review's queued item ("Still unserved: FEATURES, Video play links — 'A video played from Search's floating player links to its play too' … no design amendment or story builds it yet").
 - A ratified file is never edited (CLAUDE.md), so the story writes only an amendment, as A1–A8 did.
 - Hide Scores doesn't apply: Search is unaffected by it (owner, 2026-10-21).
