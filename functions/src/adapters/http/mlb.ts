@@ -105,6 +105,16 @@ export function seasonsUrl(season: number, baseUrl = DEFAULT_BASE_URL): string
 	return `${baseUrl}/api/v1/seasons/${season}?sportId=1`;
 }
 
+/**
+ * Both leagues' standings as of `date` (S4), with each team hydrated. MLB answers a `date` only
+ * together with its `season` — as of 2026-11-07, `date` without `season` gets a 500 for every date (found smoke-testing v3.0.0)
+ * — so the season is the date's year. The recorder (S14) records the same URL.
+ */
+export function standingsUrl(date: string, baseUrl = DEFAULT_BASE_URL): string
+{
+	return `${baseUrl}/api/v1/standings?leagueId=103,104&season=${date.slice(0, 4)}&date=${date}&hydrate=team`;
+}
+
 /** One season's World Series schedule (S111): its last listed game is the season's final. */
 export function worldSeriesUrl(season: number, baseUrl = DEFAULT_BASE_URL): string
 {
@@ -156,8 +166,7 @@ export class HttpMlbStatsClient implements MlbStatsClient
 
 	async fetchStandings(date: string): Promise<StandingsSnapshot>
 	{
-		const url = `${this.baseUrl}/api/v1/standings?leagueId=103,104&date=${date}&hydrate=team`;
-		const payload = parseStandingsResponse(await this.getJson(url));
+		const payload = parseStandingsResponse(await this.getJson(standingsUrl(date, this.baseUrl)));
 		return {
 			...mapStandings(payload, date, this.now().toISOString()),
 			windowMode: "active",

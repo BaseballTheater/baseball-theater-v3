@@ -62,6 +62,17 @@ describe("HttpMlbStatsClient (S2)", () =>
 		expect(standings.windowMode).toBe("active");
 	});
 
+	it("fetchStandings asks with the date's season, which MLB requires alongside the date", async () =>
+	{
+		const { mlb, urls } = client();
+		await mlb.fetchStandings("2026-09-05");
+		const asked = new URL(urls.at(-1)!);
+		expect(asked.pathname).toBe("/api/v1/standings");
+		expect(asked.searchParams.get("season")).toBe("2026");
+		expect(asked.searchParams.get("date")).toBe("2026-09-05");
+		expect(asked.searchParams.get("leagueId")).toBe("103,104");
+	});
+
 	it("fetchPlayers asks for this season's stats, and asks nothing for no ids", async () =>
 	{
 		const { mlb, urls } = client();

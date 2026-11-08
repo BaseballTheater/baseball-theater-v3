@@ -125,7 +125,7 @@ automatically 2. Mirror"):
 
 - Every story arrives as its own pull request from a `story/S<N>` branch into `stage`. The agent
   opens it, handles Copilot's review, then turns on auto-merge, so it merges once `ci-passed` is green; each merge deploys
-  staging, `stage.baseball.theater`. Every pull request also gets a preview (below).
+  staging, `stage.baseball.theater`. Every pull request that changes code also gets a preview (below); a docs-only change runs only the docs checks, and a docs-only merge deploys staging without re-running `pnpm verify`.
 - Production, at `next.baseball.theater` until the owner's cutover (below), deploys only when a
   GitHub Release is published (by the coordinator, on the owner's word), and deploys exactly that release's tag, with no approval wait
   (S118). A push to `main` deploys nothing.
@@ -135,7 +135,7 @@ automatically 2. Mirror"):
   publishes a release only when the owner says so; each release has a milestone, and every pull
   request into `stage` is assigned to the next one. The DNS cutover stays the owner's.
 
-- **Previews.** Every pull request gets its own Worker, `baseball-theater-pr-<number>` on workers.dev,
+- **Previews.** Every pull request that changes code gets its own Worker, `baseball-theater-pr-<number>` on workers.dev,
   once `pnpm verify` passes, and the workflow posts its address on the pull request. Previews share
   staging's database (owner, 2026-11-05: "Previews share staging db") through the `bt-staging`
   Hyperdrive config, so a pull request that adds a migration migrates staging before it merges: keep
