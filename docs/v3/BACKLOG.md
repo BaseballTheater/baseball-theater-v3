@@ -219,8 +219,12 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 68 | [S67](#s67--scoreboard-game-row-slot-occupants--its-setting) | Scoreboard slot occupants + setting | `done` |
 | 69 | [S68](#s68--favorites-driven-collapse--hide-scores-on-the-scoreboard) | Collapse non-favorites + Hide Scores | `done` |
 | 70 | [S69](#s69--videos-room-impact-sorted-grid-list-search-quick-filters) | Videos room grid / list / search | `done` |
+| 70 | [S122](#s122--backfill-every-game-between-two-dates-gently-resumably-back-to-1901) | Game backfill since 1901 | `todo` |
 | 71 | [S70](#s70--video-player-dialog-by-default-persistent-stage-by-setting) | Video player (dialog / stage) | `done` |
+| 71 | [S123](#s123--design-the-scoreboards-calendar-date-picker) | Design: calendar date picker | `todo` |
 | 72 | [S109](#s109--live-status-the-inning-count-and-outs-in-one-place) | Live status, one place | `done` |
+| 72 | [S124](#s124--games-per-day-for-a-month-from-bts-store) | Games-per-day counts API | `todo` |
+| 73 | [S125](#s125--the-scoreboards-calendar-date-picker) | Calendar date picker | `todo` |
 | 73 | [S20](#s20--scoreboard-live-refresh-for-in-window-games) | Scoreboard live refresh for in-window games | `done` |
 | 74 | [S110](#s110--entry-bundle-headroom-pages-past-the-scoreboard-load-on-demand) | Entry bundle headroom | `done` |
 | 75 | [S111](#s111--the-scoreboard-opens-on-today-or-on-the-seasons-final-day-in-the-off-season) | Scoreboard opens on the right day | `done` |
@@ -271,7 +275,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 116 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
 | 117 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
 
-**Next (generated):** **80 / S117** — the lowest **Priority** `todo` story not waiting on a design.
+**Next (generated):** **70 / S122** — the lowest **Priority** `todo` story not waiting on a design.
 
 **Before starting it:** confirm no [backlog review](#backlog-reviews) is due — the review-debt line in that section counts stories, but a drift event makes one due regardless.
 
@@ -602,7 +606,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 | Area | State |
 |------|-------|
-| Scoreboard (default date) | Working — reads through the query cache (**S25**); `/` and `/games` open on MLB's today in season, or the last World Series final in the off-season (**S111**, `defaultScoreboardDate`, `GET /api/v1/scoreboard/default-date`; design matched by the owner 2026-11-03) |
+| Scoreboard (default date) | Working — reads through the query cache (**S25**); `/` and `/games` open on MLB's today in season, or the last World Series final in the off-season (**S111**, `defaultScoreboardDate`, `GET /api/v1/scoreboard/default-date`; design matched by the owner 2026-11-03). BT stores only the days someone has looked at; every game back to 1901 is **S122**'s backfill. The date control steps one day at a time; its calendar picker is **S123** (design), **S124** (games per day) and **S125** (owner, 2026-11-07) |
 | Game → Videos (impact sort) | Done — the room is **S69**'s (below); a clip whose play MLB measured ranks by the win probability that play added, key moments then lead changes first among ties, and the rest follow by title keywords (**S98**: `rankHighlightsByImpact` with the play metrics in `withGameExtras`) |
 | Game → Plays (strike zone + trajectory) | **Done** (**S41**, design matched by the owner 2026-10-29): `PlaysPanel.tsx` — S2's boxed `Linescore`, a floating inning sidebar (every inning, then **Runs**), the latest inning with at-bats by default (`defaultPlaysInning`), top / bottom halves as at-bat accordions (`inningHalves`), Runs = every scoring play with the score after it (`scoringPlays`, `scoreAfterLabel`; `AtBat.result.awayScore` / `homeScore`). An open at-bat reuses S64's `MatchupCards` (totals through that at-bat), `StrikeZoneChart` and `PitchSequence` via `AtBatViewer` / `PitchTheater`; fixture `823823` |
 | Game → Live / Box / Recap | Inside the ratified chrome (**S40**: `GameTopBar`, tabs by phase from `gamePhase`, shared room states in `RoomState.tsx`). **Live** — done (**S3** status, **S64** pitch theater): `LiveStatus.tsx` with `BaseDiamond.tsx`; `MatchupCards` (`pitcherLine` / `batterLine`), the catcher's view `StrikeZoneChart.tsx` — one camera (`packages/domain/src/catcher-view.ts`) for the batter's own MLB zone, plate, boxes, the batter (sized from their height) and each flight (`pitchFlight`: release to plate from the pitch's data) — real-time replays (`pitchPlayback`, `useReplayClock`), to-scale side / top charts (`field-chart.ts`) behind links, and `PitchSequence`; a new live pitch replays itself. **Box** — done (**S2**): `BoxRoom.tsx` with the boxed-inning `Linescore.tsx` (content-width and centred for now, owner 2026-10-29), `TeamSwatch` switcher, one batting table and Game info, from `GameSnapshot.boxscore`. **Recap** — done (**S10**): `RecapRoom.tsx` from `GameSnapshot.recap`, shown only when a recap exists (`roomsForPhase(phase, hasRecap)`). |
@@ -6365,6 +6369,193 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 ```
 
 **Status:** `done`
+
+### S122 — Backfill every game between two dates, gently, resumably, back to 1901
+
+**Gap:** BT stores a game only when a fan's visit or the live cadence pulls it (`ingestScheduleDay`, `functions/src/services/ingest.ts:87`), so the store holds a handful of recent days and nothing older. The owner wants every game back to 1901 (owner, 2026-11-07: *"I want idempotent functionality that hydrates every game between two dates, defaulting to “today” as the end date, and 1 year prior as the start date. It should always skip days between Nov 15 and Feb 15. This goes all the way back to 1901/04/18."*), run locally first to see how much room it takes (*"Let's do it locally and then see how big it actually is. This means it needs to allow resuming without starting over."*), without hitting MLB hard (*"I think I would keep it to something like 2 request threads per domain? Running until all the data is hydrated."*; *"I don't want to be a bad citizen, don't hit the API too hard"*), and giving up on a kind of data once it stops existing (*"there should be logic in there to stop trying that kind of data if more than x days worth of games for a type of data fail"*; *"14 days should be plenty"*).
+
+**Impact:** Before S122, BT knew only the few days someone had looked at. S122 impact: one command fills BT with every game between two dates, as far back as 1901, gently enough not to burden MLB, and a stopped run picks up where it left off; at the end it says how much room the data takes.
+
+**Source:** Feature: Every game since 1901
+
+**Depends on:** nothing new — the ingest path (`storeGame` / `ingestScheduleDay`), the HTTP adapter (`functions/src/adapters/http/mlb.ts`) and the Postgres repos exist.
+
+**Scope files:** `functions/`, `packages/domain/`, `packages/ports/`, `package.json`, `pnpm-lock.yaml`, `README.md`, `.gitignore`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`
+
+**Work**
+
+0. Write `scripts/verify-S122.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** writing any product code (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S122.sh` performs)
+
+1. `pnpm mlb:backfill [--from YYYY-MM-DD] [--to YYYY-MM-DD]` hydrates every game between the two dates, inclusive: `--to` defaults to MLB's today (`mlbToday`), `--from` to one year before `--to`, and no date before `1901-04-18` is ever requested (an earlier `--from` is clamped). It writes the database `BT_DATABASE_URL` names, else the local Docker Postgres (`localConnectionString`, as `pnpm db:seed` does), and it refuses the production database (the `bt-production` Hyperdrive target or the Neon project's default branch) unless given `--allow-production`, which this story never uses (tests).
+2. Every day from November 15 through February 15 is skipped without any request, by one named, tested function in `packages/domain` (ADR-025); the boundary days 11-14, 11-15, 02-15 and 02-16 are tested.
+3. A day is stored the way ingest stores it: its schedule day, and each final game through the same version-guarded `storeGame` path (snapshot and projection, ADR-022), so a game already stored unchanged is not rewritten (test on the 823823 fixtures through PGlite).
+4. It is idempotent and resumable: a second run over the same range makes no MLB request for a day already complete in the store (its schedule day stored and every final game in it stored) and writes nothing; a run stopped part-way (killed, or an error) resumes on the next run at the first incomplete day, without redoing finished days (tests with a counting fake client: run, stop after N days, run again; the total requests equal one clean run's).
+5. It walks newest to oldest, so recent games land first and the give-up rule (AC 7) sees each source's newest days before its oldest.
+6. It is gentle on MLB: never more than **2 requests in flight per host** (statsapi.mlb.com, bdfed.stitch.mlbinfra.com, data-graph.mlb.com counted separately), a minimum gap between request starts per host, and a longer gap for games more than 10 years before today. The gaps are named constants (defaults at least 1 s within 10 years and at least 3 s older; overridable by flag). A `429` or `5xx` backs off exponentially per host (honoring `Retry-After`) and retries; it never gives up on a day because of throttling (tests with a fake clock and fake fetch: concurrency never exceeds 2 per host; gaps hold; a 429 then 200 is retried after the backoff).
+7. Some data exists only for recent games, so a source is given up once it fails for **14 consecutive days of games**: each of the game's extra sources (MLB's content/highlights, the play-metrics service, the GraphQL game content) is tracked separately; a day counts as failed for a source when every final game that day failed or came back empty for it; a day with any success resets the count; after 14 failed days that source is not requested again for any older date, in this run or a resumed one. The live feed itself is never given up: a game whose feed fails is left incomplete and retried on the next run (tests).
+8. Resume state (the given-up sources with the date each was given up at) is kept in a git-ignored file keyed by the target database's host and name, so a resumed run doesn't re-probe a given-up source and a different database starts fresh (test).
+9. It reports progress as it runs (day, games stored, sources given up) and, at the end, the row count and on-disk size (`pg_total_relation_size`) of each game table (`schedule_days`, `games`, `game_projections`), so the owner can see how big the data is (test of the report against PGlite).
+10. Tests and CI never reach MLB: the command's tests use fake clients and fixtures (grep: no `statsapi.mlb.com` request outside the HTTP adapter and its live-gated path).
+11. `README.md` says what the command does, its defaults, the off-season skip, the pacing and the give-up rule, how to resume, that it writes the local database unless told otherwise, and that it refuses production without `--allow-production`.
+12. This file's S122 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- **Run locally first.** The owner's plan (2026-11-07): run it locally over the whole range (`--from 1901-04-18`), see how big the data is (AC 9's report), and only then decide about production. Whether and how it ever runs against production is the owner's call, asked separately; the `--allow-production` guard exists so it can't happen by accident.
+- **"Today" defaults** use `mlbToday` (`America/New_York`), the same day the scoreboard uses.
+- **Which games.** Only final games are hydrated (`isFinalStatus`); postponed, cancelled and suspended games stay in their schedule day's summary, as `ingestScheduleDay` does today.
+- **The extra sources** are the three `fetchGame` fans out to (`functions/src/adapters/http/mlb.ts:149`): content, play metrics, GraphQL content. Each already returns empty on failure; the backfill needs to tell "failed or empty" per source, so it calls them separately rather than through `fetchGame`'s `Promise.all`.
+- **Schedule requests.** One schedule request per in-season day is fine; MLB's schedule endpoint also accepts a date range, which may cut requests a lot. Either way it goes through the per-host limits.
+
+**Reuse check** (ADR-025): before writing code, search `functions/src/services/ingest.ts` (`storeGame`, `ingestScheduleDay`), `functions/src/adapters/http/mlb.ts` (`fetchGame`, `fetchGameContent`, `fetchPlayMetrics`, `fetchGameGraphContent`, `getJson`), `functions/src/scripts/db-seed.ts` and `connect.ts` (`localConnectionString`, `openPostgres`), `functions/src/deploy/bootstrap.ts` (what marks production), and `packages/domain` (`mlbToday`, `addDays`, `isFinalStatus`) for what this story needs; record what was reused, or why nothing fit, in the story's ledger notes.
+
+**Turn cap:** 20 — assumes a backfill service over the existing ingest path, a per-host limiter with backoff, the give-up tracker and resume file, the off-season domain function, a `package.json` script, PGlite and fake-clock tests, and README.
+
+**Goal condition:** scripts/verify-S122.sh exits 0, pnpm verify exits 0, no files outside functions/, packages/domain/, packages/ports/, package.json, pnpm-lock.yaml, README.md, .gitignore, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 20 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S122. Work item 0 first: if scripts/verify-S122.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S122.sh exits 0, pnpm verify exits 0, no files outside functions/, packages/domain/, packages/ports/, package.json, pnpm-lock.yaml, README.md, .gitignore, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S122.sh, or stop after 20 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
+
+**Status:** `todo`
+
+### S123 — Design: the scoreboard's calendar date picker
+
+**Gap:** The ratified scoreboard draws its date control as ‹ `SEP 21, 2026` › (`shell-scoreboard/DESIGN.md`; `web/src/components/scoreboard/DateControl.tsx`), which moves one day at a time. The owner wants a calendar (owner, 2026-11-07: *"I also want a calendar picker UI that makes it easy to switch the year, lets you pick with the calendar visible and the day of the week showing in the calendar grid, and the date display should let you type the date in yourself. If we could also show the number of games on each day in that view that would be great."*). Nothing ratified draws it, so S125 can't build it (rule 18).
+
+**Impact:** Before S123, reaching a date long ago meant tapping back one day at a time. S123 impact: the owner approves how the scoreboard's calendar looks — typing a date, switching years, seeing the weekdays and each day's game count — before S125 builds it.
+
+**Source:** Feature: Calendar date picker
+
+**Gates (rule 18):** S125 — it names S123 on its `**Design:**` line.
+
+**Depends on:** nothing.
+
+**Scope files:** `docs/v3/visual/shell-scoreboard/amendments/`, `docs/v3/VISUAL-DESIGN.md`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`
+
+**Work**
+
+0. Write `scripts/verify-S123.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** building (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S123.sh` performs)
+
+1. A ratified amendment to the shell-scoreboard surface draws, at mobile, medium and desktop: the date control with its calendar closed and open; in the open calendar, a date field the user can type into (and an invalid typed date), a month grid with its weekday row and each day's game count, days with no games dimmed but pickable, the year and decade views for switching the year, a month still loading its counts, and an off-season month. Future dates are pickable; nothing before 1901-04-18 is (owner, 2026-11-07, asked whether no-game days are dimmed and whether future dates are allowed: *"dimmed"*; *"allow future"*).
+2. The amendment says which parts are Mantine's own date components (`@mantine/dates`, Mantine 7: `DatePicker` levels for month / year / decade, `DateInput` for typing, `renderDay` for the count) and which are custom, so S125 doesn't design in code.
+3. The owner ratified it in the session it was shown (quoted), recorded the way the other amendments are.
+4. This file's S123 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- A ratified file is never edited (CLAUDE.md), so the story writes only an amendment, as A1–A7 did.
+- The previous / next-day arrows stay unless the owner says otherwise when ratifying.
+
+**Reuse check** (ADR-025): before drawing, read the ratified date control (`shell-scoreboard/DESIGN.md`, `scoreboard-*` frames, `DateControl.tsx`) and the shell-scoreboard amendments A1–A7 for tokens and patterns to reuse; a design story writes no code; record what was reused, or why nothing fit, in the story's ledger notes.
+
+**Turn cap:** 12 — assumes frames drafted from the ratified date control and Mantine's date components, and one owner session to ratify; waiting on the owner parks the story rather than spending turns.
+
+**Goal condition:** scripts/verify-S123.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/shell-scoreboard/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S123. Work item 0 first: if scripts/verify-S123.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S123.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/shell-scoreboard/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S123.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
+
+**Status:** `todo`
+
+### S124 — Games per day for a month, from BT's store
+
+**Gap:** The calendar the owner asked for shows how many games each day has (owner, 2026-11-07: *"If we could also show the number of games on each day in that view that would be great."*), and clients read only BT (ADR-002). BT has no request that answers "how many games on each day of this month": the only way would be one schedule request per day.
+
+**Impact:** Before S124, a calendar would need a month's worth of requests to show its game counts. S124 impact: one request gives the number of games on each day of a month, straight from what BT has stored, so S125's calendar can show the counts.
+
+**Source:** Feature: Calendar date picker
+
+**Depends on:** nothing new. Prefer after **S122**: the counts for past seasons come from what its backfill stores.
+
+**Scope files:** `functions/src/`, `functions/vitest.config.ts`, `packages/domain/`, `packages/ports/`, `openapi/`, `fixtures/`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`
+
+**Work**
+
+0. Write `scripts/verify-S124.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** writing any product code (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S124.sh` performs)
+
+1. `GET /api/schedule/month/{YYYY-MM}` (route in `packages/domain/src/api-routes.ts`) returns, for every day of that month, its date and the number of games BT has stored for it, read from BT's store (the schedule days, or the `games` table's `official_date` index) in one query, not one read per day (tests against PGlite and the memory repos).
+2. A month BT has no schedule days for that is in the future or the current season is filled from MLB through the existing ingest path with one schedule request for the month's date range, never one per day, and a day still unknown afterwards says so (`count: null`), distinct from a day with no games (`0`) (tests with a counting fake client).
+3. Cache headers follow ADR-021's graduated freshness: a month entirely in the past caches long, the current month short (test on the headers).
+4. The route is in the OpenAPI spec (`pnpm api:spec`) and `pnpm api:breaking` exits 0 (additive).
+5. Months before 1901-04 are rejected with a 400; a malformed month too (tests).
+6. This file's S124 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- The off-season days (S122's skip) count as stored-with-no-games only if BT has a schedule day for them; otherwise `null` — the picker shows `null` and `0` the same (dimmed) unless S123's design says otherwise.
+
+**Reuse check** (ADR-025): before writing code, search `packages/domain/src/api-routes.ts`, `functions/src/handlers/` (the schedule handler and its cache headers), `functions/src/services/ingest.ts` (`getOrRefreshSchedule`), the repositories in `packages/ports/src/repositories.ts` and `functions/src/adapters/postgres/repos.ts` (`listByDate`), and S47's cache-lifetime functions for what this story needs; record what was reused, or why nothing fit, in the story's ledger notes.
+
+**Turn cap:** 12 — assumes one route, one repository count query in each adapter, one month-range schedule fill through ingest, cache headers from existing functions, and the spec update.
+
+**Goal condition:** scripts/verify-S124.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, packages/domain/, packages/ports/, openapi/, fixtures/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S124. Work item 0 first: if scripts/verify-S124.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S124.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, packages/domain/, packages/ports/, openapi/, fixtures/, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S124.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
+
+**Status:** `todo`
+
+### S125 — The scoreboard's calendar date picker
+
+**Gap:** The scoreboard's date control moves one day at a time (`web/src/components/scoreboard/DateControl.tsx`). The owner wants a calendar (owner, 2026-11-07: *"I also want a calendar picker UI that makes it easy to switch the year, lets you pick with the calendar visible and the day of the week showing in the calendar grid, and the date display should let you type the date in yourself. If we could also show the number of games on each day in that view that would be great. It might have to be custom, but maybe not."*).
+
+**Impact:** Before S125, going to a date long ago meant tapping back one day at a time. S125 impact: fans open a calendar from the scoreboard's date, type a date or pick one, jump between years, and see how many games each day had.
+
+**Source:** Feature: Calendar date picker
+
+**Design:** S123 — build to the approved frames. This story may only move to `doing` once every design story named here is `done` (rule 18; `pnpm backlog:check` enforces it).
+
+**Depends on:** **S124** (the games-per-day counts). Also **S81** (design capture).
+
+**Scope files:** `web/src/`, `web/package.json`, `web/vitest.config.ts`, `pnpm-lock.yaml`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `CHANGELOG.md`, `e2e/design/`, `docs/v3/design-checks/`
+
+**Work**
+
+0. Write `scripts/verify-S125.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** building (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S125.sh` performs)
+
+1. The date control opens S123's ratified calendar: a typed date navigates to `/games/<date>` once valid, and an invalid one shows S123's invalid state without navigating (RTL).
+2. The month grid shows its weekday row and each day's game count from S124 through one named TanStack Query hook (ADR-024); days with no games (or unknown) are dimmed and still pickable; picking a day navigates to `/games/<date>` (RTL with a mocked API).
+3. The year and decade views switch the year; future dates are pickable and nothing before 1901-04-18 is (RTL).
+4. Mantine's date components are used where S123 says (`@mantine/dates`, matching the installed Mantine 7), added to `web/package.json` with the lockfile (rule 14).
+5. Files this story adds or edits don't call `useMediaQuery`, `hiddenFrom` or `visibleFrom` outside `web/src/layout/` (grep).
+6. Design match (rule 22): for each ratified frame this story builds (desktop captured at 1200px, owner 2026-10-28: *"Capture at 1200px"*), `pnpm design:capture S125` saves the built page to `docs/v3/design-checks/S125/<frame>.png` from `e2e/design/S125.spec.ts`; the grader checks each file exists at its pairing's width. The story parks `blocked` with its captures committed until the owner says each pair matches, recorded with `scripts/audit.sh story S125 --design-match -`.
+7. This file's S125 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- The owner's answers (2026-11-07): days with no games *"dimmed"* (pickable), and *"allow future"*.
+- The day is in the URL (`/games/<date>`), so the picker navigates like the arrows do; back / forward keep working.
+
+**Reuse check** (ADR-025): before writing code, search `DateControl.tsx`, `addDays` / `mlbToday` (`packages/domain`), `formatDate` (`web/src/format/datetime.ts`), the scoreboard queries in `web/src/api/`, and S124's client function for what this story needs; record what was reused, or why nothing fit, in the story's ledger notes.
+
+**Turn cap:** 14 — assumes Mantine's date components in a popover off the existing control, one query hook over S124's route, RTL tests, and the rule 22 design match.
+
+**Goal condition:** scripts/verify-S125.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/package.json, web/vitest.config.ts, pnpm-lock.yaml, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified, or stop after 14 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S125. Work item 0 first: if scripts/verify-S125.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S125.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/package.json, web/vitest.config.ts, pnpm-lock.yaml, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S125.sh, or stop after 14 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
+
+**Status:** `todo`
 
 ---
 

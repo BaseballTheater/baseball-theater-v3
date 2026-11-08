@@ -377,19 +377,19 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `2167–2170` System Consistency
   - `2171–2174` Originality
   - `2175–2221` Small-Size Test
-- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 38 KB
+- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 40 KB
   - `12–19` North star
   - `20–34` Principles (product)
   - `35–46` Scope legend
   - `47–81` Carry / cut from v2 (working table)
     - `76–81` Dropped (summary)
-  - `82–255` New product themes
-    - `103–255` Theme detail
-  - `256–272` Build checklist (working — not a “feel” gate)
-  - `273–301` Patronage & access (product-level)
-    - `285–301` Tiers (carry from v2)
-  - `302–312` Success signals
-  - `313–320` Open product questions
+  - `82–257` New product themes
+    - `105–257` Theme detail
+  - `258–274` Build checklist (working — not a “feel” gate)
+  - `275–303` Patronage & access (product-level)
+    - `287–303` Tiers (carry from v2)
+  - `304–314` Success signals
+  - `315–322` Open product questions
 - [FIGMA-EXPLORATION.md — FIGMA-EXPLORATION.md](FIGMA-EXPLORATION.md) — 19 KB
   - `161–164` Verdict
   - `165–167` Fails
@@ -482,6 +482,10 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 
 | Priority | Story | Status | Depends on | Design |
 |---|---|---|---|---|
+| 70 | [S122](backlog/stories/S122.md) Game backfill since 1901 | `todo` | — | — |
+| 71 | [S123](backlog/stories/S123.md) Design: calendar date picker | `todo` | — | — |
+| 72 | [S124](backlog/stories/S124.md) Games-per-day counts API | `todo` | S122 | — |
+| 73 | [S125](backlog/stories/S125.md) Calendar date picker | `todo` | S124, S81 | S123 |
 | 80 | [S117](backlog/stories/S117.md) Baseball-data copy to staging | `todo` | S114 | — |
 | 90 | [S5](backlog/stories/S5.md) Search page queries highlights fixture | `todo` | S70, S61, S68, S81 | S34, S56 |
 | 91 | [S72](backlog/stories/S72.md) Search chips: date / team / tag | `todo` | S5, S69, S81 | S34 |
