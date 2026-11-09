@@ -17767,3 +17767,18 @@ export const label = game.abbreviation + " @ ";  464ms
 ```
 
 </details>
+
+---
+
+## 2026-11-09 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-09T20:08:29Z` |
+| HEAD at capture | `a6ae3f3` (tree clean) |
+| Change | `a6ae3f3` — S124: pre-PR review fixes — month horizon, year-9999 and year-50 dates, failed fills, tests, grader |
+
+**What changed, and the owner's answer**
+
+Asked (2026-11-09) whether the owner-directed S124 note recording "Reject past next year" (months after December of next year answer 400, narrowing AC 2's "or the future"; committed in a6ae3f3) needs a backlog review, the owner answered: "No, skip it (Recommended)".
