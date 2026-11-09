@@ -17510,3 +17510,18 @@ Scope: S131–S135 (named by `pnpm parity:debt`) plus the next 3 `todo` by prior
 For the next backlog review: none.
 
 Owner questions: none.
+
+---
+
+## 2026-11-09 — backlog review answers (2026-11-08)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-08 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-09T03:14:16Z` |
+| HEAD at capture | `ebbd936` (tree clean) |
+| Applied in | `ebbd936` — Backlog review answers 2026-11-08: rail follows semver, v3.1.0's notes in its GitHub Release, S131's deploy step approved, API dates left as is |
+
+**Answers and what was applied**
+
+Owner, 2026-11-08: 1. rail version line: "Follow semver". 2. v3.1.0 notes until S131: "GitHub Release notes". 3. S131 deploy step: "This is the go-ahead". 4. impossible API dates as 400: "No, leave as is".
