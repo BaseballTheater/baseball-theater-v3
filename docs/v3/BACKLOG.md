@@ -225,7 +225,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 71 | [S70](#s70--video-player-dialog-by-default-persistent-stage-by-setting) | Video player (dialog / stage) | `done` |
 | 71 | [S117](#s117--copy-productions-baseball-data-into-staging-on-request-with-no-fans-data) | Baseball-data copy to staging | `done` |
 | 72 | [S109](#s109--live-status-the-inning-count-and-outs-in-one-place) | Live status, one place | `done` |
-| 72 | [S123](#s123--design-the-scoreboards-calendar-date-picker) | Design: calendar date picker | `todo` |
+| 72 | [S123](#s123--design-the-scoreboards-calendar-date-picker) | Design: calendar date picker | `blocked` |
 | 73 | [S124](#s124--games-per-day-for-a-month-from-bts-store) | Games-per-day counts API | `todo` |
 | 73 | [S20](#s20--scoreboard-live-refresh-for-in-window-games) | Scoreboard live refresh for in-window games | `done` |
 | 74 | [S110](#s110--entry-bundle-headroom-pages-past-the-scoreboard-load-on-demand) | Entry bundle headroom | `done` |
@@ -285,7 +285,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 116 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
 | 117 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
 
-**Next (generated):** **72 / S123** — the lowest **Priority** `todo` story not waiting on a design.
+**Next (generated):** **73 / S124** — the lowest **Priority** `todo` story not waiting on a design.
 
 **Before starting it:** confirm no [backlog review](#backlog-reviews) is due — the review-debt line in that section counts stories, but a drift event makes one due regardless.
 
@@ -6698,7 +6698,7 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 /goal docs/v3/BACKLOG.md S123. Work item 0 first: if scripts/verify-S123.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S123.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/shell-scoreboard/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S123.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `todo`
+**Status:** `blocked`
 
 ### S124 — Games per day for a month, from BT's store
 
