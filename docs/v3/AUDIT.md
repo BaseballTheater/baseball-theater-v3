@@ -17579,3 +17579,27 @@ Design intake review (`.claude/skills/design-intake-review/SKILL.md`), two indep
 3. **When S124 returns `null` (unknown) rather than `0`, should that day look dimmed like a no-game day?** A8 draws only an undimmed loading state; S125 AC 2 dims unknown; S124's note says the same unless the design says otherwise.
 
 Plus A8's own four open questions, asked at S123's ratification.
+
+---
+
+## 2026-11-09 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-09T18:59:03Z` |
+| HEAD at review | `5d14054` (tree dirty) |
+| Trigger | design intake review: docs/v3/visual/shell-scoreboard/amendments/A8.md changed in 5d14054 (S123 pre-PR fixes to the unratified draft) since bc694a5 |
+| Stories `done` since last review | — |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+**Design intake review (two independent fresh-context reviewers, merged).** Scope: `docs/v3/visual/shell-scoreboard/amendments/A8.md` as changed by S123's pre-PR fixes in `5d14054`; previous intake entry logged in `bc694a5`.
+
+- **A8 is still a draft.** A8.md:3 says "**Draft, not ratified.**"; nothing is taken into the backlog, S125's ACs are unchanged, and S125's `**Design:**` gating on S123 still holds (`pnpm backlog:check` passes). Both reviewers: the 2026-11-09 correction already on S125's intake bullet ((a) `count: null` drawn like a no-game day, (d) `Today` via `useScoreboardDefaultDate`, Q5 for (c)) matches A8.md:87, :90, :99.
+- **Amended (notes only):** appended a second 2026-11-09 correction to S125's intake bullet (`docs/v3/backlog/stories/S125.md`) recording the new frames for the post-ratification intake to map: `failed` (A8.md:46–48), `tooearly` (A8.md:28–30; a second invalid state that AC 1's singular "S123's invalid state" should cover), `earliest` / `earliest-decade` (A8.md:37–42; AC 3 already bounds), `Today` muted while `useScoreboardDefaultDate` loads (A8.md:90); the prose-only states (A8.md:53: year view loading / failed / 1901, pending Q5); navigation on Enter or blur, never `onChange` (A8.md:65, :84), to check against AC 1's "navigates … once valid"; and `scoreboard-calendar-closed-<pairing>` superseding the date control in every ratified frame (A8.md:15).
+- **S123's grader** now requires the `failed`, `tooearly` and `earliest` states beyond AC 1's wording: stricter than the ACs, not loosened (rule 7: graders may be updated before the shipping commit).
+- **Previous intake's questions:** Q1 (skip intakes on draft-only amendments) restated, still open and strengthened: this is the fourth draft-only intake, S123's A8 twice. Q2 (year-view totals) is now carried as A8's own open question Q5. Q3 (whether `count: null` dims) is answered by the draft (A8.md:87), superseded pending ratification.
+- **Note for S123's ratification ask (not a backlog change):** should A8 draw the prose-only states (muted `Today`; year view loading / failed / 1901) before the owner ratifies it?
+- No new owner questions. No file under `docs/v3/visual/` edited.
