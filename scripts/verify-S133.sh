@@ -124,9 +124,13 @@ last_quote() {
 }
 # The owner's answer on a cited line: the quotation right after the citation's closing paren or,
 # only if there is none, a quotation inside the citation that runs to that paren (`…: "…")`), so a
-# code literal in the question text or later on the line is never taken for it.
+# code literal in the question text or later on the line is never taken for it. (A question quoted
+# up to the paren, `asked: "…?")`, would still read as an answer, so not_the_question below rejects
+# words that are a draft question's own text; review checks the rest.)
 # Accepted forms (the quotation may be italic, *"…"* or _"…"_):
 #   (owner, YYYY-MM-DD, …): "…"     (owner, YYYY-MM-DD, …) : "…"     (owner, YYYY-MM-DD, asked …: "…")
+# The citation may hold one level of nested parentheses. Words that contain straight quotes need
+# curly outer quotes (“…”), since a straight quotation ends at the next straight quote.
 ANSWER_FORMS='(owner, YYYY-MM-DD, …): "…", or (owner, YYYY-MM-DD, …: "…"); italic *"…"* allowed; curly “…” when the words contain straight quotes'
 answer_quote() {
 	perl -CSD -ne 'my $q = qr/[*_]?(?:"([^"]+)"|\x{201C}([^\x{201D}]+)\x{201D})/;
@@ -135,6 +139,23 @@ answer_quote() {
 # Does <text> quote anything?
 quotes() {
 	[ -n "$(printf '%s\n' "$1" | last_quote)" ]
+}
+
+# not_the_question <answer> [<n>] — false when the quoted answer is one of the draft's own bold
+# question texts (**Q<n>.** **…**; every question's when <n> is omitted), or a question of 3+ words
+# (it ends in "?") found inside one, or 3+ words that open one (a question pasted in straight quotes
+# stops at its own first inner quote). A real answer may echo the question's words ("Keep the
+# commit") or be a short question of its own ("Why not 8?"), so neither of those fails; the
+# question with its "?" dropped fails too. An answer that quotes a sentence explaining the question
+# (not its bold text) is left to review.
+# Reads $hist, S133's history of the amendment.
+not_the_question() {
+	printf '%s\n' "$hist" | A="$1" N="${2:-[0-9]+}" perl -CSD -e '
+		my $a = lc $ENV{A}; $a =~ s/^\s+|\s+$//g; $a =~ s/\s+/ /g; my $words = () = $a =~ /\S+/g; my $bad = 0;
+		while (<STDIN>) { while (/\*\*Q(?:$ENV{N})\.\*\*\s*\*\*(.+?)\*\*/g) { my $t = lc $1; $t =~ s/\s+/ /g;
+			(my $tq = $t) =~ s/\s*\?\s*$//; (my $aq = $a) =~ s/\s*\?\s*$//;
+			$bad = 1 if $t eq $a || $tq eq $aq || ($words >= 3 && $a =~ /\?$/ && index($t, $a) >= 0) || ($words >= 3 && index($t, $a) == 0); } }
+		exit $bad;'
 }
 
 PAIRINGS="mobile medium desktop"
@@ -152,14 +173,15 @@ required_frames() {
 	echo "$RAIL_FRAME"
 }
 
-# Every frame name sealed before S133 (the ratified manifest's PNGs and every other amendment's
-# manifest), plus the frames a written amendment (A6) governs by name, shell-notice-<p> and A1's
-# shell-update-<p>. design-reference.ts counts an amendment whose text contains "<frame>.png" as
-# drawing that frame, so naming one here (even inside a longer name) would take it from A6/A1.
+# Every frame name sealed before S133 on any surface (each RATIFIED.md manifest's PNGs and every
+# other amendment's manifest), plus the frames A6 (a written amendment) governs by name. A quick,
+# specific message for the common slip; the authoritative check is refs_unchanged below.
 earlier_frames() {
-	local a p
-	section "$V/$S/RATIFIED.md" Manifest | grep -oE '  [^ ]+\.png$' | sed 's/^  //'
-	for a in "$DIR"/A[0-9]*.md; do
+	local a p r
+	for r in "$V"/*/RATIFIED.md; do
+		section "$r" Manifest | grep -oE '  [^ ]+\.png$' | sed 's/^  //'
+	done
+	for a in "$V"/*/amendments/A[0-9]*.md; do
 		[ "$a" = "$A" ] && continue
 		section "$a" Manifest | grep -oE '  [^ ]+\.png$' | sed 's/^  //'
 	done
@@ -167,6 +189,83 @@ earlier_frames() {
 		echo "shell-notice-$p.png"
 		echo "shell-update-$p.png"
 	done
+}
+
+# design-reference.ts decides which ratified picture a capture is judged against, across every
+# surface (the highest-numbered written amendment naming "<frame>.png" wins; amendment frames win
+# over original frames of the same name on any surface). REFS prints, for each name on stdin, a
+# line "<name>\t<kind>:<path relative to the visual dir>,…", and exits nonzero on any error.
+# GLOBS prints the glob prefixes (`settings-*` → `settings-`) on written amendments' Overrides lines.
+REFS='const m = await import(process.argv[1]); const dir = process.argv[2];
+const { readFileSync } = await import("node:fs"); const { relative } = await import("node:path");
+const names = readFileSync(0, "utf8").split("\n").filter(Boolean);
+for (const n of names) console.log(n + "\t" + m.designReferences(dir, n).map((r) => r.kind + ":" + relative(dir, r.path)).join(","));'
+GLOBS='const m = await import(process.argv[1]); const { readFileSync, readdirSync, existsSync } = await import("node:fs");
+const { join } = await import("node:path"); const dir = process.argv[2];
+for (const s of readdirSync(dir, { withFileTypes: true }).filter((d) => d.isDirectory())) {
+	const ad = join(dir, s.name, "amendments"); if (!existsSync(ad)) continue;
+	for (const f of readdirSync(ad).filter((f) => /^A\d+\.md$/.test(f))) {
+		const t = readFileSync(join(ad, f), "utf8"); if (!/^## Frames\s+None\b/m.test(t)) continue;
+		for (const o of m.overriddenNames(t)) if (o.endsWith("*")) console.log(o.slice(0, -1));
+	}
+}'
+ROOT=$PWD
+# refs_unchanged's /tmp copy of the visual docs, removed however the grader ends.
+S133_TMP=""
+trap '[ -n "$S133_TMP" ] && rm -rf "$S133_TMP"' EXIT
+trap '[ -n "$S133_TMP" ] && rm -rf "$S133_TMP"; exit 130' INT TERM
+DREF="$ROOT/scripts/backlog-vault/design-reference.ts"
+
+# refs_unchanged <own frames…> — A9 must not change which picture any earlier frame name resolves
+# to, and each of its own frames must be a name nothing resolved before A9 that now resolves to
+# exactly that one PNG (an own frame named like another surface's frame fails). Compared against a
+# copy of docs/v3/visual without A9 and its frames. Fails closed: node must succeed and print one
+# line per name on both runs.
+refs_unchanged() {
+	local tmp names with without n w o f expect
+	tmp=$(mktemp -d /tmp/verify-S133.XXXXXX) || { bad 2 "cannot make a temp dir"; return; }
+	S133_TMP=$tmp
+	cp -R "$V" "$tmp/visual" || { bad 2 "cannot copy $V"; rm -rf "$tmp"; return; }
+	rm -f "$tmp/visual/$S/amendments/$(basename "$A")"
+	for f in "$@"; do rm -f "$tmp/visual/$S/amendments/$f"; done
+	names=$({
+		find "$V" -name '*.png' -exec basename {} \;
+		grep -ohE '[a-z0-9-]+\.png' "$A"
+		for f in "$V"/*/amendments/A[0-9]*.md; do
+			grep -E '^\*\*Overrides:\*\*' "$f" | grep -oE '`[a-z0-9-]+`' | tr -d '`' | sed 's/$/.png/'
+		done
+	} | sort -u)
+	with=$(printf '%s\n' "$names" | (cd /tmp && node --input-type=module -e "$REFS" "$DREF" "$ROOT/$V")) ||
+		{ bad 2 "design-reference.ts failed on $V"; rm -rf "$tmp"; return; }
+	without=$(printf '%s\n' "$names" | (cd /tmp && node --input-type=module -e "$REFS" "$DREF" "$tmp/visual")) ||
+		{ bad 2 "design-reference.ts failed on the copy without $A"; rm -rf "$tmp"; return; }
+	n=$(printf '%s\n' "$names" | grep -c .)
+	if [ "$(printf '%s\n' "$with" | grep -c .)" != "$n" ] || [ "$(printf '%s\n' "$without" | grep -c .)" != "$n" ]; then
+		bad 2 "design-reference.ts did not answer for every frame name"
+		rm -rf "$tmp"
+		return
+	fi
+	while IFS= read -r n; do
+		[ -z "$n" ] && continue
+		w=$(printf '%s\n' "$with" | awk -F'\t' -v n="$n" '$1==n{print $2}')
+		o=$(printf '%s\n' "$without" | awk -F'\t' -v n="$n" '$1==n{print $2}')
+		if printf '%s\n' "$@" | grep -qxF -- "$n"; then
+			expect="frame:$S/amendments/$n"
+			[ -z "$o" ] && [ "$w" = "$expect" ] ||
+				bad 2 "own frame $n: resolves to '$w' (with A9) and '$o' (without); it must be a new name resolving only to $expect"
+		else
+			[ "$w" = "$o" ] || bad 2 "$A changes what $n is judged against: '$o' becomes '$w' (design-reference.ts)"
+		fi
+	done <<< "$names"
+	if globs=$(cd /tmp && node --input-type=module -e "$GLOBS" "$DREF" "$ROOT/$V"); then
+		while IFS= read -r g; do
+			[ -z "$g" ] && continue
+			grep -qE -- "${g}[a-z0-9-]*\.png" "$A" && bad 2 "$A names a ${g}*.png frame, which a written amendment's Overrides glob covers"
+		done <<< "$globs"
+	else
+		bad 2 "design-reference.ts failed listing the written amendments' Overrides globs"
+	fi
+	rm -rf "$tmp"
 }
 
 if [ -z "$A" ]; then
@@ -191,15 +290,23 @@ else
 	# Every open question the draft ever asked (labelled **Q<n>.**) is answered in ## Decisions by
 	# a line naming Q<n> (word boundary: Q1 is not Q10) whose owner citation is followed by the
 	# owner's quoted words (answer_quote).
-	labels=$({
+	hist=$({
 		git log --first-parent --no-merges --no-renames -p --format= "$BASE..${TIP:-HEAD}" -- "$A"
 		[ -z "$TIP" ] && git diff --no-renames HEAD -- "$A"
 		cat "$A"
-	} | grep -oE '\*\*Q[0-9]+\.\*\*' | grep -oE '[0-9]+' | sort -un)
+	})
+	labels=$(printf '%s\n' "$hist" | grep -oE '\*\*Q[0-9]+\.\*\*' | grep -oE '[0-9]+' | sort -un)
 	for q in $labels; do
-		qline=$(echo "$decisions" | grep -E "(^|[^[:alnum:]])Q${q}([^0-9]|\$)")
-		[ -n "$(printf '%s\n' "$qline" | answer_quote)" ] ||
+		# A line answers Q<n> only when it starts with it ("- Q<n> …") or its owner citation says
+		# "asked Q<n>"; a Q<n> mentioned in passing ("see also Q8", "per Q10") answers nothing.
+		qline=$(echo "$decisions" | grep -E "^- Q${q}([ ,(.:]|\$)|\(owner, [0-9]{4}-[0-9]{2}-[0-9]{2}[^)]*asked Q${q}([^0-9]|\$)")
+		ans=$(printf '%s\n' "$qline" | answer_quote)
+		if [ -z "$ans" ]; then
 			bad 1 "open question Q$q has no cited owner answer in ## Decisions (forms: $ANSWER_FORMS)"
+		elif ! not_the_question "$ans"; then
+			# Any question's text, not only Q<n>'s: quoting another question answers nothing either.
+			bad 1 "Q$q's quoted answer \"$ans\" is a draft question's own text, not the owner's answer"
+		fi
 	done
 	manifest=$(section "$A" Manifest | grep -E '^[0-9a-f]{64}  ')
 	want=$(own_frames | sort)
@@ -246,14 +353,16 @@ else
 		why=$(png_ok "$DIR/$f" "$p") || bad 2 "frame $f: $why"
 		echo "$frames_table" | grep -qF "\`$f\`" || bad 2 "$f not in ## Frames"
 	done
-	# Each frame is its own drawing: never a byte-for-byte copy of a ratified frame it starts from,
-	# nor of another of its own frames.
+	# Each frame is its own drawing: never a byte-for-byte copy of any other PNG under the visual
+	# docs (the frames it starts from live on several surfaces), nor of another of its own frames.
+	others=$(find "$V" -name '*.png' | while IFS= read -r g; do
+		[ "$(dirname "$g")" = "$DIR" ] && echo "$own" | grep -qxF "$(basename "$g")" && continue
+		printf '%s  %s\n' "$(shasum -a 256 < "$g" | cut -d' ' -f1)" "$g"
+	done)
 	for f in $own; do
-		p=$(echo "$f" | sed -E 's/.*-(mobile|medium|desktop)\.png$/\1/')
-		h=$(shasum -a 256 < "$DIR/$f")
-		for src in "$V/$S/scoreboard-$p.png" "$V/$S/shell-notice-$p.png" "$DIR/shell-update-$p.png" "$DIR/shell-version-$p.png" "$DIR/scoreboard-header-version-$p.png"; do
-			[ -f "$src" ] && [ "$h" = "$(shasum -a 256 < "$src")" ] && bad 2 "$f is identical to $src"
-		done
+		h=$(shasum -a 256 < "$DIR/$f" | cut -d' ' -f1)
+		src=$(printf '%s\n' "$others" | awk -v h="$h" '$1==h{print $2; exit}')
+		[ -n "$src" ] && bad 2 "$f is identical to $src"
 	done
 	dupes=$(for f in $own; do shasum -a 256 < "$DIR/$f"; done | sort | uniq -d)
 	[ -z "$dupes" ] || bad 2 "two or more of this amendment's frames are byte-for-byte identical"
@@ -262,6 +371,8 @@ else
 		[ -z "$e" ] && continue
 		grep -qF -- "$e" "$A" && bad 2 "$A contains '$e', which would make it the reference for that earlier frame (design-reference.ts)"
 	done <<< "$(earlier_frames | sort -u)"
+	# shellcheck disable=SC2086
+	refs_unchanged $own
 	# AC 1's buckets, kinds and states are drawn, so ## Frames (what each export shows) names them.
 	for term in "fixes and polish" "feature" "setting" "fix" "design" "empty" "loading" "error" "link" "retired" "dismiss" "more" "marker" "version"; do
 		echo "$frames_table" | grep -qiF "$term" || bad 2 "## Frames never mentions '$term'"
@@ -278,37 +389,67 @@ else
 			bad 3 "## Decisions needs exactly one '- $1: …' line"
 			return 1
 		fi
-		[ -n "$(printf '%s\n' "$DL" | answer_quote)" ] || {
+		local ans
+		ans=$(printf '%s\n' "$DL" | answer_quote)
+		[ -n "$ans" ] || {
 			bad 3 "the '- $1:' line has no cited owner answer (forms: $ANSWER_FORMS)"
 			return 1
 		}
+		not_the_question "$ans" || {
+			bad 3 "the '- $1:' line quotes a draft question's own text, not the owner's answer"
+			return 1
+		}
+		# What the line decides: its text before the owner's citation.
+		DLPRE=${DL%% (owner,*}
 	}
 	if decision_line "Address"; then
 		addr=$(echo "$DL" | grep -oE '^- Address: `/[a-z0-9-]+`' | grep -oE '/[a-z0-9-]+')
 		if [ -z "$addr" ]; then
 			bad 3 "the '- Address:' line does not start with a backticked path like \`/whats-new\`"
-		elif grep -qE "path=\"$addr(/|\")" web/src/routes.tsx; then
-			bad 3 "the address $addr is already another page's route in web/src/routes.tsx"
+		else
+			seg=${addr#/}
+			taken=$({
+				# Literal routes, and routes named by a constant (path={NAME}) resolved to its value.
+				grep -oE 'path="/[^"/]*' web/src/routes.tsx | sed 's|^path="/||'
+				for c in $(grep -oE 'path=\{[A-Z_][A-Z0-9_]*\}' web/src/routes.tsx | grep -oE '[A-Z_][A-Z0-9_]*'); do
+					v=$(grep -rhoE "export const $c = \"/[^\"]*\"" packages/*/src web/src 2>/dev/null | head -1 | grep -oE '"/[^"]*"' | tr -d '"')
+					[ -n "$v" ] && echo "$v" | cut -d/ -f2 || echo "__unresolved:$c"
+				done
+				# Paths the Worker answers before the static assets (wrangler.jsonc run_worker_first).
+				grep -E '"run_worker_first"' wrangler.jsonc | grep -oE '"/[^"]*"' | tr -d '"' | cut -d/ -f2 | sed 's/\*$//'
+				# Built and public files served at the root.
+				echo assets; echo sw.js; echo manifest.webmanifest
+				ls web/public 2>/dev/null
+			} | sed '/^$/d' | sort -u)
+			if echo "$taken" | grep -q '^__unresolved:'; then
+				bad 3 "routes.tsx names a route constant the grader can't resolve: $(echo "$taken" | grep '^__unresolved:' | tr '\n' ' ')"
+			elif echo "$taken" | grep -qxF -- "$seg"; then
+				bad 3 "the address $addr is already taken (a route, a Worker path or a served file)"
+			fi
 		fi
 	fi
-	decision_line "Reached from"
+	if decision_line "Reached from"; then
+		[ "$(printf '%s' "${DLPRE#- Reached from:}" | tr -d '[:space:]' | wc -c)" -ge 3 ] ||
+			bad 3 "the '- Reached from:' line says nothing before the owner's citation"
+	fi
 	if decision_line "Dismisses after"; then
 		secs=$(echo "$DL" | grep -oE '^- Dismisses after: [0-9]+ seconds' | grep -oE '[0-9]+')
 		[ -n "$secs" ] && [ "$secs" -ge 1 ] && [ "$secs" -le 120 ] ||
 			bad 3 "the '- Dismisses after:' line does not start with '<N> seconds' (1 to 120)"
 	fi
+	# Read only before the citation, in one of two exact forms, so a question or quote can't pass it.
 	if decision_line "Retired version"; then
-		l=$DL
-		echo "$l" | grep -qiE 'no additions' || bad 3 "the '- Retired version:' line does not say A6 shows no additions"
-		if echo "$l" | grep -qiE 'link shown'; then
-			echo "$l" | grep -qiE 'goes to' || bad 3 "the retired version's link is shown, but the line does not say where it goes"
-		elif ! echo "$l" | grep -qiE 'link hidden'; then
-			bad 3 "the '- Retired version:' line says neither 'link shown' nor 'link hidden'"
-		fi
+		echo "$DLPRE" | grep -qiE '^- Retired version: no additions; link hidden\.?$|^- Retired version: no additions; link shown, goes to .{3,}$' ||
+			bad 3 "the '- Retired version:' line is not 'no additions; link hidden' or 'no additions; link shown, goes to …' before its citation"
 	fi
-	decision_line "With another notice"
+	if decision_line "With another notice"; then
+		echo "$DLPRE" | grep -qE 'A6|update notice' || bad 3 "the '- With another notice:' line does not say where it sits beside A6 (the update notice)"
+		echo "$DLPRE" | grep -qi 'marker' || bad 3 "the '- With another notice:' line does not say where it sits beside a marker"
+	fi
 	if decision_line "Rail version"; then
-		echo "$DL" | grep -qE '`v[0-9]+\.[0-9]+\.[0-9]+' || bad 3 "the '- Rail version:' line shows no semver version line (\`vMAJOR.MINOR.PATCH …\`)"
+		echo "$DLPRE" | grep -qE '^- Rail version: `?v[0-9]+\.[0-9]+\.[0-9]+' || bad 3 "the '- Rail version:' line shows no semver version line (\`vMAJOR.MINOR.PATCH …\`)"
+		# Today's build counter (v3.0.<Actions run>, three or more digits) is not a release version.
+		echo "$DLPRE" | grep -qE '^- Rail version: `?v3\.0\.[0-9]{3,}' && bad 3 "the '- Rail version:' line shows the build counter (v3.0.<Actions run>), not the release"
 	fi
 
 	# --- Check 4: ratification record ---------------------------------------------
@@ -316,9 +457,16 @@ else
 	echo "$rat" | grep -qE '^Ratified by:[[:space:]]*Jake Lauer([^[:alnum:]]|$)' || bad 4 "## Ratification has no 'Ratified by: Jake Lauer' line"
 	echo "$rat" | grep -qE '^Date:[[:space:]]*[0-9]{4}-[0-9]{2}-[0-9]{2}[[:space:]]*$' || bad 4 "## Ratification has no 'Date: YYYY-MM-DD' line"
 	quotes "$(echo "$rat" | grep -E '^Go-ahead:')" || bad 4 "## Ratification has no quoted 'Go-ahead: … \"…\"' line"
-	grep -qiE '\*\*Draft|not (yet )?ratified' "$A" && bad 4 "the amendment still says it is a draft or not ratified"
+	# Draft markers sit in the header (before the first ##) and in ## Ratification; a body sentence may
+	# say what was a draft when it was drawn (A7, A8) without failing this.
+	{ awk '/^## /{exit} {print}' "$A"; echo "$rat"; } | grep -qiE '(^|[^[:alpha:]])draft([^[:alpha:]]|$)|not (yet )?ratified' &&
+		bad 4 "the amendment still says it is a draft or not ratified"
+	grep -qi 'awaiting the owner' "$A" && bad 4 "the amendment still says it is awaiting the owner"
 	section "$A" Manifest | grep -qi 'pending' && bad 4 "## Manifest is still pending"
-	grep -qiE 'pending Q[0-9]+' "$A" && bad 4 "the amendment still has text pending an open question"
+	# Outside the owner's words (## Decisions and the Go-ahead line), where "pending on Q5" may be a
+	# quote; "Depending on Q5" is not a marker.
+	awk '$0=="## Decisions"{f=1;next} /^## /{f=0} !f && !/^Go-ahead:/' "$A" | grep -qiE '(^|[^[:alpha:]])pending:?[[:space:]]+Q[0-9]+' &&
+		bad 4 "the amendment still has text pending an open question"
 	grep -qi 'awaiting ratification' "$A" && bad 4 "the amendment still says awaiting ratification"
 	grep -qF 'will be a 1×' "$A" && bad 4 "## Frames still says the exports will be made"
 fi
