@@ -10,6 +10,15 @@
 # S129's own changes are its first-parent, non-merge commits after BASE (plus uncommitted
 # and untracked files while it is unshipped), so a later merge of stage into this branch, or
 # the stories this branch stacks on, never count as S129's.
+#
+# Tightened before shipping (2026-11-09, S129 pre-PR review G1–G8): the final table's outcome is
+# one structured Decisions line, and a labeled final table needs its own frames and the owner's
+# words added to FEATURES' Standings row; an unlabeled one leaves no final-table text behind;
+# quotes are read the same way in every locale (straight or curly); frames must differ from the
+# ratified frames they copy and end in IEND; A9 must never name a ratified standings-<p>.png
+# (design-reference.ts would then stop A7 governing that frame). Every change only tightens.
+# Ratifying also renames the Figma section and A9's Source line; the "awaiting ratification" check
+# below fails until both lines in A9 drop it.
 
 set -uo pipefail
 cd "$(dirname "$0")/.."
@@ -100,12 +109,39 @@ png_ok() {
 	[ -s "$f" ] || { echo "empty"; return 1; }
 	[ "$(head -c 8 "$f" | od -An -tx1 | tr -d ' \n')" = "89504e470d0a1a0a" ] || { echo "not a PNG"; return 1; }
 	[ "$(od -An -tx1 -j12 -N4 "$f" | tr -d ' \n')" = "49484452" ] || { echo "no IHDR chunk first"; return 1; }
+	[ "$(tail -c 8 "$f" | od -An -tx1 | tr -d ' \n')" = "49454e44ae426082" ] || { echo "does not end in an IEND chunk (truncated?)"; return 1; }
 	read -r b1 b2 b3 b4 <<< "$(od -An -tu1 -j16 -N4 "$f")"
 	w=$((b1 * 16777216 + b2 * 65536 + b3 * 256 + b4))
 	read -r b1 b2 b3 b4 <<< "$(od -An -tu1 -j16 -N4 "$ref")"
 	want=$((b1 * 16777216 + b2 * 65536 + b3 * 256 + b4))
 	[ "$w" = "$want" ] || { echo "${w}px wide, not ${want}px"; return 1; }
 }
+
+# The last quotation on each input line, straight ("…") or curly (“…”), or nothing. Perl with
+# -CSD reads UTF-8 whatever the locale, so a curly quote is one character, never three bytes
+# that could match part of an em dash or the apostrophe in "training’s".
+last_quote() {
+	perl -CSD -ne 'while (/"([^"]+)"|\x{201C}([^\x{201D}]+)\x{201D}/g) { $q = defined $1 ? $1 : $2 } END { print $q if defined $q }'
+}
+# The owner's answer on a cited line: the quotation right after the citation's closing paren or,
+# only if there is none, a quotation inside the citation that runs to that paren (`…: "…")`), so a
+# code literal in the question text or later on the line is never taken for it. (A question quoted
+# up to the paren, `asked: "…?")`, still reads as an answer; review checks that.)
+# Accepted forms (the quotation may be italic, *"…"* or _"…"_):
+#   (owner, YYYY-MM-DD, …): "…"     (owner, YYYY-MM-DD, …) : "…"     (owner, YYYY-MM-DD, asked …: "…")
+# The citation may hold one level of nested parentheses. Words that contain straight quotes need
+# curly outer quotes (“…”), since a straight quotation ends at the next straight quote.
+ANSWER_FORMS='(owner, YYYY-MM-DD, …): "…", or (owner, YYYY-MM-DD, …: "…"); italic *"…"* allowed; curly “…” when the words contain straight quotes'
+answer_quote() {
+	perl -CSD -ne 'my $q = qr/[*_]?(?:"([^"]+)"|\x{201C}([^\x{201D}]+)\x{201D})/;
+		if (/\(owner, \d{4}-\d{2}-\d{2}(?:[^()]|\([^()]*\))*\)\s*:?\s*$q/ || /\(owner, \d{4}-\d{2}-\d{2}(?:[^()]|\([^()]*\))*?:\s*$q[*_]?\s*\)/) { print((grep { defined } $1, $2)[0]); exit }'
+}
+# Does <text> quote anything?
+quotes() {
+	[ -n "$(printf '%s\n' "$1" | last_quote)" ]
+}
+# The off-season final table's drawn label; if the owner says no, none of it may remain.
+FINAL_LABEL="regular season · final"
 
 PAIRINGS="mobile medium desktop"
 NAME_RE='^[a-z]+(-[a-z]+)*-(mobile|medium|desktop)\.png$'
@@ -126,19 +162,22 @@ else
 		grep -qx "## $h" "$A" || bad 1 "$A has no ## $h"
 	done
 	decisions=$(section "$A" Decisions)
-	echo "$decisions" | grep -q '"' || bad 1 "## Decisions quotes no owner words"
+	quotes "$decisions" || bad 1 "## Decisions quotes no owner words"
 	oq=$(section "$A" "Open questions" | sed '/^[[:space:]]*$/d')
 	[ "$oq" = "None." ] || bad 1 "## Open questions body is not exactly 'None.'"
 	# Every open question the draft ever asked (labelled **Q<n>.**) is answered in ## Decisions by
-	# a line naming Q<n> (word boundary: Q1 is not Q10) and quoting the owner.
+	# a line naming Q<n> (word boundary: Q1 is not Q10) whose owner citation is followed by the
+	# owner's quoted words (answer_quote). (It can't prove those words aren't the question's own
+	# text; review checks that.)
 	labels=$({
 		git log --first-parent --no-merges --no-renames -p --format= "$BASE..${TIP:-HEAD}" -- "$A"
 		[ -z "$TIP" ] && git diff --no-renames HEAD -- "$A"
 		cat "$A"
 	} | grep -oE '\*\*Q[0-9]+\.\*\*' | grep -oE '[0-9]+' | sort -un)
 	for q in $labels; do
-		echo "$decisions" | grep -E "(^|[^[:alnum:]])Q${q}([^0-9]|\$)" | grep -q '"' ||
-			bad 1 "open question Q$q has no quoted owner answer in ## Decisions"
+		qline=$(echo "$decisions" | grep -E "(^|[^[:alnum:]])Q${q}([^0-9]|\$)")
+		[ -n "$(printf '%s\n' "$qline" | answer_quote)" ] ||
+			bad 1 "open question Q$q has no cited owner answer in ## Decisions (forms: $ANSWER_FORMS)"
 	done
 	manifest=$(section "$A" Manifest | grep -E '^[0-9a-f]{64}  ')
 	want=$(own_frames | sort)
@@ -187,6 +226,23 @@ else
 		why=$(png_ok "$DIR/$f" "$p") || bad 2 "frame $f: $why"
 		echo "$frames_table" | grep -qF "\`$f\`" || bad 2 "$f not in ## Frames"
 	done
+	# A frame is a change to the ratified frame it copies (and spring and final differ), never a
+	# byte-for-byte copy of it.
+	for f in $own; do
+		p=$(echo "$f" | sed -E 's/.*-(mobile|medium|desktop)\.png$/\1/')
+		[ -f "$V/$S/standings-$p.png" ] && [ "$(shasum -a 256 < "$DIR/$f")" = "$(shasum -a 256 < "$V/$S/standings-$p.png")" ] &&
+			bad 2 "$f is identical to the ratified standings-$p.png"
+	done
+	for p in $PAIRINGS; do
+		[ -f "$DIR/standings-spring-$p.png" ] && [ -f "$DIR/standings-final-$p.png" ] &&
+			[ "$(shasum -a 256 < "$DIR/standings-spring-$p.png")" = "$(shasum -a 256 < "$DIR/standings-final-$p.png")" ] &&
+			bad 2 "standings-spring-$p.png and standings-final-$p.png are identical"
+	done
+	# design-reference.ts counts an amendment that contains "<frame>.png" as drawing that frame, so
+	# naming a ratified standings-<p>.png here, even inside a longer name, would stop A7 governing
+	# its captures (it matches the same substring design-reference.ts does).
+	grep -qE 'standings-(mobile|medium|desktop)\.png' "$A" &&
+		bad 2 "$A names a ratified standings-<pairing>.png, which would displace A7 as that frame's reference"
 	# A final-table state, if drawn, is drawn at every pairing.
 	if echo "$own" | grep -q '^standings-final-'; then
 		for p in $PAIRINGS; do
@@ -199,25 +255,59 @@ else
 	done
 
 	# --- Check 3: the off-season final table ---------------------------------------
-	# One line of ## Decisions settles it: it names the final table and its label (or no label)
-	# and quotes the owner.
-	echo "$decisions" | grep -i 'final' | grep -iE 'label' | grep -q '"' ||
-		bad 3 "## Decisions has no quoted owner decision on whether the off-season final table is labeled"
-	if echo "$own" | grep -q '^standings-final-'; then
-		s129_changed "$FEATURES" | grep -qxF "$FEATURES" ||
-			bad 3 "final-table frames drawn, but S129 did not record the owner's words in $FEATURES"
-		grep -E '^\| Standings \|' "$FEATURES" | grep -i 'final' | grep -qi 'label' ||
-			bad 3 "$FEATURES' Standings row does not say the final table is labeled"
+	# Exactly one structured line of ## Decisions settles it, citing and quoting the owner:
+	# "- Final table: labeled …" or "- Final table: unlabeled …" ("labelled" accepted).
+	outcome=$(echo "$decisions" | grep -E '^- Final table: (un)?labell?ed([^[:alnum:]]|$)')
+	if [ "$(printf '%s' "$outcome" | grep -c .)" != 1 ]; then
+		bad 3 "## Decisions needs exactly one '- Final table: labeled|unlabeled' line"
+	elif [ -z "$(printf '%s\n' "$outcome" | answer_quote)" ]; then
+		bad 3 "the '- Final table:' line has no cited owner answer (forms: $ANSWER_FORMS)"
+	elif echo "$outcome" | grep -qE '^- Final table: unlabell?ed'; then
+		# No label: no final frames, and nothing the final label needed left in A9 outside ## Decisions
+		# (where the owner's own words may name it): not its frames, not its label, and not one of the
+		# sentences any version of the draft marked "Pending Q2:" that speak of the final table
+		# (harvested from S129's own history the way the Q labels are; matched in any case), so
+		# dropping only the prefix can't leave them standing. Bodies that don't say "final" ("the same
+		# as medium beside the rail") belong to the final rows, which the standings-final check covers.
+		echo "$own" | grep -q '^standings-final-' && bad 3 "final table unlabeled, but standings-final-* frames remain"
+		rest=$(awk '$0=="## Decisions"{f=1;next} /^## /{f=0} !f' "$A")
+		echo "$rest" | grep -qF 'standings-final' && bad 3 "final table unlabeled, but $A still mentions standings-final"
+		echo "$rest" | grep -qF "$FINAL_LABEL" && bad 3 "final table unlabeled, but $A still has the label '$FINAL_LABEL'"
+		while IFS= read -r body; do
+			[ -z "$body" ] && continue
+			echo "$rest" | grep -qiF -- "$body" && bad 3 "final table unlabeled, but $A still says \"$body\" (a Pending Q2 sentence)"
+		done <<< "$({
+			git log --first-parent --no-merges --no-renames -p --format= "$BASE..${TIP:-HEAD}" -- "$A"
+			[ -z "$TIP" ] && git diff --no-renames HEAD -- "$A"
+			cat "$A"
+		} | perl -CSD -ne 'while (/Pending Q2:\s*(.+?)(?:\.(?=\s|$)|\s\||$)/gi) { my $b = $1; print "$b\n" if $b =~ /final/i }' | sort -u)"
+	else
+		for p in $PAIRINGS; do
+			echo "$own" | grep -qxF "standings-final-$p.png" || bad 3 "final table labeled, but standings-final-$p.png is not one of its frames"
+		done
+		# The owner's words (the quotation right after the line's citation) are added to FEATURES'
+		# Standings row by S129 itself (a merge of stage doesn't count), in FEATURES' own form for an
+		# owner quote, *"<words>"* (straight quotes only, as every owner quote in FEATURES is): that
+		# form occurs there more often than at BASE.
+		q=$(printf '%s\n' "$outcome" | answer_quote)
+		s129_changed "$FEATURES" | grep -qxF "$FEATURES" || bad 3 "final table labeled, but S129 did not change $FEATURES"
+		if [ -z "$q" ]; then
+			bad 3 "the '- Final table:' line has no cited owner answer (forms: $ANSWER_FORMS)"
+		else
+			now=$(grep -E '^\| Standings \|' "$FEATURES" | grep -oF -- "*\"$q\"*" | wc -l)
+			was=$(git show "$BASE:$FEATURES" 2>/dev/null | grep -E '^\| Standings \|' | grep -oF -- "*\"$q\"*" | wc -l)
+			[ "$now" -gt "$was" ] || bad 3 "$FEATURES' Standings row does not add the owner's words \"$q\""
+		fi
 	fi
 
 	# --- Check 4: ratification record ---------------------------------------------
 	rat=$(section "$A" Ratification)
 	echo "$rat" | grep -qE '^Ratified by:[[:space:]]*Jake Lauer([^[:alnum:]]|$)' || bad 4 "## Ratification has no 'Ratified by: Jake Lauer' line"
 	echo "$rat" | grep -qE '^Date:[[:space:]]*[0-9]{4}-[0-9]{2}-[0-9]{2}[[:space:]]*$' || bad 4 "## Ratification has no 'Date: YYYY-MM-DD' line"
-	echo "$rat" | grep -qE '^Go-ahead:.*".+"' || bad 4 "## Ratification has no quoted 'Go-ahead: … \"…\"' line"
+	quotes "$(echo "$rat" | grep -E '^Go-ahead:')" || bad 4 "## Ratification has no quoted 'Go-ahead: … \"…\"' line"
 	grep -qiE '\*\*Draft|not (yet )?ratified' "$A" && bad 4 "the amendment still says it is a draft or not ratified"
 	section "$A" Manifest | grep -qi 'pending' && bad 4 "## Manifest is still pending"
-	grep -qE 'pending Q[0-9]+' "$A" && bad 4 "the amendment still has text pending an open question"
+	grep -qiE 'pending Q[0-9]+' "$A" && bad 4 "the amendment still has text pending an open question"
 	grep -qi 'awaiting ratification' "$A" && bad 4 "the amendment still says awaiting ratification"
 	grep -qF 'will be a 1×' "$A" && bad 4 "## Frames still says the exports will be made"
 fi
