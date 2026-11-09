@@ -17782,3 +17782,34 @@ export const label = game.abbreviation + " @ ";  464ms
 **What changed, and the owner's answer**
 
 Asked (2026-11-09) whether the owner-directed S124 note recording "Reject past next year" (months after December of next year answer 400, narrowing AC 2's "or the future"; committed in a6ae3f3) needs a backlog review, the owner answered: "No, skip it (Recommended)".
+
+---
+
+## 2026-11-09 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-09T20:56:15Z` |
+| HEAD at review | `5755230` (tree dirty) |
+| Trigger | design intake: standings-search-settings A9 (S129 draft, unratified) added/changed since 8d03ba8 |
+| Stories `done` since last review | S124 (1 of 6) |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Design intake review (`.claude/skills/design-intake-review/SKILL.md`), two independent fresh-context reviewers (A, B), merged. Same case as the A8 intakes (S123), the A7 intake (`92c6656`, S107) and the S96 drafts intake (`ac18059`): one story's draft amendment, nothing ratified, no frontend ADR change. Trigger from `scripts/review-debt.sh`: "a design intake review is due (since 8d03ba8, which logged the last backlog review or its answers): docs/v3/visual/standings-search-settings/amendments/A9.md added or changed". A9 is S129's draft ("Draft, not ratified.", A9.md:3; Ratification: "Not ratified"), spring training label on Standings, Figma `wqGKEFlvyxq0ObWZhRJdPF` section Y. The reviewers read A9 at `a6f152a`; the merger re-read it at `5755230` (`git diff a6f152a 5755230 -- docs/v3/visual/`: frames redrawn with A7 applied, spring GB `—` on every row with Q3, `formatMonthDay` for the day, ties/0–0 notes, every dependent sentence marked "Pending Q<n>:", new Q3–Q6, OAK vs ATH note) and reconciled the note to it.
+
+**Inventory (standings-search-settings, A9 draft only).** Screens: `standings-spring-{mobile,medium,desktop}` and, pending Q2, `standings-final-{mobile,medium,desktop}`, all copies of the ratified `standings-*` with A7 applied. Component: one muted `sm` meta line 4px under the unchanged `Standings` title (A9.md:17, :41). States: spring and (Q2) final labeled; regularSeason / no `phase` unlabeled (Q5); loading, empty and error unchanged with no label (A9.md:30). Data: `StandingsSnapshot.phase`, `.season` (optional, `packages/domain/src/types.ts`), `.date`, all served by S128 (`functions/src/services/standings.ts` sets `season`); day formatted by the existing `formatMonthDay` (`web/src/format/datetime.ts:55`). Nothing missing from the API for the drawn label. Spring GB: MLB's `"-"` stored as no value, `—` in `DivisionTable`; Q3's `springLeagueGamesBack` alternative would need the mapper (`functions/src/mappers/standings.ts`) to pass it on.
+
+**Ownership.** Owned 1 (the label, S130) / unowned 0 / re-scoped 0. No story inserted or re-scoped; ACs unchanged (A9 is a draft; rule 18 takes nothing from it). One note bullet appended to S130's **Notes:** as a reading aid, union of both reviewers, updated to `5755230`: label text from the payload not the URL (S128 AC 3 fallback case for AC 1's RTL), `season` fallback, `formatMonthDay` reuse; Q2 decides `final` (AC 1 already covers both); spring GB per Q3, with hide / `springLeagueGamesBack` touching the mapper outside S130's scope files, so the post-ratification intake re-scopes or slices; no label while loading/empty/error, and a spring payload with team-less divisions is not `ViewState`-empty (`StandingsPage` checks only `divisions.length`) and is undrawn; the label is not a second heading (`<Title order={1}>`), Q6 and Q5 may change that and AC 1's `regularSeason` case, Q1 may change the form; design match on A7's layout, final frames only if Q2 keeps them, fixture client (`functions/src/adapters/fixtures/fixture-client.ts:247-258`) serves 2026 spring for any 2026 spring day and the 2026 final after the season so `e2e/design/S130.spec.ts` captures offline with "2026"/its own day and `ATH` vs the drawn "2027 · Mar 2" / `OAK`; "Pending Q<n>:" markers mean S130's ACs are re-checked at the intake that follows A9's ratification.
+
+**Reviewer disagreements.** None of substance. Reviewer A's point (d), that the design match would be against pre-A7 frames, is superseded by `5755230` (A9.md:13, frames drawn with A7 applied) and dropped. Reviewer A's `season` fallback and empty-divisions points and Reviewer B's payload-vs-URL, fixture-capture and not-a-second-heading points are unioned. Both reviewers' owner questions on what "as of" means, a regular-season "as of" line and the accessible heading/tab title are now A9's own Q4, Q5 and Q6 (A9.md:51-53), so they are not logged here as separate questions; they reach the owner through S129's ratification.
+
+**Checks 2/2b/3.** Next stories and order unchanged by this intake (no insertion or re-scope); S130 stays behind S129 (rule 18, `pnpm backlog:check` green). Count: 1 of 6 done since the last review (S124).
+
+**For the parity review.** Nothing: FEATURES.md:65 already says spring standings are "labeled as such"; a Q2 yes adds the owner's words through S129 AC 1.
+
+**Owner questions.**
+
+1. **Should the review-debt check skip draft amendments marked "Draft, not ratified."?** Restated from the A8 intakes (bc694a5), still unanswered and strengthened: this is the fifth draft-only intake (S96, S107, S123 twice, S129), each able to record only a reading-aid note, while the real intake fires again at ratification. `scripts/review-debt.sh` fires on any change under `docs/v3/visual/*/amendments/*.md`; changing it is outside a review's write scope, so it is the owner's call.
