@@ -236,15 +236,20 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 77 | [S130](#s130--standings-label-spring-training-standings) | Spring standings label | `todo` |
 | 77 | [S112](#s112--dev-seed-the-last-month-of-the-season-and-the-postseason-refreshable-by-date-range) | Dev seed (season end + postseason) | `done` |
 | 78 | [S113](#s113--production-database-neon-through-hyperdrive-migrated-composed-into-the-worker) | Production database (Neon) | `done` |
+| 78 | [S131](#s131--each-releases-fan-facing-notes-approved-by-the-owner-before-it-publishes) | Approved release notes | `todo` |
 | 79 | [S114](#s114--cloudflare-deploy-preview-staging-and-production-through-github-actions) | Cloudflare deploy | `done` |
 | 79 | [S118](#s118--branch-flow-stage-deploys-staging-main-deploys-production) | Stage and main branch flow | `done` |
 | 79 | [S119](#s119--production-deploys-to-nextbaseballtheater-until-the-owners-dns-cutover) | Production at next.baseball.theater | `done` |
 | 79 | [S120](#s120--sign-in-hardening-recent-sign-in-from-logtos-auth_time-per-account-settings-jwks-cooldown-5xx-for-outages-per-tab-sign-in-state-no-stale-session-loads) | Sign-in hardening | `done` |
 | 79 | [S121](#s121--release-flow-stories-land-as-auto-merged-pull-requests-into-stage-a-published-github-release-deploys-production) | Releases from pull requests | `done` |
+| 79 | [S132](#s132--the-approved-release-notes-and-whats-new-since-a-version-from-bts-api) | Release notes API | `todo` |
 | 80 | [S93](#s93--ingest-mlb-play-metrics-win-probability-key-moments-abs-challenges) | Ingest play metrics | `done` |
 | 80 | [S116](#s116--sign-in-with-logto-email-one-time-code-on-the-deployed-sites) | Logto sign-in | `done` |
+| 80 | [S133](#s133--design-the-changelist-page-and-whats-new-on-the-update-notifications) | Design: changelist + update notes | `todo` |
 | 81 | [S75](#s75--hide-scores-in-the-game-rooms-and-the-recap-video-title) | Hide Scores in the rooms | `done` |
+| 81 | [S134](#s134--the-changelist-page-lists-each-releases-approved-notes) | Changelist page | `todo` |
 | 82 | [S71](#s71--day-highlights-digest-best-of-date) | Day highlights digest | `done` |
+| 82 | [S135](#s135--the-update-notice-links-to-the-changelist-and-shows-big-additions-a-notification-after-updating-does-too-then-dismisses-itself) | What's new on update notices | `todo` |
 | 83 | [S45](#s45--api-runs-as-a-worker-on-the-local-workers-runtime) | Worker entry + local Workers runtime + Workers tests | `done` |
 | 84 | [S47](#s47--graduated-edge-caching--refresh-on-read) | Graduated edge caching + refresh-on-read | `done` |
 | 85 | [S48](#s48--per-game-ingest-durable-object--cron-ensure-running) | Ingest Durable Object + cron | `done` |
@@ -300,7 +305,18 @@ scripts/audit.sh review --trigger "…" --since "S23, S21, S13" --verdict amende
 
 This section keeps only the *forward-looking* scheduling state: what is due next, and the drift the next review has to weigh.
 
-**Last review:** 2026-11-07 at HEAD `e7deda1`, verdict **`amended`**. **Trigger: drift** — S124's AC 1 and AC 2 rewritten in `e7deda1` (Copilot's review of PR #10; the same commit added `docs/v3/audit.jsonl` and `docs/v3/INDEX.md` to S122–S127's fences). Fresh-context subagent; see [AUDIT](./AUDIT.md). No story done and no code changed since `797e868`.
+**Last review:** 2026-11-08 at HEAD `c6f283f`, verdict **`amended`**. **Trigger: drift** — S131–S135 inserted outside a review (owner-directed 2026-11-08; asked whether they need a review: "Yes, run both reviews"). Fresh-context subagent; see [AUDIT](./AUDIT.md). Also checked: S129–S130 (inserted after the last review, skip logged). Done since the last review: S126, S128, S122, S117 (4 of 6).
+
+- **S131:** v3.1.0 publishes before S131, so nothing would put its notes in `releases/` and every later build's `currentRelease` would be null; **AC 6 added** (`releases/v3.1.0.json`, its approval copied as recorded at release time or given in S131's session), and S131 starts only once v3.1.0 is published. AC 1 rejects leading zeros, impossible dates and an entry in both buckets; AC 4's grep reads only the `production:` job (four jobs have "Build the web app"); AC 5 releases a commit whose milestone pull requests the notes all describe. Notes: `release:check` resolves `releases/` from the repo root; the deploy-workflow edit needs the owner's go-ahead (CLAUDE.md).
+- **S132:** the bundle command refuses a file whose version doesn't match its name; the 5-minute limit includes `stale-while-revalidate`; **AC 6 added** and `CLAUDE.md` joins the fence, so landing a release's notes regenerates the bundle instead of failing the drift test.
+- **S133 AC 1** also says whether A6's retired-version case shows the additions, where the after-update notification sits beside A6's box and the offline marker, and what the rail's version line shows (today `v3.0.<run>`, which would disagree with the release).
+- **S134 AC 1** tests a release without headline additions. **S135 AC 3**: its own non-personal `STORAGE_KEYS` key (not the snooze key), a malformed stored value, a null release, and a failed request (link alone); note on the 5-minute cache after a deploy.
+- **S124:** S122 landed with no range method (it reads a day at a time), so S124 adds it; reuse S122's exported `storeSchedule` and `scheduleWindowMode`; `recorder.test.ts`'s fake also implements the port; line references refreshed; AC 5's month check is one domain function beside `isCalendarDate`.
+- **S130 AC 1:** `regularSeason` or an absent `phase` (optional in the spec) draws no label.
+- **Duplication (answered):** the API's date parameters are checked by shape only (`api.ts:178`, `:197`, `:215`) while S122 added `isCalendarDate`. Left as is (owner, 2026-11-08, asked whether they become a 400 in S124: *"No, leave as is"*).
+- **Next 3 by priority:** S123, S124, S125. S123 needs the owner to ratify; S124 is startable.
+
+**Earlier review:** 2026-11-07 at HEAD `e7deda1`, verdict **`amended`**. **Trigger: drift** — S124's AC 1 and AC 2 rewritten in `e7deda1` (Copilot's review of PR #10; the same commit added `docs/v3/audit.jsonl` and `docs/v3/INDEX.md` to S122–S127's fences). Fresh-context subagent; see [AUDIT](./AUDIT.md). No story done and no code changed since `797e868`.
 
 - **S124 AC 2 tightened:** the month fill stores schedule days only, through ingest's version-guarded schedule write, and fetches no games (read as `ingestScheduleDay`, it would hydrate every final game of every filled day — hundreds of MLB requests in one month read). Notes: a range answer omits no-game days and `mapScheduleResponse` falls back to `dates[0]` for a missing date, so absent days are stored empty (`0`), `null` only when the request failed; every `MlbStatsClient` (HTTP, fixture, `overlayMlbClient`, four test fakes) gains the range method; reuse S122's if it lands first. Reuse check names the schedule repositories and the mapper instead of the `games` table's `listByDate`. AC 1 holds at HEAD (`schedule_days.document` is jsonb; one count query per adapter).
 - **S122 note:** after the run, put AC 9's sizes to the owner with the production question and ARCHITECTURE.md:649's open retention (the parity review's queued item).
@@ -506,7 +522,7 @@ This section keeps only the *forward-looking* scheduling state: what is due next
 
 **Earlier reviews** (2026-10-20 at `1967ae3` — S54 fenced for `tools/`, S48 AC 8 (ingest's final check), S56 Search-title note; 2026-10-19 at `adf4f24` — ADR-023–027 and the first design intake: guardrail, design and UI stories S52–S74 inserted, rooms re-scoped, guardrails and design first; 2026-10-18 at `52a0d0f` — off Firebase onto Cloudflare/Postgres/Logto (ADR-017–022): S42–S51 inserted, S7/S9 superseded, S8/S18/S19 re-scoped; 2026-10-14 at `71526bf` — S39/S40/S41 inserted for ratified work, rooms re-scoped, `openapi/` fenced; 2026-10-09 at `77244af` — S9 re-scoped, then emulator-only `pnpm dev` on the owner's answer; 2026-10-04 at `5dd9404` — `blocked` on Q1–Q5, answered 2026-10-08 and applied in `5f370be`; 2026-09-16 at `2a357ad` — S29 split: guard kept, generated DAL deferred behind a trigger; 2026-09-14 at `f74767c` — rule-18 design gate, parking, S18 ahead of the gated UI band; 2026-09-13 at `5827d36` — the V3 fence amendment and the end-to-end walk of the notes process; 2026-09-13 at `38a52aa` — the S27/S29 counterfactual and the S25-before-S29 re-order; 2026-09-10 at `c98e435` and before): see [AUDIT](./AUDIT.md).
 
-**Review debt (generated from [AUDIT](./AUDIT.md)):** 4 of 6 stories `done` since the last backlog review (2026-11-07, verdict `amended`): S126, S128, S122, S117. A drift event makes a review due regardless of this count.
+**Review debt (generated from [AUDIT](./AUDIT.md)):** 0 of 6 stories `done` since the last backlog review (2026-11-08, verdict `amended`). A drift event makes a review due regardless of this count.
 
 **Next review due:** by count after **6** stories land since the last review, or immediately on any drift event. In particular:
 - ~~**When S41 enters the next 3:** confirm S2 actually shipped the reusable boxed-linescore component and the `823823` fixture pair S41 binds to.~~ Confirmed 2026-10-29 (see S41's notes).
@@ -639,7 +655,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 | Scoreboard to the ratified frames | Modules done (**S66**: `ScoreboardModule` final / live / scheduled, `TeamEdge`, `teamRecordLabel`, `DateControl` with `addDays`, `ViewState` states, one column on mobile and two on medium / desktop; `fixtures/schedule-823823-moments.json`). Data done (**S65**: `ScheduleGameSummary` `startTime`, `teams.*.record`, `probablePitchers`, `decisions`, `live`; `fixtures/schedule-2026-09-05.json`; `formatGameTime`). Slot done (**S67**: `GameRowSlot` with `slotOccupant` — pitchers of record, the count as `countShorthand` text beside `BaseDiamond`, probables with `probableLine`, or the room menu — and the Game-Row Slot setting, Status default / Room Menu; design matched by the owner). Collapse + Hide Scores done (**S68**, design matched by the owner 2026-10-30: `CollapsedBar` centers the score between the teams with round `TeamSwatch` colors inside, by the score, and the state muted underneath, and opens the game when chosen (**S126**); a favorite spans the row at medium / desktop while anything is collapsed; `useScoresHidden`, `HiddenValue`; the game rooms honor Hide Scores too — **S75**, design matched by the owner 2026-11-03: Live, Plays, Runs, Recap and the recap video's title masked, Box unchanged). Still to build: **S71** digest |
 | Videos room + player | Room done (**S69**, design matched by the owner 2026-10-30: `VideosRoom`, `VideoCard`, grid / list with icons, search, a sort (Impact / Newest / Oldest, `sortHighlights`), quick filters that show as many as fit then a Filters drawer (`QuickFilters`, `fittingFilters`), and collapsible Pre-game / Game highlights / Statcast / Post-game groups with empty ones left out (`highlightGroup` / `groupHighlights`), all in `packages/domain/src/highlights.ts`). Player done (**S70**, design matched by the owner 2026-10-31: `VideoPlayer` with the MLBAM disclaimer once, plays inline on iOS, in `PlayerDialog` (floating over the dimmed page with "Close ✕" in the overlay, game-shell A4; loaded on the first chosen clip) by default or `PlayerStage` by the Video Player setting; `PlayerHost` picks by setting; Space plays / pauses, Esc / Close / the empty overlay close; the dialog links to the clip's game unless played from it; `clipClock` in `packages/domain`) |
 | Team colors | **Done** (**S61**) — `packages/domain/src/team-colors.ts` (`teamColor`, `contrastSafeTeamColor`, `divisionName`); `TeamEdge`, `TeamSwatch`, `MatchupAbbr` in `web/src/components/team/`; `TeamSwatch` is used by the Box room (**S2**), `TeamEdge` waits for **S66** |
-| PWA (ADR-023) | **Designed** — **S55** ratified 2026-10-21: `amendments/A1.md` in `docs/v3/visual/shell-scoreboard/` (standalone layout, offline scoreboard, update notice), `game-rooms/` (offline rooms) and `standings-search-settings/` (Install app row). Installable app **done** (**S73**, design matched by the owner 2026-11-07): `vite-plugin-pwa` manifest and service worker at scope `/` (shell precached, `/api/` never; `web/public/_headers` keeps `sw.js` and `index.html` revalidating past Workers Cache), the floating update notice with Snooze (`bt.updateSnoozedUntil`) and Update Now in `web/src/layout/NoticeSlot.tsx` (`web/src/pwa/updates.ts`, one source shared with S28's 426), the Settings install tip and iOS Share steps (`bt.installTipDismissed`), standalone safe-area insets; its Playwright flows (`e2e/flows/update.spec.ts`) are proven in CI's `flows` job (owner, 2026-11-07: "4 passing in ci"). Offline **S74** next |
+| PWA (ADR-023) | **Designed** — **S55** ratified 2026-10-21: `amendments/A1.md` in `docs/v3/visual/shell-scoreboard/` (standalone layout, offline scoreboard, update notice), `game-rooms/` (offline rooms) and `standings-search-settings/` (Install app row). Installable app **done** (**S73**, design matched by the owner 2026-11-07): `vite-plugin-pwa` manifest and service worker at scope `/` (shell precached, `/api/` never; `web/public/_headers` keeps `sw.js` and `index.html` revalidating past Workers Cache), the floating update notice with Snooze (`bt.updateSnoozedUntil`) and Update Now in `web/src/layout/NoticeSlot.tsx` (`web/src/pwa/updates.ts`, one source shared with S28's 426), the Settings install tip and iOS Share steps (`bt.installTipDismissed`), standalone safe-area insets; its Playwright flows (`e2e/flows/update.spec.ts`) are proven in CI's `flows` job (owner, 2026-11-07: "4 passing in ci"). Offline **S74** next. Changelist page and what's new on the update notices (owner, 2026-11-08): **not started** — no release notes exist yet; **S131** (approved notes, `pnpm release:check`) → **S132** (`GET /api/v1/releases`), design **S133** → **S134** page, **S135** notices. |
 | Frontend guardrails (ADR-024–026) | **Partial** — **S52** done: game phase, rooms and pitch outcome are one domain function each (`packages/domain/src/game-phase.ts`, `pitch-outcome.ts`), and `bt/no-domain-arithmetic` (`tools/eslint-rules/`, tested by `pnpm test:tools` in `pnpm verify`) rejects arithmetic over `@bt/domain` data in `web/src/components/**` and `web/src/pages/**`. **S53** done: `pnpm dup:check` (`jscpd` over `packages/`, `functions/src/`, `web/src/`, `.jscpd.json` threshold 0) runs in `pnpm verify`; `pnpm comments:stale` (`tools/comments-stale/`) flags exported code whose comment did not change; frame-00 rule 20 requires a reuse check. **S54** done: `pnpm size` (`size-limit`, `.size-limit.json`, 200 KB gzipped entry JS) runs in `pnpm verify` after the build, tested by `tools/size-limit/`; coverage floors sit at measured values (domain 95/87, mlb-api 100/88, functions 80/78, web 47/84 lines/branches) and only go up (rule 21); `web/src/test/renderCount.tsx` counts a view's commits. **S110** done: the game, standings, search and settings pages load on demand (`React.lazy` in `web/src/routes.tsx`, ViewState's loader while a chunk arrives); the scoreboard stays in the entry, now 150,405 bytes gzipped (was 199,882). Lighthouse CI + Playwright in CI (**S62** done): `lighthouserc.json` (LCP warns over 2.5 s, fails at 5 s; both pages warn at about 3.2–3.3 s on the runner), `e2e/flows/main.spec.ts`, `pnpm e2e`, `pnpm lighthouse`, `.github/workflows/ci.yml`; CI is four parallel jobs — verify (+ API checks), the flows (`pnpm e2e`, four workers, `--repeat-each=2`), the design specs (`pnpm e2e:design`, no captures written) and Lighthouse alone with only the web build — and a `ci-passed` gate (**S89**); a story's design captures on request, uploaded and optionally committed (**S115**: `.github/workflows/design-capture.yml`, `gh workflow run design-capture.yml -f story=S<N>`). Design match (rule 22, ADR-026 amended 2026-10-28): **S81** done — `e2e/playwright.config.ts` (Playwright 1.64.1; mobile 390, medium 768, desktop 1200 against the fixture-backed `pnpm dev`), `e2e/design/helpers.ts`, `pnpm design:capture <ID>` → `docs/v3/design-checks/<ID>/`, `scripts/audit.sh story --design-match` (refuses a UI story's completion without the owner's verdict), `backlog:check` rule 22 (`designMatchProblems`); S60's shell captured and judged a mismatch by the owner (fonts, active-item color); **S83** done, owner verdict "Matches". Two tiers (**S84** done): graders are commit-time proofs (`story_diff` / `story_changed_files` in `scripts/lib/checks.sh`), `scripts/audit.sh story --reverify` runs one in a worktree at its shipping commit (`scripts/lib/reverify.sh`), `audit.sh design` records a design verdict on its own; `docs/v3/LAWS.md` lists 11 enforced laws (checked by `scripts/backlog-vault/laws.test.ts`) and 10 proposed. Laws P1, P3, P5, P8 enforced (**S85** done, owner 2026-10-28): `bt/no-viewport-outside-layout`, `bt/no-mlb-in-web`, `bt/no-personal-data-in-logs` (`tools/eslint-rules/`, in `pnpm lint`) and `scripts/backlog-vault/verify-chain.test.ts` (no browser in the `pnpm verify` chain); P2, P4, P10 removed by the owner; P6, P7, P9 still proposed. CI runs all of `pnpm verify`, so `pnpm dup:check` (L7) and `pnpm size` (L5) hold there too (law P11, `scripts/backlog-vault/ci-law.test.ts`, **S62**). Still missing: bringing LCP under 2.5 s — no story owns it (owner, 2026-10-29: "we can figure out the problems later"). |
 | Brand theme (VISUAL-DESIGN tokens; dark only) | **Done** — five tokens + Plex (**S24**); ratified palette and dark-only lock (**S39**): `web/src/styles.css` `--bt-dark: #10100f`, `--bt-raised`, `--bt-raised-current`, `--bt-primary-light`, `--bt-muted`, `--bt-pitch-ball` / `-strike` / `-in-play`; Mantine `colors.dark` carries the surfaces (body = `dark-7`); `App.tsx` `forceColorScheme="dark"`; `theme-color` `#10100F`. Pages don't apply Raised / Raised current yet — each UI story does |
 | Visual designs per surface (owner-ratified, rule 18) | **Done** — all four surfaces ratified 2026-10-14 with SHA-256 manifests: `docs/v3/visual/shell-scoreboard/` (**S31**), `game-shell/` (**S32**), `game-rooms/` (**S33**), `standings-search-settings/` (**S34**). Every UI story's design gate is open. Changes are amendments only. **S56** ratified 2026-10-21 the navigation and leftover amendments: `shell-scoreboard/amendments/A2.md` (nav drawer, signed-out shell, no desktop burger, version line, collapsed score), `game-shell/amendments/A1.md` (Videos without Filter), `game-rooms/amendments/A2.md` (full-width Live tabs, footer without subscription link, "Source: MLB"), `standings-search-settings/amendments/A2.md` ("Search Highlights", search result plays in a modal with a game link, iOS install steps). **S57** ratified 2026-10-21 Hide Scores beyond the scoreboard: `game-rooms/amendments/A3.md` (Live, Box, Plays, Runs, Recap), `shell-scoreboard/amendments/A3.md` (slot occupants, digest, collapsed bar), `game-shell/amendments/A2.md` (only the recap video retitled). Then, by owner direction, `game-rooms/amendments/A4.md`, `game-shell/amendments/A3.md` and `shell-scoreboard/amendments/A4.md` remove every "Scores hidden in settings" text (footer and scoreboard line). **S58** ratified 2026-10-22 the account amendments: `standings-search-settings/amendments/A3.md` (signed-in Account section, "Sign out" link, Patreon not linked / linked with tier, "Unlink Patreon"; no sign-in screens — Logto's own) and `shell-scoreboard/amendments/A5.md` (desktop header with the ratified version line). **S78** ratified 2026-10-28 `standings-search-settings/amendments/A4.md` (download and delete your data: ways in, stored download, 24-hour refusal, delete dialog states, signed-out after deletion). By owner direction on 2026-10-31 (S70's design match), `game-shell/amendments/A4.md` and `standings-search-settings/amendments/A6.md` make the video dialog a floating player: no card, "Close ✕" in the dimmed overlay. By owner direction on 2026-11-01 (after S19's design match), `game-rooms/amendments/A5.md` shows the Live inning once (`Bot 7th`) and drops the mobile `Count: … · … Out` line; **S109** builds it. VISUAL-DESIGN §9's design rows are decided. S31's theme tokens shipped in **S39** |
@@ -2153,7 +2169,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 
 **Acceptance criteria** (checks `scripts/verify-S130.sh` performs)
 
-1. The Standings page draws S129's label when the payload's `phase` is `spring`, and whatever S129 says (or nothing) for `final`, reading the payload through `useStandings` (RTL with both payloads).
+1. The Standings page draws S129's label when the payload's `phase` is `spring`, and whatever S129 says (or nothing) for `final`, reading the payload through `useStandings`; `regularSeason`, or no `phase` at all (the field is optional: a payload cached from before S128), draws no label (RTL with all four payloads).
 2. Files this story adds or edits don't call `useMediaQuery`, `hiddenFrom` or `visibleFrom` outside `web/src/layout/` (grep).
 3. Design match (rule 22): for each ratified frame this story builds (desktop captured at 1200px, owner 2026-10-28: *"Capture at 1200px"*), `pnpm design:capture S130` saves the built page to `docs/v3/design-checks/S130/<frame>.png` from `e2e/design/S130.spec.ts`; the grader checks each file exists at its pairing's width. The story parks `blocked` with its captures committed until the owner says each pair matches, recorded with `scripts/audit.sh story S130 --design-match -`.
 4. This file's S130 **Status** (story heading and top table) is `done`.
@@ -6708,7 +6724,7 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 2. When any day of the month in the current season or the future has no stored schedule day (a month the scoreboard has visited usually holds some days and not others), those missing days are filled from MLB through the existing ingest path with one schedule request for their date range, never one per day, storing each day's schedule through the same version-guarded schedule write ingest uses (`stampVersion`, ADR-022) without hydrating its games (no `fetchGame`: game snapshots stay with the scoreboard's own refresh and S122), and a day still unknown afterwards says so (`count: null`), distinct from a day with no games (`0`) (tests with a counting fake client: an empty month, and a month already holding one day, each take one schedule request and no game request).
 3. Freshness follows ADR-021's graduated ladder (`cacheLifetimeMs`, S47), based on when the month's data last changed, not on whether the month is past: the response's cache lifetime comes from that ladder, so a past month that changes (a backfill fills it, MLB corrects a day) drops back to the floor (test: a changed past month's headers reset). Stored days of the current season or the future are refreshed by the same schedule-only range request as AC 2 once that lifetime has run out, so a future month first stored empty, before MLB published its schedule, gains its games later (test: an empty future month gains games after expiry, with one schedule request and no game request).
 4. The route is in the OpenAPI spec (`pnpm api:spec`) and `pnpm api:breaking` exits 0 (additive).
-5. Months before 1901-04 are rejected with a 400; a malformed month too (tests).
+5. Months before 1901-04 are rejected with a 400; a malformed month too (`1901-4`, `2026-13`, `2026-00`), checked by one domain function beside S122's `isCalendarDate` (`packages/domain/src/calendar-date.ts`), not a new pattern in the handler (tests).
 6. This file's S124 **Status** (story heading and top table) is `done`.
 
 **Notes:**
@@ -6716,6 +6732,7 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 - **2026-11-07 backlog review.** (a) Its **Depends on** line said "Prefer after **S122**", and `scripts/backlog-vault/parse.ts` reads every story ID on that line as a dependency (the 2026-11-02 pending-drift item), so S122 had become a hard dependency; the counts are read from whatever BT has stored, so the story needs nothing S122 builds. Moved to its own **Prefer after** line. (b) The route was written `/api/schedule/month/{YYYY-MM}`; every BT route is under `/api/v1/` (ADR-015) and the route table spells parameters `:name` (`packages/domain/src/api-routes.ts:189–203`). (c) The fence gains `web/src/api/`: a new route changes `openapi/bt-api.v1.json`, and `pnpm verify`'s drift gate (`web/src/api/codegen.test.ts:15`) re-renders `web/src/api/generated/` from it, and `web/src/api/generated.types.test.ts` lists each response type (S71 changed all three; the 2026-11-02 pending-drift item). Add S124's client function there too (`web/src/api/client.ts`), which S125's reuse check expects.
 - **A month in one request.** `MlbStatsClient.fetchSchedule(date)` (`packages/ports/src/mlb.ts:20`) takes one day; AC 2 needs a date-range method on the port and both adapters (MLB's schedule takes `startDate`/`endDate`), mapped per day through the same `mapScheduleResponse`, so the 2026-11-03 fixture byte-compare (`schedule-fixture.test.ts`) keeps passing.
 - **2026-11-07 review of the rewritten ACs (after `e7deda1`).** (a) **AC 2 now says the fill stores schedule days only.** "The existing ingest path" read as `ingestScheduleDay` (`functions/src/services/ingest.ts:87`) would call `fetchGame` for every final or in-window game of every filled day (`:100–117`), and each `HttpMlbStatsClient.fetchGame` fans out to three more requests (`functions/src/adapters/http/mlb.ts:149`): a current-season month of ~15 games a day is hundreds of MLB requests inside one month read — far past "one request", hard on MLB, and over a Worker's subrequest budget. The counts need only the schedule days; store them the way `storeSchedule` (`ingest.ts:59`, private) does — export or reuse it, not a second write — with the same `windowMode` decision `ingestScheduleDay` makes. (b) **A range answer omits days with no games.** MLB's schedule `dates` lists only days that have games, and `mapScheduleResponse` (`functions/src/mappers/schedule.ts:206`) falls back to `response.dates[0]` when its date is missing, so mapping each day of a range answer through it unchanged would give an empty day the first day's games and date. Treat a day absent from a successful range answer as a stored day with no games (`count: 0`; it is fetched again only when AC 3's freshness says so, Copilot on PR #10); `null` is only for a day the request didn't answer (it failed). Keep the single-day path's behavior, so the fixture byte-compare holds. (c) **Every `MlbStatsClient` needs the new method:** `HttpMlbStatsClient`, `FixtureMlbStatsClient`, `overlayMlbClient` (`functions/src/adapters/overlay-mlb.ts`: the local Worker overlays its store on the fixtures, so its range method should answer days the source holds and ask `inner` for the rest), and the test fakes typed as the port (`tick-ingest.test.ts:34` `CountingMlbClient`, `cache-control.test.ts:128`, `refresh.test.ts:40`, `overlay-mlb.test.ts:39`); all inside the fence. (d) **S122 may add the same method** (its note on schedule requests): if it has landed, reuse its range method (ADR-025) rather than adding a second.
+- **2026-11-08 backlog review (S122 has landed).** (a) S122 added no range method: its backfill asks one day at a time (`functions/src/services/backfill.ts:217`), so S124 adds the port's range method itself; note (d) above is settled. (b) S122 exported `storeSchedule` (`functions/src/services/ingest.ts:62`) and made the day's window decision one function, `scheduleWindowMode` (`packages/domain/src/window.ts`; ingest calls it at `ingest.ts:123`): reuse both for AC 2's fill. Line references above have moved: `ingestScheduleDay` is at `ingest.ts:113` and its game loop at `:135`; `HttpMlbStatsClient.fetchGame` at `functions/src/adapters/http/mlb.ts:185`; `fetchSchedule` on the port at `packages/ports/src/mlb.ts:21`. (c) One more test fake implements the port and must gain the method: `FakeMlbStatsClient` in `functions/src/services/recorder.test.ts:53`. The backfill's fake (`backfill.test.ts`) types as `MlbGameSources`, a `Pick` of the port, so it needs nothing. (d) The API's three date parameters are still checked by shape only (`functions/src/handlers/api.ts:178`, `:197`, `:215`, so `2026-02-30` passes); changing them is a behavior change outside this story, put to the owner by this review.
 - The off-season days (S122's skip) count as stored-with-no-games only if BT has a schedule day for them; otherwise `null` — the picker shows `null` and `0` the same (dimmed) unless S123's design says otherwise.
 
 **Reuse check** (ADR-025): before writing code, search `packages/domain/src/api-routes.ts`, `functions/src/handlers/` (the schedule handler and its cache headers), `functions/src/services/ingest.ts` (`getOrRefreshSchedule`, `storeSchedule`), `ScheduleRepository` in `packages/ports/src/repositories.ts` and its adapters (`PostgresScheduleRepository` over `schedule_days.document` in `functions/src/adapters/postgres/repos.ts`, `InMemoryScheduleRepository` in `functions/src/adapters/memory/repos.ts`), `functions/src/mappers/schedule.ts` (`mapScheduleResponse`), and S47's cache-lifetime functions for what this story needs; record what was reused, or why nothing fit, in the story's ledger notes.
@@ -6823,6 +6840,233 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 ```
 
 **Status:** `done`
+
+### S131 — Each release's fan-facing notes, approved by the owner before it publishes
+
+**Gap:** The owner wants a fan-facing changelist for every release, its bucketing approved by them each time (owner, 2026-11-08: *"The change log and bucketing need to be manually approved by me for each release"*; asked how, *"Draft, you approve in session"*). Today the only record is `CHANGELOG.md`, written per story for anyone, including dev-only changes, and nothing ties a release to an approved summary: a release can publish with no notes at all, and no build knows which release it is.
+
+**Impact:** Before S131, a release went out with no fan-facing summary and nobody had signed off on how its changes were described. S131 impact: every release has one short list of what changed for fans — big additions, their own items, and one "fixes and polish" line — that the owner approved before it went out, and production refuses a release without it.
+
+**Source:** Feature: Update / changelist UX
+
+**Depends on:** nothing.
+
+**Scope files:** `releases/`, `packages/domain/`, `functions/src/`, `functions/vitest.config.ts`, `package.json`, `.github/workflows/deploy.yml`, `CLAUDE.md`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`
+
+**Work**
+
+0. Write `scripts/verify-S131.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** writing any product code (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S131.sh` performs)
+
+1. `packages/domain` defines a release's notes (`ReleaseNotes`) and one parser for them (`parseReleaseNotes`): `version` (`vMAJOR.MINOR.PATCH`, each part a number with no leading zero, so `v3.01.0` is rejected rather than read as `v3.1.0`); an optional `date` (a real calendar date, `isCalendarDate`); `headline`, the really big additions that the update notifications show (each a title and one sentence); `items`, every change that gets its own entry (each a `kind` — `feature`, `setting`, `fix` or `design` — a title and one sentence); an optional `fixesAndPolish`, the one sentence that stands for all the minor fixes; and an optional `approval` (a real calendar date and the owner's words, quoted). An entry is in `headline` or `items`, never both. The parser returns the notes or every problem it found, by field (unit tests: a valid file; a bad version, including a leading zero; an impossible date; an unknown `kind`; an empty title or sentence; an approval with no quote; the same title in `headline` and `items`; notes with nothing in any bucket, which are rejected; notes holding only `fixesAndPolish`, which are valid, as a fixes-only release's are; `v3.0.0`, whose zero parts are valid).
+2. `packages/domain` has one exported check of a release version (`parseReleaseVersion`, the same rules as AC 1's `version`; `parseReleaseNotes` uses it), one comparison of release versions (`compareReleaseVersions`, numeric per part, so `v3.10.0` is newer than `v3.9.0`) and one answer to "which release is this build" (`currentRelease`: the newest **approved** notes among those given, ignoring drafts) (unit tests, including `parseReleaseVersion` on `v3.01.0`, `3.1.0` and an empty string, `v3.10.0` newer than `v3.9.0`, a newer draft that is ignored and no approved notes at all).
+3. `pnpm release:check <version>` exits 0 only when `releases/<version>.json` exists, parses (AC 1), is approved (date and a non-empty quote) and its `version` matches the file name; otherwise it exits nonzero and prints each problem (tests over temporary directories: missing file, draft, mismatched version, valid).
+4. The production deploy job (`.github/workflows/deploy.yml`, `production`) runs `pnpm release:check` with the release's tag (`github.event.release.tag_name`) after its Install step and before it builds anything, so a release whose notes aren't approved in the tagged commit fails before deploying (grep, read inside the `production:` job's block only: the file has a "Build the web app" step in four jobs, so a whole-file grep would pass with the check in the wrong one).
+5. `CLAUDE.md`'s release rule says the coordinator drafts `releases/<version>.json` from the milestone's merged pull requests' `CHANGELOG.md` entries, bucketed as FEATURES' changelist page says (big additions in `headline`; very impactful fixes, new settings, new features and significant design changes as their own `items`; minor fixes and polish in `fixesAndPolish`), shows the draft to the owner, writes the owner's in-session approval into `approval` quoted, lands it in `stage` through a pull request, and publishes only a commit where `pnpm release:check <version>` exits 0 and whose milestone pull requests the notes all describe (one that merged into `stage` after the draft is either drafted in and re-approved, or left out by releasing the commit where the notes landed and moving it to the next milestone); never writing an approval the owner didn't give in the current session, except AC 6's copies; and it replaces the sentence that held each release's fan-facing notes in its GitHub Release until S131 (grep).
+6. `releases/` holds a notes file for every release published from v3.1.0 until S131, each copied from its GitHub Release notes, whose `approval` quotes the owner's approval as recorded when it was published, or, if none was recorded, the owner's approval of that file given in S131's session (asked, never assumed). The grader checks offline only, so it still holds when re-verified at the shipping commit: `releases/v3.1.0.json` exists and `pnpm release:check` exits 0 for every file in `releases/`. Which releases were published before S131 is listed by the coordinator at commit time (`gh api repos/<repo>/releases --jq '.[] | select(.draft | not) | .tag_name'`; REST, since `gh release list` uses GraphQL, which Claude Code sessions can't reach) and recorded in the story's ledger notes. Without these, every build after S131 would have no approved notes, so `currentRelease` would be null and the page (S134) would start empty although v3.1.0 is live.
+7. This file's S131 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- **Why the version comes from the notes.** A release's tag is cut from a `stage` commit (CLAUDE.md release rule), and that commit must already hold the release's approved notes (AC 4), so the newest approved notes in a build *are* its release. `currentRelease` gives every build, `stage` and preview included, a version with no build-time tag injection; S132 (the API) and S135 (the web app) both read it from here, never from a second source.
+- The page starts at v3.1.0 (owner, 2026-11-08: *"No, start at v3.1.0"*): no notes file for v3.0.0.
+- `CHANGELOG.md` stays the full, per-story record; release notes are the fan-facing, owner-approved subset of it.
+- v3.1.0 publishes first (owner, 2026-11-08, asked whether S131 should land before it: *"No, release v3.1.0 first"*): its notes are drafted and approved in session the same way, without S131's check behind them. So S131 starts only once v3.1.0 is published (AC 6 copies its notes, and those of any release published after it before S131); before then it parks. Whoever publishes v3.1.0, or any release before S131, puts its approved fan-facing notes and the owner's approval words in its GitHub Release notes, so AC 6 can copy them (owner, 2026-11-08, asked where they live until S131: *"GitHub Release notes"*).
+- **2026-11-08 backlog review.** (a) `pnpm --filter @bt/functions exec` runs in `functions/` (`package.json`'s other scripts do it that way), so `release:check` finds `releases/` from the repo root, not the working directory. (b) AC 4 edits `.github/workflows/deploy.yml`; CLAUDE.md says to ask before changing CI or deploy workflows unless the owner explicitly asked, and the owner said yes to this story's step (owner, 2026-11-08, asked whether S131 is the go-ahead or the run should ask again: *"This is the go-ahead"*), so the run doesn't ask again. (c) Before S131 builds have notes, the rail's version line (`web/src/layout/version.ts`, A2/A5) reads `v3.0.<Actions run>`, not the release; the owner answered that it follows semver (2026-11-08: *"Follow semver"*); S133 draws it and S135 AC 4 builds it.
+
+**Reuse check** (ADR-025): before writing code, search `packages/domain/src/` for an existing version or date parser (`calendar-date`, the API version in `api-routes.ts`) and `functions/src/scripts/` for an existing CLI pattern (argument parsing, exit codes) to follow; record what was reused, or why nothing fit, in the story's ledger notes.
+
+**Turn cap:** 12 — assumes one type and parser, three small domain functions, one CLI check, one workflow step, one rule edit and the notes files of the releases published before it.
+
+**Goal condition:** scripts/verify-S131.sh exits 0, pnpm verify exits 0, no files outside releases/, packages/domain/, functions/src/, functions/vitest.config.ts, package.json, .github/workflows/deploy.yml, CLAUDE.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S131. Work item 0 first: if scripts/verify-S131.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S131.sh exits 0, pnpm verify exits 0, no files outside releases/, packages/domain/, functions/src/, functions/vitest.config.ts, package.json, .github/workflows/deploy.yml, CLAUDE.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S131.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
+
+**Status:** `todo`
+
+### S132 — The approved release notes, and what's new since a version, from BT's API
+
+**Gap:** The changelist page lists every release's approved notes, and the update notifications show the big additions between the version a fan has and the one they're getting (owner, 2026-11-08: *"Really big new additions should show on the update notification itself (via API data comparing versions)"*). Clients read only BT (ADR-002), and BT serves no release notes and doesn't say which release it is running.
+
+**Impact:** Before S132, the app had no way to ask what changed between releases. S132 impact: one request gives every approved release's notes, and another gives just the ones a fan hasn't seen yet, so the page and the update notifications (S134, S135) can show them.
+
+**Source:** Feature: Update / changelist UX
+
+**Depends on:** **S131** (the notes, their parser, `compareReleaseVersions` and `currentRelease`).
+
+**Scope files:** `functions/src/`, `functions/vitest.config.ts`, `package.json`, `packages/domain/`, `openapi/`, `web/src/api/`, `CLAUDE.md`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`
+
+**Work**
+
+0. Write `scripts/verify-S132.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** writing any product code (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S132.sh` performs)
+
+1. `GET /api/v1/releases` (route in `packages/domain/src/api-routes.ts`) returns `current`, the release this server is (`currentRelease`, S131), and `releases`, every **approved** notes file in the build, newest first; a draft is never returned (handler tests with a draft newer than the newest approved one, and with none approved: `current: null`, `releases: []`).
+2. `GET /api/v1/releases?after=<version>` returns only approved releases newer than `after` and not newer than `current`, newest first (tests: `after` older than every release; `after` equal to `current` → `[]`; `after` newer than `current`, as a client from a later deploy talking to a rolled-back server would send → `[]`); a malformed `after` (`v3.01.0`, `3.1.0`, or empty), read by S131's `parseReleaseVersion` rather than a second pattern, is a 400 (tests).
+3. The notes are bundled into the build from `releases/*.json` by one named command and parsed once with S131's parser; nothing reads the file system at request time, so the Worker serves them (a `*.workerd.test.ts` request returns them), and a build whose bundle is stale against `releases/` fails `pnpm verify` (drift test, as `web/src/api/codegen.test.ts` does for the generated client). The command refuses a file that doesn't parse or whose `version` doesn't match its file name, so two files can't claim one release (tests).
+4. The response is cacheable for at most 5 minutes in all, `max-age`/`s-maxage` plus any `stale-while-revalidate` (`Cache-Control` header test), so a release's notes show within minutes of its deploy.
+5. The route is in the OpenAPI spec (`pnpm api:spec`), `pnpm api:breaking` exits 0 (additive), and `web/src/api/client.ts` has one function for each form, typed from the generated spec.
+6. `CLAUDE.md`'s release rule (S131 AC 5) names AC 3's command as part of landing a release's notes, so the notes' pull request carries the regenerated bundle and doesn't fail the drift test (grep).
+7. This file's S132 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- The comparison is on the server so a client built before a release still learns what that release adds; the client only sends the version it was built as (S135).
+- A rollback (CLAUDE.md release rule) redeploys an older build, whose `current` is older: AC 2's third case keeps it from describing a release that is no longer live.
+
+**Reuse check** (ADR-025): before writing code, read `packages/domain/src/api-routes.ts`, the header shape of `functions/src/handlers/cache-control.ts` (`public, s-maxage=…, stale-while-revalidate=…`), with its own budget totalling at most 300s (e.g. 240 + 60): neither `edgeCacheControl` (an `s-maxage` of at least 300s plus a 300s stale window, or `no-store`) nor `STALE_WHILE_REVALIDATE_S` (300s by itself) fits AC 4; `web/src/api/codegen.test.ts` (the drift pattern) and S131's release-notes module; record what was reused, or why nothing fit, in the story's ledger notes.
+
+**Turn cap:** 12 — assumes one route with an optional query, a generated bundle with a drift test, cache headers in the existing shape with their own 300s budget, the spec update and one line in the release rule.
+
+**Goal condition:** scripts/verify-S132.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, package.json, packages/domain/, openapi/, web/src/api/, CLAUDE.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S132. Work item 0 first: if scripts/verify-S132.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S132.sh exits 0, pnpm verify exits 0, no files outside functions/src/, functions/vitest.config.ts, package.json, packages/domain/, openapi/, web/src/api/, CLAUDE.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S132.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
+
+**Status:** `todo`
+
+### S133 — Design: the changelist page and what's new on the update notifications
+
+**Gap:** The owner asked for a changelist page, a link to it from the update notice, a notification after updating that dismisses itself and links to it, and the big additions shown on both notifications (owner, 2026-11-08: *"The update dialog should link to it and a notification that auto dismisses after updating should show a link to it. Really big new additions should show on the update notification itself"*; asked which notification, *"Both"*). The ratified shell draws only the update-available notice (A6), with no link or notes, and nothing draws the page or the after-update notification, so S134 and S135 can't build them without designing in code (rule 18).
+
+**Impact:** Before S133, nothing showed what the changelist page or the new notifications look like. S133 impact: the owner approves the page, the link, the after-update notification and how big additions appear, before S134 and S135 build them.
+
+**Source:** Feature: Update / changelist UX
+
+**Gates (rule 18):** S134 and S135 — they name S133 on their `**Design:**` lines.
+
+**Depends on:** nothing.
+
+**Scope files:** `docs/v3/visual/shell-scoreboard/amendments/`, `docs/v3/VISUAL-DESIGN.md`, `docs/v3/FEATURES.md`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`
+
+**Work**
+
+0. Write `scripts/verify-S133.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** building (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S133.sh` performs)
+
+1. A ratified amendment to the shell-scoreboard surface draws, at mobile, medium and desktop: the changelist page with S131's buckets (headline additions, each item labeled by its kind, the one "fixes and polish" line) for more than one release, and its empty, loading and error states; the A6 update-available notice with its link to the page, with and without big additions (one, and more than fit); and the after-update notification with its link, with and without big additions. It says where else the page is reached from (or that it isn't), its address, and how long the after-update notification stays before it dismisses itself. It also says: what A6 shows instead of additions, and whether its link shows and where it goes, when it is up because the server retired this version, which can't load them (S28 raises the same notice with the same message as a waiting update, S73; `web/src/pwa/updates.ts`; see the note); where the after-update notification sits when another notice is up (A6's box at the foot of the screen, S74's offline marker under the header; `web/src/layout/NoticeSlot.tsx`); and the rail's version line (A2/A5, today `v3.0.<Actions run> (<commit>)` from `web/src/layout/version.ts`) showing the build's release version once it knows it, so the rail and the changelist name the same version (owner, 2026-11-08, asked whether the rail shows the release or stays a build counter: *"Follow semver"*).
+2. The owner ratified it in the session it was shown (quoted), recorded the way the other amendments are.
+3. This file's S133 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- A ratified file is never edited (CLAUDE.md), so the story writes only an amendment, as earlier amendments did; it takes the next free number (A7 is S107's unratified draft, and S123 may take one first).
+- **Retired version.** When the server has retired a build's API version, every route under that version answers 426 (`functions/src/handlers/api.ts`, S28), so that build can load neither the additions (`GET /api/v1/releases?after=`) nor the changelist page (S134 reads `/api/v1/releases` too). The retired-case frame draws no additions, and says where its link goes (e.g. it moves to the new version first, as Update Now does, `updateToNewVersion`, since a plain reload under the old service worker brings back the retired build, `web/src/pwa/updates.ts`) or that it isn't shown.
+- Release notes have no scores, so Hide Scores doesn't change anything here; say so if the frames need it.
+
+**Reuse check** (ADR-025): before drawing, read A6 (the update notice) and its frames, the ratified page frames' heading and list styles, and VISUAL-DESIGN's notification and muted-text tokens; a design story writes no code; record what was reused, or why nothing fit, in the story's ledger notes.
+
+**Turn cap:** 10 — assumes one page in four states, two notifications in two states each, at three widths, and one owner session to ratify; waiting on the owner parks the story rather than spending turns.
+
+**Goal condition:** scripts/verify-S133.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/shell-scoreboard/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/FEATURES.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified, or stop after 10 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S133. Work item 0 first: if scripts/verify-S133.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S133.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/shell-scoreboard/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/FEATURES.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S133.sh, or stop after 10 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
+
+**Status:** `todo`
+
+### S134 — The changelist page lists each release's approved notes
+
+**Gap:** The owner asked for a fan-facing changelist page (owner, 2026-11-08: *"I need a user-facing changelist page which lists the changes in each release simplified to just those things which impact users"*). S132 serves each release's approved notes, and nothing in the app shows them.
+
+**Impact:** Before S134, a fan had no way to see what changed in a release. S134 impact: one page lists every release since v3.1.0 in plain words — the big additions, the other changes that matter, and one line for the small fixes.
+
+**Source:** Feature: Update / changelist UX
+
+**Design:** S133 — build to the approved frames. This story may only move to `doing` once every design story named here is `done` (rule 18; `pnpm backlog:check` enforces it).
+
+**Depends on:** **S132** (`GET /api/v1/releases`). Also **S81** (design capture).
+
+**Scope files:** `web/src/`, `web/vitest.config.ts`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`, `e2e/design/`, `docs/v3/design-checks/`
+
+**Work**
+
+0. Write `scripts/verify-S134.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** building (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S134.sh` performs)
+
+1. The page, at the address S133 gives (route in `web/src/routes.tsx`), draws every release from `GET /api/v1/releases` newest first, each with its headline additions, its items labeled by kind, and its "fixes and polish" line when it has one, as S133 draws them, through one named TanStack Query hook (RTL with two releases, one without a fixes line and one without headline additions).
+2. Its empty, loading and error states are drawn as S133 draws them (RTL).
+3. The page is reached from wherever S133 says, and a signed-out visitor sees it too (RTL).
+4. Files this story adds or edits don't call `useMediaQuery`, `hiddenFrom` or `visibleFrom` outside `web/src/layout/` (grep).
+5. Design match (rule 22): for each ratified frame this story builds (desktop captured at 1200px, owner 2026-10-28: *"Capture at 1200px"*), `pnpm design:capture S134` saves the built page to `docs/v3/design-checks/S134/<frame>.png` from `e2e/design/S134.spec.ts`; the grader checks each file exists at its pairing's width. The story parks `blocked` with its captures committed until the owner says each pair matches, recorded with `scripts/audit.sh story S134 --design-match -`.
+6. This file's S134 **Status** (story heading and top table) is `done`.
+
+**Reuse check** (ADR-025): before writing code, read S132's client function in `web/src/api/client.ts`, an existing page with a list and empty/loading/error states (`web/src/pages/StandingsPage.tsx`) and the shared heading components; record what was reused in the story's ledger notes.
+
+**Turn cap:** 10 — assumes one page from one request, its states, its entry points and the rule 22 design match.
+
+**Goal condition:** scripts/verify-S134.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified, or stop after 10 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S134. Work item 0 first: if scripts/verify-S134.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S134.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, e2e/design/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S134.sh, or stop after 10 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
+
+**Status:** `todo`
+
+### S135 — The update notice links to the changelist and shows big additions; a notification after updating does too, then dismisses itself
+
+**Gap:** The owner asked that the update notice link to the changelist page, that a notification after updating link to it and dismiss itself, and that really big additions show on both (owner, 2026-11-08: *"The update dialog should link to it and a notification that auto dismisses after updating should show a link to it. Really big new additions should show on the update notification itself (via API data comparing versions)"*; asked which notification, *"Both"*). Today the update notice (S73, A6) says only that an update is ready, nothing shows after updating, and the web app doesn't know which release it is.
+
+**Impact:** Before S135, a fan updated without knowing what they'd get, and saw nothing afterwards. S135 impact: the update notice says what's big in the new version and links to the full list, and after updating a short notification does the same, then gets out of the way.
+
+**Source:** Feature: Update / changelist UX
+
+**Design:** S133 — build to the approved frames. This story may only move to `doing` once every design story named here is `done` (rule 18; `pnpm backlog:check` enforces it).
+
+**Depends on:** **S132** (`GET /api/v1/releases?after=`), **S134** (the page the links open). Also **S81** (design capture).
+
+**Scope files:** `web/src/`, `web/vite.config.ts`, `web/vitest.config.ts`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`, `e2e/design/`, `e2e/flows/`, `docs/v3/design-checks/`
+
+**Work**
+
+0. Write `scripts/verify-S135.sh` meeting the [Verify-script contract](#verify-script-contract). Run it against current HEAD and show the nonzero exit **before** building (rule 9).
+
+**Acceptance criteria** (checks `scripts/verify-S135.sh` performs)
+
+1. The web build knows the release it is, from S131's `currentRelease` over the approved notes in `releases/` at build time (`web/vite.config.ts`), not a second implementation (test: the built value equals `currentRelease` of the repo's notes; with none approved it is null).
+2. The update-available notice (A6) links to the changelist page, and shows the headline additions of `GET /api/v1/releases?after=<this build's release>` as S133 draws them; with none, with no release known, or when the request fails for any reason other than a retired version's 426, it shows the link alone and still offers Snooze and Update Now; when A6 is up because the server retired this version (S28), the `?after=` request gets a 426 (every route of a sunset version does, `functions/src/handlers/api.ts`), so A6 shows no additions and shows or leaves out the link as S133 draws it (RTL with a mocked API for each case, including a 426).
+3. After an update: each load of a build whose release is known records it in browser storage, under its own key in `web/src/storage/storage.ts`'s `STORAGE_KEYS` labeled not personal (ADR-028's `none`, as S73's keys are), never the update notice's snooze key (`bt.updateSnoozedUntil`); a load whose release is newer than the recorded one shows the after-update notification with the link and the headline additions of the releases in between (`?after=<recorded>`), or the link alone when that request fails or returns none, which dismisses itself after S133's time and can be dismissed by hand, and sits where S133 puts it when A6's box or a message-only marker is in the slot (S74's kind; the test passes a marker `Notice`, since S74 may not be built yet) (RTL with each). A first visit (nothing recorded), a recorded value that isn't a release version (treated as nothing recorded, and overwritten), the same release, an older one (a rollback), a build whose release is null (nothing is recorded) or storage that throws show nothing and break nothing (RTL with fake timers, a malformed stored value and a storage stub that throws).
+4. Once the build knows its release (AC 1), the rail's version line (`web/src/layout/version.ts`) shows that release's semver version as S133 draws it, not `v3.0.<Actions run>`; with no release known it stays as it is (owner, 2026-11-08: *"Follow semver"*) (unit test of `version.ts` with and without a release).
+5. Files this story adds or edits don't call `useMediaQuery`, `hiddenFrom` or `visibleFrom` outside `web/src/layout/` (grep).
+6. Design match (rule 22): for each ratified frame this story builds (desktop captured at 1200px, owner 2026-10-28: *"Capture at 1200px"*), `pnpm design:capture S135` saves the built page to `docs/v3/design-checks/S135/<frame>.png` from `e2e/design/S135.spec.ts`; the grader checks each file exists at its pairing's width. The story parks `blocked` with its captures committed until the owner says each pair matches, recorded with `scripts/audit.sh story S135 --design-match -`.
+7. This file's S135 **Status** (story heading and top table) is `done`.
+
+**Notes:**
+
+- A build from before S135 records no release, so the first update onto a build with S135 shows no after-update notification (AC 3's first-visit case); every later update does.
+- The update-available notice comes up in the *old* build, which asks the newly deployed API what's new since itself; that is why the comparison lives on the server (S132).
+- **2026-11-08 backlog review.** S132's answer may be cached for up to 5 minutes, so in the minutes after a deploy either notice can get the old server's answer (no newer release): that is AC 2's and AC 3's "none" case (the link alone), not an error. The rail's version line is built here, by AC 4, from S133's frames.
+- `e2e/flows/update.spec.ts` asserts A6's message and that it has no Dismiss button, and runs in CI's `flows` job (which `ci-passed` needs), not in `pnpm verify`: update it to S133's frames in this story.
+
+**Reuse check** (ADR-025): before writing code, read `web/src/pwa/updates.ts` and `UpdateNotice.test.tsx` (S73/S28's notice and snooze), how `web/src/pwa/install.ts` guards browser storage, S132's client function and S134's page route, and the `releases/` reader S131's `release:check` and S132's bundle command share (use it from the Vite config if it imports cleanly there rather than writing a third); record what was reused in the story's ledger notes.
+
+**Turn cap:** 12 — assumes a build-time constant, two notices sharing one headline list (with the retired-version and notice-placement cases), one storage key, the rail's version line, the update flow test and the rule 22 design match.
+
+**Goal condition:** scripts/verify-S135.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/vite.config.ts, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, e2e/design/, e2e/flows/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+
+**`/goal` command**
+
+```text
+/goal docs/v3/BACKLOG.md S135. Work item 0 first: if scripts/verify-S135.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S135.sh exits 0, pnpm verify exits 0, no files outside web/src/, web/vite.config.ts, web/vitest.config.ts, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md, e2e/design/, e2e/flows/, docs/v3/design-checks/ are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S135.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
+```
+
+**Status:** `todo`
 
 ---
 
@@ -7807,6 +8051,7 @@ Keep as themes until promoted; still architecture-aligned when sliced:
 | Every game since 1901 (FEATURES, owner 2026-11-07) | **S122** `pnpm mlb:backfill`, run locally first; whether it ever runs against production is the owner's call, asked separately |
 | Calendar date picker (FEATURES, owner 2026-11-07) | Design **S123** → **S124** games per day (prefers S122's stored seasons) → **S125** picker |
 | Collapsed bar opens the game (VISUAL-DESIGN §6 Scoreboard, owner 2026-11-07) | **S126** |
+| Changelist page and what's new on update notices (FEATURES Update / changelist UX, owner 2026-11-08) | **S131** approved release notes → **S132** API; design **S133** → **S134** page, **S135** notices |
 | Video play links from Search's floating player (FEATURES, owner 2026-11-05) | Design **S127**; its intake re-scopes **S5** or slices the build |
 | Budgets + coverage (ADR-026) | **S54** size + render counts + ratchet, **S81** Playwright + design-match captures (rule 22), **S62** Lighthouse CI + flows; bringing LCP under 2.5 s (both pages warn at about 3.2–3.3 s) — no story yet (owner, 2026-10-29: "we can figure out the problems later") |
 
