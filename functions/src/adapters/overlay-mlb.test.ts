@@ -101,3 +101,56 @@ describe("overlayMlbClient (S112)", () =>
 		expect(await source.game(1)).toBeNull();
 	});
 });
+
+describe("overlayMlbClient schedule range (S124)", () =>
+{
+	it("answers the days the source holds and asks the client underneath once, for the span it lacks", async () =>
+	{
+		const inner = new FixtureMlbStatsClient();
+		const fromInner = await inner.fetchSchedule("2024-07-04");
+		const asked: [string, string][] = [];
+		const counting = Object.assign(Object.create(inner) as MlbStatsClient, {
+			fetchScheduleRange: async (from: string, to: string) =>
+			{
+				asked.push([from, to]);
+				return inner.fetchScheduleRange(from, to);
+			},
+		});
+		const mlb = overlayMlbClient(counting, {
+			schedule: async (date) => date === "2024-07-02" ? {
+				...fromInner,
+				date,
+			} : null,
+			game: async () => null,
+		});
+		const days = await mlb.fetchScheduleRange("2024-07-01", "2024-07-04");
+		expect(days.map((day) => day.date)).toEqual(["2024-07-01", "2024-07-02", "2024-07-03", "2024-07-04"]);
+		expect(days[1]!.games).toEqual(fromInner.games);
+		expect(days[3]!.games).toEqual(fromInner.games);
+		expect(days[0]!.games).toEqual([]);
+		expect(asked).toEqual([["2024-07-01", "2024-07-04"]]);
+	});
+
+	it("asks nothing underneath when the source holds every day", async () =>
+	{
+		const inner = new FixtureMlbStatsClient();
+		const fromInner = await inner.fetchSchedule("2024-07-04");
+		let asked = 0;
+		const counting = Object.assign(Object.create(inner) as MlbStatsClient, {
+			fetchScheduleRange: async () =>
+			{
+				asked++;
+				return [];
+			},
+		});
+		const mlb = overlayMlbClient(counting, {
+			schedule: async (date) => ({
+				...fromInner,
+				date,
+			}),
+			game: async () => null,
+		});
+		expect(await mlb.fetchScheduleRange("2024-07-01", "2024-07-02")).toHaveLength(2);
+		expect(asked).toBe(0);
+	});
+});

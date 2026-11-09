@@ -127,6 +127,7 @@ describe("GET /api/v1/games/:gamePk and /api/v1/schedule Cache-Control (S47)", (
 		let changed = false;
 		const mlb: MlbStatsClient = {
 			fetchSchedule: (d) => real.fetchSchedule(d),
+			fetchScheduleRange: (from, to) => real.fetchScheduleRange(from, to),
 			fetchGame: async (pk) =>
 			{
 				const game = await real.fetchGame(pk);

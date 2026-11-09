@@ -65,6 +65,11 @@ class FakeMlbStatsClient implements MlbStatsClient
 		};
 	}
 
+	async fetchScheduleRange(startDate: string): Promise<Unversioned<ScheduleDay>[]>
+	{
+		return [await this.fetchSchedule(startDate)];
+	}
+
 	async fetchGame(gamePk: number): Promise<GameSnapshot>
 	{
 		const game = await readFixture<GameSnapshot>("game-744834.json");

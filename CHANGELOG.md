@@ -14,6 +14,16 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## How many games each day has, a month at a time
+
+- **Before, a calendar wanting to show how many games each day has would have needed a separate request for every
+  day of the month. Now one request answers the whole month, straight from what Baseball Theater has stored, and
+  days it hasn't seen yet are fetched from MLB in a single go.** A day it can't know yet says so, rather than
+  pretending it has no games. Nothing on screen uses it yet: the calendar date picker that shows these counts comes
+  next. Details: **S124** — `GET /api/v1/schedule/month/:month` (`monthGameCounts`, `isCalendarMonth`,
+  `ScheduleRepository.listGameCounts`), filled through one `MlbStatsClient.fetchScheduleRange` request and
+  `storeSchedule` with no game hydrated, cached by the month's last change (ADR-021).
+
 ## Testing on staging
 
 - **Before, staging started empty and filled in only as people browsed it. Now, when the owner asks, it gets every

@@ -39,3 +39,40 @@ export function yearsBefore(date: string, years: number): string
 	const stepped = `${String(Number(date.slice(0, 4)) - years).padStart(4, "0")}${date.slice(4)}`;
 	return isCalendarDate(stepped) ? stepped : addDays(`${stepped.slice(0, 4)}-03-01`, -1);
 }
+
+/** Every date from `from` to `to`, both included, in order (S124); empty when `to` is before `from`. */
+export function datesBetween(from: string, to: string): string[]
+{
+	const dates: string[] = [];
+	for (let date = from; date <= to; date = addDays(date, 1)) dates.push(date);
+	return dates;
+}
+
+/**
+ * The earliest month BT serves a calendar for (S124): the month of the first MLB game BT keeps,
+ * `BACKFILL_EARLIEST_DATE` (1901-04-18, `backfill.ts`, which imports this module, so the month
+ * is written out here rather than derived; `calendar-date.test.ts` holds the two together).
+ */
+export const EARLIEST_CALENDAR_MONTH = "1901-04";
+
+/**
+ * Whether `text` is a month BT can answer for, `YYYY-MM` (S124's `/api/v1/schedule/month/:month`):
+ * the shape, a month the calendar has (`01`–`12`, so `2026-13`, `2026-00` and `1901-4` are not
+ * ones), and no earlier than {@link EARLIEST_CALENDAR_MONTH}. The one check of a month parameter,
+ * beside {@link isCalendarDate}, so no handler keeps a pattern of its own.
+ */
+export function isCalendarMonth(text: string): boolean
+{
+	const match = /^(\d{4})-(\d{2})$/.exec(text);
+	if (!match) return false;
+	const month = Number(match[2]);
+	return month >= 1 && month <= 12 && text >= EARLIEST_CALENDAR_MONTH;
+}
+
+/** Every date of a `YYYY-MM` month, first to last (S124): `2028-02` has 29, `2026-02` 28. */
+export function daysOfMonth(month: string): string[]
+{
+	const first = `${month}-01`;
+	const nextMonth = addDays(`${month}-28`, 4).slice(0, 7);
+	return datesBetween(first, addDays(`${nextMonth}-01`, -1));
+}

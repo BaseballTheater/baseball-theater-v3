@@ -83,3 +83,16 @@ describe("FixtureClient fetchGameEditorial (S122)", () =>
 		expect(recorded?.recap).toBeTruthy();
 	});
 });
+
+describe("FixtureClient schedule range (S124)", () =>
+{
+	it("answers each day of the range as fetchSchedule does: its fixture, or no games", async () =>
+	{
+		const client = new FixtureMlbStatsClient();
+		const days = await client.fetchScheduleRange("2024-07-03", "2024-07-05");
+		expect(days.map((day) => day.date)).toEqual(["2024-07-03", "2024-07-04", "2024-07-05"]);
+		expect(days[1]!.games).toEqual((await client.fetchSchedule("2024-07-04")).games);
+		expect(days[0]!.games).toEqual([]);
+		expect(days[2]!.games).toEqual([]);
+	});
+});

@@ -17603,3 +17603,85 @@ Plus A8's own four open questions, asked at S123's ratification.
 - **Previous intake's questions:** Q1 (skip intakes on draft-only amendments) restated, still open and strengthened: this is the fourth draft-only intake, S123's A8 twice. Q2 (year-view totals) is now carried as A8's own open question Q5. Q3 (whether `count: null` dims) is answered by the draft (A8.md:87), superseded pending ratification.
 - **Note for S123's ratification ask (not a backlog change):** should A8 draw the prose-only states (muted `Today`; year view loading / failed / 1901) before the owner ratifies it?
 - No new owner questions. No file under `docs/v3/visual/` edited.
+
+---
+
+## 2026-11-09 — S124 completed
+
+**Games-per-day counts API**
+
+| | |
+|---|---|
+| Entry | story completion |
+| Captured (UTC) | `2026-11-09T19:11:11Z` |
+| Shipped in | the commit that adds this entry |
+| HEAD at capture | `59b53ed` (tree dirty) |
+| Grader | `scripts/verify-S124.sh` — exit `0` |
+| `pnpm verify` | exit `0` |
+
+**What was tested and verified**
+
+```
+check 1 PASS: GET /api/v1/schedule/month/:month (in api-routes.ts) answers every day of the month with its date and its stored schedule day's game count (games not yet final included, not the games table), in one repository query, tested on PGlite and the memory repos
+check 2 PASS: missing current-season/future days are filled by one schedule-only range request (fetchScheduleRange on the port and every adapter), stored through storeSchedule (stampVersion), no fetchGame; a day still unknown is count null, distinct from 0 (empty month and month holding one day: one schedule request, no game request)
+check 3 PASS: freshness: Cache-Control from the ADR-021 ladder (cacheLifetimeMs) by the month's last change, so a changed past month's headers reset; an empty future month gains its games after expiry with one schedule request and no game request
+check 4 PASS: the route is in openapi/bt-api.v1.json, the committed spec is up to date (pnpm api:spec), and pnpm api:breaking exits 0
+check 5 PASS: months before 1901-04 and malformed months (1901-4, 2026-13, 2026-00) answer 400, checked by isCalendarMonth beside isCalendarDate in packages/domain/src/calendar-date.ts, not a pattern in the handler
+check 6 PASS: backlog Status is done (story heading and Story status table), and the story stays inside its scope files
+```
+
+**6/6 checks passed**
+
+<details><summary>Grader output</summary>
+
+```
+
+--- verify-S124 check results ---
+check 1 PASS: GET /api/v1/schedule/month/:month (in api-routes.ts) answers every day of the month with its date and its stored schedule day's game count (games not yet final included, not the games table), in one repository query, tested on PGlite and the memory repos
+check 2 PASS: missing current-season/future days are filled by one schedule-only range request (fetchScheduleRange on the port and every adapter), stored through storeSchedule (stampVersion), no fetchGame; a day still unknown is count null, distinct from 0 (empty month and month holding one day: one schedule request, no game request)
+check 3 PASS: freshness: Cache-Control from the ADR-021 ladder (cacheLifetimeMs) by the month's last change, so a changed past month's headers reset; an empty future month gains its games after expiry with one schedule request and no game request
+check 4 PASS: the route is in openapi/bt-api.v1.json, the committed spec is up to date (pnpm api:spec), and pnpm api:breaking exits 0
+check 5 PASS: months before 1901-04 and malformed months (1901-4, 2026-13, 2026-00) answer 400, checked by isCalendarMonth beside isCalendarDate in packages/domain/src/calendar-date.ts, not a pattern in the handler
+check 6 PASS: backlog Status is done (story heading and Story status table), and the story stays inside its scope files
+--- verify-S124: 6/6 checks passed ---
+verify-S124: all checks passed
+```
+
+</details>
+
+<details><summary><code>pnpm verify</code> (tail)</summary>
+
+```
+ ✓ |tools| size-limit/size-limit.test.js (2 tests) 122ms
+ ✓ |tools| comments-stale/comments-stale.test.js (4 tests) 8ms
+ ✓ |tools| eslint-rules/no-mlb-in-web.test.js (5 tests) 24ms
+ ✓ |tools| eslint-rules/no-browser-storage.test.js (9 tests) 27ms
+ ✓ |tools| eslint-rules/no-personal-data-in-logs.test.js (8 tests) 26ms
+ ✓ |tools| eslint-rules/no-viewport-outside-layout.test.js (6 tests) 28ms
+ ✓ |tools| jscpd/jscpd.test.js (2 tests) 573ms
+   ✓ jscpd duplication gate (.jscpd.json) > passes a tree with no copied code  304ms
+ ✓ |tools| eslint-rules/no-domain-arithmetic.test.js (6 tests) 337ms
+   ✓ bt/no-domain-arithmetic > valid > import type { Game } from "./packages/domain/game.js";
+declare const game: Game;
+export const label = game.abbreviation + " @ ";  321ms
+
+ Test Files  8 passed (8)
+      Tests  42 passed (42)
+   Start at  11:12:08
+   Duration  1.02s (transform 98ms, setup 0ms, collect 2.68s, tests 1.15s, environment 1ms, prepare 320ms)
+
+
+> baseball-theater-v3@0.0.0 size /Users/jakelauer/Repos/baseball-theater-v3
+> size-limit --json
+
+[
+  {
+    "name": "web/dist/assets/index-*.js — entry JavaScript, loads before the page is usable (ADR-026)",
+    "passed": true,
+    "size": 155462,
+    "sizeLimit": 200000
+  }
+]
+```
+
+</details>

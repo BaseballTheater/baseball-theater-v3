@@ -29,7 +29,7 @@ export type IngestDeps = {
  * and cooldown-gated (it may resolve `undefined` when the cooldown blocks it);
  * without one it just runs `fn`.
  */
-function runRefresh<T>(
+export function runRefresh<T>(
 	deps: IngestDeps,
 	key: string,
 	fn: () => Promise<T>,
@@ -160,12 +160,14 @@ export async function ingestScheduleDay(
  * `lastChangedAt` and drops it back to the floor. An `active`-window entity is never treated as stale
  * here — the cadence loop (S16) owns its freshness.
  *
+ * Exported for the month view (S124), which judges a whole month's stored days the same way.
+ *
  * "Last checked" is the later of the stored `fetchedAt` and the coordinator's
  * last refresh of `key`: an unchanged poll writes nothing (ADR-022), so the
  * stored `fetchedAt` stays at the last change, and without the coordinator's
  * time every read past the TTL would pull MLB again.
  */
-function needsRefresh(
+export function needsRefresh(
 	deps: IngestDeps,
 	key: string,
 	entity: { fetchedAt?: string;

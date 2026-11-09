@@ -38,6 +38,7 @@ function spyClient(): {
 	});
 	const client = {
 		fetchSchedule: (d: string) => real.fetchSchedule(d),
+		fetchScheduleRange: (from: string, to: string) => real.fetchScheduleRange(from, to),
 		fetchGame,
 		fetchGameContent: (pk: number) => real.fetchGameContent(pk),
 		fetchPlayMetrics: (pk: number) => real.fetchPlayMetrics(pk),

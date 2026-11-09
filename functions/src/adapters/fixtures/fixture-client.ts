@@ -10,7 +10,7 @@ import type {
 	AtBat,
 	Unversioned,
 } from "@bt/domain";
-import { rankHighlightsByImpact } from "@bt/domain";
+import { datesBetween, rankHighlightsByImpact } from "@bt/domain";
 import type { GameDiffPatchResponse, ReplayPatchEntry } from "@bt/mlb-api";
 import {
 	parseGameTimestamps, parseGraphContentResponse, parsePlayMetricsResponse, parseRecordedReplayWalk, parseScheduleResponse, parseSeasonsResponse, parseStandingsResponse,
@@ -86,6 +86,12 @@ export class FixtureClient implements MlbStatsClient, MlbGameSources
 				windowMode: "cache",
 			};
 		}
+	}
+
+	/** Each day of the range as {@link fetchSchedule} reads it (S124): its fixture, or no games without one. */
+	async fetchScheduleRange(startDate: string, endDate: string): Promise<Unversioned<ScheduleDay>[]>
+	{
+		return Promise.all(datesBetween(startDate, endDate).map((date) => this.fetchSchedule(date)));
 	}
 
 	async fetchGame(gamePk: number): Promise<Unversioned<GameSnapshot>>

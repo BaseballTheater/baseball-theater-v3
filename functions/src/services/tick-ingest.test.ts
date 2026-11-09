@@ -43,6 +43,11 @@ class CountingMlbClient implements MlbStatsClient
 		return this.day;
 	}
 
+	async fetchScheduleRange(): Promise<Unversioned<ScheduleDay>[]>
+	{
+		return [this.day];
+	}
+
 	async fetchGame(gamePk: number): Promise<Unversioned<GameSnapshot>>
 	{
 		this.gameCalls.push(gamePk);

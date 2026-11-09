@@ -3,7 +3,7 @@ import type {
 } from "@bt/domain";
 import type { SettingsRepository } from "@bt/ports";
 import {
-	API_VERSIONS, DEFAULT_SETTINGS, apiVersionOf, deprecationHeaders, parseAccountSettings, toGameSnapshotResponse, toMeResponse, toScheduleDayResponse,
+	API_VERSIONS, DEFAULT_SETTINGS, apiVersionOf, deprecationHeaders, isCalendarMonth, parseAccountSettings, toGameSnapshotResponse, toMeResponse, toScheduleDayResponse,
 } from "@bt/domain";
 import type { AccountDataDeps } from "../services/account-deletion.js";
 import { deleteAccount } from "../services/account-deletion.js";
@@ -19,6 +19,7 @@ import {
 } from "../services/data-downloads.js";
 import type { ApiUsageLog } from "../services/api-usage.js";
 import { getDayDigest } from "../services/digest.js";
+import { getScheduleMonth } from "../services/schedule-month.js";
 import { getDefaultScoreboardDate } from "../services/scoreboard-date.js";
 import { getStandings } from "../services/standings.js";
 import type { IngestDeps } from "../services/ingest.js";
@@ -187,6 +188,30 @@ export const API_ROUTER: readonly RouteEntry[] = [
 				force,
 			});
 			return withCacheControl(sendJson(200, "GET /api/v1/schedule", toScheduleDayResponse(day)), day, ctx);
+		},
+	},
+	{
+		route: "GET /api/v1/schedule/month/:month",
+		handle: async (_url, params, ctx) =>
+		{
+			// One check of the month (S124 AC 5): its shape, a real month, and none before 1901-04.
+			const month = params.month ?? "";
+			if (!isCalendarMonth(month))
+			{
+				return sendError(400, {
+					error: "month_invalid",
+					hint: "YYYY-MM, 1901-04 or later",
+				});
+			}
+			const result = await getScheduleMonth(ctx.ingest, month);
+			// Cached by when the month's data last changed (ADR-021), never by whether it is past.
+			return withCacheControl(sendJson(200, "GET /api/v1/schedule/month/:month", {
+				month: result.month,
+				days: result.days,
+			}), {
+				windowMode: "cache",
+				lastChangedAt: result.lastChangedAt,
+			}, ctx);
 		},
 	},
 	{

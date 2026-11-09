@@ -9,10 +9,11 @@ import type { GameSnapshot, ScheduleDay } from "./types.js";
 
 describe("ApiRoutes", () =>
 {
-	it("is a runtime-enumerable table covering the schedule, game, digest, standings, scoreboard default-date, account and sign-in routes", () =>
+	it("is a runtime-enumerable table covering the schedule, schedule month, game, digest, standings, scoreboard default-date, account and sign-in routes", () =>
 	{
 		expect(Object.keys(ApiRoutes)).toEqual([
 			"GET /api/v1/schedule",
+			"GET /api/v1/schedule/month/:month",
 			"GET /api/v1/games/:gamePk",
 			"GET /api/v1/digest",
 			"GET /api/v1/standings",
@@ -28,6 +29,7 @@ describe("ApiRoutes", () =>
 			"POST /api/v1/sign-in",
 		]);
 		expect(ApiRoutes["GET /api/v1/schedule"]).toBe("ScheduleDayResponse");
+		expect(ApiRoutes["GET /api/v1/schedule/month/:month"]).toBe("ScheduleMonthResponse");
 		expect(ApiRoutes["GET /api/v1/games/:gamePk"]).toBe("GameSnapshotResponse");
 		expect(ApiRoutes["GET /api/v1/digest"]).toBe("DayDigestResponse");
 		expect(ApiRoutes["GET /api/v1/standings"]).toBe("StandingsResponse");

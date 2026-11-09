@@ -185,6 +185,7 @@ function counted(base: { schedules: ScheduleRepository;
 		writes,
 		schedules: {
 			getByDate: (date) => base.schedules.getByDate(date),
+			listGameCounts: (from, to) => base.schedules.listGameCounts(from, to),
 			upsert: async (day) =>
 			{
 				writes.push(`schedule ${day.date}`);

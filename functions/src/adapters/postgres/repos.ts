@@ -11,7 +11,7 @@
  * holds aliases the store.
  */
 import type {
-	AccountSettings, Entitlements, GameProjection, GameSnapshot, PatronTier, Role, ScheduleDay, UserProfile,
+	AccountSettings, Entitlements, GameProjection, GameSnapshot, PatronTier, Role, ScheduleDay, ScheduleDayTally, UserProfile,
 } from "@bt/domain";
 import type {
 	DeletionLog,
@@ -26,7 +26,7 @@ import type {
 	UserRepository,
 } from "@bt/ports";
 import {
-	and, asc, eq, sql,
+	and, asc, between, eq, sql,
 } from "drizzle-orm";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import {
@@ -89,6 +89,22 @@ export class PostgresScheduleRepository implements ScheduleRepository
 			},
 			setWhere: sql`excluded.version > ${scheduleDays.version}`,
 		});
+	}
+
+	/** One query for the whole range; the games are counted in the database, so no document leaves it. */
+	async listGameCounts(from: string, to: string): Promise<ScheduleDayTally[]>
+	{
+		const rows = await this.db.select({
+			date: scheduleDays.date,
+			gameCount: sql<number>`jsonb_array_length(${scheduleDays.document}->'games')`,
+			fetchedAt: sql<string>`${scheduleDays.document}->>'fetchedAt'`,
+			lastChangedAt: sql<string>`${scheduleDays.document}->>'lastChangedAt'`,
+		}).from(scheduleDays).where(between(scheduleDays.date, from, to)).orderBy(asc(scheduleDays.date));
+		// A driver may hand an integer back as a string; the port promises a number.
+		return rows.map((row) => ({
+			...row,
+			gameCount: Number(row.gameCount),
+		}));
 	}
 }
 

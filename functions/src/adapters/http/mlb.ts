@@ -42,7 +42,7 @@ import { mapPeople } from "../../mappers/players.js";
 import { mapStandings } from "../../mappers/standings.js";
 import { mapLiveFeed } from "../../mappers/live.js";
 import { mapPlayMetrics } from "../../mappers/play-metrics.js";
-import { mapScheduleResponse } from "../../mappers/schedule.js";
+import { mapScheduleRange, mapScheduleResponse } from "../../mappers/schedule.js";
 import { mapSeasonCalendar } from "../../mappers/season-calendar.js";
 
 const DEFAULT_BASE_URL = "https://statsapi.mlb.com";
@@ -180,6 +180,14 @@ export class HttpMlbStatsClient implements MlbStatsClient, MlbGameSources
 		const url = `${this.baseUrl}/api/v1/schedule?sportId=1&date=${date}&hydrate=${SCHEDULE_HYDRATE}`;
 		const payload = parseScheduleResponse(await this.getJson(url));
 		return mapScheduleResponse(payload, date, this.now().toISOString(), "active");
+	}
+
+	/** One request for the whole range (S124), with the same hydrate as a day, so a stored day reads the same either way. */
+	async fetchScheduleRange(startDate: string, endDate: string): Promise<Unversioned<ScheduleDay>[]>
+	{
+		const url = `${this.baseUrl}/api/v1/schedule?sportId=1&startDate=${startDate}&endDate=${endDate}&hydrate=${SCHEDULE_HYDRATE}`;
+		const payload = parseScheduleResponse(await this.getJson(url));
+		return mapScheduleRange(payload, startDate, endDate, this.now().toISOString(), "active");
 	}
 
 	async fetchGame(gamePk: number): Promise<Unversioned<GameSnapshot>>
