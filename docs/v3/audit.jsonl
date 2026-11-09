@@ -301,3 +301,4 @@
 {"line":17415,"date":"2026-11-08","kind":"review","review":"backlog","verdict":"amended","heading":"## 2026-11-08 — backlog review (`amended`)"}
 {"line":17485,"date":"2026-11-08","kind":"review","review":"parity","verdict":"amended","heading":"## 2026-11-08 — doc parity review (`amended`)"}
 {"line":17516,"date":"2026-11-09","kind":"answers","review":"backlog","answers":"2026-11-08","heading":"## 2026-11-09 — backlog review answers (2026-11-08)"}
+{"line":17531,"date":"2026-11-09","kind":"skip","review":"backlog","heading":"## 2026-11-09 — backlog review skipped"}

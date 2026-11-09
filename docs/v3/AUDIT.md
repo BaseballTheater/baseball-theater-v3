@@ -17525,3 +17525,18 @@ Owner questions: none.
 **Answers and what was applied**
 
 Owner, 2026-11-08: 1. rail version line: "Follow semver". 2. v3.1.0 notes until S131: "GitHub Release notes". 3. S131 deploy step: "This is the go-ahead". 4. impossible API dates as 400: "No, leave as is".
+
+---
+
+## 2026-11-09 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-09T03:33:01Z` |
+| HEAD at capture | `d843d8f` (tree clean) |
+| Change | `d843d8f` — Backlog: pre-PR review fixes to S131–S135 and the interim release-notes rule |
+
+**What changed, and the owner's answer**
+
+S131, S132, S133 and S135 acceptance criteria rewritten in d843d8f to answer the pre-PR review of this pull request (LOOP §7), before it opened. Skipped under the owner's rule for review-driven rewrites (owner, 2026-11-07, asked whether ACs rewritten to answer a pull request's review need a backlog review: "This shouldn't even trigger a question. Always skip."), read as covering a reviewer's review of the pull request before it opens; the owner can overrule.
