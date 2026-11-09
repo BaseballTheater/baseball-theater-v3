@@ -27,15 +27,20 @@ export type IngestDeps = {
 /**
  * Run one upstream refresh for `key`. With a coordinator this is single-flighted
  * and cooldown-gated (it may resolve `undefined` when the cooldown blocks it);
- * without one it just runs `fn`.
+ * without one it just runs `fn`. `countsAsCheck` is passed to the coordinator
+ * (`RefreshCoordinator.run`): whether a result counts as a check of `key`.
+ *
+ * Exported for the month view (S124), whose range fill shares the coordinator's
+ * single-flight and cooldown with the day and game reads.
  */
 export function runRefresh<T>(
 	deps: IngestDeps,
 	key: string,
 	fn: () => Promise<T>,
+	countsAsCheck?: (result: T) => boolean,
 ): Promise<T | undefined>
 {
-	return deps.refresh ? deps.refresh.run(key, fn) : fn();
+	return deps.refresh ? deps.refresh.run(key, fn, countsAsCheck) : fn();
 }
 
 /**
@@ -57,7 +62,8 @@ async function storeGame(deps: Pick<IngestDeps, "games" | "projections">, fetche
 
 /**
  * The schedule-day counterpart of {@link storeGame}. Exported for the backfill (S122), which
- * asks a day's games one source at a time and so can't go through {@link ingestScheduleDay}.
+ * asks a day's games one source at a time and so can't go through {@link ingestScheduleDay},
+ * and for the month view's range fill (S124), which stores schedule days without hydrating games.
  */
 export async function storeSchedule(deps: Pick<IngestDeps, "schedules">, fetched: Unversioned<ScheduleDay>): Promise<ScheduleDay>
 {
@@ -163,7 +169,8 @@ export async function ingestScheduleDay(
  * Exported for the month view (S124), which judges a whole month's stored days the same way.
  *
  * "Last checked" is the later of the stored `fetchedAt` and the coordinator's
- * last refresh of `key`: an unchanged poll writes nothing (ADR-022), so the
+ * last refresh of `key` that counted as a check (`RefreshCoordinator.lastRefreshedAt`;
+ * the month view's failed fill doesn't): an unchanged poll writes nothing (ADR-022), so the
  * stored `fetchedAt` stays at the last change, and without the coordinator's
  * time every read past the TTL would pull MLB again.
  */

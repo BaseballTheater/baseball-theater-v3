@@ -3,12 +3,14 @@
  * `fixtures/raw/` by URL — 823823's feed, content, play metrics and GraphQL content, each
  * recorded day's schedule, the seasons and World Series, and the standings (a day's, a season's
  * final and spring tables, S128) — and answers MLB's empty day or empty table for one without a
- * recording and 404 for anything else. `override` answers a URL first, for a test's own case. No
+ * recording and 404 for anything else. A schedule range (`startDate`/`endDate`, S124) is answered
+ * as MLB answers one: the recorded days in the range, each under `dates`, and none for the rest. `override` answers a URL first, for a test's own case. No
  * test that uses it touches the network.
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { datesBetween } from "@bt/domain";
 import { HttpMlbStatsClient } from "../adapters/http/mlb.js";
 
 const RAW = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../fixtures/raw");
@@ -46,6 +48,26 @@ function recorded(url: URL): string | null
 	return null;
 }
 
+/** One range answer (S124) built from the recorded days in it: MLB lists only days that have games. */
+function recordedRange(startDate: string, endDate: string): string
+{
+	const dates = datesBetween(startDate, endDate).flatMap((date) =>
+	{
+		try
+		{
+			return (JSON.parse(readFileSync(path.join(RAW, `schedule-${date}.json`), "utf8")) as { dates: unknown[] }).dates;
+		}
+		catch
+		{
+			return [];
+		}
+	});
+	return JSON.stringify({
+		...JSON.parse(EMPTY_DAY) as object,
+		dates,
+	});
+}
+
 /** HttpMlbStatsClient on the recordings, logging every URL it asks for (the clock: 2026-11-04). */
 export function recordedClient(override?: (url: URL) => Response | undefined): { mlb: HttpMlbStatsClient;
 	asked: string[]; }
@@ -59,6 +81,8 @@ export function recordedClient(override?: (url: URL) => Response | undefined): {
 			asked.push(url.toString());
 			const answer = override?.(url);
 			if (answer) return answer;
+			const [startDate, endDate] = [url.searchParams.get("startDate"), url.searchParams.get("endDate")];
+			if (url.pathname === "/api/v1/schedule" && startDate && endDate) return new Response(recordedRange(startDate, endDate));
 			const file = recorded(url);
 			if (file)
 			{

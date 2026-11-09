@@ -3,7 +3,8 @@ import type {
 } from "@bt/domain";
 import type { SettingsRepository } from "@bt/ports";
 import {
-	API_VERSIONS, DEFAULT_SETTINGS, apiVersionOf, deprecationHeaders, isCalendarMonth, parseAccountSettings, toGameSnapshotResponse, toMeResponse, toScheduleDayResponse,
+	API_VERSIONS, DEFAULT_SETTINGS, apiVersionOf, deprecationHeaders, isCalendarMonth, latestScheduleMonth, mlbToday, parseAccountSettings,
+	toGameSnapshotResponse, toMeResponse, toScheduleDayResponse,
 } from "@bt/domain";
 import type { AccountDataDeps } from "../services/account-deletion.js";
 import { deleteAccount } from "../services/account-deletion.js";
@@ -85,8 +86,9 @@ function sendError(status: number, body: ApiErrorResponse): Response
 }
 
 /**
- * Sets a schedule or game response's edge-cache header (S47, ADR-021) from the stored
- * entity's window and last change, judged at ingest's clock.
+ * Sets a schedule, schedule month or game response's edge-cache header (S47, ADR-021) from the
+ * stored entity's window and last change, judged at ingest's clock. The month route (S124) passes
+ * a stand-in entity: `windowMode: "cache"` and the month's last change.
  */
 function withCacheControl(response: Response, entity: Parameters<typeof edgeCacheControl>[0], ctx: ApiContext): Response
 {
@@ -201,6 +203,16 @@ export const API_ROUTER: readonly RouteEntry[] = [
 				return sendError(400, {
 					error: "month_invalid",
 					hint: "YYYY-MM, 1901-04 or later",
+				});
+			}
+			// Nor after December of next year, by MLB's today (owner, 2026-11-09: "Reject past next year"):
+			// MLB can't have published it, and answering it would cost an MLB request and stored rows.
+			const latest = latestScheduleMonth(mlbToday(ctx.ingest.now?.() ?? new Date()));
+			if (month > latest)
+			{
+				return sendError(400, {
+					error: "month_too_late",
+					hint: `YYYY-MM, ${latest} or earlier`,
 				});
 			}
 			const result = await getScheduleMonth(ctx.ingest, month);

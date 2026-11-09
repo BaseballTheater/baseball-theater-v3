@@ -40,7 +40,9 @@ export function overlayMlbClient(inner: MlbStatsClient, source: MlbOverlaySource
 
 /**
  * A range of days (S124): the days `source` holds come from it, and `inner` is asked once, for
- * the span from the first day `source` lacks to the last, only when it lacks any.
+ * the span from the first day `source` lacks to the last, only when it lacks any. The port
+ * promises one entry per day, so an answer from `inner` missing a day rejects, as a failed
+ * request does, rather than inventing that day.
  */
 async function overlayScheduleRange(inner: MlbStatsClient, source: MlbOverlaySource, startDate: string, endDate: string): Promise<Unversioned<ScheduleDay>[]>
 {
@@ -49,11 +51,11 @@ async function overlayScheduleRange(inner: MlbStatsClient, source: MlbOverlaySou
 	const missing = dates.filter((_date, i) => held[i] === null);
 	if (missing.length === 0) return held as Unversioned<ScheduleDay>[];
 	const asked = new Map((await inner.fetchScheduleRange(missing[0]!, missing.at(-1)!)).map((day) => [day.date, day]));
-	return dates.map((date, i) => held[i] ?? asked.get(date) ?? {
-		date,
-		games: [],
-		fetchedAt: new Date().toISOString(),
-		windowMode: "cache",
+	return dates.map((date, i) =>
+	{
+		const day = held[i] ?? asked.get(date);
+		if (!day) throw new Error(`schedule range ${missing[0]}…${missing.at(-1)} has no ${date}`);
+		return day;
 	});
 }
 

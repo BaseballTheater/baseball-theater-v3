@@ -6,24 +6,24 @@
  * through its last postseason game. Like `record-fixtures`, it is a network-touching command
  * that CI and `pnpm verify` never run. The next `pnpm dev` loads the file.
  */
-import { mlbToday } from "@bt/domain";
+import { isCalendarDate, mlbToday } from "@bt/domain";
 import { HttpMlbStatsClient } from "../adapters/http/mlb.js";
 import {
 	DEFAULT_SEED_PATH, defaultSeedRange, recordDevSeed, writeDevSeed,
 } from "../services/dev-seed.js";
-
-const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 function arg(name: string): string | undefined
 {
 	return process.argv.slice(2).find((a) => a.startsWith(`--${name}=`))?.split("=")[1];
 }
 
+// Each date must be a real one (`isCalendarDate`), not only the shape: `seedDays` walks from
+// `start`, and a start like 2026-02-30 would step to 03-03 and skip the days between.
 const start = arg("start");
 const end = arg("end");
-if ((start === undefined) !== (end === undefined) || [start, end].some((d) => d !== undefined && !DATE.test(d)) || (start && end && start > end))
+if ((start === undefined) !== (end === undefined) || [start, end].some((d) => d !== undefined && !isCalendarDate(d)) || (start && end && start > end))
 {
-	console.error("usage: pnpm seed:refresh [--start=YYYY-MM-DD --end=YYYY-MM-DD] [--out=<file>]  (both dates or neither, start ≤ end)");
+	console.error("usage: pnpm seed:refresh [--start=YYYY-MM-DD --end=YYYY-MM-DD] [--out=<file>]  (both dates or neither, real calendar dates, start ≤ end)");
 	process.exit(2);
 }
 

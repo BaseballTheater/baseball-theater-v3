@@ -259,3 +259,46 @@ describe("refresh cooldown", () =>
 		expect(spy.calls()).toBe(2);
 	});
 });
+
+describe("RefreshCoordinator countsAsCheck (S124)", () =>
+{
+	const T = new Date("2026-11-09T17:00:00Z");
+
+	it("without a predicate, a settled refresh counts as a check even when it throws", async () =>
+	{
+		const coordinator = new RefreshCoordinator(() => T);
+		await expect(coordinator.run("k", async () =>
+		{
+			throw new Error("MLB unreachable");
+		})).rejects.toThrow();
+		expect(coordinator.lastRefreshedAt("k")).toBe(T.getTime());
+		expect(coordinator.canRefresh("k")).toBe(false);
+	});
+
+	it("with a predicate, a result it rejects starts the cooldown but is not a check", async () =>
+	{
+		const coordinator = new RefreshCoordinator(() => T);
+		expect(await coordinator.run("k", async () => false, (ok) => ok)).toBe(false);
+		expect(coordinator.lastRefreshedAt("k")).toBeUndefined();
+		expect(coordinator.canRefresh("k")).toBe(false);
+		expect(await coordinator.run("k", async () => true, (ok) => ok)).toBeUndefined();
+	});
+
+	it("with a predicate, a refresh that throws starts the cooldown but is not a check", async () =>
+	{
+		const coordinator = new RefreshCoordinator(() => T);
+		await expect(coordinator.run("k", async () =>
+		{
+			throw new Error("database down");
+		}, () => true)).rejects.toThrow();
+		expect(coordinator.lastRefreshedAt("k")).toBeUndefined();
+		expect(coordinator.canRefresh("k")).toBe(false);
+	});
+
+	it("with a predicate, a result it accepts is a check", async () =>
+	{
+		const coordinator = new RefreshCoordinator(() => T);
+		await coordinator.run("k", async () => true, (ok) => ok);
+		expect(coordinator.lastRefreshedAt("k")).toBe(T.getTime());
+	});
+});

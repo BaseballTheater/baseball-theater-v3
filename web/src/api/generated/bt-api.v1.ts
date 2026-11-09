@@ -148,7 +148,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** The number of games on each day of one month, from BT's stored schedule. A day of the current season or later that BT doesn't hold yet is asked of MLB first; a day still unknown has `count: null`, distinct from a day with no games (`0`). */
+        /** The number of games on each day of one month, from BT's stored schedule. A day of the current season or later (through December of next year) that BT doesn't hold yet is asked of MLB first; a day still unknown has `count: null`, distinct from a day with no games (`0`). */
         get: operations["getScheduleMonth"];
         put?: never;
         post?: never;
@@ -1283,7 +1283,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description The month, as `YYYY-MM`, 1901-04 or later. */
+                /** @description The month, as `YYYY-MM`, from 1901-04 through December of next year (by MLB's today, in `America/New_York`). */
                 month: string;
             };
             cookie?: never;
@@ -1299,7 +1299,7 @@ export interface operations {
                     "application/json": components["schemas"]["ScheduleMonthResponse"];
                 };
             };
-            /** @description `month_invalid`: `month` is not `YYYY-MM`, not a real month, or before 1901-04. */
+            /** @description `month_invalid`: `month` is not `YYYY-MM`, not a real month, or before 1901-04. `month_too_late`: `month` is after December of next year, which MLB can't have published. */
             400: {
                 headers: {
                     [name: string]: unknown;

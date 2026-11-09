@@ -54,6 +54,9 @@ export function isStale(
 export class RefreshCoordinator
 {
 	private readonly inFlight = new Map<string, Promise<unknown>>();
+	/** When each key's last refresh settled, however it went: what the cooldown counts from. */
+	private readonly lastAttemptAt = new Map<string, number>();
+	/** When each key's last refresh that counts as a check settled: what {@link lastRefreshedAt} says. */
 	private readonly lastRefreshAt = new Map<string, number>();
 
 	constructor(
@@ -61,16 +64,19 @@ export class RefreshCoordinator
 		private readonly cooldownMs: number = REFRESH_COOLDOWN_MS,
 	) {}
 
-	/** When the last refresh of `key` settled (epoch ms), or undefined if it never ran. */
+	/**
+	 * When the last refresh of `key` that counts as a check settled (epoch ms), or undefined if
+	 * none has. Without a `countsAsCheck` predicate every settled refresh counts, thrown or not.
+	 */
 	lastRefreshedAt(key: string): number | undefined
 	{
 		return this.lastRefreshAt.get(key);
 	}
 
-	/** Whether a refresh for `key` is outside its cooldown right now. */
+	/** Whether a refresh for `key` is outside its cooldown right now (counted from any attempt). */
 	canRefresh(key: string): boolean
 	{
-		const last = this.lastRefreshAt.get(key);
+		const last = this.lastAttemptAt.get(key);
 		if (last === undefined) return true;
 		return this.now().getTime() - last >= this.cooldownMs;
 	}
@@ -78,8 +84,13 @@ export class RefreshCoordinator
 	/**
    * Run `fn` for `key` at most once concurrently. Returns `undefined` without
    * calling `fn` when the key is still within its cooldown.
+   *
+   * `countsAsCheck` says whether a resolved result counts as a check of `key` (S124: a month
+   * fill that failed must not wait out a lifetime it never earned). With it, a refresh that
+   * throws or that it rejects still starts the cooldown but leaves {@link lastRefreshedAt} as
+   * it was. Without it, every settled refresh counts, as before S124.
    */
-	async run<T>(key: string, fn: () => Promise<T>): Promise<T | undefined>
+	async run<T>(key: string, fn: () => Promise<T>, countsAsCheck?: (result: T) => boolean): Promise<T | undefined>
 	{
 		const existing = this.inFlight.get(key) as Promise<T> | undefined;
 		if (existing) return existing;
@@ -87,13 +98,18 @@ export class RefreshCoordinator
 
 		const pending = (async () =>
 		{
+			let checked = countsAsCheck === undefined;
 			try
 			{
-				return await fn();
+				const result = await fn();
+				if (countsAsCheck) checked = countsAsCheck(result);
+				return result;
 			}
 			finally
 			{
-				this.lastRefreshAt.set(key, this.now().getTime());
+				const at = this.now().getTime();
+				this.lastAttemptAt.set(key, at);
+				if (checked) this.lastRefreshAt.set(key, at);
 				this.inFlight.delete(key);
 			}
 		})();

@@ -27,6 +27,9 @@ SERVICE="functions/src/services/schedule-month.ts"
 SERVICE_TEST="src/services/schedule-month.test.ts"
 HANDLER="functions/src/handlers/api.ts"
 ROUTE='GET /api/v1/schedule/month/:month'
+# The month route's own entry in the router, from its `route:` line to the entry's closing `},`.
+ROUTE_BLOCK="$TMP/month-route.ts"
+sed -n '/route: "GET \/api\/v1\/schedule\/month\/:month"/,/^\t},$/p' "$HANDLER" >"$ROUTE_BLOCK"
 
 run_vitest() {
   local id="$1" dir="$2" file="$3"
@@ -93,7 +96,8 @@ run_vitest 2 functions src/adapters/overlay-mlb.test.ts -t "schedule range"
 run_vitest 2 functions src/adapters/fixtures/fixture-client.test.ts -t "schedule range"
 
 # --- Check 3: freshness ----------------------------------------------------------------------------------------
-grep -qE 'cacheLifetimeMs|edgeCacheControl' "$SERVICE" "$HANDLER" 2>/dev/null || bad 3 "the month's freshness does not come from the ADR-021 ladder"
+grep -qF 'withCacheControl(' "$ROUTE_BLOCK" && grep -qF 'result.lastChangedAt' "$ROUTE_BLOCK" ||
+  bad 3 "the month route does not set its Cache-Control from the month's last change (withCacheControl, ADR-021's ladder)"
 tagged 3 "S124 AC 3 headers reset"
 tagged 3 "S124 AC 3 gains games after expiry"
 
@@ -111,7 +115,8 @@ for m in 1901-03 1901-04 1901-4 2026-13 2026-00; do
   grep -qF "\"$m\"" packages/domain/src/calendar-date.test.ts || bad 5 "the domain test does not try $m"
 done
 run_vitest 5 packages/domain src/calendar-date.test.ts -t "isCalendarMonth"
-grep -qF 'isCalendarMonth' "$HANDLER" || bad 5 "the handler does not check the month with isCalendarMonth"
+grep -qF 'if (!isCalendarMonth(' "$ROUTE_BLOCK" && grep -qF 'sendError(400' "$ROUTE_BLOCK" ||
+  bad 5 "the month route's 400 does not come from isCalendarMonth"
 story_diff S124 "$BASE" -U0 -- "$HANDLER" | grep -E '^\+' | grep -qE '\\d\{4\}-\\d\{2\}"?\)?\$?/' && bad 5 "the story adds a date pattern to the handler"
 tagged 5 "S124 AC 5"
 
@@ -119,8 +124,11 @@ tagged 5 "S124 AC 5"
 grep -qE '^\| [0-9]+ \| \[S124\].*\| `done` \|$' docs/v3/BACKLOG.md || bad 6 "S124 row in the Story status table is not \`done\`"
 awk '/^### S124 —/{f=1;next} /^### S[0-9]/{f=0} f' docs/v3/BACKLOG.md > "$TMP/s124.md"
 grep -qE '^\*\*Status:\*\* `done`$' "$TMP/s124.md" || bad 6 "S124 story heading Status is not \`done\`"
-story_changed_files S124 "$BASE" . | grep -vE '^(functions/src/|functions/vitest\.config\.ts$|packages/domain/|packages/ports/|openapi/|fixtures/|web/src/api/|docs/v3/BACKLOG\.md$|docs/v3/backlog/|docs/v3/AUDIT\.md$|docs/v3/audit\.jsonl$|docs/v3/INDEX\.md$|CHANGELOG\.md$|scripts/verify-S124\.sh$|docs/v3/\.obsidian/)' >"$TMP/fence.txt"
+story_changed_files S124 "$BASE" . | grep -vE '^(functions/src/|functions/vitest\.config\.ts$|packages/domain/|packages/ports/|openapi/|fixtures/|web/src/api/|docs/v3/BACKLOG\.md$|docs/v3/backlog/|docs/v3/AUDIT\.md$|docs/v3/audit\.jsonl$|docs/v3/INDEX\.md$|CHANGELOG\.md$|scripts/verify-S124\.sh$)' >"$TMP/fence.txt"
 [ -s "$TMP/fence.txt" ] && bad 6 "the story changes files outside its scope: $(tr '\n' ' ' <"$TMP/fence.txt")"
+# The Goal condition: nothing under the root test/ folder (functions/src/test/ is inside functions/src/).
+story_changed_files S124 "$BASE" . | grep -E '^test/' >"$TMP/test-dir.txt"
+[ -s "$TMP/test-dir.txt" ] && bad 6 "the story changes files under test/: $(tr '\n' ' ' <"$TMP/test-dir.txt")"
 
 report "verify-S124"
 exit $?

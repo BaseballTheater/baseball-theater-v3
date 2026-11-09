@@ -26,6 +26,7 @@ import type {
 	StandingsSnapshot,
 	Unversioned,
 } from "@bt/domain";
+import { datesBetween } from "@bt/domain";
 import type { GameDiffPatchResponse } from "@bt/mlb-api";
 import type { MlbStatsClient } from "@bt/ports";
 import { FixtureMlbStatsClient } from "../adapters/fixtures/mlb.js";
@@ -65,9 +66,9 @@ class FakeMlbStatsClient implements MlbStatsClient
 		};
 	}
 
-	async fetchScheduleRange(startDate: string): Promise<Unversioned<ScheduleDay>[]>
+	async fetchScheduleRange(startDate: string, endDate: string): Promise<Unversioned<ScheduleDay>[]>
 	{
-		return [await this.fetchSchedule(startDate)];
+		return Promise.all(datesBetween(startDate, endDate).map((date) => this.fetchSchedule(date)));
 	}
 
 	async fetchGame(gamePk: number): Promise<GameSnapshot>

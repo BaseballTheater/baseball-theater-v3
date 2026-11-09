@@ -31,7 +31,10 @@ import {
 } from "../adapters/postgres/repos.js";
 import { STALE_WHILE_REVALIDATE_S } from "../handlers/cache-control.js";
 import { handleApiRequest } from "../handlers/api.js";
+import { recordedClient } from "../test/recorded-mlb.js";
+import type { IngestDeps } from "./ingest.js";
 import { storeSchedule } from "./ingest.js";
+import { getScheduleMonth } from "./schedule-month.js";
 import { RefreshCoordinator } from "./refresh.js";
 
 const MINUTE = 60 * 1000;
@@ -99,11 +102,11 @@ async function pgliteRepos(): Promise<Repos>
 	};
 }
 
-/** The API over `repos`, read at whatever `clock.now` says. */
-function api(repos: Repos, mlb: MlbStatsClient = new CountingClient())
+/** The API over `repos`, read at whatever `clock.now` says (from `start`), with a fresh refresh coordinator. */
+function api(repos: Repos, mlb: MlbStatsClient = new CountingClient(), start: Date = T0)
 {
 	const clock = {
-		now: T0,
+		now: start,
 	};
 	const auth = createDevAuth();
 	const settings = new InMemorySettingsRepository();
@@ -246,6 +249,97 @@ describe("S124 AC 2", () =>
 		expect(count("2026-12-12")).toBe(2);
 		expect(count("2026-12-13")).toBe(0);
 		expect((await repos.schedules.getByDate("2026-12-12"))?.version).toBe(1);
+		// Each filled day's window is judged at the fill (`scheduleWindowMode`), day by day.
+		const twelfth = await repos.schedules.getByDate("2026-12-12");
+		expect(twelfth?.windowMode).toBe(scheduleWindowMode(twelfth!.games, T0));
+		expect((await repos.schedules.getByDate("2026-12-13"))?.windowMode).toBe("cache");
+	});
+
+	it("S124 AC 2 holding the ends: only the span between the days it holds is asked", async () =>
+	{
+		const repos = memoryRepos();
+		await store(repos, "2027-04-01", []);
+		await store(repos, "2027-04-30", []);
+		const mlb = new CountingClient();
+		await api(repos, mlb).month("2027-04");
+		expect(mlb.ranges).toEqual([["2027-04-02", "2027-04-29"]]);
+	});
+
+	it("S124 AC 2 season start: a month of an earlier season is never asked; MLB's today, not UTC's, sets the season", async () =>
+	{
+		const mlb = new CountingClient();
+		const { body } = await api(memoryRepos(), mlb).month("2025-12");
+		expect(body.days.every((day) => day.count === null)).toBe(true);
+		expect(mlb.ranges).toEqual([]);
+		// 03:00 UTC on 2027-01-01 is still 2026-12-31 for MLB, so 2026 is still the current season.
+		const late = new CountingClient();
+		await api(memoryRepos(), late, new Date("2027-01-01T03:00:00Z")).month("2026-12");
+		expect(late.ranges).toEqual([["2026-12-01", "2026-12-31"]]);
+	});
+
+	it("S124 AC 2 store failure: a schedule write that fails rejects the read, rather than passing for MLB being unreachable", async () =>
+	{
+		const repos = memoryRepos();
+		let writes = 0;
+		const schedules: ScheduleRepository = {
+			getByDate: (date) => repos.schedules.getByDate(date),
+			upsert: async (day) =>
+			{
+				if (++writes === 3) throw new Error("database down");
+				await repos.schedules.upsert(day);
+			},
+			listGameCounts: (from, to) => repos.schedules.listGameCounts(from, to),
+		};
+		const deps: IngestDeps = {
+			...repos,
+			schedules,
+			mlb: new CountingClient(),
+			now: () => T0,
+		};
+		await expect(getScheduleMonth(deps, "2026-12")).rejects.toThrow("database down");
+		// The two days written before it stay (each write is version-guarded on its own).
+		expect(await repos.schedules.listGameCounts("2026-12-01", "2026-12-31")).toHaveLength(2);
+	});
+
+	it("S124 AC 2 recorded range: the recorded client answers a range from its recorded days", async () =>
+	{
+		const { mlb, asked } = recordedClient();
+		const { count } = await api(memoryRepos(), mlb).month("2026-09");
+		expect(asked).toHaveLength(1);
+		expect(count("2026-09-05")).toBe(15);
+		expect(count("2026-09-06")).toBe(0);
+	});
+
+	it("S124 AC 2 concurrent: two reads at once share one request through the coordinator", async () =>
+	{
+		const repos = memoryRepos();
+		const mlb = new CountingClient();
+		mlb.gamesOn.set("2026-12-12", await mixedGames());
+		const reader = api(repos, mlb);
+		const [a, b] = await Promise.all([reader.month("2026-12"), reader.month("2026-12")]);
+		expect(mlb.ranges).toHaveLength(1);
+		expect(a.count("2026-12-12")).toBe(2);
+		expect(b.count("2026-12-12")).toBe(2);
+	});
+
+	it("S124 AC 2 concurrent without a coordinator: each read asks for itself, and both answers are right", async () =>
+	{
+		const repos = memoryRepos();
+		const mlb = new CountingClient();
+		mlb.gamesOn.set("2026-12-12", await mixedGames());
+		const deps: IngestDeps = {
+			...repos,
+			mlb,
+			now: () => T0,
+		};
+		const [a, b] = await Promise.all([getScheduleMonth(deps, "2026-12"), getScheduleMonth(deps, "2026-12")]);
+		expect(mlb.ranges).toHaveLength(2);
+		for (const answer of [a, b]) expect(answer.days.find((day) => day.date === "2026-12-12")?.count).toBe(2);
+		// Stored once: the second write of the same content kept its version (ADR-022).
+		expect((await repos.schedules.getByDate("2026-12-12"))?.version).toBe(1);
+		// Inside the lifetime a later read asks nothing.
+		await getScheduleMonth(deps, "2026-12");
+		expect(mlb.ranges).toHaveLength(2);
 	});
 
 	it("S124 AC 2 holding one day: the days around it are filled with one schedule request, no game request", async () =>
@@ -311,11 +405,11 @@ describe("S124 AC 2", () =>
 	});
 });
 
-describe("S124 AC 3", () =>
+describe.each([["memory", async () => memoryRepos()], ["PGlite", pgliteRepos]] as const)("S124 AC 3 %s", (_name, makeRepos) =>
 {
 	it("S124 AC 3 headers reset: a past month unchanged for a month is cached for the cap, and one that changes drops to the floor", async () =>
 	{
-		const repos = memoryRepos();
+		const repos = await makeRepos();
 		const longAgo = new Date(T0.getTime() - 30 * DAY);
 		for (const date of datesBetween("2024-07-01", "2024-07-31")) await store(repos, date, [], longAgo);
 		const reader = api(repos);
@@ -327,12 +421,68 @@ describe("S124 AC 3", () =>
 
 	it("S124 AC 3 headers reset: a month with an unknown day is checked again at the floor", async () =>
 	{
-		expect((await api(memoryRepos()).month("2019-05")).cacheControl).toBe(`public, s-maxage=300, stale-while-revalidate=${STALE_WHILE_REVALIDATE_S}`);
+		expect((await api(await makeRepos()).month("2019-05")).cacheControl).toBe(`public, s-maxage=300, stale-while-revalidate=${STALE_WHILE_REVALIDATE_S}`);
+	});
+
+	it("S124 AC 3 headers reset: a partly stored past month is checked again at the floor, not by its stored day's age", async () =>
+	{
+		const repos = await makeRepos();
+		await store(repos, "2024-07-04", [], new Date(T0.getTime() - 30 * DAY));
+		expect((await api(repos).month("2024-07")).cacheControl).toBe(`public, s-maxage=300, stale-while-revalidate=${STALE_WHILE_REVALIDATE_S}`);
+	});
+
+	it("S124 AC 3 lifetime: past the cooldown but inside the month's lifetime, nothing is asked again", async () =>
+	{
+		const repos = await makeRepos();
+		const mlb = new CountingClient();
+		const reader = api(repos, mlb);
+		await reader.month("2027-03");
+		expect(mlb.ranges).toHaveLength(1);
+		// Two minutes on: past the coordinator's one-minute cooldown, inside the five-minute floor.
+		reader.clock.now = new Date(T0.getTime() + 2 * MINUTE);
+		await reader.month("2027-03");
+		expect(mlb.ranges).toHaveLength(1);
+	});
+
+	it("S124 AC 3 lifetime: a month whose every day was fetched a minute ago is not asked, even by a fresh isolate", async () =>
+	{
+		const repos = await makeRepos();
+		for (const date of datesBetween("2026-12-01", "2026-12-31")) await store(repos, date, [], new Date(T0.getTime() - MINUTE));
+		const mlb = new CountingClient();
+		await api(repos, mlb).month("2026-12");
+		expect(mlb.ranges).toEqual([]);
+	});
+
+	it("S124 AC 3 oldest check: the month counts as checked at its oldest day's fetch, so one old day makes it stale", async () =>
+	{
+		const repos = await makeRepos();
+		await store(repos, "2026-12-01", [], new Date(T0.getTime() - 30 * DAY));
+		for (const date of datesBetween("2026-12-02", "2026-12-31")) await store(repos, date, [], new Date(T0.getTime() - MINUTE));
+		const mlb = new CountingClient();
+		await api(repos, mlb).month("2026-12");
+		expect(mlb.ranges).toEqual([["2026-12-01", "2026-12-31"]]);
+	});
+
+	it("S124 AC 3 failed refresh: a fill MLB didn't answer isn't a check, so the month is asked again once the cooldown passes", async () =>
+	{
+		const repos = await makeRepos();
+		// Every day stored and last changed three days ago: once checked now, the ladder would
+		// give the month its 48-hour cap, so a failure counted as a check would hide it for two days.
+		for (const date of datesBetween("2026-12-01", "2026-12-31")) await store(repos, date, [], new Date(T0.getTime() - 3 * DAY));
+		const mlb = new CountingClient();
+		mlb.fail = true;
+		const reader = api(repos, mlb);
+		await reader.month("2026-12");
+		expect(mlb.ranges).toHaveLength(1);
+		mlb.fail = false;
+		reader.clock.now = new Date(T0.getTime() + 2 * MINUTE);
+		await reader.month("2026-12");
+		expect(mlb.ranges).toHaveLength(2);
 	});
 
 	it("S124 AC 3 gains games after expiry: a future month stored empty gains its games once its lifetime has run out, with one schedule request and no game request", async () =>
 	{
-		const repos = memoryRepos();
+		const repos = await makeRepos();
 		const mlb = new CountingClient();
 		const reader = api(repos, mlb);
 		expect((await reader.month("2027-03")).body.days.every((day) => day.count === 0)).toBe(true);
@@ -366,6 +516,36 @@ describe("S124 AC 5", () =>
 				hint: "YYYY-MM, 1901-04 or later",
 			});
 		}
+	});
+
+	it("S124 AC 5 horizon: a month after December of next year is a 400 and asks MLB nothing; December itself is answered", async () =>
+	{
+		const mlb = new CountingClient();
+		const { get, month } = api(memoryRepos(), mlb);
+		for (const tooLate of ["2028-01", "2099-07", "9999-12"])
+		{
+			const response = await get(`/api/v1/schedule/month/${tooLate}`);
+			expect(response.status, tooLate).toBe(400);
+			expect(await response.json()).toEqual({
+				error: "month_too_late",
+				hint: "YYYY-MM, 2027-12 or earlier",
+			});
+		}
+		expect(mlb.ranges).toEqual([]);
+		const { body } = await month("2027-12");
+		expect(body.days).toHaveLength(31);
+		expect(mlb.ranges).toEqual([["2027-12-01", "2027-12-31"]]);
+	});
+
+	it("S124 AC 5 horizon: next year is MLB's, not UTC's", async () =>
+	{
+		// 03:00 UTC on 2027-01-01 is 2026-12-31 for MLB: next year is still 2027.
+		const early = api(memoryRepos(), new CountingClient(), new Date("2027-01-01T03:00:00Z"));
+		expect((await early.get("/api/v1/schedule/month/2028-01")).status).toBe(400);
+		expect((await early.month("2027-12")).body.days).toHaveLength(31);
+		// By 06:00 UTC it is 2027-01-01 for MLB too, and 2028 is next year.
+		const later = api(memoryRepos(), new CountingClient(), new Date("2027-01-01T06:00:00Z"));
+		expect((await later.month("2028-01")).body.days).toHaveLength(31);
 	});
 
 	it("answers 1901-04, the earliest month, with every day", async () =>

@@ -1,7 +1,9 @@
 import {
 	describe, expect, it,
 } from "vitest";
-import { monthGameCounts, monthLastChangedAt } from "./schedule-month.js";
+import {
+	latestScheduleMonth, monthGameCounts, monthLastChangedAt, scheduleFillWindow,
+} from "./schedule-month.js";
 
 describe("monthGameCounts (S124)", () =>
 {
@@ -49,5 +51,45 @@ describe("monthLastChangedAt (S124)", () =>
 				lastChangedAt: "2026-09-30T00:00:00.000Z",
 			},
 		])).toBe("2026-10-01T00:00:00.000Z");
+	});
+
+	it("skips a stamp that doesn't parse, wherever it is", () =>
+	{
+		expect(monthLastChangedAt([
+			{
+				lastChangedAt: null as unknown as string,
+			},
+			{
+				lastChangedAt: "2026-09-05T10:00:00.000Z",
+			},
+			{
+				lastChangedAt: "not a time",
+			},
+		])).toBe("2026-09-05T10:00:00.000Z");
+	});
+});
+
+describe("scheduleFillWindow and latestScheduleMonth (S124)", () =>
+{
+	it("runs from the current season's first day through December 31 of next year", () =>
+	{
+		expect(scheduleFillWindow("2026-11-09")).toEqual({
+			first: "2026-01-01",
+			last: "2027-12-31",
+		});
+		expect(scheduleFillWindow("2026-12-31")).toEqual({
+			first: "2026-01-01",
+			last: "2027-12-31",
+		});
+		expect(scheduleFillWindow("2027-01-01")).toEqual({
+			first: "2027-01-01",
+			last: "2028-12-31",
+		});
+	});
+
+	it("latestScheduleMonth is December of next year", () =>
+	{
+		expect(latestScheduleMonth("2026-11-09")).toBe("2027-12");
+		expect(latestScheduleMonth("2027-01-01")).toBe("2028-12");
 	});
 });

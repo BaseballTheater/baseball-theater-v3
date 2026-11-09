@@ -1,20 +1,25 @@
 /**
- * Games per day for a month (S124), for S125's calendar date picker: one read of BT's stored
- * schedule days (ADR-002: clients read BT only), counted by `monthGameCounts`.
+ * Games per day for a month (S124), for S125's calendar date picker, from BT's stored schedule
+ * days (ADR-002: clients read BT only), counted by `monthGameCounts`. A month BT needn't ask MLB
+ * about is one count read; a fill adds one MLB range request, a version-guarded write per day it
+ * returns (`storeSchedule`, which reads the stored day first) and a second count read.
  *
- * Days of the current season or the future that BT doesn't hold yet are filled from MLB with
- * one schedule request for their range, stored through ingest's version-guarded write
- * (`storeSchedule`, ADR-022) without hydrating any game: game snapshots stay with the
- * scoreboard's own refresh and the backfill (S122), so one month read is one MLB request, not
- * hundreds. Past seasons are never asked for here; what the backfill stored is what they show.
+ * Days inside `scheduleFillWindow` (the current season through December of next year; later
+ * months are refused at the route, owner 2026-11-09: "Reject past next year") that BT doesn't
+ * hold yet are filled from MLB with one schedule request for their range, stored through
+ * ingest's version-guarded write (ADR-022) without hydrating any game: game snapshots stay with
+ * the scoreboard's own refresh and the backfill (S122), so one month read is one MLB request,
+ * not hundreds. Past seasons are never asked for here; what the backfill stored is what they show.
  *
- * Stored days of the current season or the future are asked for again once the month's ADR-021
- * lifetime has run out (`needsRefresh`, the ladder single days use), so a future month stored
- * empty before MLB published its schedule gains its games later.
+ * Stored days inside the window are asked for again once the month's ADR-021 lifetime has run
+ * out (`needsRefresh`, the ladder single days use), so a future month stored empty before MLB
+ * published its schedule gains its games later.
  */
-import type { ScheduleDayCount, ScheduleDayTally } from "@bt/domain";
+import type {
+	ScheduleDay, ScheduleDayCount, ScheduleDayTally, Unversioned,
+} from "@bt/domain";
 import {
-	daysOfMonth, mlbToday, monthGameCounts, monthLastChangedAt, scheduleWindowMode,
+	daysOfMonth, mlbToday, monthGameCounts, monthLastChangedAt, scheduleFillWindow, scheduleWindowMode,
 } from "@bt/domain";
 import type { IngestDeps } from "./ingest.js";
 import {
@@ -43,11 +48,18 @@ export interface ScheduleMonth
 function rangeToAsk(deps: IngestDeps, key: string, fillable: string[], stored: ScheduleDayTally[], now: Date): [string, string] | null
 {
 	if (fillable.length === 0) return null;
-	const held = stored.filter((day) => day.date >= fillable[0]!);
-	const missing = fillable.filter((date) => !held.some((day) => day.date === date));
-	// The month's last check is its oldest fetch; its last change, its newest (ADR-021's ladder over the month).
+	const wanted = new Set(fillable);
+	const held = stored.filter((day) => wanted.has(day.date));
+	const heldDates = new Set(held.map((day) => day.date));
+	const missing = fillable.filter((date) => !heldDates.has(date));
+	// The month was last checked no later than its oldest fetch: every held day has been fetched
+	// since then, but nothing says the oldest one was fetched again after (an unchanged refresh
+	// writes nothing, ADR-022), so this is the safe lower bound; a stamp that doesn't parse means
+	// "never checked". Its last change is the newest among its days (ADR-021's ladder over the month).
+	const fetchedTimes = held.map((day) => Date.parse(day.fetchedAt));
+	const oldestFetch = fetchedTimes.some(Number.isNaN) ? undefined : Math.min(...fetchedTimes);
 	const month = held.length === 0 ? null : {
-		fetchedAt: held.reduce((oldest, day) => Date.parse(day.fetchedAt) < Date.parse(oldest) ? day.fetchedAt : oldest, held[0]!.fetchedAt),
+		fetchedAt: oldestFetch === undefined ? undefined : new Date(oldestFetch).toISOString(),
 		lastChangedAt: monthLastChangedAt(held),
 		windowMode: "cache" as const,
 	};
@@ -56,9 +68,10 @@ function rangeToAsk(deps: IngestDeps, key: string, fillable: string[], stored: S
 }
 
 /**
- * The number of games on each day of `month` (`YYYY-MM`, already checked by `isCalendarMonth`),
- * from BT's stored schedule days, filling or refreshing the current season's and the future's
- * days first as the module doc says. A failed MLB request leaves those days as they were.
+ * The number of games on each day of `month` (`YYYY-MM`, already checked by `isCalendarMonth`
+ * and `latestScheduleMonth` at the route), from BT's stored schedule days, filling or refreshing
+ * the days inside `scheduleFillWindow` first as the module doc says. A failed MLB request leaves
+ * those days as they were; a failed store write is BT's own failure and rejects.
  */
 export async function getScheduleMonth(deps: IngestDeps, month: string): Promise<ScheduleMonth>
 {
@@ -68,33 +81,38 @@ export async function getScheduleMonth(deps: IngestDeps, month: string): Promise
 	const last = dates.at(-1)!;
 	let stored = await deps.schedules.listGameCounts(first, last);
 
-	// The current season is MLB's calendar year: its days, and every later one, can still change.
-	const seasonStart = `${mlbToday(now).slice(0, 4)}-01-01`;
+	// MLB's today, not UTC's: 03:00 UTC on January 1 is still December 31 for MLB.
+	const window = scheduleFillWindow(mlbToday(now));
 	const key = `schedule-month:${month}`;
-	const range = rangeToAsk(deps, key, dates.filter((date) => date >= seasonStart), stored, now);
+	const range = rangeToAsk(deps, key, dates.filter((date) => date >= window.first && date <= window.last), stored, now);
 	if (range)
 	{
 		const filled = await runRefresh(deps, key, async () =>
 		{
+			const fetchedAt = now.toISOString();
+			let days: Unversioned<ScheduleDay>[];
 			try
 			{
-				const fetchedAt = now.toISOString();
-				for (const day of await deps.mlb.fetchScheduleRange(range[0], range[1]))
-				{
-					await storeSchedule(deps, {
-						...day,
-						fetchedAt,
-						windowMode: scheduleWindowMode(day.games, now),
-					});
-				}
-				return true;
+				days = await deps.mlb.fetchScheduleRange(range[0], range[1]);
 			}
 			catch
 			{
-				// MLB unreachable: the days stay as stored, and unknown ones say so (`count: null`).
+				// MLB unreachable, or an answer that doesn't parse: the days stay as stored, and
+				// unknown ones say so (`count: null`). Not a check of the month, so it is asked
+				// again once the cooldown allows rather than after a lifetime it never earned.
 				return false;
 			}
-		});
+			// A store write that fails is BT's (the database), not MLB's: it rejects, and the read fails.
+			for (const day of days)
+			{
+				await storeSchedule(deps, {
+					...day,
+					fetchedAt,
+					windowMode: scheduleWindowMode(day.games, now),
+				});
+			}
+			return true;
+		}, (ok) => ok);
 		if (filled) stored = await deps.schedules.listGameCounts(first, last);
 	}
 

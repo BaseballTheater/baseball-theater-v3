@@ -3,7 +3,7 @@ import {
 } from "vitest";
 import { BACKFILL_EARLIEST_DATE } from "./backfill.js";
 import {
-	addDays, datesBetween, daysOfMonth, EARLIEST_CALENDAR_MONTH, isCalendarDate, isCalendarMonth, yearsBefore,
+	addDays, datesBetween, daysInMonth, daysOfMonth, EARLIEST_CALENDAR_MONTH, isCalendarDate, isCalendarMonth, yearsBefore,
 } from "./calendar-date.js";
 
 describe("addDays (S66)", () =>
@@ -19,6 +19,8 @@ describe("addDays (S66)", () =>
 		expect(addDays("2026-12-31", 1)).toBe("2027-01-01");
 		expect(addDays("2026-03-01", -1)).toBe("2026-02-28");
 		expect(addDays("2024-02-28", 1)).toBe("2024-02-29");
+		expect(addDays("0050-01-01", 1)).toBe("0050-01-02");
+		expect(datesBetween("0050-01-01", "0050-01-03")).toEqual(["0050-01-01", "0050-01-02", "0050-01-03"]);
 	});
 });
 
@@ -78,10 +80,29 @@ describe("isCalendarMonth, daysOfMonth and datesBetween (S124)", () =>
 		expect(daysOfMonth("2026-07")[0]).toBe("2026-07-01");
 	});
 
+	it("daysOfMonth: the last month the calendar has, 9999-12, ends on 9999-12-31 without stepping into year 10000", () =>
+	{
+		const days = daysOfMonth("9999-12");
+		expect(days).toHaveLength(31);
+		expect(days.at(-1)).toBe("9999-12-31");
+	});
+
+	it("daysInMonth counts by the Gregorian calendar, and is undefined for a month it doesn't have", () =>
+	{
+		expect(daysInMonth(2028, 2)).toBe(29);
+		expect(daysInMonth(1900, 2)).toBe(28);
+		expect(daysInMonth(2000, 2)).toBe(29);
+		expect(daysInMonth(9999, 12)).toBe(31);
+		expect(daysInMonth(2026, 13)).toBeUndefined();
+	});
+
 	it("datesBetween includes both ends and is empty when reversed", () =>
 	{
 		expect(datesBetween("2026-12-30", "2027-01-02")).toEqual(["2026-12-30", "2026-12-31", "2027-01-01", "2027-01-02"]);
 		expect(datesBetween("2026-09-05", "2026-09-05")).toEqual(["2026-09-05"]);
 		expect(datesBetween("2026-09-06", "2026-09-05")).toEqual([]);
+		expect(datesBetween("9999-12-30", "9999-12-31")).toEqual(["9999-12-30", "9999-12-31"]);
+		// An end that isn't a real date still bounds the list as text: nothing after it.
+		expect(datesBetween("2026-02-27", "2026-02-30")).toEqual(["2026-02-27", "2026-02-28"]);
 	});
 });

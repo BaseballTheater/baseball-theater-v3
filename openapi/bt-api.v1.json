@@ -1525,7 +1525,7 @@
 				"operationId": "getScheduleMonth",
 				"parameters": [
 					{
-						"description": "The month, as `YYYY-MM`, 1901-04 or later.",
+						"description": "The month, as `YYYY-MM`, from 1901-04 through December of next year (by MLB's today, in `America/New_York`).",
 						"in": "path",
 						"name": "month",
 						"required": true,
@@ -1543,7 +1543,7 @@
 						"content": {
 							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
 						},
-						"description": "`month_invalid`: `month` is not `YYYY-MM`, not a real month, or before 1901-04."
+						"description": "`month_invalid`: `month` is not `YYYY-MM`, not a real month, or before 1901-04. `month_too_late`: `month` is after December of next year, which MLB can't have published."
 					},
 					"426": {
 						"content": {
@@ -1552,7 +1552,7 @@
 						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
 					}
 				},
-				"summary": "The number of games on each day of one month, from BT's stored schedule. A day of the current season or later that BT doesn't hold yet is asked of MLB first; a day still unknown has `count: null`, distinct from a day with no games (`0`)."
+				"summary": "The number of games on each day of one month, from BT's stored schedule. A day of the current season or later (through December of next year) that BT doesn't hold yet is asked of MLB first; a day still unknown has `count: null`, distinct from a day with no games (`0`)."
 			}
 		},
 		"/api/v1/scoreboard/default-date": {
