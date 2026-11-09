@@ -179,7 +179,7 @@ This section keeps only the *forward-looking* scheduling state: what is due next
 - **S134 AC 1** tests a release without headline additions. **S135 AC 3**: its own non-personal `STORAGE_KEYS` key (not the snooze key), a malformed stored value, a null release, and a failed request (link alone); note on the 5-minute cache after a deploy.
 - **S124:** S122 landed with no range method (it reads a day at a time), so S124 adds it; reuse S122's exported `storeSchedule` and `scheduleWindowMode`; `recorder.test.ts`'s fake also implements the port; line references refreshed; AC 5's month check is one domain function beside `isCalendarDate`.
 - **S130 AC 1:** `regularSeason` or an absent `phase` (optional in the spec) draws no label.
-- **Duplication (pending, owner question):** the API's date parameters are checked by shape only (`api.ts:178`, `:197`, `:215`) while S122 added `isCalendarDate`.
+- **Duplication (answered):** the API's date parameters are checked by shape only (`api.ts:178`, `:197`, `:215`) while S122 added `isCalendarDate`. Left as is (owner, 2026-11-08, asked whether they become a 400 in S124: *"No, leave as is"*).
 - **Next 3 by priority:** S123, S124, S125. S123 needs the owner to ratify; S124 is startable.
 
 **Earlier review:** 2026-11-07 at HEAD `e7deda1`, verdict **`amended`**. **Trigger: drift** — S124's AC 1 and AC 2 rewritten in `e7deda1` (Copilot's review of PR #10; the same commit added `docs/v3/audit.jsonl` and `docs/v3/INDEX.md` to S122–S127's fences). Fresh-context subagent; see [AUDIT](./AUDIT.md). No story done and no code changed since `797e868`.
