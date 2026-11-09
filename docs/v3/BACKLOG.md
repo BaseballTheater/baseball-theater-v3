@@ -245,7 +245,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 79 | [S132](#s132--the-approved-release-notes-and-whats-new-since-a-version-from-bts-api) | Release notes API | `todo` |
 | 80 | [S93](#s93--ingest-mlb-play-metrics-win-probability-key-moments-abs-challenges) | Ingest play metrics | `done` |
 | 80 | [S116](#s116--sign-in-with-logto-email-one-time-code-on-the-deployed-sites) | Logto sign-in | `done` |
-| 80 | [S133](#s133--design-the-changelist-page-and-whats-new-on-the-update-notifications) | Design: changelist + update notes | `todo` |
+| 80 | [S133](#s133--design-the-changelist-page-and-whats-new-on-the-update-notifications) | Design: changelist + update notes | `blocked` |
 | 81 | [S75](#s75--hide-scores-in-the-game-rooms-and-the-recap-video-title) | Hide Scores in the rooms | `done` |
 | 81 | [S134](#s134--the-changelist-page-lists-each-releases-approved-notes) | Changelist page | `todo` |
 | 82 | [S71](#s71--day-highlights-digest-best-of-date) | Day highlights digest | `done` |
@@ -6979,7 +6979,7 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 /goal docs/v3/BACKLOG.md S133. Work item 0 first: if scripts/verify-S133.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S133.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/shell-scoreboard/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/FEATURES.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S133.sh, or stop after 10 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `todo`
+**Status:** `blocked`
 
 ### S134 — The changelist page lists each release's approved notes
 
