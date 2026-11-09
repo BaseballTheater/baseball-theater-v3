@@ -231,7 +231,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 74 | [S110](#s110--entry-bundle-headroom-pages-past-the-scoreboard-load-on-demand) | Entry bundle headroom | `done` |
 | 74 | [S125](#s125--the-scoreboards-calendar-date-picker) | Calendar date picker | `todo` |
 | 75 | [S111](#s111--the-scoreboard-opens-on-today-or-on-the-seasons-final-day-in-the-off-season) | Scoreboard opens on the right day | `done` |
-| 76 | [S129](#s129--design-the-spring-training-label-on-standings) | Design: spring standings label | `todo` |
+| 76 | [S129](#s129--design-the-spring-training-label-on-standings) | Design: spring standings label | `blocked` |
 | 76 | [S51](#s51--representative-local-dev-pnpm-dev-on-postgres-in-docker) | `pnpm dev` on Postgres in Docker | `done` |
 | 77 | [S130](#s130--standings-label-spring-training-standings) | Spring standings label | `todo` |
 | 77 | [S112](#s112--dev-seed-the-last-month-of-the-season-and-the-postseason-refreshable-by-date-range) | Dev seed (season end + postseason) | `done` |
@@ -285,7 +285,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 116 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
 | 117 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
 
-**Next (generated):** **76 / S129** — the lowest **Priority** `todo` story not waiting on a design. Skipped, waiting on design (rule 18): S125.
+**Next (generated):** **78 / S131** — the lowest **Priority** `todo` story not waiting on a design. Skipped, waiting on design (rule 18): S125, S130.
 
 **Before starting it:** confirm no [backlog review](#backlog-reviews) is due — the review-debt line in that section counts stories, but a drift event makes one due regardless.
 
@@ -2147,7 +2147,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 /goal docs/v3/BACKLOG.md S129. Work item 0 first: if scripts/verify-S129.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S129.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/standings-search-settings/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/FEATURES.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S129.sh, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `todo`
+**Status:** `blocked`
 
 ### S130 — Standings label spring training standings
 
