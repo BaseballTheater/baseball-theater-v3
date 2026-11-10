@@ -12,12 +12,12 @@
 
 Assembled, in this order and around the stories, into BACKLOG.md.
 
-- [00 Baseball Theater v3 — Checkable backlog](<backlog/frame/00 Baseball Theater v3 — Checkable backlog.md>) — 109 KB
+- [00 Baseball Theater v3 — Checkable backlog](<backlog/frame/00 Baseball Theater v3 — Checkable backlog.md>) — 112 KB
   - `127–145` Verify-script contract
   - `146–159` Story status
-  - `160–482` Backlog reviews
-  - `483–502` Doc parity reviews
-  - `503–507` Goal command for multiple stories
+  - `160–494` Backlog reviews
+  - `495–514` Doc parity reviews
+  - `515–519` Goal command for multiple stories
   - Rules, by number:
     - `10–10` 1. Acceptance criteria map to commands, tests, or file invariants (exit codes / assertions).
     - `11–11` 2. Vague phrases (“works correctly”, “handles errors gracefully”) are forbidden until rewrit…
@@ -499,7 +499,7 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 | 76 | [S140](backlog/stories/S140.md) World Series winner in standings | `todo` | S128 | — |
 | 77 | [S130](backlog/stories/S130.md) Standings views | `todo` | S128, S139, S140, S81 | S129 |
 | 77 | [S137](backlog/stories/S137.md) Design: Standings date picker | `todo` | S123, S129 | — |
-| 77 | [S138](backlog/stories/S138.md) Standings date picker | `todo` | S125, S81 | S137 |
+| 77 | [S138](backlog/stories/S138.md) Standings date picker | `todo` | S125, S130, S81 | S137 |
 | 79 | [S132](backlog/stories/S132.md) Release notes API | `todo` | S131 | — |
 | 81 | [S134](backlog/stories/S134.md) Change log page | `todo` | S132, S81 | S133 |
 | 82 | [S135](backlog/stories/S135.md) Update notice and after-update pointer | `todo` | S132, S134, S81 | S133 |
