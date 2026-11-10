@@ -17985,3 +17985,51 @@ Backlog review (`.claude/skills/backlog-review/SKILL.md`), one fresh-context rev
 1. On the first morning of spring training, before any spring game has been played, should Standings keep showing last season's final table as the regular season view, and should the switch offer a spring training view that is still empty?
 2. When the calendar is open as a sheet on a phone, should the phone's Back button close the sheet and stay on the day, or leave the page?
 3. If the privacy policy and user agreement aren't written yet when the footer's design is approved, may the footer ship without those two links, or does the whole footer wait for them?
+
+---
+
+## 2026-11-10 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-10T11:20:21Z` |
+| HEAD at review | `29e8c9e` (tree dirty) |
+| Trigger | docs/v3/FEATURES.md and docs/v3/ARCHITECTURE.md changed; S139–S142 added; Source lines of S28, S31, S35, S55, S73, S131–S135 changed |
+| Stories `done` since last review | — |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context review at `29e8c9e`, after the owner's 2026-11-10 answers (`2e6ae4b`) and the backlog review that followed (`29e8c9e`). The three draft amendments (shell-scoreboard A8 and A9, standings-search-settings A9) are unratified and about to be redrawn, so a mismatch between them and FEATURES is not a finding.
+
+**Check 1: citation honesty**
+
+1. **The ten changed Source lines hold.** S28, S31, S35, S55, S73 (`done`), S131, S133 (`blocked`), S132, S134, S135 (`todo`): each change is only the row's rename from "Update / changelist UX" to "Update / change log UX" (owner, 2026-11-10: *"Change list is never right. Change log is the right name. So anything that's change list anywhere should be change log."*), and every one resolves to FEATURES' renamed row (`pnpm backlog:check`: in sync). The ARCHITECTURE change since `d8d05ee` is the same rename in the ADR-015 sunset paragraph. The one "changelist" left in FEATURES is inside the owner's verbatim 2026-11-08 quote and is correctly kept.
+2. **The four new stories cite honestly.** S139 (the three views in the API) and S140 (the World Series winner box) deliver what FEATURES' Standings row describes; S141 (footer design) and S142 (footer build) cite the new Site footer row, added in the owner's words in the same change set as the stories (rule 19).
+3. **Next three `todo` by priority hold:** S136 and S125 against the Calendar date picker row (favorite-team mark, sheet / dropdown, Today, month arrows, opening already filled); S139 as above. No `Open:` story exists; no pillar-cited story was named by `parity:debt`.
+4. **Quotations.** Every italic owner quotation in the changed notes was compared with FEATURES by script: 52 exact, 31 substrings, 7 where a note quotes a longer run of the same words; none altered, none joined without a break, none misdated. The rename changed no quotation.
+
+**Check 2: doc reflects reality**
+
+5. **Fixed: FEATURES' Update / change log UX row stated a reading as settled.** It said that when the notice is up because the server retired the version it shows neither link nor addition, and added, as its own voice, "it isn't obviated, since the notice keeps its link and its addition". The owner's answer was conditional (*"I think this is obviated by the thing I just said for number 18, but if not, then my answer is yes."*), and "the notice keeps its addition" rests on the "+N more" reading the same row already marks as the agent's. Reworded so it reads as the agent's reading, resting on that one, which the owner confirms when the redrawn draft is shown. No owner words changed.
+6. **The other unanswered points are presented acceptably in FEATURES:** "+N more" (marked as a reading); the page's address `/changelog` (not in FEATURES); the pointer's countdown and close button ("asked when the redrawn draft is shown"); the pointer while a notice is up, the World Series box's duration, the arrows across a year and Esc, the notice "growing" (FEATURES silent); a fourth kind ("undecided"); "Fetched … ago" from every page (marked as the agent's reading of "at all"); the footer's policy text, contact and copyright name ("asked in the design story").
+7. **Not fixed (outside write scope): story notes state readings flat.** S133's "Retired version" note says it was "Settled on 2026-11-10"; S135 AC 2 states the retired case flat; S133 AC 1's update-notice bullet and S135 AC 2 state "one addition, then how many more" without marking it as the agent's reading; S135 AC 3 states "never on screen with A6's box" flat while S133 marks it as the agent's reading.
+8. **Not fixed (outside write scope): VISUAL-DESIGN's footer line contradicts FEATURES.** `docs/v3/VISUAL-DESIGN.md:287` says "Footer: optional, quiet — copyright / report a problem. Not a second nav, not headlines."; FEATURES' Site footer row (owner, 2026-11-10) asks for a few columns of links on every page. S141 has VISUAL-DESIGN.md in its fence but no AC updates that line.
+9. **Not settled by any record: visible freshness.** FEATURES' Site footer row reads the owner's *"I don't think we need the fetched thing at all"* as removing "Fetched … ago" from every page (marked as a reading). `docs/v3/ARCHITECTURE.md:918` lists "Freshness is visible, not just internal … A stale screen is diagnosable by looking at it" among the stated owner debuggability requirements, and VISUAL-DESIGN D9 (line 44) and line 292 ("Quiet meta: date, window mode, last fetched (D9)") say the same. S142 AC 2 removes the line. Put to the owner (question 1). Not blocking: S141 and S142 are not next up, and the row already presents it as a reading.
+10. **"How the site is made".** FEATURES says the footer has "room" for it; S141 AC 1 draws a separate page for it; the owner's *"I'll probably want to put some like information on it"* could mean the footer or the about page. Put to the owner (question 2).
+
+**Check 3: coverage**
+
+11. Every FEATURES clause added since `d8d05ee` has a story: Standings (S139, S140, S129, S130, S137, S138), Calendar date picker (S123, S136, S125), Update / change log UX (S131–S135), Site footer (S141, S142). What the playoffs view shows once playoff games are played has no story, by the owner's own deferral (*"We'll figure that out later."*).
+
+**For the next backlog review:**
+
+- S133's "Settled on 2026-11-10" note and S135 AC 2 on the retired-version case, S133 AC 1 and S135 AC 2 on "one addition, then how many more", and S135 AC 3 on "never on screen with A6's box": mark each as the agent's reading for the owner to confirm with the redrawn draft, as FEATURES now does (finding 7).
+- `docs/v3/VISUAL-DESIGN.md:287`'s Footer line contradicts the Site footer row; S141 should say it updates that line (finding 8).
+- Visible freshness (ARCHITECTURE:918, VISUAL-DESIGN D9 and :292) against removing "Fetched … ago" everywhere (S142 AC 2): wait for the owner's answer (finding 9).
+
+**Owner questions**
+
+1. Should "Fetched … ago" go from every page, even though the docs list visible freshness as one of your debuggability requirements? — see finding 9.
+2. Does "how the site is made" go in the footer, on the about page, or on a page of its own? — see finding 10.
