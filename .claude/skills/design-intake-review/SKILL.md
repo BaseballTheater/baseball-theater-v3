@@ -11,7 +11,7 @@ It is a backlog review with a wider input. It shares the backlog review's write 
 
 ## When it is due
 
-- A surface's `RATIFIED.md` is added, or a ratified amendment lands in `docs/v3/visual/<surface>/`. **A draft never makes one due** (owner, 2026-11-10: "if it's in draft, then identifying that work and then changing the design will only cause more confusion for the model. So I would just avoid doing any design reviews on draft designs."): an amendment that still says `**Draft, not ratified.**` is skipped by `scripts/review-debt.sh`, and its intake is due when the owner ratifies it.
+- A surface's `RATIFIED.md` is added, or a ratified amendment lands in `docs/v3/visual/<surface>/`. **A draft never makes one due** (owner, 2026-11-10: "if it's in draft, then identifying that work and then changing the design will only cause more confusion for the model. So I would just avoid doing any design reviews on draft designs."): `scripts/review-debt.sh` skips an amendment whose committed text still has a draft marker (`**Draft`, or "not ratified" / "not yet ratified") and no line starting `Ratified by:` with a name, and a draft amendment that was deleted; its intake is due when the owner ratifies it. When the two marks disagree it counts as ratified.
 - A frontend ADR is accepted or materially changed (ADR-003, 008, 014, 016, 023–026, or a new one).
 - The owner asks whether the backlog builds the designs.
 
