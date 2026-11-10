@@ -50,8 +50,8 @@ Assembled, in this order and around the stories, into BACKLOG.md.
     - `55–80` Later themes (not yet story-sliced)
 - [05 Gap map (doc → story)](<backlog/frame/05 Gap map (doc → story).md>) — 9 KB
   - `1–44` Gap map (doc → story)
-- [06 Baseline history](<backlog/frame/06 Baseline history.md>) — 43 KB
-  - `1–126` Baseline history
+- [06 Baseline history](<backlog/frame/06 Baseline history.md>) — 44 KB
+  - `1–127` Baseline history
 
 ## Product and architecture docs
 
@@ -377,19 +377,19 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `2167–2170` System Consistency
   - `2171–2174` Originality
   - `2175–2221` Small-Size Test
-- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 56 KB
+- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 57 KB
   - `12–19` North star
   - `20–34` Principles (product)
   - `35–46` Scope legend
   - `47–81` Carry / cut from v2 (working table)
     - `76–81` Dropped (summary)
-  - `82–258` New product themes
-    - `106–258` Theme detail
-  - `259–275` Build checklist (working — not a “feel” gate)
-  - `276–304` Patronage & access (product-level)
-    - `288–304` Tiers (carry from v2)
-  - `305–315` Success signals
-  - `316–323` Open product questions
+  - `82–259` New product themes
+    - `106–259` Theme detail
+  - `260–276` Build checklist (working — not a “feel” gate)
+  - `277–305` Patronage & access (product-level)
+    - `289–305` Tiers (carry from v2)
+  - `306–316` Success signals
+  - `317–324` Open product questions
 - [FIGMA-EXPLORATION.md — FIGMA-EXPLORATION.md](FIGMA-EXPLORATION.md) — 19 KB
   - `161–164` Verdict
   - `165–167` Fails
@@ -493,6 +493,7 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 
 | Priority | Story | Status | Depends on | Design |
 |---|---|---|---|---|
+| 73 | [S143](backlog/stories/S143.md) Mock sign-in on staging | `todo` | S116 | — |
 | 74 | [S136](backlog/stories/S136.md) Teams per day in the month counts | `todo` | S124 | — |
 | 74 | [S125](backlog/stories/S125.md) Calendar date picker | `todo` | S124, S136, S81 | S123 |
 | 76 | [S139](backlog/stories/S139.md) Standings views in the API | `todo` | S128 | — |
