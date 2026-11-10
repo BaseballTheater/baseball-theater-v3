@@ -17844,3 +17844,33 @@ Design intake review (`.claude/skills/design-intake-review/SKILL.md`), two indep
 **Owner questions.**
 
 1. **Should the review-debt check skip draft amendments marked "Draft, not ratified."?** Restated from the A8 intakes (bc694a5), still unanswered: this is the sixth draft-only intake (S96, S107, S123 twice, S129, S133), each able to record only a reading-aid note, while the real intake fires again at ratification. `scripts/review-debt.sh` fires on any change under `docs/v3/visual/*/amendments/*.md`; changing it is outside a review's write scope, so it is the owner's call.
+
+---
+
+## 2026-11-09 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-10T07:17:12Z` |
+| HEAD at capture | `b262eda` (tree clean) |
+| Change | `b262eda` — Backlog: owner's review of the calendar, standings and update-notice drafts |
+
+**What changed, and the owner's answer**
+
+Owner-directed backlog change b262eda (2026-11-09): three stories added (S136 the teams playing each day in the month counts; S137 and S138 the Standings date picker design and build), acceptance criteria rewritten in S123 and S125 (native month and year pickers, the favorite-team mark) and in S133 and S135 (one "update complete" box after updating, never two boxes), and the owner's words added to three FEATURES rows. Asked "Does the backlog change you directed today need a full backlog review and doc parity review before I go on?", with the options to skip both, run both, or run the backlog review only, the owner answered: "No, skip both (Recommended)". The fresh-context pre-PR review (LOOP.md section 7) still runs on the whole diff before its pull request opens, and the next scheduled or drift-triggered review still checks these stories.
+
+---
+
+## 2026-11-09 — doc parity review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a doc parity review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-10T07:17:13Z` |
+| HEAD at capture | `b262eda` (tree dirty) |
+| Change | `b262eda` — Backlog: owner's review of the calendar, standings and update-notice drafts |
+
+**What changed, and the owner's answer**
+
+Owner-directed backlog change b262eda (2026-11-09): three stories added (S136 the teams playing each day in the month counts; S137 and S138 the Standings date picker design and build), acceptance criteria rewritten in S123 and S125 (native month and year pickers, the favorite-team mark) and in S133 and S135 (one "update complete" box after updating, never two boxes), and the owner's words added to three FEATURES rows. Asked "Does the backlog change you directed today need a full backlog review and doc parity review before I go on?", with the options to skip both, run both, or run the backlog review only, the owner answered: "No, skip both (Recommended)". The fresh-context pre-PR review (LOOP.md section 7) still runs on the whole diff before its pull request opens, and the next scheduled or drift-triggered review still checks these stories.
