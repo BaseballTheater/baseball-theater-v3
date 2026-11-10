@@ -231,7 +231,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 74 | [S110](#s110--entry-bundle-headroom-pages-past-the-scoreboard-load-on-demand) | Entry bundle headroom | `done` |
 | 74 | [S125](#s125--the-scoreboards-calendar-date-picker) | Calendar date picker | `todo` |
 | 75 | [S111](#s111--the-scoreboard-opens-on-today-or-on-the-seasons-final-day-in-the-off-season) | Scoreboard opens on the right day | `done` |
-| 76 | [S129](#s129--design-the-spring-training-label-on-standings) | Design: spring standings label | `todo` |
+| 76 | [S129](#s129--design-the-spring-training-label-on-standings) | Design: spring standings label | `blocked` |
 | 76 | [S51](#s51--representative-local-dev-pnpm-dev-on-postgres-in-docker) | `pnpm dev` on Postgres in Docker | `done` |
 | 77 | [S130](#s130--standings-label-spring-training-standings) | Spring standings label | `todo` |
 | 77 | [S112](#s112--dev-seed-the-last-month-of-the-season-and-the-postseason-refreshable-by-date-range) | Dev seed (season end + postseason) | `done` |
@@ -285,7 +285,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 116 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
 | 117 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
 
-**Next (generated):** **76 / S129** — the lowest **Priority** `todo` story not waiting on a design. Skipped, waiting on design (rule 18): S125.
+**Next (generated):** **78 / S131** — the lowest **Priority** `todo` story not waiting on a design. Skipped, waiting on design (rule 18): S125, S130.
 
 **Before starting it:** confirm no [backlog review](#backlog-reviews) is due — the review-debt line in that section counts stories, but a drift event makes one due regardless.
 
@@ -522,7 +522,7 @@ This section keeps only the *forward-looking* scheduling state: what is due next
 
 **Earlier reviews** (2026-10-20 at `1967ae3` — S54 fenced for `tools/`, S48 AC 8 (ingest's final check), S56 Search-title note; 2026-10-19 at `adf4f24` — ADR-023–027 and the first design intake: guardrail, design and UI stories S52–S74 inserted, rooms re-scoped, guardrails and design first; 2026-10-18 at `52a0d0f` — off Firebase onto Cloudflare/Postgres/Logto (ADR-017–022): S42–S51 inserted, S7/S9 superseded, S8/S18/S19 re-scoped; 2026-10-14 at `71526bf` — S39/S40/S41 inserted for ratified work, rooms re-scoped, `openapi/` fenced; 2026-10-09 at `77244af` — S9 re-scoped, then emulator-only `pnpm dev` on the owner's answer; 2026-10-04 at `5dd9404` — `blocked` on Q1–Q5, answered 2026-10-08 and applied in `5f370be`; 2026-09-16 at `2a357ad` — S29 split: guard kept, generated DAL deferred behind a trigger; 2026-09-14 at `f74767c` — rule-18 design gate, parking, S18 ahead of the gated UI band; 2026-09-13 at `5827d36` — the V3 fence amendment and the end-to-end walk of the notes process; 2026-09-13 at `38a52aa` — the S27/S29 counterfactual and the S25-before-S29 re-order; 2026-09-10 at `c98e435` and before): see [AUDIT](./AUDIT.md).
 
-**Review debt (generated from [AUDIT](./AUDIT.md)):** 1 of 6 stories `done` since the last backlog review (2026-11-09, verdict `amended`): S124. A drift event makes a review due regardless of this count.
+**Review debt (generated from [AUDIT](./AUDIT.md)):** 0 of 6 stories `done` since the last backlog review (2026-11-09, verdict `amended`). A drift event makes a review due regardless of this count.
 
 **Next review due:** by count after **6** stories land since the last review, or immediately on any drift event. In particular:
 - ~~**When S41 enters the next 3:** confirm S2 actually shipped the reusable boxed-linescore component and the `823823` fixture pair S41 binds to.~~ Confirmed 2026-10-29 (see S41's notes).
@@ -2147,7 +2147,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 /goal docs/v3/BACKLOG.md S129. Work item 0 first: if scripts/verify-S129.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S129.sh exits 0, pnpm verify exits 0, no files outside docs/v3/visual/standings-search-settings/amendments/, docs/v3/VISUAL-DESIGN.md, docs/v3/FEATURES.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S129.sh, or stop after 8 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `todo`
+**Status:** `blocked`
 
 ### S130 — Standings label spring training standings
 
@@ -2177,6 +2177,7 @@ scripts/audit.sh answers parity --review <date> --commit <sha> --answers -   # o
 **Notes:**
 
 - Spring training 2027 starts in late February; this should land before then.
+- Design intake, 2026-11-09 (two reviewers merged, against S129's draft A9 at `5755230`; A9 is not ratified, so this is a reading aid, not a decision, and S130's ACs are re-checked at the intake that follows A9's ratification, when every "Pending Q<n>:" sentence in A9 is settled): (a) **Label.** A9 draws a muted `sm` line 4px under the unchanged `Standings` title, "Spring training <season> · as of <Mon D>", with the day formatted by the existing `formatMonthDay` (`web/src/format/datetime.ts`), not a new formatter (Pending Q4: whether the day means the day asked for or the last finished day). The text comes from the payload, never the URL: under S128 AC 3's fallback the payload describes the table returned (on the morning of 2027-02-19 with no spring game final, the final 2026 table), so AC 1's RTL cases should include a payload whose `date`/`season` differ from the requested `?date=`. `season` is optional in `StandingsSnapshot` (`packages/domain/src/types.ts`) though the server always sets it (`functions/src/services/standings.ts`); state what a payload without it draws. (b) **Final.** Q2 decides whether `final` is labeled ("2026 regular season · final") or not; AC 1's "whatever S129 says (or nothing)" covers both, and the `final` RTL case also covers that first-spring-morning fallback. (c) **Spring games back.** Pending Q3: as drawn, GB shows `—` on every spring row (MLB sends `"-"`, the mapper stores no value, `DivisionTable` shows `—`); if the owner picks hiding the column, or `springLeagueGamesBack` with its own heading, that is a change to `DivisionTable` and the standings mapper (`functions/src/mappers/standings.ts`, outside this story's scope files), so the post-ratification intake re-scopes or slices it. (d) **States.** Loading, empty and error show no label (A9); AC 1 tests only four loaded payloads, so add the no-label states. A spring payload whose divisions have no teams is not `ViewState`-empty (`StandingsPage` checks only `divisions.length`) and A9 draws nothing for it. (e) **Heading.** The label is not a second heading (`StandingsPage` has `<Title order={1}>Standings</Title>`); Pending Q6 may change the heading or tab title, and Q5 may add an "as of" line to the regular season, which would change AC 1's no-label `regularSeason` case. Q1 may replace the line with a badge or retitle. (f) **Design match (AC 3).** A9's frames are drawn with A7 applied (content-width tables, abbreviations on mobile), so S130 builds on A7's layout; the `standings-final-*` frames are captured only if Q2 keeps them. The fixture client serves `fixtures/raw/standings-2026-spring.json` for any 2026 spring day and the 2026 final table after the regular season (`functions/src/adapters/fixtures/fixture-client.ts`), so `e2e/design/S130.spec.ts` captures both phases offline, showing "2026" and its own day rather than the drawn "2027 · Mar 2", and the AL West shows the payload's `ATH`/"Athletics" where the frames draw `OAK` (A9, Interpretation).
 
 **Reuse check** (ADR-025): before writing code, read `web/src/pages/StandingsPage.tsx`, `web/src/api/standings.ts` (`useStandings`) and the shared heading components; record what was reused in the story's ledger notes.
 
