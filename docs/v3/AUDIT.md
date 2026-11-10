@@ -18033,3 +18033,18 @@ Fresh-context review at `29e8c9e`, after the owner's 2026-11-10 answers (`2e6ae4
 
 1. Should "Fetched … ago" go from every page, even though the docs list visible freshness as one of your debuggability requirements? — see finding 9.
 2. Does "how the site is made" go in the footer, on the about page, or on a page of its own? — see finding 10.
+
+---
+
+## 2026-11-10 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-10T11:57:47Z` |
+| HEAD at capture | `4ffa3b6` (tree clean) |
+| Change | `4ffa3b6` — Backlog: fix what the pre-PR review found in the owner's 2026-11-10 changes |
+
+**What changed, and the owner's answer**
+
+Acceptance criteria of S123, S130, S133, S135, S139, S140, S141 and S142 were rewritten to answer the pre-PR review of this branch (LOOP.md section 7). Owner, 2026-11-07, asked whether such a rewrite needs a backlog review: "This shouldn't even trigger a question. Always skip."
