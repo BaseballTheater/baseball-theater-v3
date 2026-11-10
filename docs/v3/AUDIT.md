@@ -17540,3 +17540,66 @@ Owner, 2026-11-08: 1. rail version line: "Follow semver". 2. v3.1.0 notes until 
 **What changed, and the owner's answer**
 
 S131, S132, S133 and S135 acceptance criteria rewritten in d843d8f to answer the pre-PR review of this pull request (LOOP §7), before it opened. Skipped under the owner's rule for review-driven rewrites (owner, 2026-11-07, asked whether ACs rewritten to answer a pull request's review need a backlog review: "This shouldn't even trigger a question. Always skip."), read as covering a reviewer's review of the pull request before it opens; the owner can overrule.
+
+---
+
+## 2026-11-09 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-09T18:16:12Z` |
+| HEAD at review | `3cb22d9` (tree dirty) |
+| Trigger | design intake: shell-scoreboard A8 (S123 draft, unratified) |
+| Stories `done` since last review | none (S123 parked) |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Design intake review (`.claude/skills/design-intake-review/SKILL.md`), two independent fresh-context reviewers (A, B), merged. Same case as the A7 intake (2026-11-04, `92c6656`, S107's draft) and the S96 drafts intake (`ac18059`): one story's draft amendment, nothing ratified, no frontend ADR change. Trigger from `scripts/review-debt.sh`: "a design intake review is due (since 68e2375, which logged the last backlog review or its answers): docs/v3/visual/shell-scoreboard/amendments/A8.md added or changed".
+
+**Input: A8 is not ratified.** `docs/v3/visual/shell-scoreboard/amendments/A8.md` (added by `3cb22d9`, S123's park) says "**Draft, not ratified.**" (line 3); its Ratification section says "Not ratified. Awaiting the owner's review of section X." (line 79); it has 4 open questions (lines 72–75); `grep -c 'Ratified by'` is 0. `git show --stat 3cb22d9` adds no `.png` and no `RATIFIED.md`. SKILL.md: unratified frames are not work, so nothing is taken in.
+
+**Provisional inventory (for the post-ratification intake).** 18 named frames, not exported, each state at mobile (bottom sheet) and medium/desktop (344px popover): closed, open (month grid with weekday row and per-day counts, no-game day dimmed and pickable, `Today` / `Close` footer), invalid typed date, year view (per-month `391 games`, no-game months dimmed), decade view (future years pickable), loading counts (bar per day, nothing dimmed, "Counting games…"), off-season month ("No games this month."). Components: Mantine `DatePicker` (`renderDay`, `getDayProps`), `DateInput`, `Popover`, `Drawer`; custom date button, count text and loading bar, status lines, footer.
+
+**Ownership.** Reviewer A: S125 owns all of it, with S124 for the counts. Reviewer B: owned 2 / unowned 1 (the year view's per-month totals: S124 is one month per request) / re-scoped 0. Merged: owned 2 (S125 the calendar, S124 per-day counts) / unowned 1 (year-view month totals, recorded as a gap and an owner question rather than sliced, since the frames are unratified and A8 may drop it) / re-scoped 0. No new story, no priority change.
+
+**Gating.** S125 has `design: [[S123]]` and `status: todo`; S123 is `blocked`, so `pnpm backlog:check` keeps S125 from `doing`. Holds.
+
+**Amendment (notes only, ACs unchanged).** Added one note to S125 after its 2026-11-07 backlog review note, listing gaps for the post-ratification intake: (a) loading counts: A8 draws an undimmed loading state while AC 2 dims "no games (or unknown)", and S124's `count: null` is undrawn (S124's note, line 62, treats `null` like `0` unless S123 says otherwise); (b) the off-season line has no AC beyond AC 6; (c) year-view month totals need twelve months' counts, S124 is `GET /api/v1/schedule/month/:month` (S124 AC 1) and may fill from MLB per month (AC 2); (d) date button, `Today` / `Close` footer (`Today` via `mlbToday`, `packages/domain/src/scoreboard-date.ts:40`) and sheet-vs-popover have no AC beyond AC 6; the container goes through `useLayoutVariant()` (`web/src/layout/variant.ts:17`) because AC 5 keeps `useMediaQuery` in `web/src/layout/`; (e) any month total / no-games test is one `packages/domain` function (ADR-025); (f) A8's open questions may change (a)–(d). Every citation checked against the files by the merger.
+
+**Reviewers' disagreements.** None on verdict or edit. B added the ADR-025, `mlbToday` and AC 6 points and counted the year-view totals as unowned; A folded them into S125. Merged as the union; the unowned item stays a gap plus owner question 2.
+
+**For the parity review:** nothing (`docs/v3/FEATURES.md:101` already has "Calendar date picker").
+
+**Owner questions** (do not act on these until answered):
+
+1. **Should the review-debt check skip draft amendments marked "Draft, not ratified."?** `scripts/review-debt.sh:50` fires an intake on any amendment change; this is the third time (S96, S107, S123) an intake could only record "nothing taken in", and the real intake fires again at ratification. Changing it is outside a review's write scope; owner's call.
+2. **Should S123's ratification decide whether the year view shows per-month game totals (`391 games`)?** The owner asked only for counts on each day; no story serves a year's totals (S124 answers one month per request). Keeping them means twelve requests per year view or a new year-route story; dropping them keeps S125 as is.
+3. **When S124 returns `null` (unknown) rather than `0`, should that day look dimmed like a no-game day?** A8 draws only an undimmed loading state; S125 AC 2 dims unknown; S124's note says the same unless the design says otherwise.
+
+Plus A8's own four open questions, asked at S123's ratification.
+
+---
+
+## 2026-11-09 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-09T18:59:03Z` |
+| HEAD at review | `5d14054` (tree dirty) |
+| Trigger | design intake review: docs/v3/visual/shell-scoreboard/amendments/A8.md changed in 5d14054 (S123 pre-PR fixes to the unratified draft) since bc694a5 |
+| Stories `done` since last review | — |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+**Design intake review (two independent fresh-context reviewers, merged).** Scope: `docs/v3/visual/shell-scoreboard/amendments/A8.md` as changed by S123's pre-PR fixes in `5d14054`; previous intake entry logged in `bc694a5`.
+
+- **A8 is still a draft.** A8.md:3 says "**Draft, not ratified.**"; nothing is taken into the backlog, S125's ACs are unchanged, and S125's `**Design:**` gating on S123 still holds (`pnpm backlog:check` passes). Both reviewers: the 2026-11-09 correction already on S125's intake bullet ((a) `count: null` drawn like a no-game day, (d) `Today` via `useScoreboardDefaultDate`, Q5 for (c)) matches A8.md:87, :90, :99.
+- **Amended (notes only):** appended a second 2026-11-09 correction to S125's intake bullet (`docs/v3/backlog/stories/S125.md`) recording the new frames for the post-ratification intake to map: `failed` (A8.md:46–48), `tooearly` (A8.md:28–30; a second invalid state that AC 1's singular "S123's invalid state" should cover), `earliest` / `earliest-decade` (A8.md:37–42; AC 3 already bounds), `Today` muted while `useScoreboardDefaultDate` loads (A8.md:90); the prose-only states (A8.md:53: year view loading / failed / 1901, pending Q5); navigation on Enter or blur, never `onChange` (A8.md:65, :84), to check against AC 1's "navigates … once valid"; and `scoreboard-calendar-closed-<pairing>` superseding the date control in every ratified frame (A8.md:15).
+- **S123's grader** now requires the `failed`, `tooearly` and `earliest` states beyond AC 1's wording: stricter than the ACs, not loosened (rule 7: graders may be updated before the shipping commit).
+- **Previous intake's questions:** Q1 (skip intakes on draft-only amendments) restated, still open and strengthened: this is the fourth draft-only intake, S123's A8 twice. Q2 (year-view totals) is now carried as A8's own open question Q5. Q3 (whether `count: null` dims) is answered by the draft (A8.md:87), superseded pending ratification.
+- **Note for S123's ratification ask (not a backlog change):** should A8 draw the prose-only states (muted `Today`; year view loading / failed / 1901) before the owner ratifies it?
+- No new owner questions. No file under `docs/v3/visual/` edited.
