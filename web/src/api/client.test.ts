@@ -2,7 +2,9 @@ import {
 	afterEach, describe, expect, it, vi,
 } from "vitest";
 import { jsonResponse } from "../test/jsonResponse.js";
-import { fetchGame, fetchSchedule } from "./client.js";
+import {
+	fetchGame, fetchSchedule, fetchScheduleMonth,
+} from "./client.js";
 
 /** Stubs the global fetch with one JSON response. */
 function mockFetchOnce(body: unknown, status = 200): void
@@ -42,6 +44,29 @@ describe("fetchSchedule", () =>
 	{
 		mockFetchOnce({}, 500);
 		await expect(fetchSchedule("2024-07-04")).rejects.toThrow("Request failed (500)");
+	});
+});
+
+describe("fetchScheduleMonth (S124)", () =>
+{
+	it("requests the month route and returns each day's count", async () =>
+	{
+		mockFetchOnce({
+			month: "2026-09",
+			days: [
+				{
+					date: "2026-09-01",
+					count: 15,
+				},
+				{
+					date: "2026-09-02",
+					count: null,
+				},
+			],
+		});
+		const month = await fetchScheduleMonth("2026-09");
+		expect(month.days[1]?.count).toBeNull();
+		expect(requestedPath()).toBe("/api/v1/schedule/month/2026-09");
 	});
 });
 

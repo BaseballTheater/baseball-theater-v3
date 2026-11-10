@@ -18,7 +18,7 @@ import {
 	personalDataStores, SETTINGS_STORE, USERS_STORE,
 } from "../services/personal-data.js";
 import {
-	describeIdentityLinkContract, describePersonalDataStoreContract, describeRepositoryContract,
+	describeIdentityLinkContract, describePersonalDataStoreContract, describeRepositoryContract, describeScheduleCountsContract,
 } from "./repository-contract.js";
 
 /** A fresh, empty instance of each repository an adapter implements. */
@@ -88,6 +88,16 @@ export function describeStorageContract(prefix: string, stores: StoreFactories):
 			day.windowMode = "active";
 		},
 	});
+
+	describeScheduleCountsContract(`${prefix}ScheduleRepository`, () => stores.schedules(), async (date, gameCount, stamp) => ({
+		...(await fixtures.fetchSchedule("2024-07-04")),
+		date,
+		games: (await fixtures.fetchSchedule("2024-07-04")).games.slice(0, gameCount),
+		fetchedAt: stamp,
+		version: 1,
+		// A change before the fetch, so the two stamps differ and each is checked on its own.
+		lastChangedAt: new Date(Date.parse(stamp) - 60_000).toISOString(),
+	}));
 
 	describeRepositoryContract<number, GameSnapshot>(`${prefix}GameRepository`, {
 		create: () =>

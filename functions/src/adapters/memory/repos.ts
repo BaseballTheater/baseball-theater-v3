@@ -1,5 +1,5 @@
 import type {
-	AccountSettings, Entitlements, GameProjection, GameSnapshot, ScheduleDay, UserProfile,
+	AccountSettings, Entitlements, GameProjection, GameSnapshot, ScheduleDay, ScheduleDayTally, UserProfile,
 } from "@bt/domain";
 import { downloadExpired } from "@bt/domain";
 import type {
@@ -80,6 +80,19 @@ export class InMemoryScheduleRepository implements ScheduleRepository
 	async upsert(day: ScheduleDay): Promise<void>
 	{
 		this.store.put(day.date, day);
+	}
+
+	async listGameCounts(from: string, to: string): Promise<ScheduleDayTally[]>
+	{
+		return this.store.values()
+			.filter((day) => day.date >= from && day.date <= to)
+			.sort((a, b) => a.date.localeCompare(b.date))
+			.map((day) => ({
+				date: day.date,
+				gameCount: day.games.length,
+				fetchedAt: day.fetchedAt,
+				lastChangedAt: day.lastChangedAt,
+			}));
 	}
 
 	clear(): void

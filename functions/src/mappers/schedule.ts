@@ -17,7 +17,7 @@ import type {
 	TeamRecord,
 	Unversioned,
 } from "@bt/domain";
-import { isLiveStatus } from "@bt/domain";
+import { datesBetween, isLiveStatus } from "@bt/domain";
 import type {
 	Linescore,
 	LiveDecisions,
@@ -210,4 +210,27 @@ export function mapScheduleResponse(
 		fetchedAt,
 		windowMode,
 	};
+}
+
+/**
+ * Every day from `startDate` to `endDate` out of one range answer (S124), in order. MLB's `dates`
+ * lists only days that have games, so a day it leaves out is a day with no games, never another
+ * day's games: each day is matched by its exact date, unlike {@link mapScheduleResponse}'s
+ * single-day fallback to `dates[0]`, which stays as it is for the one-day path.
+ */
+export function mapScheduleRange(
+	response: ScheduleResponse,
+	startDate: string,
+	endDate: string,
+	fetchedAt: string,
+	windowMode: ScheduleDay["windowMode"] = "cache",
+): Unversioned<ScheduleDay>[]
+{
+	const byDate = new Map(response.dates.map((entry) => [entry.date, entry]));
+	return datesBetween(startDate, endDate).map((date) => ({
+		date,
+		games: (byDate.get(date)?.games ?? []).map(mapScheduleGame),
+		fetchedAt,
+		windowMode,
+	}));
 }

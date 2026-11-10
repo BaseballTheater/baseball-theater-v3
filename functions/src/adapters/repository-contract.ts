@@ -12,13 +12,16 @@
  * case (h) is its deletion (ADR-028): `deleteFor` reaches profile and links.
  * Case (i) is the same deletion for any registered `PersonalDataStore` (S6),
  * so each new store (settings now, S50's Postgres stores) runs one shared case.
+ * Case (j) is the schedule repository's month read (S124, `listGameCounts`).
  */
 import {
 	beforeEach, describe, expect, it,
 } from "vitest";
-import type { UserProfile } from "@bt/domain";
+import type { ScheduleDay, UserProfile } from "@bt/domain";
 import { entitlementsForTier } from "@bt/domain";
-import type { PersonalDataStore, UserRepository } from "@bt/ports";
+import type {
+	PersonalDataStore, ScheduleRepository, UserRepository,
+} from "@bt/ports";
 
 /** The reads and writes every keyed repository shares. */
 export interface ContractRepository<K, T>
@@ -210,6 +213,49 @@ export function describePersonalDataStoreContract(label: string, subject: Person
 			await store.deleteFor("uid-1");
 			expect(await store.exportFor("uid-1")).toBeNull();
 			expect(await store.exportFor("uid-2")).toEqual(kept);
+		});
+	});
+}
+
+/**
+ * Case (j), the schedule repository's month read (S124): `listGameCounts` returns each stored day
+ * in the range, both ends included, in date order, as its game count and its stamps exactly as
+ * stored, and leaves out days outside the range or never stored. `makeDay` builds a stored day
+ * with `gameCount` games.
+ */
+export function describeScheduleCountsContract(
+	label: string,
+	create: () => ScheduleRepository,
+	makeDay: (date: string, gameCount: number, stamp: string) => Promise<ScheduleDay>,
+): void
+{
+	describe(`${label} — repository contract`, () =>
+	{
+		it("(j) listGameCounts gives each stored day in the range, in order, with its game count and stamps", async () =>
+		{
+			const repo = create();
+			const days = [
+				await makeDay("2024-07-06", 0, "2024-07-07T00:00:03.000Z"),
+				await makeDay("2024-07-03", 1, "2024-07-07T00:00:01.000Z"),
+				await makeDay("2024-07-04", 2, "2024-07-07T00:00:02.000Z"),
+				await makeDay("2024-07-08", 1, "2024-07-07T00:00:04.000Z"),
+			];
+			for (const day of days) await repo.upsert(day);
+			expect(await repo.listGameCounts("2024-07-04", "2024-07-06")).toEqual([
+				{
+					date: "2024-07-04",
+					gameCount: 2,
+					fetchedAt: days[2]!.fetchedAt,
+					lastChangedAt: days[2]!.lastChangedAt,
+				},
+				{
+					date: "2024-07-06",
+					gameCount: 0,
+					fetchedAt: days[0]!.fetchedAt,
+					lastChangedAt: days[0]!.lastChangedAt,
+				},
+			]);
+			expect(await repo.listGameCounts("1999-01-01", "1999-01-31")).toEqual([]);
 		});
 	});
 }

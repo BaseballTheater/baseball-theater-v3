@@ -19,6 +19,13 @@ import type { GameDiffPatchResponse } from "@bt/mlb-api";
  */
 export interface MlbStatsClient {
 	fetchSchedule(date: string): Promise<Unversioned<ScheduleDay>>;
+	/**
+	 * Every day from `startDate` to `endDate` (both included) in one MLB schedule request (S124),
+	 * one entry per day in order, each shaped as {@link fetchSchedule} shapes its day. A day MLB's
+	 * answer leaves out (it lists only days with games) comes back with no games. Rejects when the
+	 * request fails, so a caller can tell "no games" from "not answered".
+	 */
+	fetchScheduleRange(startDate: string, endDate: string): Promise<Unversioned<ScheduleDay>[]>;
 	fetchGame(gamePk: number): Promise<Unversioned<GameSnapshot>>;
 	/** Highlights + editorial for one game; the only payload with playback URLs. */
 	fetchGameContent(gamePk: number): Promise<MediaHighlight[]>;

@@ -7,13 +7,18 @@
  * the stored one is a no-op (ADR-022 apply-if-newer).
  */
 import type {
-	AccountSettings, GameProjection, GameSnapshot, ScheduleDay,
+	AccountSettings, GameProjection, GameSnapshot, ScheduleDay, ScheduleDayTally,
 } from "@bt/domain";
 import type { ReplayPatchEntry } from "@bt/mlb-api";
 
 export interface ScheduleRepository {
 	getByDate(date: string): Promise<ScheduleDay | null>;
 	upsert(day: ScheduleDay): Promise<void>;
+	/**
+	 * Every stored day from `from` to `to` (both included, `YYYY-MM-DD`) as its game count and
+	 * stamps, in date order, in one read (S124's month view): days nothing stored are left out.
+	 */
+	listGameCounts(from: string, to: string): Promise<ScheduleDayTally[]>;
 }
 
 export interface GameRepository {

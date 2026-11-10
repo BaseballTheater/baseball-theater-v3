@@ -836,6 +836,19 @@
 				"required": ["date", "games", "fetchedAt", "windowMode", "version", "lastChangedAt"],
 				"type": "object"
 			},
+			"ScheduleDayCount": {
+				"additionalProperties": false,
+				"description": "A day of the month view: its date and its number of games.",
+				"properties": {
+					"count": {
+						"description": "How many games the day has; `0` for a stored day with none. `null` when BT holds no schedule for the day (a past day nothing has stored, or one MLB couldn't be asked for), so a client can tell \"no games\" from \"not known\".",
+						"type": ["number", "null"]
+					},
+					"date": { "description": "The day, `YYYY-MM-DD`.", "type": "string" }
+				},
+				"required": ["date", "count"],
+				"type": "object"
+			},
 			"ScheduleDayResponse": { "$ref": "#/components/schemas/ScheduleDay" },
 			"ScheduleGameSummary": {
 				"additionalProperties": false,
@@ -938,6 +951,20 @@
 					"runners",
 					"strikes"
 				],
+				"type": "object"
+			},
+			"ScheduleMonthResponse": {
+				"additionalProperties": false,
+				"description": "Games per day for one month (S124), from BT's stored schedule days, for S125's calendar date picker: one entry per day of the month, in order.",
+				"properties": {
+					"days": {
+						"description": "Every day of the month, first to last; `count` is null for a day BT holds no schedule for.",
+						"items": { "$ref": "#/components/schemas/ScheduleDayCount" },
+						"type": "array"
+					},
+					"month": { "description": "The month, `YYYY-MM`.", "type": "string" }
+				},
+				"required": ["month", "days"],
 				"type": "object"
 			},
 			"ScheduleTeam": {
@@ -1491,6 +1518,41 @@
 					}
 				},
 				"summary": "Games scheduled on one day."
+			}
+		},
+		"/api/v1/schedule/month/{month}": {
+			"get": {
+				"operationId": "getScheduleMonth",
+				"parameters": [
+					{
+						"description": "The month, as `YYYY-MM`, from 1901-04 through December of next year (by MLB's today, in `America/New_York`).",
+						"in": "path",
+						"name": "month",
+						"required": true,
+						"schema": { "pattern": "^\\d{4}-(0[1-9]|1[0-2])$", "type": "string" }
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ScheduleMonthResponse" } }
+						},
+						"description": "OK"
+					},
+					"400": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`month_invalid`: `month` is not `YYYY-MM`, not a real month, or before 1901-04. `month_too_late`: `month` is after December of next year, which MLB can't have published."
+					},
+					"426": {
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/ApiErrorResponse" } }
+						},
+						"description": "`version_unsupported`: this API version has been retired (ADR-015); the client should reload to update."
+					}
+				},
+				"summary": "The number of games on each day of one month, from BT's stored schedule. A day of the current season or later (through December of next year) that BT doesn't hold yet is asked of MLB first; a day still unknown has `count: null`, distinct from a day with no games (`0`)."
 			}
 		},
 		"/api/v1/scoreboard/default-date": {

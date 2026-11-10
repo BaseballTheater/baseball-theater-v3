@@ -18,6 +18,7 @@
  * (still a passthrough today), not in a rewrite of the route table.
  */
 import type { DigestItem } from "./digest.js";
+import type { ScheduleDayCount } from "./schedule-month.js";
 import type { AccountSettings } from "./settings.js";
 import type {
 	Entitlements, GameSnapshot, Role, ScheduleDay, StandingsSnapshot, UserProfile,
@@ -32,6 +33,17 @@ export type GameSnapshotResponse = GameSnapshot;
  * in the spring (see `phase`).
  */
 export type StandingsResponse = StandingsSnapshot;
+
+/**
+ * Games per day for one month (S124), from BT's stored schedule days, for S125's calendar date
+ * picker: one entry per day of the month, in order.
+ */
+export interface ScheduleMonthResponse {
+	/** The month, `YYYY-MM`. */
+	month: string;
+	/** Every day of the month, first to last; `count` is null for a day BT holds no schedule for. */
+	days: ScheduleDayCount[];
+}
 
 /** The day the scoreboard opens on (S111): today in season, the last final in the off-season. */
 export interface ScoreboardDefaultDateResponse {
@@ -170,6 +182,7 @@ export interface SignInResponse {
 /** Registry a route's response-type name is checked against — no unenforced string keys. */
 export interface ApiResponseTypes {
 	ScheduleDayResponse: ScheduleDayResponse;
+	ScheduleMonthResponse: ScheduleMonthResponse;
 	GameSnapshotResponse: GameSnapshotResponse;
 	DayDigestResponse: DayDigestResponse;
 	StandingsResponse: StandingsResponse;
@@ -191,6 +204,7 @@ export interface ApiResponseTypes {
  */
 export const ApiRoutes = {
 	"GET /api/v1/schedule": "ScheduleDayResponse",
+	"GET /api/v1/schedule/month/:month": "ScheduleMonthResponse",
 	"GET /api/v1/games/:gamePk": "GameSnapshotResponse",
 	"GET /api/v1/digest": "DayDigestResponse",
 	"GET /api/v1/standings": "StandingsResponse",

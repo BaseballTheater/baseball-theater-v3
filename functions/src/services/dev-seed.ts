@@ -17,7 +17,7 @@ import { gunzip, gzip } from "node:zlib";
 import type {
 	GameSnapshot, ScheduleDay, SeasonCalendar, Unversioned,
 } from "@bt/domain";
-import { addDays } from "@bt/domain";
+import { addDays, datesBetween } from "@bt/domain";
 import type { MlbStatsClient } from "@bt/ports";
 import { overlayMlbClient } from "../adapters/overlay-mlb.js";
 import type { IngestDeps } from "./ingest.js";
@@ -77,12 +77,10 @@ export async function defaultSeedRange(mlb: SeasonDates, today: string): Promise
 	throw new Error("MLB has no finished season to seed from; pass --start=YYYY-MM-DD --end=YYYY-MM-DD");
 }
 
-/** Every calendar day from `start` through `end`, in order. */
+/** Every calendar day from `start` through `end`, in order: the domain's `datesBetween` (ADR-025: one implementation). */
 export function seedDays(start: string, end: string): string[]
 {
-	const days: string[] = [];
-	for (let day = start; day <= end; day = addDays(day, 1)) days.push(day);
-	return days;
+	return datesBetween(start, end);
 }
 
 /** Runs `work` over `items`, `limit` at a time, keeping their order. */

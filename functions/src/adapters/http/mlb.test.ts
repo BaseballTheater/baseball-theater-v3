@@ -64,6 +64,26 @@ describe("HttpMlbStatsClient (S2)", () =>
 		expect(standings.windowMode).toBe("active");
 	});
 
+	it("fetchScheduleRange asks one schedule request for the range, and a day the answer leaves out has no games (S124 schedule range)", async () =>
+	{
+		const { mlb, urls } = client();
+		const days = await mlb.fetchScheduleRange("2026-09-04", "2026-09-06");
+		expect(urls).toHaveLength(1);
+		const asked = new URL(urls[0]!);
+		expect(asked.pathname).toBe("/api/v1/schedule");
+		expect(asked.searchParams.get("startDate")).toBe("2026-09-04");
+		expect(asked.searchParams.get("endDate")).toBe("2026-09-06");
+		// The same hydrate as one day's request, so a day stored from either reads the same.
+		const single = client();
+		await single.mlb.fetchSchedule("2026-09-05");
+		expect(asked.searchParams.get("hydrate")).toBe(new URL(single.urls[0]!).searchParams.get("hydrate"));
+		expect(days.map((day) => day.date)).toEqual(["2026-09-04", "2026-09-05", "2026-09-06"]);
+		// The recording holds only 2026-09-05: the days around it are empty, not copies of it.
+		expect(days[0]!.games).toEqual([]);
+		expect(days[2]!.games).toEqual([]);
+		expect(days[1]!.games).toEqual((await mlb.fetchSchedule("2026-09-05")).games);
+	});
+
 	it("fetchStandings asks with the date's season, which MLB requires alongside the date", async () =>
 	{
 		const { mlb, urls } = client();

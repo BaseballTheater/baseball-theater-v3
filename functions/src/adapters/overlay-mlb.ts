@@ -9,6 +9,7 @@
 import type {
 	GameSnapshot, ScheduleDay, Unversioned,
 } from "@bt/domain";
+import { datesBetween } from "@bt/domain";
 import type { MlbStatsClient } from "@bt/ports";
 
 /** Where the overlay looks first; null means "not here, ask the client underneath". */
@@ -22,6 +23,7 @@ export function overlayMlbClient(inner: MlbStatsClient, source: MlbOverlaySource
 {
 	return {
 		fetchSchedule: async (date) => await source.schedule(date) ?? inner.fetchSchedule(date),
+		fetchScheduleRange: (startDate, endDate) => overlayScheduleRange(inner, source, startDate, endDate),
 		fetchGame: async (gamePk) => await source.game(gamePk) ?? inner.fetchGame(gamePk),
 		fetchGameContent: (gamePk) => inner.fetchGameContent(gamePk),
 		fetchPlayMetrics: (gamePk) => inner.fetchPlayMetrics(gamePk),
@@ -34,6 +36,27 @@ export function overlayMlbClient(inner: MlbStatsClient, source: MlbOverlaySource
 		fetchGameTimestamps: (gamePk) => inner.fetchGameTimestamps(gamePk),
 		fetchGameDiffPatch: (gamePk, start, end) => inner.fetchGameDiffPatch(gamePk, start, end),
 	};
+}
+
+/**
+ * A range of days (S124): the days `source` holds come from it, and `inner` is asked once, for
+ * the span from the first day `source` lacks to the last, only when it lacks any. The port
+ * promises one entry per day, so an answer from `inner` missing a day rejects, as a failed
+ * request does, rather than inventing that day.
+ */
+async function overlayScheduleRange(inner: MlbStatsClient, source: MlbOverlaySource, startDate: string, endDate: string): Promise<Unversioned<ScheduleDay>[]>
+{
+	const dates = datesBetween(startDate, endDate);
+	const held = await Promise.all(dates.map((date) => source.schedule(date)));
+	const missing = dates.filter((_date, i) => held[i] === null);
+	if (missing.length === 0) return held as Unversioned<ScheduleDay>[];
+	const asked = new Map((await inner.fetchScheduleRange(missing[0]!, missing.at(-1)!)).map((day) => [day.date, day]));
+	return dates.map((date, i) =>
+	{
+		const day = held[i] ?? asked.get(date);
+		if (!day) throw new Error(`schedule range ${missing[0]}…${missing.at(-1)} has no ${date}`);
+		return day;
+	});
 }
 
 /** A stored, versioned document as the upstream state it was stamped from (ADR-022 re-stamps it). */

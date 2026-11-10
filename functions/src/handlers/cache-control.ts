@@ -9,7 +9,7 @@ import { CACHE_LIFETIME_FLOOR_MS, cacheLifetimeMs } from "@bt/domain";
 export const STALE_WHILE_REVALIDATE_S = CACHE_LIFETIME_FLOOR_MS / 1000;
 
 /**
- * The `Cache-Control` a schedule or game response carries (S47, ADR-021). Workers Cache
+ * The `Cache-Control` a schedule, schedule month (S124) or game response carries (S47, ADR-021). Workers Cache
  * (`wrangler.jsonc`) stores the response at Cloudflare's edge, tiered, and answers later
  * requests before the Worker runs, for as long as this header allows.
  *

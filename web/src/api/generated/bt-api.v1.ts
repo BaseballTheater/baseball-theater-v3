@@ -141,6 +141,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/schedule/month/{month}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The number of games on each day of one month, from BT's stored schedule. A day of the current season or later (through December of next year) that BT doesn't hold yet is asked of MLB first; a day still unknown has `count: null`, distinct from a day with no games (`0`). */
+        get: operations["getScheduleMonth"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/scoreboard/default-date": {
         parameters: {
             query?: never;
@@ -628,6 +645,13 @@ export interface components {
             /** @enum {string} */
             windowMode: "active" | "cache";
         };
+        /** @description A day of the month view: its date and its number of games. */
+        ScheduleDayCount: {
+            /** @description How many games the day has; `0` for a stored day with none. `null` when BT holds no schedule for the day (a past day nothing has stored, or one MLB couldn't be asked for), so a client can tell "no games" from "not known". */
+            count: number | null;
+            /** @description The day, `YYYY-MM-DD`. */
+            date: string;
+        };
         ScheduleDayResponse: components["schemas"]["ScheduleDay"];
         ScheduleGameSummary: {
             /** @description After the game: the pitchers of record (S65); `null` until MLB names them. */
@@ -673,6 +697,13 @@ export interface components {
                 third: number | null;
             };
             strikes: number | null;
+        };
+        /** @description Games per day for one month (S124), from BT's stored schedule days, for S125's calendar date picker: one entry per day of the month, in order. */
+        ScheduleMonthResponse: {
+            /** @description Every day of the month, first to last; `count` is null for a day BT holds no schedule for. */
+            days: components["schemas"]["ScheduleDayCount"][];
+            /** @description The month, `YYYY-MM`. */
+            month: string;
         };
         /** @description A team on the scoreboard (S65): the team, and its record when MLB sent one. */
         ScheduleTeam: {
@@ -1228,6 +1259,47 @@ export interface operations {
                 };
             };
             /** @description `date` is missing or not `YYYY-MM-DD`. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+            /** @description `version_unsupported`: this API version has been retired (ADR-015); the client should reload to update. */
+            426: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponse"];
+                };
+            };
+        };
+    };
+    getScheduleMonth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The month, as `YYYY-MM`, from 1901-04 through December of next year (by MLB's today, in `America/New_York`). */
+                month: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScheduleMonthResponse"];
+                };
+            };
+            /** @description `month_invalid`: `month` is not `YYYY-MM`, not a real month, or before 1901-04. `month_too_late`: `month` is after December of next year, which MLB can't have published. */
             400: {
                 headers: {
                     [name: string]: unknown;

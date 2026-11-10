@@ -82,6 +82,25 @@ export const ROUTE_DESCRIPTIONS: Record<ApiRoute, RouteDescription> = {
 			400: "`date` is missing or not `YYYY-MM-DD`.",
 		},
 	},
+	"GET /api/v1/schedule/month/:month": {
+		operationId: "getScheduleMonth",
+		summary: "The number of games on each day of one month, from BT's stored schedule. A day of the current season or later (through December of next year) that BT doesn't hold yet is asked of MLB first; a day still unknown has `count: null`, distinct from a day with no games (`0`).",
+		parameters: [
+			{
+				name: "month",
+				in: "path",
+				required: true,
+				description: "The month, as `YYYY-MM`, from 1901-04 through December of next year (by MLB's today, in `America/New_York`).",
+				schema: {
+					type: "string",
+					pattern: "^\\d{4}-(0[1-9]|1[0-2])$",
+				},
+			},
+		],
+		errors: {
+			400: "`month_invalid`: `month` is not `YYYY-MM`, not a real month, or before 1901-04. `month_too_late`: `month` is after December of next year, which MLB can't have published.",
+		},
+	},
 	"GET /api/v1/games/:gamePk": {
 		operationId: "getGame",
 		summary: "One game's snapshot, including plays.",

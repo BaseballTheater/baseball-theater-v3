@@ -67,6 +67,21 @@ export async function fetchSchedule(date: string)
 	}));
 }
 
+/**
+ * The number of games on each day of `month` (`YYYY-MM`, S124), for the calendar date picker
+ * (S125); `count` is null for a day BT doesn't know yet, distinct from a day with no games.
+ */
+export async function fetchScheduleMonth(month: string)
+{
+	return unwrap(await api.GET("/api/v1/schedule/month/{month}", {
+		params: {
+			path: {
+				month,
+			},
+		},
+	}));
+}
+
 /** The division standings as of `date` (S4); the server's today when it is absent. */
 export async function fetchStandings(date?: string)
 {

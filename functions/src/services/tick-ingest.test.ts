@@ -17,6 +17,7 @@ import type {
 	ScheduleDay,
 	StandingsSnapshot,
 } from "@bt/domain";
+import { datesBetween } from "@bt/domain";
 import type { MlbStatsClient } from "@bt/ports";
 import { FixtureMlbStatsClient } from "../adapters/fixtures/mlb.js";
 import {
@@ -41,6 +42,14 @@ class CountingMlbClient implements MlbStatsClient
 	async fetchSchedule(): Promise<Unversioned<ScheduleDay>>
 	{
 		return this.day;
+	}
+
+	async fetchScheduleRange(startDate: string, endDate: string): Promise<Unversioned<ScheduleDay>[]>
+	{
+		return datesBetween(startDate, endDate).map((date) => ({
+			...this.day,
+			date,
+		}));
 	}
 
 	async fetchGame(gamePk: number): Promise<Unversioned<GameSnapshot>>
