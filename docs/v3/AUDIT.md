@@ -18102,3 +18102,40 @@ S133 / S135 (parity queue, items 11): **amended** wording only — the retired-v
 **Personal-data sweep (ADR-028):** S143 adds no table, no stored field, no outside service, no browser key (the session token is `token.ts`'s existing one) and no log line (the sign-in route logs the error's name only, `api.ts:413`). The mock adds `identity_links` rows with provider `mock` and a `users` row with a staging-only test email, in stores already registered and deleted by account deletion. S136 and S125 add none. None found.
 
 **Verdict: `amended`.** No owner question blocks the next story.
+
+---
+
+## 2026-11-10 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-10T22:26:54Z` |
+| HEAD at review | `5c61a56` (tree dirty) |
+| Trigger | docs/v3/FEATURES.md changed; S143 added |
+| Stories `done` since last review | S143, S125, S136, S139 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context parity review at 5c61a56 (since 6347608). Scope: S143 (added) plus the next 3 `todo` stories by priority: S125 (74), S136 (74), S139 (76). No story's `**Source:**` line changed in range (`git diff 6347608..HEAD -- docs/v3/backlog/stories/` touches only `order:` and AC text outside S143); no `Open:` and no pillar-cited story exists (`grep -l '^\*\*Source:\*\* Open'` and `... Pillar` over the notes: none).
+
+**1. Citation honesty**
+
+- **S143 → Feature: Modern membership.** Holds. The row (FEATURES.md:93, "BT accounts + entitlements") is broad, but the theme section now carries a "Signing in on staging" bullet (FEATURES.md:236) in the owner's words that describes exactly what S143 delivers: a mock sign-in as one shared test account on staging, the account API working behind it, and no Sign in button on a site with no sign-in. Each quote matches S143's Gap (2026-11-06 "We will use a staging one or a fake shim"; 2026-11-10 "Can we make it a session-only shim…", "What I wanted to make sure of…", "yeah, plan this story…"). Nothing in ARCHITECTURE, INTENT or VISUAL-DESIGN says staging waits for a tenant of its own (grep for `tenant of its own|own tenant|staging tenant|staging…sign-in`: only FEATURES:236).
+- **S125 → Feature: Calendar date picker.** Holds: Gap/Impact (calendar from the scoreboard's date, type or pick, switch years, game counts) is the row's first quote word for word (FEATURES.md:101).
+- **S136 → Feature: Calendar date picker.** Holds: the favorite-team corner mark and "the API for that needs to return the teams that played each day" are in the row verbatim.
+- **S139 → Feature: Standings.** Holds: three views and which opens first are the Standings row (FEATURES.md:65). Its AC 1 now marks one rule as the agent's reading for the owner to accept (`playoffs` stays choosable until the next season's spring start; 4ffa3b6). FEATURES says only that "the playoffs view can still be chosen" after the Series, with no end, so doc and story don't conflict; the end date is an open owner question carried in the story, not a FEATURES edit.
+
+**2. Doc reflects reality: amended**
+
+- FEATURES.md:236 said the mock "signs straight in, with no email" two bullets below "Every account has an email" (owner, 2026-10-28: "It should be impossible for an account to have no email."). Read literally it says the mock account has none, which contradicts both that bullet and S143 AC 1 (a fixed email on staging's own address, so S82's no-email refusal never fires). Reworded to "with no emailed code, as one shared test account (which has an email address of its own, as every account does)". Records the decision in S143 AC 1 and the owner's 2026-10-28 rule; no new intent.
+- The bullet's last quote, "yeah, plan this story and move it up to the top priority.", stood without the question it answered, so it read as unrelated to hiding the button. Added the question as S143's Gap records it ("asked whether every click signs in as that one shared account and whether a site with no sign-in at all hides the button").
+- No relic found in the changed text; S143 AC 7 already owns the stale "until its own tenant" comments in code and README.
+
+**3. For the next backlog review**
+
+- No FEATURES item added this review. The new "Signing in on staging" bullet is served by S143.
+- S139 AC 1's `playoffs` end date (the day before the next known season's `springStartDate`) is marked as the agent's reading for the owner to accept or change; it should reach the owner before S139 starts.
+
+**Questions for the owner:** none blocking. One to carry (non-blocking, S139): how long should the playoffs view stay choosable after the World Series? The story's proposal is until the next spring training starts.
