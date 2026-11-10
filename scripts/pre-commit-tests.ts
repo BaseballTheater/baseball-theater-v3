@@ -18,8 +18,8 @@
  *   whole suite; the root lockfile, package.json, tsconfig or vitest config runs every suite.
  * - The repo-tooling suites outside the workspace packages run whole when a file they test is
  *   staged: the backlog tool's (`pnpm test:backlog`) for scripts/backlog-vault/, scripts/audit.sh,
- *   the backlog notes and the ledger (one of its tests reads the real AUDIT.md), and the tools
- *   suite (`pnpm test:tools`) for tools/. Both take a few seconds.
+ *   scripts/review-debt.sh, the backlog notes and the ledger (one of its tests reads the real
+ *   AUDIT.md), and the tools suite (`pnpm test:tools`) for tools/. Both take a few seconds.
  * - Coverage thresholds and the workerd suite (`functions/vitest.workers.config.ts`) are left to
  *   `pnpm verify` and CI, to keep a commit fast.
  * - It tests the working tree, so unstaged edits to a staged file are tested too.
@@ -44,9 +44,9 @@ const toolingSuites = [
 	{
 		label: "scripts/backlog-vault",
 		config: "scripts/backlog-vault/vitest.config.ts",
-		// The tool itself, the ledger writer, the backlog notes and docs it builds from, and the CI workflow (law P11's test).
+		// The tool itself, the ledger writer, the review-debt script, the backlog notes and docs it builds from, and the CI workflow (law P11's test).
 		triggers: [
-			/^scripts\/(backlog-vault\/|audit\.sh$|lib\/)/,
+			/^scripts\/(backlog-vault\/|audit\.sh$|review-debt\.sh$|lib\/)/,
 			/^docs\/v3\/(backlog\/|AUDIT\.md$|audit\.jsonl$|BACKLOG\.md$|FEATURES\.md$|INTENT\.md$)/,
 			/^\.github\/workflows\//,
 		],

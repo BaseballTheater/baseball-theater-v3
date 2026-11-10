@@ -17844,3 +17844,207 @@ Design intake review (`.claude/skills/design-intake-review/SKILL.md`), two indep
 **Owner questions.**
 
 1. **Should the review-debt check skip draft amendments marked "Draft, not ratified."?** Restated from the A8 intakes (bc694a5), still unanswered: this is the sixth draft-only intake (S96, S107, S123 twice, S129, S133), each able to record only a reading-aid note, while the real intake fires again at ratification. `scripts/review-debt.sh` fires on any change under `docs/v3/visual/*/amendments/*.md`; changing it is outside a review's write scope, so it is the owner's call.
+
+---
+
+## 2026-11-09 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-10T07:17:12Z` |
+| HEAD at capture | `b262eda` (tree clean) |
+| Change | `b262eda` — Backlog: owner's review of the calendar, standings and update-notice drafts |
+
+**What changed, and the owner's answer**
+
+Owner-directed backlog change b262eda (2026-11-09): three stories added (S136 the teams playing each day in the month counts; S137 and S138 the Standings date picker design and build), acceptance criteria rewritten in S123 and S125 (native month and year pickers, the favorite-team mark) and in S133 and S135 (one "update complete" box after updating, never two boxes), and the owner's words added to three FEATURES rows. Asked "Does the backlog change you directed today need a full backlog review and doc parity review before I go on?", with the options to skip both, run both, or run the backlog review only, the owner answered: "No, skip both (Recommended)". The fresh-context pre-PR review (LOOP.md section 7) still runs on the whole diff before its pull request opens, and the next scheduled or drift-triggered review still checks these stories.
+
+---
+
+## 2026-11-09 — doc parity review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a doc parity review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-10T07:17:13Z` |
+| HEAD at capture | `b262eda` (tree dirty) |
+| Change | `b262eda` — Backlog: owner's review of the calendar, standings and update-notice drafts |
+
+**What changed, and the owner's answer**
+
+Owner-directed backlog change b262eda (2026-11-09): three stories added (S136 the teams playing each day in the month counts; S137 and S138 the Standings date picker design and build), acceptance criteria rewritten in S123 and S125 (native month and year pickers, the favorite-team mark) and in S133 and S135 (one "update complete" box after updating, never two boxes), and the owner's words added to three FEATURES rows. Asked "Does the backlog change you directed today need a full backlog review and doc parity review before I go on?", with the options to skip both, run both, or run the backlog review only, the owner answered: "No, skip both (Recommended)". The fresh-context pre-PR review (LOOP.md section 7) still runs on the whole diff before its pull request opens, and the next scheduled or drift-triggered review still checks these stories.
+
+---
+
+## 2026-11-10 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-10T08:09:03Z` |
+| HEAD at capture | `a4a28d2` (tree clean) |
+| Change | `a4a28d2` — Backlog: fix what the pre-PR review found in the owner's 2026-11-09 changes |
+
+**What changed, and the owner's answer**
+
+Not asked. a4a28d2 rewrites acceptance criteria and notes of S123, S125, S133, S135, S136, S137 and S138 to answer the pre-PR review of b262eda (two fresh-context reviewers with the Copilot-class checklist, before the pull request opened). The owner's standing rule for that (2026-11-07, asked whether such a rewrite needed a backlog review): "This shouldn't even trigger a question. Always skip." This is read as covering a pre-PR reviewer's findings as well as Copilot's; the owner can overrule it. Two parts of a4a28d2 go beyond rewording an AC, and the next scheduled or drift-triggered backlog review still checks them: S137's scope fence gains docs/v3/FEATURES.md (so the owner's answers about Standings can be written there, rule 19), and S136 gains a new AC 4 (one tested packages/domain function saying whether a month has games, none, or is unknown, for S125's off-season line). The doc parity question for a4a28d2's two FEATURES edits (the Update / changelist UX row and the Installable app bullet) has been put to the owner and is not skipped here.
+
+---
+
+## 2026-11-10 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-10T08:14:40Z` |
+| HEAD at review | `1386116` (tree dirty) |
+| Trigger | docs/v3/FEATURES.md changed (a4a28d2: the Update / changelist UX row and the Installable app bullet) |
+| Stories `done` since last review | S124 (1 of 6) |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context review. `pnpm parity:debt` (since `59ace65`) named no story, only "docs/v3/FEATURES.md changed": a4a28d2's two edits (the Update / changelist UX row, FEATURES.md:66, and the Installable app bullet, FEATURES.md:216). Scope checked: the stories citing that row (S131–S135); the stories and FEATURES words of b262eda, whose parity review the owner skipped on 2026-11-09 with "the next scheduled or drift-triggered review still checks these stories" (S123, S125, S136, S137, S138 and three FEATURES rows); and the next 3 `todo` by priority (S136, S125, S130, from INDEX.md's story table). No `Open:` story exists (`grep '^\*\*Source:\*\* Open' docs/v3/backlog/stories/*.md`: none; frontmatter is 109 `feature`, 29 `pillar`). No pillar-cited story is in scope, and `pnpm parity:debt` reported no pillar story's Gap, Impact or ACs changed.
+
+1. a4a28d2's edit to the Update / changelist UX row (FEATURES.md:66) holds. The owner's words are verbatim against the commits that recorded them: cd2eac9 (2026-11-08: the changelist ask; asked which notification shows the big additions, "Both") and b262eda (2026-11-09: "Image 1 here looks good. Image 2 is weird, no need to show that"; "There shouldn’t be two boxes ever. After it updates, we should see something similar to image 1, but it should tell the user the the update is complete instead"). Each claim in the row maps to them: no big additions on the notification after updating (image 2 was that notification listing them); it says the update is complete; the two boxes are never on screen together; it links to the page and dismisses itself (2026-11-08: "a notification that auto dismisses after updating should show a link to it"). Before a4a28d2 the row said the big additions "show both on the update-available notice and on the notification after updating" and, in the next clause, that the owner took them off the latter; it now says the owner "first asked" for both, so the row no longer states both as current.
+2. The row's new clause, "the update-available notice still shows them (owner, 2026-11-08; not changed on 2026-11-09), which the owner is asked to confirm when the redrawn draft is shown", is honest as hedged. The owner's 2026-11-09 answer to "which notices should stop listing them" spoke of the two boxes and the notification after updating, not of the update-available notice, and image 1, which "looks good", listed additions on neither notice. The row claims no new decision: it keeps the 2026-11-08 one and says it is still to be confirmed. The backlog says the same: S135 AC 2 and its 2026-11-09 note ("unless the owner says otherwise when S133's redrawn draft is shown"), S133 AC 1 (the A6 notice "with and without big additions") and its note (a new question, Q12, in the redrawn draft), S132's Gap. S133 is `blocked` (parked for ratification) and gates S134 and S135 (rule 18), so nothing is built on this reading before the owner sees it. Carried below as owner question 1; it does not block.
+3. a4a28d2's edit to the Installable app bullet (FEATURES.md:216) holds: it said the notification after updating "does the same" as the update notice (links to the page and shows the big additions), which contradicted the row and S135 AC 3; it now says that notification "says the update is complete, links to the page and then dismisses itself".
+4. Citation honesty, Update / changelist UX: S132 (the releases API; its Gap now names only the update-available notice as showing additions), S133 (the design: page, link, after-update notification as one box without additions, additions on the update notice) and S135 (the notices; AC 3 rewritten to the 2026-11-09 words) each deliver what the row describes. S131 and S134 are unchanged in what they are for since the 2026-11-08 review and say nothing about the after-update notification (grep). All five hold.
+5. Citation honesty, Calendar date picker (FEATURES.md:101): S136 (the month counts also name the teams playing each day) is the row's "This means the API for that needs to return the teams that played each day."; its AC 4 (one domain function saying whether a month has games) serves the same calendar's off-season line. S125 and S123 build and draw what the row lists, including the two 2026-11-09 additions (the device's own month and year pickers, "Native month + year (Recommended)"; the favorite-team mark), both verbatim in b262eda. All hold.
+6. Citation honesty, Standings (FEATURES.md:65): S130 is the row's spring training standings "labeled as such" ("Agreed", 2026-11-07), named in the row. S137 and S138 are the row's date picker ("can the standings page also have the date picker and show what the standings were at any given date?"; "Add as its own stories (Recommended)"), named in the row, verbatim in b262eda. All hold.
+7. Doc reflects reality — AMENDED (FEATURES.md:101). S124 went `done` on 2026-11-09 (ledger lines 17609 and 17691) and no parity review has run since. It shipped an owner decision FEATURES did not carry: a month after December of next year is refused (S124's note of 2026-11-09: asked "For S124's games-per-day API, how should it handle months far in the future, like 2099-07?", options unknown past next year / reject past next year / leave unbounded, the owner answered "Reject past next year"; `latestScheduleMonth` in `packages/domain/src/schedule-month.ts`; 400 `month_too_late` at `functions/src/handlers/api.ts:214`; commits a6ae3f3 and 8d03ba8). The Calendar date picker row said only that "future dates can be picked". Added one sentence recording that decision in the owner's words, naming S124, and saying that what the calendar shows for such a month is for S123's design to say (S123 AC 1 already asks for it). Nothing else was edited: no story text, no `**Source:**` line, INTENT untouched.
+8. No contradiction found with the other product docs. VISUAL-DESIGN.md has no text on update notices, the changelist or notifications (grep), and S133's fence includes it for when A9 is ratified. ARCHITECTURE.md:1240–1241 says only that the update notice shows when a new service worker waits and that it needs a ratified amendment before it is built, which S133 is. INTENT.md is unchanged since the 2026-11-08 review (`git log 531e1bd..HEAD -- docs/v3/INTENT.md`: nothing). The unratified draft `shell-scoreboard/amendments/A9.md` (last changed 53e91e5) still draws the stacked pair and carries Q10; it is S133's draft, "Draft, not ratified.", which S133's note and the Current baseline say is being redrawn, so it is not a product doc out of step and not this review's to edit.
+9. Relics: none in the rows checked. Coverage: every clause added to FEATURES since the 2026-11-08 review has a story — the native pickers and the favorite-team mark (S123, S125, S136), the Standings date picker (S137, S138), the one "update complete" box without additions (S133, S135), and the counts' limit added by this review (S124, done; the calendar's side in S123 and S125 AC 3).
+
+For the next backlog review:
+
+- S132's `?after=` form and S135 AC 2 serve only the big additions on the update-available notice, which the owner has yet to confirm (finding 2; S133's Q12). S132 is `todo` at priority 79 behind S131 and could be built before S133's redrawn draft is shown. Decide whether S132 should say so, or wait for that answer.
+- Carried from the 2026-11-09 design intake (53e91e5), still open: if S133's Q1 is answered "What's new", FEATURES.md:66 still calls it the "Changelist page" (the owner's word); a naming item for the parity review that follows A9's ratification.
+
+Owner questions (none blocks the next story):
+
+1. **Should the "update available" notice still list the new version's big additions?** On 2026-11-08 you asked for them on both notices ("Both"). On 2026-11-09 you took them off the notification after updating ("Image 2 is weird, no need to show that") and said "There shouldn’t be two boxes ever." Neither answer said whether the update-available notice keeps its list, and image 1, which you said "looks good", listed none. FEATURES and S135 currently keep the list on the update-available notice, with its link, Snooze and Update Now, and say you will be asked when S133's redrawn draft is shown. Yes: nothing changes. No: the notice shows only its link, and S132's "what's new since version X" request and S135 AC 2 lose their purpose and are re-scoped.
+
+---
+
+## 2026-11-10 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-10T09:37:04Z` |
+| HEAD at review | `2e6ae4b` (tree dirty) |
+| Trigger | drift: ARCHITECTURE.md changed (a rename in ADR-015's text, no ADR accepted or changed); S139, S140, S141, S142 inserted outside a review; acceptance criteria rewritten in S123, S125, S129, S130, S131, S133, S134, S135, S137, S138 (all `2e6ae4b`, owner-directed 2026-11-10) |
+| Stories `done` since last review | S124 (1 of 6) |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Backlog review (`.claude/skills/backlog-review/SKILL.md`), one fresh-context reviewer that wrote none of these stories, at `2e6ae4b` (tree clean before the review's edits). Trigger from `scripts/review-debt.sh` (since `1386116`): ARCHITECTURE.md changed; S139, S140, S141, S142 inserted outside a review; acceptance criteria rewritten in S123, S125, S129, S130, S131, S133, S134, S135, S137, S138. All of it is `2e6ae4b`, the owner's dictated answers of 2026-11-10 about three draft designs and a new site footer. The three amendments are drafts (shell-scoreboard A8 and A9, standings-search-settings A9), so no design intake was run on them (owner, 2026-11-10: "So I would just avoid doing any design reviews on draft designs."). The ARCHITECTURE change is a rename in ADR-015's text ("changelist" to "change log"); no ADR was accepted or changed.
+
+**Coverage.** Every FEATURES row the owner's answers touched has a story: Standings (S139, S140, S129, S130, S137, S138), Calendar date picker (S123, S136, S125), Update / change log UX (S131–S135), Site footer (S141, S142). The gap map's rows for each name them (`docs/v3/backlog/frame/05 Gap map (doc → story).md` lines 22, 37, 39, 40). The baseline's "As of" line already names S139–S142 and the re-scopes (`frame/01 Current baseline.md` line 3); no change needed.
+
+**Ground truth, next 3 `todo` by priority: S136, S125, S139.**
+
+- **S136** (startable). Its paths exist (`packages/domain/src/schedule-month.ts`, the month route at `functions/src/handlers/api.ts:195-225`); its partly-present cases (a day with no stored schedule, a month with 0 and `null` mixed) are stated; AC 4's month function is coherent with S123's "unknown" month. No change.
+- **S125** (waits on S123's ratification). `web/package.json` has no `@mantine/dates`; `web/src/api/queryClient.ts` sets `retry: false` and `refetchOnWindowFocus: true`; the month route answers 400 `month_invalid` before 1901-04 and 400 `month_too_late` after `latestScheduleMonth` (`api.ts:201-217`). Amended, see 2b.
+- **S139** (startable). `standingsPhase` and S128's fallback are where the story says; the fixtures hold `seasons-2027.json` (`springStartDate` 2027-02-19, `regularSeasonStartDate` 2027-03-25) and no 2027 spring table, and the fixture client answers an empty table for a season with no recording (`functions/src/adapters/fixtures/fixture-client.ts:253-275`), so `?date=2027-02-19` is a first spring morning offline. AC 1's test dates agree with the 2026 and 2027 calendars. Amended, see 2b.
+
+**Check 2b (Copilot-class checklist, `docs/v3/LOOP.md` §7) over S123, S125, S129, S130, S131, S133–S142.** Each finding names the input that breaks it.
+
+1. **S138 could start before S130 (items 10, 11).** S130 was on S138's **Prefer after** line. Built first, S138's AC 2 ("keeping or dropping the address's `?view=` as S137's amendment says") has no `?view=` on the page, and its design-match captures have no view switch or "Standings as of" line to match S137's frames, which draw the date control beside both (S137 depends on S129 for that). *Amended:* S130 moved to S138's **Depends on** (frontmatter and body); gap map line 22 says "after S125 and S130".
+2. **S130 AC 1, the corrected address flashes a loading state (item 5).** Input: `/standings?view=playoffs&date=2026-09-05` (no team clinched in `fixtures/standings-2026-09-05.json`). The answer is the regular season, the page replaces the address with `?view=regularSeason`, and `useStandings` asks under a new key; nothing under `web/src` keeps the last answer while a new key loads (`grep -rn placeholderData web/src`: nothing), so the table gives way to the loading state and returns. *Amended:* AC 1 says the table stays on screen with no loading state between, and its RTL asserts it.
+3. **The first spring morning answered three ways under one label (items 5, 11).** Input: `?date=2027-02-19` with spring's table empty. `view=default` answers last season's final table as `view: "regularSeason"` (S128 AC 3's fallback); `view=regularSeason` by name answers the new season's table, and S139 AC 3 has no spring teams to list ("the divisions are as MLB answered"), so it is empty; `view=playoffs`, not offered, answers the default's table, S130 corrects the address to `?view=regularSeason`, asks by name and gets the empty one, against S139 AC 2's "an old or shared link still shows standings". *Amended:* S139 AC 3: on a spring day whose spring table has no team, `view=regularSeason` answers what `view=default` answers (marked as this review's proposal, for the owner to accept or change at S129's ratification); AC 2 tests `?date=2027-02-19` with each of the four values; AC 4 holds that case at two MLB standings requests (the spring table, then the final table; the new season's regular-season table isn't asked for), where reading all three would have broken its own "at most two". S129 AC 1 gained "A morning before the first game" (what shows and which view is marked on the first spring morning and opening day's morning; what a view with nothing to show looks like, or that the switch leaves it out). Opening day's morning was already coherent. Owner question 1.
+4. **S130 AC 4 / S140: when the World Series box shows was read from a stand-in (item 4; ADR-025).** S140's note said the page tells that a week has passed from S139's `views.default`. Input: an off-season day in the first week after the Series for a season whose table marks no clinched team (S139's note allows for them): `playoffs` is never offered, the default is the regular season from the first day, `champion` is set, and the box shows a week early. And any answer to "how long the box stays" (asked, unanswered) other than "until spring" needs a date to count from. *Amended:* S140 AC 2 serves `champion: { season, teamId, name, wonOn }`, `wonOn` being the day of the deciding game (tests: 2025-11-01, 2026-10-28; both are the last games in `fixtures/raw/worldseries-2025.json` and `-2026.json`); S130 AC 4 makes S129's rule one named, tested function in `packages/domain`; `packages/domain/` joined S130's fence (frontmatter, Scope files, Goal condition, `/goal`). S140 notes that AC 2's "`null` from spring's first game" rides on the unanswered question.
+5. **S130: three views at once is reachable and undrawn (item 12).** S139 AC 1 offers `spring`, `regularSeason` and `playoffs` together on a day through April 15 with a clinched team; S129 AC 1 draws three sets, none of them all three. No season has had one, so no AC changed. *Noted* in S130: the switch draws whatever `views.offered` holds, in its order.
+6. **S139 AC 5 named only the raw recording (item 4).** The fixture client's `fetchStandings(date)` reads the mapped `fixtures/standings-<date>.json` (`fixture-client.ts:161-166`); with only `fixtures/raw/standings-<date>.json` committed, the route tests see an empty table for the clinched day. 2026-09-05 has both files. *Amended:* AC 5 names both.
+7. **S141 / S142: the approved text had no home (items 4, 9).** S142 AC 4's grader compares each page's text with "the text S141's amendment names", and nothing in S141 had the text committed anywhere: an amendment that only quoted the owner's approval would pass S141 and leave S142 nothing to compare. *Amended:* S141 AC 2 commits each page's approved text beside the amendment, one file per page, named in `## Decisions`; S142 AC 4 points at those files. *Noted* in both: a contact **form** is not S142's (its fence has no `functions/`; a form needs a route, a store and an ADR-028 inventory entry) and gets its own story if the owner chooses one; a privacy-policy draft takes its list of stored data from the personal-data inventory (`packages/ports/src/personal-data.ts`, `functions/src/services/personal-data.ts`); and if someone else writes the policies later, S141 stays open and the whole footer waits. Owner question 3.
+8. **S125 AC 8 asked ahead for months that can only answer 400 (items 7, 12).** Input: `/games/2099-07-04` asks for `2099-07` on load and gets 400 `month_too_late`, and again on each return to the window (`refetchOnWindowFocus: true`); `/games/1850-01-01` gets 400 `month_invalid` the same way. *Amended:* the page asks ahead only for April 1901 through `latestScheduleMonth`, with a counting RTL.
+9. **S125 AC 8 against its own 2026-11-07 note (items 8, 11).** The note says to load the calendar's code on demand if it would pass the entry budget; a calendar loaded on the click shows a fallback first, which is what the owner said not to show ("It should have the content in it when it slides up."). *Amended:* when the code is loaded on demand the page asks for it before the open, with an RTL on the click's first render.
+10. **S125's turn cap assumed a story that no longer exists (rule 12).** "Mantine's date components in a popover off the existing control" predates ACs 7 and 8, the native pickers and the favorite-team mark. *Amended:* 14 to 16 with the assumption rewritten (frontmatter, Turn cap, Goal condition, `/goal`); the post-ratification intake splits rather than raises again. *Noted* in S123 and S125: six week rows are `DatesProvider`'s `consistentWeeks` setting in Mantine 7's `@mantine/dates`, not a prop of the month grid.
+11. **S123's fence left out FEATURES (item 9).** AC 1 asks the owner to accept or change the agent's proposals at ratification (year range, Esc, arrows across a year, off-season "today"); a changed answer is recorded in FEATURES in the same change set (CLAUDE.md), which was outside the fence, so the ratification would have to stop (rule 10). S129, S133, S137 and S141 name it. *Amended:* `docs/v3/FEATURES.md` added to S123's fence in all four places. `scripts/verify-S123.sh` has no fence check (its checks are 1–6, none on paths), so no grader change follows; no grader was edited by this review.
+12. **S123 / S125: the phone's Back button with the sheet open (item 5).** The sheet covers the page and the installed app (ADR-023) has no browser bar; the open calendar isn't in the address, so Back leaves the day instead of closing the sheet unless the design says otherwise. No AC said which. *Amended:* S123 AC 1's "Closing" has the amendment say; S125 AC 7 builds and tests it. Owner question 2.
+
+**Checked and sound (no change).** S131 (parked until v3.1.0 publishes; its ACs wait on the unanswered release-note kinds). S133, S134, S135: consistent with the owner's 2026-11-10 answers; S135's storage key goes through `STORAGE_KEYS` (`web/src/storage/storage.ts:25`) labelled `none`; their open points are the questions already with the owner. S137: its ACs name S123 and S129 and draw nothing S138 doesn't build. S140 AC 1 against both World Series recordings and the parser's `gamesInSeries` and series records; S140's `champion` on a January day (the off-season's `final` table). S142's claims: `FooterMeta` has three callers (`ScoreboardPage`, `StandingsPage`, `GamePage`); `fetchedAgo` is `packages/domain/src/fetched-ago.ts`; "FooterMeta renders Fetched {age}" is S60 AC 4, `pinned` in `docs/v3/LAWS.md`, not a law. S125's prefetch doesn't multiply MLB fills (S124's cooldown through `runRefresh`). Rule 7 already covers pre-ship grader updates under the `/goal` line's "except creating `scripts/verify-<ID>.sh`", so the unshipped graders (`verify-S123.sh`, `-S129.sh`, `-S131.sh`, `-S133.sh`) being behind their rewritten ACs is as the rule intends: each is updated red-first when its story resumes.
+
+**ACs that can't be checked until a question already with the owner is answered** (not new findings): S125 AC 7 (Esc; arrows across a year), worded "as S123 ratifies"; S130 AC 4 and S140 AC 2 (how long the World Series box stays); S133 and S135 ACs 2–3 (the "+N more" line and its link; the pointer's countdown, hover pause and close; the pointer while an update notice is up; the notice appearing at once and growing); S134 AC 1 (the page's address); S131 (a fourth release-note kind, and where settings and design changes go); S141 AC 2 and S142 AC 4 (who writes the policy text, how fans make contact, the copyright name); S142 AC 2 ("Fetched … ago" from every page). Each of these stories is behind an unratified design or parked, so none can start on a guess.
+
+**Items the 2026-11-10 parity review queued for this review.** (a) Whether S132's `?after=` serves what either reading of the update notice needs: it returns whole approved notes, so "one big addition then +N more" and "every addition" draw from the same answer; S132 can't start before S131 in any case. No change. (b) The page's name: moot, the owner named it "Change log".
+
+**Prioritization (check 3).** Order holds. Startable without the owner: S136 (74), S139 (76), S140 (76). Waiting on the owner: S125 on S123's ratification; S130 on S129's; S132–S135 on S131 (parked until v3.1.0 publishes) and S133; S137 on S123 and S129; S138 on S125, S130 and S137; S142 on S141. Argued for moving the standings stories ahead of the calendar: spring training starts 2027-02-19, three months out, and the off-season box is gated on S129's ratification whichever comes first, so no. Argued for moving S141 up: its questions are already with the owner and nothing else waits on it, so no.
+
+**Duplication sweep (ADR-025).** `pnpm dup:check`: no duplicates found (235 files, 0 clones). S124's code reuses `runRefresh` and `storeSchedule` as the last review asked. New derived values in the reviewed stories each have one named home: the views (S139 AC 1), the winner (S140 AC 1), when the box shows (S130 AC 4, added here), the favorite-team mark and the month's "no games" test (S136), the copyright year (S142 AC 1).
+
+**Personal-data sweep (ADR-028).** S136's `teamIds` per day is schedule data, and the comparison with a fan's favorites happens in the browser; nothing about the fan is sent. S135's key records which release a browser last saw, classified `none` through `STORAGE_KEYS`. S139 and S140 add no stored data. S141's contact, if it becomes a form, stores a message and an address: noted in S141 and S142 as a separate story with its inventory entry.
+
+**Reported to the doc parity review, not edited here.** None beyond the above; no `**Source:**` line, INTENT or FEATURES text was touched.
+
+**Owner questions** (none blocks; each is a proposal the owner accepts or changes at a ratification).
+
+1. On the first morning of spring training, before any spring game has been played, should Standings keep showing last season's final table as the regular season view, and should the switch offer a spring training view that is still empty?
+2. When the calendar is open as a sheet on a phone, should the phone's Back button close the sheet and stay on the day, or leave the page?
+3. If the privacy policy and user agreement aren't written yet when the footer's design is approved, may the footer ship without those two links, or does the whole footer wait for them?
+
+---
+
+## 2026-11-10 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-10T11:20:21Z` |
+| HEAD at review | `29e8c9e` (tree dirty) |
+| Trigger | docs/v3/FEATURES.md and docs/v3/ARCHITECTURE.md changed; S139–S142 added; Source lines of S28, S31, S35, S55, S73, S131–S135 changed |
+| Stories `done` since last review | — |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context review at `29e8c9e`, after the owner's 2026-11-10 answers (`2e6ae4b`) and the backlog review that followed (`29e8c9e`). The three draft amendments (shell-scoreboard A8 and A9, standings-search-settings A9) are unratified and about to be redrawn, so a mismatch between them and FEATURES is not a finding.
+
+**Check 1: citation honesty**
+
+1. **The ten changed Source lines hold.** S28, S31, S35, S55, S73 (`done`), S131, S133 (`blocked`), S132, S134, S135 (`todo`): each change is only the row's rename from "Update / changelist UX" to "Update / change log UX" (owner, 2026-11-10: *"Change list is never right. Change log is the right name. So anything that's change list anywhere should be change log."*), and every one resolves to FEATURES' renamed row (`pnpm backlog:check`: in sync). The ARCHITECTURE change since `d8d05ee` is the same rename in the ADR-015 sunset paragraph. The one "changelist" left in FEATURES is inside the owner's verbatim 2026-11-08 quote and is correctly kept.
+2. **The four new stories cite honestly.** S139 (the three views in the API) and S140 (the World Series winner box) deliver what FEATURES' Standings row describes; S141 (footer design) and S142 (footer build) cite the new Site footer row, added in the owner's words in the same change set as the stories (rule 19).
+3. **Next three `todo` by priority hold:** S136 and S125 against the Calendar date picker row (favorite-team mark, sheet / dropdown, Today, month arrows, opening already filled); S139 as above. No `Open:` story exists; no pillar-cited story was named by `parity:debt`.
+4. **Quotations.** Every italic owner quotation in the changed notes was compared with FEATURES by script: 52 exact, 31 substrings, 7 where a note quotes a longer run of the same words; none altered, none joined without a break, none misdated. The rename changed no quotation.
+
+**Check 2: doc reflects reality**
+
+5. **Fixed: FEATURES' Update / change log UX row stated a reading as settled.** It said that when the notice is up because the server retired the version it shows neither link nor addition, and added, as its own voice, "it isn't obviated, since the notice keeps its link and its addition". The owner's answer was conditional (*"I think this is obviated by the thing I just said for number 18, but if not, then my answer is yes."*), and "the notice keeps its addition" rests on the "+N more" reading the same row already marks as the agent's. Reworded so it reads as the agent's reading, resting on that one, which the owner confirms when the redrawn draft is shown. No owner words changed.
+6. **The other unanswered points are presented acceptably in FEATURES:** "+N more" (marked as a reading); the page's address `/changelog` (not in FEATURES); the pointer's countdown and close button ("asked when the redrawn draft is shown"); the pointer while a notice is up, the World Series box's duration, the arrows across a year and Esc, the notice "growing" (FEATURES silent); a fourth kind ("undecided"); "Fetched … ago" from every page (marked as the agent's reading of "at all"); the footer's policy text, contact and copyright name ("asked in the design story").
+7. **Not fixed (outside write scope): story notes state readings flat.** S133's "Retired version" note says it was "Settled on 2026-11-10"; S135 AC 2 states the retired case flat; S133 AC 1's update-notice bullet and S135 AC 2 state "one addition, then how many more" without marking it as the agent's reading; S135 AC 3 states "never on screen with A6's box" flat while S133 marks it as the agent's reading.
+8. **Not fixed (outside write scope): VISUAL-DESIGN's footer line contradicts FEATURES.** `docs/v3/VISUAL-DESIGN.md:287` says "Footer: optional, quiet — copyright / report a problem. Not a second nav, not headlines."; FEATURES' Site footer row (owner, 2026-11-10) asks for a few columns of links on every page. S141 has VISUAL-DESIGN.md in its fence but no AC updates that line.
+9. **Not settled by any record: visible freshness.** FEATURES' Site footer row reads the owner's *"I don't think we need the fetched thing at all"* as removing "Fetched … ago" from every page (marked as a reading). `docs/v3/ARCHITECTURE.md:918` lists "Freshness is visible, not just internal … A stale screen is diagnosable by looking at it" among the stated owner debuggability requirements, and VISUAL-DESIGN D9 (line 44) and line 292 ("Quiet meta: date, window mode, last fetched (D9)") say the same. S142 AC 2 removes the line. Put to the owner (question 1). Not blocking: S141 and S142 are not next up, and the row already presents it as a reading.
+10. **"How the site is made".** FEATURES says the footer has "room" for it; S141 AC 1 draws a separate page for it; the owner's *"I'll probably want to put some like information on it"* could mean the footer or the about page. Put to the owner (question 2).
+
+**Check 3: coverage**
+
+11. Every FEATURES clause added since `d8d05ee` has a story: Standings (S139, S140, S129, S130, S137, S138), Calendar date picker (S123, S136, S125), Update / change log UX (S131–S135), Site footer (S141, S142). What the playoffs view shows once playoff games are played has no story, by the owner's own deferral (*"We'll figure that out later."*).
+
+**For the next backlog review:**
+
+- S133's "Settled on 2026-11-10" note and S135 AC 2 on the retired-version case, S133 AC 1 and S135 AC 2 on "one addition, then how many more", and S135 AC 3 on "never on screen with A6's box": mark each as the agent's reading for the owner to confirm with the redrawn draft, as FEATURES now does (finding 7).
+- `docs/v3/VISUAL-DESIGN.md:287`'s Footer line contradicts the Site footer row; S141 should say it updates that line (finding 8).
+- Visible freshness (ARCHITECTURE:918, VISUAL-DESIGN D9 and :292) against removing "Fetched … ago" everywhere (S142 AC 2): wait for the owner's answer (finding 9).
+
+**Owner questions**
+
+1. Should "Fetched … ago" go from every page, even though the docs list visible freshness as one of your debuggability requirements? — see finding 9.
+2. Does "how the site is made" go in the footer, on the about page, or on a page of its own? — see finding 10.
+
+---
+
+## 2026-11-10 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-10T11:57:47Z` |
+| HEAD at capture | `4ffa3b6` (tree clean) |
+| Change | `4ffa3b6` — Backlog: fix what the pre-PR review found in the owner's 2026-11-10 changes |
+
+**What changed, and the owner's answer**
+
+Acceptance criteria of S123, S130, S133, S135, S139, S140, S141 and S142 were rewritten to answer the pre-PR review of this branch (LOOP.md section 7). Owner, 2026-11-07, asked whether such a rewrite needs a backlog review: "This shouldn't even trigger a question. Always skip."

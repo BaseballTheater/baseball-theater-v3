@@ -989,7 +989,7 @@ The last breaking row is the one tooling cannot detect. It is a review responsib
 
 Clients pin the version they were built against (the version lives in the route table, so it is compile-time, not a runtime string). Note **which mechanism actually protects a stale client**: additive-only. A browser holding old JS keeps working against a newer v1 server because it ignores fields it does not read — and that is genuinely safe here only because ADR-014 chose **not** to runtime-validate, making the client a tolerant reader by construction.
 
-Versioning only matters at **sunset**. When a version is retired, the backstop is: `Deprecation` and `Sunset` response headers while it is winding down, per-version request logging so retirement is evidence-based rather than hopeful, and **HTTP 426 Upgrade Required** once it is gone, which the SPA turns into the "new version available — reload" affordance already carried in [FEATURES](./FEATURES.md) as *Update / changelist UX*.
+Versioning only matters at **sunset**. When a version is retired, the backstop is: `Deprecation` and `Sunset` response headers while it is winding down, per-version request logging so retirement is evidence-based rather than hopeful, and **HTTP 426 Upgrade Required** once it is gone, which the SPA turns into the "new version available — reload" affordance already carried in [FEATURES](./FEATURES.md) as *Update / change log UX*.
 
 #### Tooling
 
