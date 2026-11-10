@@ -17874,3 +17874,18 @@ Owner-directed backlog change b262eda (2026-11-09): three stories added (S136 th
 **What changed, and the owner's answer**
 
 Owner-directed backlog change b262eda (2026-11-09): three stories added (S136 the teams playing each day in the month counts; S137 and S138 the Standings date picker design and build), acceptance criteria rewritten in S123 and S125 (native month and year pickers, the favorite-team mark) and in S133 and S135 (one "update complete" box after updating, never two boxes), and the owner's words added to three FEATURES rows. Asked "Does the backlog change you directed today need a full backlog review and doc parity review before I go on?", with the options to skip both, run both, or run the backlog review only, the owner answered: "No, skip both (Recommended)". The fresh-context pre-PR review (LOOP.md section 7) still runs on the whole diff before its pull request opens, and the next scheduled or drift-triggered review still checks these stories.
+
+---
+
+## 2026-11-10 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-10T08:09:03Z` |
+| HEAD at capture | `a4a28d2` (tree clean) |
+| Change | `a4a28d2` — Backlog: fix what the pre-PR review found in the owner's 2026-11-09 changes |
+
+**What changed, and the owner's answer**
+
+Not asked. a4a28d2 rewrites acceptance criteria and notes of S123, S125, S133, S135, S136, S137 and S138 to answer the pre-PR review of b262eda (two fresh-context reviewers with the Copilot-class checklist, before the pull request opened). The owner's standing rule for that (2026-11-07, asked whether such a rewrite needed a backlog review): "This shouldn't even trigger a question. Always skip." This is read as covering a pre-PR reviewer's findings as well as Copilot's; the owner can overrule it. Two parts of a4a28d2 go beyond rewording an AC, and the next scheduled or drift-triggered backlog review still checks them: S137's scope fence gains docs/v3/FEATURES.md (so the owner's answers about Standings can be written there, rule 19), and S136 gains a new AC 4 (one tested packages/domain function saying whether a month has games, none, or is unknown, for S125's off-season line). The doc parity question for a4a28d2's two FEATURES edits (the Update / changelist UX row and the Installable app bullet) has been put to the owner and is not skipped here.
