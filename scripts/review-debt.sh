@@ -13,6 +13,7 @@
 #
 # Detects the drift events that leave a trace in committed history:
 #   - a surface ratified or a ratified amendment landed     → design intake review
+#     (an amendment still marked as a draft never counts; see is_draft below)
 #   - ARCHITECTURE.md changed (an ADR accepted or changed)  → design intake if the diff
 #     names a frontend ADR (003, 008, 014, 016, 020–026), else backlog review
 #   - a new workspace package appeared
@@ -45,8 +46,26 @@ fi
 reasons=()
 intake=()
 
+# A draft amendment never makes an intake due (owner, 2026-11-10: "So I would just avoid doing
+# any design reviews on draft designs"): the work a draft implies changes when the design does.
+# A draft is an amendment whose committed text still says so, by the test the design graders
+# use, and that has no "Ratified by" line (every ratified amendment carries one). Ratifying it
+# rewrites the file, so it stops matching and the intake is due then. When the two marks
+# disagree it counts as ratified, so a doubt runs the intake rather than skipping it. A
+# deleted amendment has no text at HEAD, so it still counts.
+is_draft()
+{
+  local text
+  text="$(git show "HEAD:$1" 2>/dev/null)" || return 1
+  grep -qiE '\*\*Draft|not (yet )?ratified' <<<"$text" && ! grep -qi 'Ratified by' <<<"$text"
+}
+
 while IFS= read -r path; do
-  [ -n "$path" ] && intake+=("${path} added or changed")
+  [ -z "$path" ] && continue
+  case "$path" in
+    */amendments/*) is_draft "$path" && continue ;;
+  esac
+  intake+=("${path} added or changed")
 done < <(git diff --name-only "$base" HEAD -- 'docs/v3/visual/*/RATIFIED.md' 'docs/v3/visual/*/amendments/*.md')
 
 if ! git diff --quiet "$base" HEAD -- docs/v3/ARCHITECTURE.md; then
