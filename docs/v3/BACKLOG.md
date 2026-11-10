@@ -236,7 +236,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 77 | [S130](#s130--standings-label-spring-training-standings) | Spring standings label | `todo` |
 | 77 | [S112](#s112--dev-seed-the-last-month-of-the-season-and-the-postseason-refreshable-by-date-range) | Dev seed (season end + postseason) | `done` |
 | 78 | [S113](#s113--production-database-neon-through-hyperdrive-migrated-composed-into-the-worker) | Production database (Neon) | `done` |
-| 78 | [S131](#s131--each-releases-fan-facing-notes-approved-by-the-owner-before-it-publishes) | Approved release notes | `todo` |
+| 78 | [S131](#s131--each-releases-fan-facing-notes-approved-by-the-owner-before-it-publishes) | Approved release notes | `blocked` |
 | 79 | [S114](#s114--cloudflare-deploy-preview-staging-and-production-through-github-actions) | Cloudflare deploy | `done` |
 | 79 | [S118](#s118--branch-flow-stage-deploys-staging-main-deploys-production) | Stage and main branch flow | `done` |
 | 79 | [S119](#s119--production-deploys-to-nextbaseballtheater-until-the-owners-dns-cutover) | Production at next.baseball.theater | `done` |
@@ -285,7 +285,7 @@ Ordered by **Priority** (execution order). Story IDs (`S1`…`S30`) are stable l
 | 116 | [S92](#s92--design-next-pitch-odds-in-the-live-room) | Design: next-pitch odds (owner-ratified) | `todo` |
 | 117 | [S91](#s91--next-pitch-odds-in-the-live-room-paid-tier) | Next-pitch odds in Live (paid) | `todo` |
 
-**Next (generated):** **78 / S131** — the lowest **Priority** `todo` story not waiting on a design. Skipped, waiting on design (rule 18): S125, S130.
+**Next (generated):** **79 / S132** — the lowest **Priority** `todo` story not waiting on a design. Skipped, waiting on design (rule 18): S125, S130.
 
 **Before starting it:** confirm no [backlog review](#backlog-reviews) is due — the review-debt line in that section counts stories, but a drift event makes one due regardless.
 
@@ -6890,7 +6890,7 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 /goal docs/v3/BACKLOG.md S131. Work item 0 first: if scripts/verify-S131.sh is missing, write it per the Verify-script contract, run it against current HEAD, and show the nonzero exit before writing any product code. Then: scripts/verify-S131.sh exits 0, pnpm verify exits 0, no files outside releases/, packages/domain/, functions/src/, functions/vitest.config.ts, package.json, .github/workflows/deploy.yml, CLAUDE.md, docs/v3/BACKLOG.md, docs/v3/backlog/, docs/v3/AUDIT.md, docs/v3/audit.jsonl, docs/v3/INDEX.md, CHANGELOG.md are modified, no files under scripts/ or test/ are modified except creating scripts/verify-S131.sh, or stop after 12 turns. If a criterion cannot be met inside that path list, stop and report which criterion and which path — do not widen the scope yourself.
 ```
 
-**Status:** `todo`
+**Status:** `blocked`
 
 ### S132 — The approved release notes, and what's new since a version, from BT's API
 
