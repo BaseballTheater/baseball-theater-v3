@@ -19,7 +19,7 @@
 | Ratified design with **no build story** (2026-10-14 review; all owned by the 2026-10-19 design intake) | ← back top bar, phase-aware tabs, room states → **S40**; boxed linescore + Game info → **S2**; Plays → **S41**; (a) Live pitch theater body → **S63** data + **S64**; (b) Videos room → **S69** + player **S70**; (c) scoreboard → **S65**–**S68**, digest **S71**; (d) Settings controls → each with its reader (**S6** favorites + Opens First, **S67** slot, **S68** collapse + Hide Scores, **S70** Video Player); (e) shell, favicon, rail `Active`, drawer → **S60**. Undrawn results and owner decisions the frames contradict → design **S56**; Hide Scores beyond the scoreboard → design **S57**. Win probability: left out at launch (owner, 2026-10-19) |
 | FEATURES carry rows with **no build story** (2026-10-09 parity review; owned 2026-10-19) | **Hide scores** → **S68** scoreboard, **S75** rooms and recap title (+ design **S57**); **playback prefs** → **S70**; game-row slot / collapse → **S67** / **S68**; **highlight search by date + tag** → **S72**; **settings sync** → free for every signed-in user (**S6**, ADR-027). Still unowned: **Savant deep links** (Pro Backer gate), **Patreon link + server-enforced entitlements** (Later themes) |
 | Scoreboard → game loop UI | **S60** shell → **S83** shell fixes from the owner's S60 comparison (wordmark face, active rail color, text checked against Figma) → **S61** team colors → S2, S3, S41, S10 → **S63**/**S64** Live → **S65**–**S68** scoreboard → **S69**/**S70** Videos → **S71** digest → S18/S19 live push → S20 |
-| Standings | S4 (after S13 + S21; prefer S24; gated on **S34**) |
+| Standings | S4 (after S13 + S21; prefer S24; gated on **S34**). A date picker for any date (FEATURES, owner 2026-11-09): design **S137** (after S123 and S129) → **S138** (after S125) |
 | Search | S5 (prefer S24; typographic results; gated on **S34**) |
 | Settings | S6 (no presentation-profile layer; gated on **S34**) |
 | Platform (ADR-017): off Firebase, onto Workers | **S42** remove Firebase → **S44** Fetch handlers + route table → **S45** Worker entry + local Workers runtime; deploy pipeline is a Later theme (owner go-ahead) |
@@ -34,7 +34,7 @@
 | Client state (ADR-024) + account settings (ADR-027) | **S8** → **S59** → **S6** (one Zustand store hydrated from the account) |
 | Code quality (ADR-025) | **S52** derivations + lint, **S53** `jscpd` + comment check + reuse-check rule; duplication sweep in every backlog review |
 | Every game since 1901 (FEATURES, owner 2026-11-07) | **S122** `pnpm mlb:backfill`, run locally first; whether it ever runs against production is the owner's call, asked separately |
-| Calendar date picker (FEATURES, owner 2026-11-07) | Design **S123** → **S124** games per day (prefers S122's stored seasons) → **S125** picker |
+| Calendar date picker (FEATURES, owner 2026-11-07; native month and year pickers and the favorite-team mark, owner 2026-11-09) | Design **S123** → **S124** games per day (prefers S122's stored seasons) → **S136** the teams playing each day → **S125** picker |
 | Collapsed bar opens the game (VISUAL-DESIGN §6 Scoreboard, owner 2026-11-07) | **S126** |
 | Changelist page and what's new on update notices (FEATURES Update / changelist UX, owner 2026-11-08) | **S131** approved release notes → **S132** API; design **S133** → **S134** page, **S135** notices |
 | Video play links from Search's floating player (FEATURES, owner 2026-11-05) | Design **S127**; its intake re-scopes **S5** or slices the build |

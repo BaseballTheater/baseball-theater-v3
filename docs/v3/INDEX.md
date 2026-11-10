@@ -377,7 +377,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `2167–2170` System Consistency
   - `2171–2174` Originality
   - `2175–2221` Small-Size Test
-- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 42 KB
+- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 44 KB
   - `12–19` North star
   - `20–34` Principles (product)
   - `35–46` Scope legend
@@ -493,8 +493,11 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 
 | Priority | Story | Status | Depends on | Design |
 |---|---|---|---|---|
-| 74 | [S125](backlog/stories/S125.md) Calendar date picker | `todo` | S124, S81 | S123 |
+| 74 | [S136](backlog/stories/S136.md) Teams per day in the month counts | `todo` | S124 | — |
+| 74 | [S125](backlog/stories/S125.md) Calendar date picker | `todo` | S124, S136, S81 | S123 |
 | 77 | [S130](backlog/stories/S130.md) Spring standings label | `todo` | S128, S81 | S129 |
+| 77 | [S137](backlog/stories/S137.md) Design: Standings date picker | `todo` | S123, S129 | — |
+| 77 | [S138](backlog/stories/S138.md) Standings date picker | `todo` | S125, S81 | S137 |
 | 79 | [S132](backlog/stories/S132.md) Release notes API | `todo` | S131 | — |
 | 81 | [S134](backlog/stories/S134.md) Changelist page | `todo` | S132, S81 | S133 |
 | 82 | [S135](backlog/stories/S135.md) What's new on update notices | `todo` | S132, S134, S81 | S133 |
