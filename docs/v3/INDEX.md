@@ -50,8 +50,8 @@ Assembled, in this order and around the stories, into BACKLOG.md.
     - `55–80` Later themes (not yet story-sliced)
 - [05 Gap map (doc → story)](<backlog/frame/05 Gap map (doc → story).md>) — 9 KB
   - `1–44` Gap map (doc → story)
-- [06 Baseline history](<backlog/frame/06 Baseline history.md>) — 44 KB
-  - `1–127` Baseline history
+- [06 Baseline history](<backlog/frame/06 Baseline history.md>) — 45 KB
+  - `1–128` Baseline history
 
 ## Product and architecture docs
 
@@ -377,7 +377,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `2167–2170` System Consistency
   - `2171–2174` Originality
   - `2175–2221` Small-Size Test
-- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 57 KB
+- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 59 KB
   - `12–19` North star
   - `20–34` Principles (product)
   - `35–46` Scope legend
@@ -496,6 +496,8 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 | 73 | [S143](backlog/stories/S143.md) Mock sign-in on staging | `todo` | S116 | — |
 | 74 | [S136](backlog/stories/S136.md) Teams per day in the month counts | `todo` | S124 | — |
 | 74 | [S125](backlog/stories/S125.md) Calendar date picker | `todo` | S124, S136, S81 | S123 |
+| 75 | [S144](backlog/stories/S144.md) Design: play link on the meta line | `todo` | — | — |
+| 75 | [S145](backlog/stories/S145.md) Play link on the meta line | `todo` | S97, S81 | S144 |
 | 76 | [S139](backlog/stories/S139.md) Standings views in the API | `todo` | S128 | — |
 | 76 | [S140](backlog/stories/S140.md) World Series winner in standings | `todo` | S128 | — |
 | 77 | [S130](backlog/stories/S130.md) Standings views | `todo` | S128, S139, S140, S81 | S129 |
