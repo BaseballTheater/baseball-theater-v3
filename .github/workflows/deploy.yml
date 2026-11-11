@@ -4,8 +4,8 @@ name: Deploy
 # - Every pull request that changes code gets its own preview Worker on workers.dev, on staging's database (owner,
 #   2026-11-05: "Previews share staging db"), and its address is posted on the pull request. It is
 #   deleted when the pull request closes.
-# - Every push to stage deploys staging at stage.baseball.theater, on the Neon `staging` branch: a
-#   schema-only branch that never holds a fan's data.
+# - Every push to stage that changes code deploys staging at stage.baseball.theater (a docs-only push
+#   deploys nothing), on the Neon `staging` branch: a schema-only branch that never holds a fan's data.
 # - Production, at next.baseball.theater, deploys only when the owner publishes a GitHub Release
 #   (S121; owner, 2026-11-07: "I think releases to main probably should use GitHub releases, if
 #   that's actually possible. I want a release to be a set of PRs basically"). It checks out and
@@ -46,9 +46,10 @@ permissions:
 jobs:
     # Docs-only changes (Markdown, docs/, .claude/) skip verify (owner, 2026-11-07: "Things like
     # this shouldn't trigger CI."): a docs-only pull request gets no preview, and a docs-only push
-    # to stage deploys staging without re-running verify. A push is compared with the last stage
-    # commit whose Deploy run passed, so code that hasn't passed verify there yet always runs it
-    # first. A release always runs everything. scripts/ci-changes.sh decides, the same script CI asks.
+    # to stage doesn't deploy staging either, since nothing it serves changed (owner, 2026-11-11:
+    # "Can we avoid deploying when the only change was docs?", then "yeah, I like your plan"). A push
+    # is compared with the last stage commit whose Deploy run passed, so code that hasn't been
+    # verified and deployed there yet (a run still going, cancelled or failed) always is. A release always runs everything. scripts/ci-changes.sh decides, the same script CI asks.
     changes:
         if: github.event.action != 'closed'
         runs-on: ubuntu-latest
@@ -197,11 +198,13 @@ jobs:
                       echo "$output"; exit 1
                   fi
 
-    # Every push to stage: stage.baseball.theater on the Neon staging branch (bt-staging).
+    # Every push to stage that changes code: stage.baseball.theater on the Neon staging branch (bt-staging).
     staging:
-        # After verify passed, or after a docs-only push skipped it; never after it failed or was
-        # cancelled.
-        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/stage' && needs.changes.result == 'success' && (needs.verify.result == 'success' || (needs.verify.result == 'skipped' && needs.changes.outputs.code == 'false')) }}
+        # Only when something besides docs changed since the last passing run, and verify passed;
+        # never after it failed or was cancelled. A docs-only push deploys nothing.
+        if: >-
+            ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/stage' &&
+            needs.changes.result == 'success' && needs.changes.outputs.code == 'true' && needs.verify.result == 'success' }}
         needs: [changes, verify]
         runs-on: ubuntu-latest
         timeout-minutes: 20
@@ -219,33 +222,85 @@ jobs:
             BT_SESSION_KEY: ${{ secrets.BT_SESSION_KEY_STAGING }}
         steps:
             - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            # The deploy-staging group runs one deploy at a time but doesn't keep push order, and a
+            # docs-only push no longer redeploys the head to heal an older run landing last. So each run
+            # reads the commit staging serves (bt-commit.txt, written into the build below) and deploys
+            # unless staging already serves this commit or one that contains it. Deciding from what is
+            # served, not from what is on stage, means a newer run that fails or is cancelled never
+            # strands an older commit that passed.
+            # - A 200 with a sha: compare. Read twice, a few seconds apart, so a deploy still spreading to
+            #   the edge is seen; either read showing a commit containing this one skips.
+            # - A 404, or a 200 without a sha (the SPA's index.html for a missing file): no marker yet
+            #   (the first deploy, or a rollback to a build without it), so deploy.
+            # - Anything else (no connection, a 5xx, a 408 or 429) after curl's retries: fail the step,
+            #   so the run is re-run rather than deploying an older commit over a newer one blind.
+            - name: Does staging already serve this commit or a newer one?
+              id: served
+              run: |
+                  set -euo pipefail
+                  git fetch --no-tags origin stage
+                  contains=false
+                  for attempt in 1 2; do
+                      [ "$attempt" = 2 ] && sleep 10
+                      status="$(curl -sS --retry 5 --max-time 10 -o "$RUNNER_TEMP/served" -w '%{http_code}' \
+                          "https://stage.baseball.theater/bt-commit.txt?run=${{ github.run_id }}-$attempt")"
+                      case "$status" in
+                          200 | 404) ;;
+                          *) echo "staging answered $status for bt-commit.txt; re-run this job" >&2; exit 1 ;;
+                      esac
+                      served="$(head -c 100 "$RUNNER_TEMP/served" | tr -d '[:space:]')"
+                      if [ "$status" = 200 ] && [[ "$served" =~ ^[0-9a-f]{40}$ ]] && git cat-file -e "${served}^{commit}" 2>/dev/null &&
+                          git merge-base --is-ancestor "${{ github.sha }}" "$served"; then
+                          contains=true
+                          echo "staging serves $served, which already contains ${{ github.sha }}"
+                      fi
+                  done
+                  if [ "$contains" = true ]; then
+                      echo "deploy=false" >>"$GITHUB_OUTPUT"
+                  else
+                      echo "deploy=true" >>"$GITHUB_OUTPUT"
+                  fi
 
             - uses: pnpm/action-setup@v4
+              if: steps.served.outputs.deploy == 'true'
               with:
                   version: 9.15.0
 
             - uses: actions/setup-node@v4
+              if: steps.served.outputs.deploy == 'true'
               with:
                   node-version-file: ".nvmrc"
                   cache: pnpm
 
             - name: Install
+              if: steps.served.outputs.deploy == 'true'
               run: pnpm install --frozen-lockfile
 
+            # bt-commit.txt is how the next run learns what staging serves (see above).
             - name: Build the web app
-              run: pnpm --filter @bt/web run build
+              if: steps.served.outputs.deploy == 'true'
+              run: |
+                  pnpm --filter @bt/web run build
+                  echo "${{ github.sha }}" >web/dist/bt-commit.txt
 
             - name: Bootstrap (schema-only staging branch, bt-staging, Worker config and secrets)
+              if: steps.served.outputs.deploy == 'true'
               id: bootstrap
               run: pnpm run deploy:bootstrap staging
 
             - name: Migrate the staging database
+              if: steps.served.outputs.deploy == 'true'
               run: pnpm db:migrate
 
             - name: Re-apply deletions
+              if: steps.served.outputs.deploy == 'true'
               run: pnpm db:reapply-deletions
 
             - name: Deploy staging
+              if: steps.served.outputs.deploy == 'true'
               run: pnpm --filter @bt/functions exec wrangler deploy --config "${{ steps.bootstrap.outputs.config }}" --env staging --secrets-file "${{ steps.bootstrap.outputs.secrets_file }}"
 
     # next.baseball.theater (until the owner's cutover, S119), when the owner publishes a GitHub Release,
