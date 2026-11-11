@@ -12,12 +12,12 @@
 
 Assembled, in this order and around the stories, into BACKLOG.md.
 
-- [00 Baseball Theater v3 — Checkable backlog](<backlog/frame/00 Baseball Theater v3 — Checkable backlog.md>) — 113 KB
+- [00 Baseball Theater v3 — Checkable backlog](<backlog/frame/00 Baseball Theater v3 — Checkable backlog.md>) — 116 KB
   - `127–145` Verify-script contract
   - `146–159` Story status
-  - `160–495` Backlog reviews
-  - `496–515` Doc parity reviews
-  - `516–520` Goal command for multiple stories
+  - `160–508` Backlog reviews
+  - `509–528` Doc parity reviews
+  - `529–533` Goal command for multiple stories
   - Rules, by number:
     - `10–10` 1. Acceptance criteria map to commands, tests, or file invariants (exit codes / assertions).
     - `11–11` 2. Vague phrases (“works correctly”, “handles errors gracefully”) are forbidden until rewrit…
@@ -505,9 +505,9 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 | 77 | [S138](backlog/stories/S138.md) Standings date picker | `todo` | S125, S130, S81 | S137 |
 | 79 | [S132](backlog/stories/S132.md) Release notes API | `todo` | S131 | — |
 | 81 | [S134](backlog/stories/S134.md) Change log page | `todo` | S132, S81 | S133 |
-| 82 | [S135](backlog/stories/S135.md) Update notice and after-update pointer | `todo` | S132, S134, S81 | S133 |
+| 82 | [S135](backlog/stories/S135.md) Update notice and after-update pointer | `todo` | S131, S134, S81 | S133 |
 | 83 | [S141](backlog/stories/S141.md) Design: site footer | `todo` | — | — |
-| 84 | [S142](backlog/stories/S142.md) Site footer and its pages | `todo` | S81 | S141 |
+| 84 | [S142](backlog/stories/S142.md) Site footer of links | `todo` | S81 | S141 |
 | 89 | [S127](backlog/stories/S127.md) Design: play link in Search's player | `todo` | — | — |
 | 90 | [S5](backlog/stories/S5.md) Search page queries highlights fixture | `todo` | S70, S61, S68, S81 | S34, S56 |
 | 91 | [S72](backlog/stories/S72.md) Search chips: date / team / tag | `todo` | S5, S69, S81 | S34 |

@@ -18139,3 +18139,61 @@ Fresh-context parity review at 5c61a56 (since 6347608). Scope: S143 (added) plus
 - S139 AC 1's `playoffs` end date (the day before the next known season's `springStartDate`) is marked as the agent's reading for the owner to accept or change; it should reach the owner before S139 starts.
 
 **Questions for the owner:** none blocking. One to carry (non-blocking, S139): how long should the playoffs view stay choosable after the World Series? The story's proposal is until the next spring training starts.
+
+---
+
+## 2026-11-10 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-11T01:43:11Z` |
+| HEAD at review | `2eaa555` (tree dirty) |
+| Trigger | S144-S145 inserted and ACs rewritten in S123, S125, S129, S133, S134, S135, S139, S141, S142 outside a review (2eaa555) |
+| Stories `done` since last review | — |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context review at `2eaa555`, triggered by the owner's evening answers of 2026-11-10 applied in `2eaa555`: S144 and S145 inserted outside a review; acceptance criteria rewritten in S123, S125, S129, S133, S134, S135, S139, S141 and S142 (`scripts/review-debt.sh`). No story has flipped to `done` since the last review (S124 is still the last), and no code changed since `3ce55d3` (`git diff --stat 3ce55d3..HEAD -- . ':!docs'` is empty). Next 3 `todo` by priority: **S143** (73), **S136** (74), **S125** (74; design S123 `blocked`).
+
+**Check 1: coverage**
+
+1. Every owner answer in `2eaa555`'s message lands in a story: footer (S141/S142), first spring morning and mobile width (S139/S129), calendar arrows, Esc and back stack (S123/S125), no headline, `/changelog`, update-notice-wins, gold "Major Feature" (S133/S134/S135, notes on S131/S132), play link on the meta line (S144/S145). Each rewrite was checked against the quoted words: none stretched; the readings that go beyond the words are marked as the agent's (S123 Back, S141 "nothing else, copyright included", S144 "where else it applies").
+2. The newest parity review (AUDIT line 18108) queued S139 AC 1's playoffs end for the owner: still open (S139 and S140 notes say so); not guessed.
+3. Cascade the commit missed: **S130** (not rewritten) still said both mornings answer a view other than the default, and had no case for an empty spring answer (finding 9). **S132**'s `?after=` lost its only caller; its note left the decision to this review (finding 12).
+
+**Check 2: ground truth at HEAD (`2eaa555`)**
+
+4. **S143.** Depends on S116 (`done`). Unchanged since the review at `3ce55d3`, which amended it; every path it names still exists (re-checked: `functions/src/worker-app.ts`, `functions/src/services/accounts.ts`, `functions/src/handlers/api.ts`, `functions/src/adapters/fixtures/auth.ts`, `functions/src/adapters/logto/identity.ts`, `functions/src/services/account-deletion.ts`, `functions/src/worker.workerd.test.ts`, `functions/vitest.workers.config.ts`, `functions/src/deploy/bootstrap.test.ts`, `web/src/session/SessionProvider.tsx`, `AuthClient.ts`, `token.ts`, `web/src/layout/AppHeader.tsx`, `web/src/pages/settings/AccountData.tsx`, `packages/domain/src/api-routes.ts`, `wrangler.jsonc`). Commands `pnpm api:spec`, `api:breaking`, `api:types` exist in root `package.json`. Fence and cap as amended at `3ce55d3`.
+5. **S136.** Depends on S124 (`done`). `packages/domain/src/schedule-month.ts`, `packages/ports/src/repositories.ts` exist; unchanged since `3ce55d3`.
+6. **S125.** Depends on S124, S81 (`done`), S136 (`todo`); Design S123 `blocked`, so it can't go to `doing` (rule 18). `DateControl.tsx`, `web/src/layout/variant.ts`, `web/src/api/scoreboardDate.ts`, `web/src/settings/store.ts`, `web/src/routes.tsx` (`/games/:date` one element, :83) exist. AC 7 amended (finding 10).
+
+**Check 2b: Copilot-class checklist** (LOOP.md §7, items 1–15)
+
+7. **S144 / S145, item 3 (partly present data) and item 12: broken.** `kind` is optional on a highlight (`packages/domain/src/types.ts:125`) and `date` nullable (:127); `VideoCard.tsx:88,95` draws no meta line when both are missing. Input: a clip with a play, no `kind`, no `date`: once the link moves onto the meta line, it vanishes. A clip of kind `video` with a play has no rule either. **Amended:** S144 AC 1 has the amendment say what the line reads then; S145 AC 1 tests it.
+8. **S145 AC 2, item 14 (matching), inverted: matched nothing.** "The existing `VideoCard` meta tests keep passing unchanged": no `web/src` test asserts the meta text (`grep -rn Highlight web/src --include='*.test.tsx'`: only `HideScoresRooms`, `VideosRoom` sort and `DayDigest` titles). **Amended:** AC 2 names new RTL tests (highlight, recap, condensed, no play: text, muted, no link). Note: `e2e/design/S97.spec.ts` waits on `play-link` (inside S145's fence). Held: item 11 (AC 3's "no link inside `<button>`" vs today's layout: S97 put the link outside `UnstyledButton`, `VideoCard.tsx:125-136`; note says the card's layout changes); item 9 (fence holds `web/src/components/videos/`, where `PlayerDialog`/`PlayerHost` live, so AC 4's player case fits; Search's cards don't exist yet, S5 `todo`); item 10 (Depends on S97, S81 both `done`); red token exists (Primary Light `#FF5247`, VISUAL-DESIGN:145).
+9. **S130 AC 2 (cascade of S139 AC 2/3), item 3 and item 11: broken.** First spring morning: `view=default` now answers spring's empty table; with 0 MLB records it is `divisions: []`, and `StandingsPage.tsx:37` draws "No standings for this date." with no switch, so the fan can't reach the regular season. S130's note said both mornings answer a non-default view (stale). **Amended:** AC 2 draws S129's empty-spring frame with the switch and tests it; the note rewritten; mobile full-width note added.
+10. **S123 AC 1 / S125 AC 7, item 11: contradiction; item 12: Back sequence.** "Opening or closing the calendar never changes the URL" vs S125 AC 2 (picking a day navigates to `/games/<date>` and closes it). And `/games/2026-09-20` → › → `/games/2026-09-21` → open sheet → Back: `ScoreboardPage` stays mounted (`routes.tsx:83`), so `DateControl`'s open state survives and the sheet stays up over the previous day. **Amended:** closing means without choosing a day; choosing navigates as the arrows do; Back closes the sheet; S125 AC 7 tests that sequence. The Back reading stays marked as the agent's.
+11. **S141 AC 2 / S142 AC 3, item 4/11: dead links.** Input: S141 ratifies "Privacy policy → `/privacy`" with a new story sliced for it; S142 ships the footer first and the link lands on no route (`routes.tsx` has none). Same for "Change log → `/changelog`" if S142 runs before S134 (neither depends on the other; both design-gated). **Amended:** S141 AC 2 "No dead links" (each unbuilt page's story goes on S142's Depends on, or the page's own story adds its link); S142 AC 3 forbids a link to an unserved route and tests each BT link against `routes.tsx`. Also item 11: S141's Gap and notes (policies, "S142 waits for text") and S142's notes (builds the contact page; pages may split it), reuse check (text pages, year function) and `table_title` ("Site footer and its pages") contradicted the rewritten ACs; marked superseded or fixed. S142: if a copyright year is ratified, its mlbToday rule (removed from AC 1) is kept in a note for the intake. S141 AC 3 also rewrites VISUAL-DESIGN's `Quiet meta: … last fetched (D9)` line (VISUAL-DESIGN:292), which the fetched label's removal makes stale.
+12. **S132 AC 2, item 10-like (scope with no consumer).** `?after=` had one caller, S135 AC 2, which now makes no releases request (`grep after= docs/v3/backlog/stories/S13[3-5].md`: notes only). **Amended:** AC 2 says the route has no `after` query (checked in spec and client); AC 5 one client function; title, Gap, Impact, notes, cap assumption follow. Not easier for the sake of it: the owner's answer removed the only use (S132's own note deferred this to the review).
+13. **S135, item 11 and item 10.** Title and Impact still promised "the biggest addition" against AC 2; **Depends on** named S132 for `?after=`, which it no longer calls. **Amended:** title, Impact; Depends on now S131 (`currentRelease`, `compareReleaseVersions`, `parseReleaseVersion` used by ACs 1 and 3; S134 still depends on S132); `depends_on` rebuilt to S131, S134, S81. Stale notes about the server comparison and the 5-minute cache marked superseded. Held: item 13 (AC 3's storage cases unchanged), item 15 (own key, not the snooze key).
+14. **S133, item 11.** Impact ("one big addition"), the retired-version note ("the update notice keeps its link and its addition", "neither the addition (`?after=`)") and the turn cap's assumption ("no addition, one and more than one") contradicted AC 1's no-addition notice. **Amended** to match. Held: the gold header has a token to draw from (Accent `#F5AD1D`, VISUAL-DESIGN:135); the fourth kind is open with the owner.
+15. **S129.** Item 11: the mobile full-width bullet contradicts A7 and FEATURES' Standings row ("only as wide as it needs"). **Amended:** the amendment says it overrides A7 at mobile only and FEATURES records it at ratification (S129 fences FEATURES). Held: morning bullet matches the owner's words and S139 AC 2.
+16. **S139.** Items 3, 7, 11, 12 applied. AC 2 default and AC 3's three answers on 2027-02-19 are consistent with each other and with AC 1 (spring opens first from `springStartDate`); AC 4's budget holds (default that morning reads one table; `regularSeason` by name two); 2027-02-18 test added. Only the earlier review note at line 84 contradicted the new AC 3: marked superseded. AC 1's playoffs end is still with the owner.
+17. **S134.** Items 9, 11: `/changelog` route in `web/src/routes.tsx` (fenced `web/src/`); the gold header is "as S133 draws them". Nothing broken.
+18. **S131, S140, S107, S127.** Notes only; nothing contradicts their ACs (S131 AC 1's kinds wait on the fourth-kind answer; S140 AC 2's days on the owner).
+19. **S143, S136** (next 3): items 1–15 applied at `3ce55d3`; no code or note change since. Nothing new.
+
+**Check 3: prioritization**
+
+20. S144/S145 at 75 sit above S139/S140 (76), which spring 2027 (2027-02-19) makes time-bound. Argued against: S144 needs an owner session and S145 is gated on it, so the loop skips them until ratified and S139/S140 stay the next startable work after S143 and S136; the order costs the standings nothing. S132 is smaller now (finding 12). S142 may now wait on S134 (finding 11), which already sits above it (81 vs 84). S127 (89) and S144 both ask about Search's play link; S144's "where else" bullet names S127, so whichever is ratified first constrains the other; no reorder. Nothing obsolete or quietly done.
+21. **Current baseline:** no story `done` since `3ce55d3`; the As of line now also records this review's S132 re-scope and the no-dead-links rule.
+
+**Duplication sweep (ADR-025):** no story `done` since the last review and no code changed (`git diff 3ce55d3..HEAD` touches only `docs/`). In the stories: S145 keeps one kind-word table (`KIND_LABELS`) and one play word (note); S142's year, if any, is one function (note). None found.
+
+**Personal-data sweep (ADR-028):** S144/S145 add no store, field, browser key or log line; S141/S142 now draw only links (no contact form, so no inventory entry); S132 loses a query, adds nothing; S135's key is unchanged. Checked the notes of S141, S142, S144, S145, S132, S135. None found.
+
+**Questions for the owner (non-blocking):** (1) ADR-014's "Freshness is visible" row (ARCHITECTURE.md, `fetchedAt` / `windowMode` render per D9) and VISUAL-DESIGN's D9 principle predate "just get rid of the fetched label": amend ADR-014's row to match? (2) Still open from earlier: how long the playoffs choice and the World Series box stay after the Series (S139 AC 1, S140 AC 2); a fourth change log kind (S131).
+
+**Verdict: `amended`.** No owner question blocks the next story (S143).
