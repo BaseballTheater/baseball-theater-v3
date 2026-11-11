@@ -18324,3 +18324,18 @@ S145 AC 2 was rewritten to answer Claude's review of pull request #31 (two S97 t
 Owner-directed change (2026-11-11: "Can we avoid deploying when the only change was docs?", then "yeah, I like your plan"): a docs-only push to `stage` no longer deploys staging, and a staging run deploys unless staging already serves its commit or a newer one (`bt-commit.txt`). It edits CLAUDE.md's release and push rules, LOOP.md, README, wrangler.jsonc's comment, the baseline frame's deploy line, and law P11's test. Commits 705a855, 9704399.
 
 Asked whether this needs a backlog review, the owner answered: "skip".
+
+---
+
+## 2026-11-11 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-11T23:50:41Z` |
+| HEAD at capture | `c2a7efc` (tree dirty) |
+| Change | `c2a7efc` — Backlog: answer Claude's review of PR #31 at 61d3307 |
+
+**What changed, and the owner's answer**
+
+S131 AC 1 was rewritten to answer Claude's review of pull request #31 (headline described as what the update notice shows, which the owner's evening answers removed). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
