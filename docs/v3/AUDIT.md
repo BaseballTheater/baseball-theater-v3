@@ -18282,3 +18282,18 @@ S129 AC 1 and S130 AC 2 were rewritten to answer Claude's review of pull request
 **What changed, and the owner's answer**
 
 S141 AC 2 was rewritten to answer Claude's review of pull request #31 (a link's destination "that exists" contradicted its own No dead links clause). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
+
+---
+
+## 2026-11-11 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-11T22:54:38Z` |
+| HEAD at capture | `a3202d0` (tree dirty) |
+| Change | `a3202d0` — Backlog: answer Claude's review of PR #31 at 4182295 |
+
+**What changed, and the owner's answer**
+
+S145 AC 2 and S132 AC 2 were rewritten to answer Claude's review of pull request #31 (S145: an existing meta-line test it said didn't exist; S132: a grep with no pattern). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
