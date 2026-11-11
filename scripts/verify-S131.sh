@@ -208,7 +208,9 @@ node "$TMP/check4.cjs" "$TMP/production.yml" || bad 4 "the production job does n
 # --- Check 5: the release rule ----------------------------------------------------------------------------------
 # The rule's own bullet, up to the next rule. Each phrase stands for one clause of AC 5, and none of them is in
 # CLAUDE.md before S131 (checked at 28c2059), so the check can't pass on the old rule.
-awk '/^- \*\*The coordinator manages releases/{f=1} f&&/^- \*\*Copilot/{exit} f' CLAUDE.md >"$TMP/rule.md"
+# It ends at the next top-level rule, whatever that rule is called (the next one was Copilot's review until Claude's
+# review replaced it on 2026-11-11).
+awk '/^- \*\*The coordinator manages releases/{f=1; print; next} f&&/^- \*\*/{exit} f' CLAUDE.md >"$TMP/rule.md"
 for s in 'releases/<version>.json' \
   'CHANGELOG.md' \
   '`headline`' '`items`' '`fixesAndPolish`' '`approval`' \

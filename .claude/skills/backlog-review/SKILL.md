@@ -64,9 +64,9 @@ For **each** of the next 3 stories:
 
 ### 2b. Adversarial pass — try to break every acceptance criterion
 
-Check 2 confirms a story's names exist; this check asks whether its plan holds. The goal is that Copilot finds nothing in the backlog's pull request (owner, 2026-11-07: "Our goal should be zero Copilot discoveries for each pull request"); on 2026-11-07 it found twelve real problems in the backlog pull request #10 after two reviews had passed it, all of this kind.
+Check 2 confirms a story's names exist; this check asks whether its plan holds. The goal is that Claude's pull request review finds nothing in the backlog's pull request (owner, 2026-11-07, of Copilot's review, which Claude's replaced on 2026-11-11: "Our goal should be zero Copilot discoveries for each pull request"); on 2026-11-07 Copilot found twelve real problems in the backlog pull request #10 after two reviews had passed it, all of this kind.
 
-Scope: every acceptance criterion and note of the next 3 stories **and of every story inserted, re-scoped or rewritten since the last review**. For each, apply the [Copilot-class checklist](../../../docs/v3/LOOP.md#copilot-class-checklist) in `docs/v3/LOOP.md` §7 (LOOP.md holds the authoritative list; read it there, every time) reading the code each criterion touches at HEAD, not just its name.
+Scope: every acceptance criterion and note of the next 3 stories **and of every story inserted, re-scoped or rewritten since the last review**. For each, apply the [review-class checklist](../../../docs/v3/LOOP.md#review-class-checklist) in `docs/v3/LOOP.md` §7 (LOOP.md holds the authoritative list; read it there, every time) reading the code each criterion touches at HEAD, not just its name.
 
 Each finding names the **exact input or sequence that breaks the criterion** (for example "stopped after 13 failed days, the resumed run skips those days and never reaches 14") and becomes an amendment to that story. The ledger entry lists, for each story in scope, the checklist items that applied and what was checked; a story recorded with no items checked fails the evidence requirement below.
 
@@ -148,4 +148,4 @@ This review never edits `docs/v3/INTENT.md`, `docs/v3/FEATURES.md`, or an existi
 
 ## Recipe maintenance
 
-If a drift class slips through — a review said `continue` and the next story still went sideways — add the signal to the drift-event list above and to check 2, then note it in the review log entry that caught it. If Copilot finds a real problem in a backlog pull request this review passed, that is a miss of check 2b: add its class to the checklist in `docs/v3/LOOP.md` §7 in the same pull request as the fix.
+If a drift class slips through — a review said `continue` and the next story still went sideways — add the signal to the drift-event list above and to check 2, then note it in the review log entry that caught it. If Claude's review finds a real problem in a backlog pull request this review passed, that is a miss of check 2b: add its class to the checklist in `docs/v3/LOOP.md` §7 in the same pull request as the fix.
