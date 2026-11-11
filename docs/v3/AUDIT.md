@@ -18051,6 +18051,193 @@ Acceptance criteria of S123, S130, S133, S135, S139, S140, S141 and S142 were re
 
 ---
 
+## 2026-11-10 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-10T22:24:59Z` |
+| HEAD at review | `3ce55d3` (tree dirty) |
+| Trigger | S143 inserted outside a review (3ce55d3) |
+| Stories `done` since last review | — |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context review at `3ce55d3`, triggered by S143 (mock sign-in on staging, priority 73) inserted at the owner's direction outside a review. No story has flipped to `done` since the last review (`29e8c9e`); S124 is still the last. Next 3 `todo` by priority: **S143**, **S136**, **S125** (S125 can't start: its design S123 is `blocked` on ratification, so after S136 the loop's next startable stories are S139 and S140).
+
+**Check 1: coverage**
+
+1. S143's concern (staging sign-in, previews' dead button) is owned end to end by S143; FEATURES' Modern membership row added in `3ce55d3` cites it. Nothing else in the Auth area lacks a story. Patreon on staging is left as is, by the story's own note.
+2. The newest doc parity review (2026-11-10, AUDIT line 17991) queued three items **for the next backlog review**: (a) mark S133's "Settled on 2026-11-10" retired-version note, S133 AC 1 / S135 AC 2's "one addition, then how many more" and S135 AC 3's "never on screen with A6's box" as the agent's reading: **amended** (findings 10–11); (b) S141 should update VISUAL-DESIGN.md:287's footer line: **no amendment needed**, S141 AC 3 already requires it in the same change set (S141.md:53); (c) visible freshness vs S142 AC 2: waits on the owner's answer; carried in the Pending drift list (neither S141 nor S142 is in the next 3).
+
+**Check 2: ground truth at HEAD (`3ce55d3`)**
+
+3. **S143.** Depends on S116 (`done`); also leans on S120 and S82 (`done`). Paths named exist: `functions/src/worker-app.ts` (`devSignInAllowed` :175, `logtoSignIn` :181, `withoutDevSignIn` :218, `createWorkerApp` :113), `functions/src/services/accounts.ts` (`AuthDeps` :16, `signIn` :83, `completeProviderSignIn` :135 returns null without Logto, `CredentialRefusedError` :54), `functions/src/handlers/api.ts:393-424` (401 `sign_in_refused` / 503 / 404 `sign_in_unavailable`), `functions/src/adapters/fixtures/auth.ts`, `functions/src/adapters/logto/identity.ts` (non-JWT refused as `IdTokenError` before any JWKS fetch, :188, so the mock constant reaches 401 on production), `functions/src/services/account-deletion.ts` (`RECENT_SIGN_IN_SECONDS` 600, `authTime` in Unix seconds per `packages/ports/src/auth.ts:21-28`; providers without an admin are left alone, :83), `functions/src/worker.workerd.test.ts` (already composes `createWorkerApp` on per-test envs with and without `BT_LOCAL`, :44-79, so AC 4's two runs fit the pattern), `functions/vitest.workers.config.ts` (pool binds only `BT_LOCAL`), `functions/src/deploy/bootstrap.test.ts:19` (reads `wrangler.jsonc`), `web/src/session/SessionProvider.tsx` (:71 `deployedAuthClient`, :126 the dead PROD return, :142 `exchangeIdToken`), `web/src/session/AuthClient.ts` (:158 `loadAuthClient`), `web/src/session/token.ts`, `web/src/layout/AppHeader.tsx:31`, `web/src/pages/settings/AccountData.tsx:207` ("Sign in again"). `wrangler.jsonc` has vars only in `env.preview` (:89), `env.staging` (:111) and `env.production` (:144); `deploy.yml` passes no `--var`. Commands `pnpm api:spec`, `pnpm api:breaking`, `pnpm api:types` exist. **Fence: fails** (finding 5). Turn cap 12: plausible after the amendments (they add tests, not features).
+4. **S136.** Depends on S124 (`done`). `packages/domain/src/schedule-month.ts` (`ScheduleDayTally` :9, `ScheduleDayCount` :22, `monthGameCounts` :38), `ScheduleRepository.listGameCounts` (`packages/ports/src/repositories.ts:21`, Postgres `repos.ts:95` with `jsonb_array_length`, memory `repos.ts:85`), contract case (j) (`repository-contract.ts:234`), the service test's counting double (`schedule-month.test.ts:215-224`, `2024-07-04` case :189), `scoreboard-rows.ts:30` (`favorite`), `CACHE_LIFETIME_CAP_MS` 48 h (`cache-lifetime.ts:11`): all exist as cited. Fence holds `packages/domain/`, `openapi/`, `web/src/api/` (generated types and fidelity test). Unchanged since the review at `29e8c9e`.
+5. **S125.** Depends on S124, S81 (`done`), S136 (`todo`); Design S123 is `blocked` (parked for ratification), so it can't go to `doing` (rule 18). `DateControl.tsx`, `web/src/layout/variant.ts`, `web/src/api/scoreboardDate.ts`, `web/src/settings/store.ts`, `latestScheduleMonth` (`schedule-month.ts:88`) exist. Unchanged since `29e8c9e`, whose review rewrote its turn cap; the intake after S123's ratification re-checks it.
+
+**Check 2b: Copilot-class checklist** (LOOP.md §7, items 1–15)
+
+S143 (inserted since the last review), every AC and note:
+6. **Item 9 (generated files / fence) and item 6 (ADR conformance): broken.** AC 3 adds `mock` to `GET /api/v1/sign-in`'s answer, whose type is `SignInConfigResponse` in `packages/domain/src/api-routes.ts:163`; `pnpm api:spec` renders the schema from that file (`functions/src/services/openapi.ts:258`) and `web/src/api/generated.types.test.ts:48` holds the generated type mutually assignable to it. The fence had no `packages/domain/`, so AC 3 stops at rule 10. **Amended:** `packages/domain/src/api-routes.ts` (that file alone) added to the scope files, Goal condition and `/goal` fence. Not easier: a necessary path the ACs already required.
+7. **Item 14 (matching), inverted: AC 7's grep matched nothing.** At `3ce55d3` `wrangler.jsonc:64` reads "until its own Logto tenant exists" and `README.md:347` "until it has a staging tenant of its own"; neither contains "until its own tenant exists", so the check passes before any work and catches neither stale line. The same stale claim is in `accounts.ts:29`, `worker-app.ts:58`, `api-routes.ts:161`, `openapi.ts:232` and the spec / generated types. **Amended:** AC 7's grep names those eight paths and three phrases (`until its own`, `tenant of its own`, `own tenant's once it exists`), each present at HEAD, so it is red first.
+8. **Item 8 (import side effects): AC 5's "no Logto SDK loaded" was untestable as written.** `AuthClient.ts` imports `@logto/browser` at top level (:23-26) and holds the config read (`loadAuthClient` :158) the note pointed to, so reusing it downloads the SDK on staging; an RTL test with a stand-in loader can't see that. **Amended:** AC 5 also tests the deployed loader as a production build with `mock: true`, in which `AuthClient.ts` is never imported; a note says the config read moves out of it.
+9. **Item 3 (a "nothing yet" answer told apart from "zero") and item 15: AC 6 hid nothing-vs-failure.** Today the header never asks for the config; once it waits for the answer, input: production page, `GET /api/v1/sign-in` fails (offline, 503) — read like the no-sign-in answer, a fan has no Sign in. **Amended:** a failed request shows the button and the click asks again (as `loadAuthClient` already retries), only `logto: null, mock: false` hides it; one config read per page load for header and sign-in (ADR-025). Marked in the note as the review's reading of the owner's "a site with no sign-in at all".
+10. **Item 12 (boundaries): AC 2's half-named tenant.** `logtoSignIn` needs both vars (`worker-app.ts:183`); input `{ BT_MOCK_SIGN_IN: "1", LOGTO_ENDPOINT: "x" }` — "names no Logto tenant" reads either way and both pass the listed tests. **Amended:** off when either var is set, with a unit test.
+11. Held, with what was checked: item 1/2 (sign-in is one `signIn` call; upsert then link, the existing S116 path, nothing new); item 4 (account and links read from `UserRepository` as today); item 5 n/a; item 7 (no MLB calls); item 10 (Depends on names only S116; `depends_on` matches); item 11 (AC 3's 401-vs-404 matches `api.ts:400-424`; AC 4's deletion passes because the mock's `authTime` is the call's Unix seconds and no admin exists for `mock`, `account-deletion.ts:83`); item 13 (the token is the existing session key in `token.ts`; no new browser key); item 15 (mock and Logto never wired together, by AC 2). The shared account can also be deleted by any staging visitor; the note now says so (AC 4 already covers the next sign-in).
+12. Earlier reviews' carried items that land in S143's files: `wrangler.jsonc:116` "Every push to main" (review `f34576a`) and `AuthClient.ts:128`'s hand-built redirect vs `logtoAppUris` (`packages/domain/src/sign-in.ts:33`). Both still true at HEAD; S143 fences both files, so its notes now carry the fixes and the Pending drift items say so.
+
+S136 (items 3, 4, 6, 7, 9, 12 applied): `count: null` ↔ `teamIds: null`, `[]` for a stored empty day, one `listGameCounts` call (item 3/4/7); the pre-S136 cached answer's missing `teamIds` reads as no favorite (item 13-like staleness, AC 3); fence holds every generated path (item 9). Nothing broken; unchanged since `29e8c9e`.
+S125 (items 9, 11, 12 applied): fence holds `web/src/` incl. `web/src/api/generated/` (it regenerates nothing); AC 3's clock boundary (2027-01-01T03:00Z vs `mlbToday`) and AC 8's bounded ask (April 1901 through `latestScheduleMonth`) still hold; no AC contradicts another. Nothing new; the post-ratification intake re-checks it.
+S133 / S135 (parity queue, items 11): **amended** wording only — the retired-version note's "Settled on 2026-11-10" and "It isn't obviated" (S133:57), the update-notice bullet of S133 AC 1, S135 AC 2 (both "one, then how many more" and the retired case) and S135 AC 3's "never on screen with A6's box" now say each is the agent's reading, which the owner confirms when the redrawn draft is shown, as FEATURES' row does. No behavior changed.
+
+**Check 3: prioritization**
+
+13. S143 first (73) is the owner's direction ("move it up to the top priority") and depends only on `done` S116; it blocks nothing and nothing above it waits. Argued against: S136 (74) is cheaper and unblocks S125, but S125 is parked on S123's ratification anyway, so S143 first costs the calendar nothing. S139/S140 (76) still depend only on S128 (`done`). The open owner questions in Pending drift (S117 vs the owner-directed band; S127 vs S5) are unchanged. Nothing obsolete or quietly done.
+14. **Current baseline:** every Done row unchanged since `29e8c9e` holds; the Auth row named production's Logto app `b2f2q1wau5axo1psqexdo`, but `wrangler.jsonc:148` and README name `1b1sc2uclfqak0swrahef` (changed in `0716854`). **Fixed** in the row.
+
+**Duplication sweep (ADR-025):** no story `done` since the last review, so no new code. In S143's area: `AuthClient.ts:128` vs `logtoAppUris` (finding 12, carried into S143); the sign-in config would be read twice (header and loader) without AC 6's one-read clause (finding 9). Searched `web/src/session/`, `web/src/api/client.ts:235`, `functions/src/worker-app.ts`, `functions/src/services/accounts.ts`.
+
+**Personal-data sweep (ADR-028):** S143 adds no table, no stored field, no outside service, no browser key (the session token is `token.ts`'s existing one) and no log line (the sign-in route logs the error's name only, `api.ts:413`). The mock adds `identity_links` rows with provider `mock` and a `users` row with a staging-only test email, in stores already registered and deleted by account deletion. S136 and S125 add none. None found.
+
+**Verdict: `amended`.** No owner question blocks the next story.
+
+---
+
+## 2026-11-10 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-10T22:26:54Z` |
+| HEAD at review | `5c61a56` (tree dirty) |
+| Trigger | docs/v3/FEATURES.md changed; S143 added |
+| Stories `done` since last review | — (corrected 2026-11-11: this row named S143, S125, S136 and S139, which were all still `todo`; found by Claude's review of PR #31) |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context parity review at 5c61a56 (since 6347608). Scope: S143 (added) plus the next 3 `todo` stories by priority: S125 (74), S136 (74), S139 (76). No story's `**Source:**` line changed in range (`git diff 6347608..HEAD -- docs/v3/backlog/stories/` touches only `order:` and AC text outside S143); no `Open:` and no pillar-cited story exists (`grep -l '^\*\*Source:\*\* Open'` and `... Pillar` over the notes: none).
+
+**1. Citation honesty**
+
+- **S143 → Feature: Modern membership.** Holds. The row (FEATURES.md:93, "BT accounts + entitlements") is broad, but the theme section now carries a "Signing in on staging" bullet (FEATURES.md:236) in the owner's words that describes exactly what S143 delivers: a mock sign-in as one shared test account on staging, the account API working behind it, and no Sign in button on a site with no sign-in. Each quote matches S143's Gap (2026-11-06 "We will use a staging one or a fake shim"; 2026-11-10 "Can we make it a session-only shim…", "What I wanted to make sure of…", "yeah, plan this story…"). Nothing in ARCHITECTURE, INTENT or VISUAL-DESIGN says staging waits for a tenant of its own (grep for `tenant of its own|own tenant|staging tenant|staging…sign-in`: only FEATURES:236).
+- **S125 → Feature: Calendar date picker.** Holds: Gap/Impact (calendar from the scoreboard's date, type or pick, switch years, game counts) is the row's first quote word for word (FEATURES.md:101).
+- **S136 → Feature: Calendar date picker.** Holds: the favorite-team corner mark and "the API for that needs to return the teams that played each day" are in the row verbatim.
+- **S139 → Feature: Standings.** Holds: three views and which opens first are the Standings row (FEATURES.md:65). Its AC 1 now marks one rule as the agent's reading for the owner to accept (`playoffs` stays choosable until the next season's spring start; 4ffa3b6). FEATURES says only that "the playoffs view can still be chosen" after the Series, with no end, so doc and story don't conflict; the end date is an open owner question carried in the story, not a FEATURES edit.
+
+**2. Doc reflects reality: amended**
+
+- FEATURES.md:236 said the mock "signs straight in, with no email" two bullets below "Every account has an email" (owner, 2026-10-28: "It should be impossible for an account to have no email."). Read literally it says the mock account has none, which contradicts both that bullet and S143 AC 1 (a fixed email on staging's own address, so S82's no-email refusal never fires). Reworded to "with no emailed code, as one shared test account (which has an email address of its own, as every account does)". Records the decision in S143 AC 1 and the owner's 2026-10-28 rule; no new intent.
+- The bullet's last quote, "yeah, plan this story and move it up to the top priority.", stood without the question it answered, so it read as unrelated to hiding the button. Added the question as S143's Gap records it ("asked whether every click signs in as that one shared account and whether a site with no sign-in at all hides the button").
+- No relic found in the changed text; S143 AC 7 already owns the stale "until its own tenant" comments in code and README.
+
+**3. For the next backlog review**
+
+- No FEATURES item added this review. The new "Signing in on staging" bullet is served by S143.
+- S139 AC 1's `playoffs` end date (the day before the next known season's `springStartDate`) is marked as the agent's reading for the owner to accept or change; it should reach the owner before S139 starts.
+
+**Questions for the owner:** none blocking. One to carry (non-blocking, S139): how long should the playoffs view stay choosable after the World Series? The story's proposal is until the next spring training starts.
+
+---
+
+## 2026-11-10 — backlog review (`amended`)
+
+| | |
+|---|---|
+| Entry | backlog review pass |
+| Captured (UTC) | `2026-11-11T01:43:11Z` |
+| HEAD at review | `2eaa555` (tree dirty) |
+| Trigger | S144-S145 inserted and ACs rewritten in S123, S125, S129, S133, S134, S135, S139, S141, S142 outside a review (2eaa555) |
+| Stories `done` since last review | — |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context review at `2eaa555`, triggered by the owner's evening answers of 2026-11-10 applied in `2eaa555`: S144 and S145 inserted outside a review; acceptance criteria rewritten in S123, S125, S129, S133, S134, S135, S139, S141 and S142 (`scripts/review-debt.sh`). No story has flipped to `done` since the last review (S124 is still the last), and no code changed since `3ce55d3` (`git diff --stat 3ce55d3..HEAD -- . ':!docs'` is empty). Next 3 `todo` by priority: **S143** (73), **S136** (74), **S125** (74; design S123 `blocked`).
+
+**Check 1: coverage**
+
+1. Every owner answer in `2eaa555`'s message lands in a story: footer (S141/S142), first spring morning and mobile width (S139/S129), calendar arrows, Esc and back stack (S123/S125), no headline, `/changelog`, update-notice-wins, gold "Major Feature" (S133/S134/S135, notes on S131/S132), play link on the meta line (S144/S145). Each rewrite was checked against the quoted words: none stretched; the readings that go beyond the words are marked as the agent's (S123 Back, S141 "nothing else, copyright included", S144 "where else it applies").
+2. The newest parity review (AUDIT line 18108) queued S139 AC 1's playoffs end for the owner: still open (S139 and S140 notes say so); not guessed.
+3. Cascade the commit missed: **S130** (not rewritten) still said both mornings answer a view other than the default, and had no case for an empty spring answer (finding 9). **S132**'s `?after=` lost its only caller; its note left the decision to this review (finding 12).
+
+**Check 2: ground truth at HEAD (`2eaa555`)**
+
+4. **S143.** Depends on S116 (`done`). Unchanged since the review at `3ce55d3`, which amended it; every path it names still exists (re-checked: `functions/src/worker-app.ts`, `functions/src/services/accounts.ts`, `functions/src/handlers/api.ts`, `functions/src/adapters/fixtures/auth.ts`, `functions/src/adapters/logto/identity.ts`, `functions/src/services/account-deletion.ts`, `functions/src/worker.workerd.test.ts`, `functions/vitest.workers.config.ts`, `functions/src/deploy/bootstrap.test.ts`, `web/src/session/SessionProvider.tsx`, `AuthClient.ts`, `token.ts`, `web/src/layout/AppHeader.tsx`, `web/src/pages/settings/AccountData.tsx`, `packages/domain/src/api-routes.ts`, `wrangler.jsonc`). Commands `pnpm api:spec`, `api:breaking`, `api:types` exist in root `package.json`. Fence and cap as amended at `3ce55d3`.
+5. **S136.** Depends on S124 (`done`). `packages/domain/src/schedule-month.ts`, `packages/ports/src/repositories.ts` exist; unchanged since `3ce55d3`.
+6. **S125.** Depends on S124, S81 (`done`), S136 (`todo`); Design S123 `blocked`, so it can't go to `doing` (rule 18). `DateControl.tsx`, `web/src/layout/variant.ts`, `web/src/api/scoreboardDate.ts`, `web/src/settings/store.ts`, `web/src/routes.tsx` (`/games/:date` one element, :83) exist. AC 7 amended (finding 10).
+
+**Check 2b: Copilot-class checklist** (LOOP.md §7, items 1–15)
+
+7. **S144 / S145, item 3 (partly present data) and item 12: broken.** `kind` is optional on a highlight (`packages/domain/src/types.ts:125`) and `date` nullable (:127); `VideoCard.tsx:88,95` draws no meta line when both are missing. Input: a clip with a play, no `kind`, no `date`: once the link moves onto the meta line, it vanishes. A clip of kind `video` with a play has no rule either. **Amended:** S144 AC 1 has the amendment say what the line reads then; S145 AC 1 tests it.
+8. **S145 AC 2, item 14 (matching), inverted: matched nothing.** "The existing `VideoCard` meta tests keep passing unchanged": no `web/src` test asserts the meta text (`grep -rn Highlight web/src --include='*.test.tsx'`: only `HideScoresRooms`, `VideosRoom` sort and `DayDigest` titles). **Amended:** AC 2 names new RTL tests (highlight, recap, condensed, no play: text, muted, no link). Note: `e2e/design/S97.spec.ts` waits on `play-link` (inside S145's fence). Held: item 11 (AC 3's "no link inside `<button>`" vs today's layout: S97 put the link outside `UnstyledButton`, `VideoCard.tsx:125-136`; note says the card's layout changes); item 9 (fence holds `web/src/components/videos/`, where `PlayerDialog`/`PlayerHost` live, so AC 4's player case fits; Search's cards don't exist yet, S5 `todo`); item 10 (Depends on S97, S81 both `done`); red token exists (Primary Light `#FF5247`, VISUAL-DESIGN:145).
+9. **S130 AC 2 (cascade of S139 AC 2/3), item 3 and item 11: broken.** First spring morning: `view=default` now answers spring's empty table; with 0 MLB records it is `divisions: []`, and `StandingsPage.tsx:37` draws "No standings for this date." with no switch, so the fan can't reach the regular season. S130's note said both mornings answer a non-default view (stale). **Amended:** AC 2 draws S129's empty-spring frame with the switch and tests it; the note rewritten; mobile full-width note added.
+10. **S123 AC 1 / S125 AC 7, item 11: contradiction; item 12: Back sequence.** "Opening or closing the calendar never changes the URL" vs S125 AC 2 (picking a day navigates to `/games/<date>` and closes it). And `/games/2026-09-20` → › → `/games/2026-09-21` → open sheet → Back: `ScoreboardPage` stays mounted (`routes.tsx:83`), so `DateControl`'s open state survives and the sheet stays up over the previous day. **Amended:** closing means without choosing a day; choosing navigates as the arrows do; Back closes the sheet; S125 AC 7 tests that sequence. The Back reading stays marked as the agent's.
+11. **S141 AC 2 / S142 AC 3, item 4/11: dead links.** Input: S141 ratifies "Privacy policy → `/privacy`" with a new story sliced for it; S142 ships the footer first and the link lands on no route (`routes.tsx` has none). Same for "Change log → `/changelog`" if S142 runs before S134 (neither depends on the other; both design-gated). **Amended:** S141 AC 2 "No dead links" (each unbuilt page's story goes on S142's Depends on, or the page's own story adds its link); S142 AC 3 forbids a link to an unserved route and tests each BT link against `routes.tsx`. Also item 11: S141's Gap and notes (policies, "S142 waits for text") and S142's notes (builds the contact page; pages may split it), reuse check (text pages, year function) and `table_title` ("Site footer and its pages") contradicted the rewritten ACs; marked superseded or fixed. S142: if a copyright year is ratified, its mlbToday rule (removed from AC 1) is kept in a note for the intake. S141 AC 3 also rewrites VISUAL-DESIGN's `Quiet meta: … last fetched (D9)` line (VISUAL-DESIGN:292), which the fetched label's removal makes stale.
+12. **S132 AC 2, item 10-like (scope with no consumer).** `?after=` had one caller, S135 AC 2, which now makes no releases request (`grep after= docs/v3/backlog/stories/S13[3-5].md`: notes only). **Amended:** AC 2 says the route has no `after` query (checked in spec and client); AC 5 one client function; title, Gap, Impact, notes, cap assumption follow. Not easier for the sake of it: the owner's answer removed the only use (S132's own note deferred this to the review).
+13. **S135, item 11 and item 10.** Title and Impact still promised "the biggest addition" against AC 2; **Depends on** named S132 for `?after=`, which it no longer calls. **Amended:** title, Impact; Depends on now S131 (`currentRelease`, `compareReleaseVersions`, `parseReleaseVersion` used by ACs 1 and 3; S134 still depends on S132); `depends_on` rebuilt to S131, S134, S81. Stale notes about the server comparison and the 5-minute cache marked superseded. Held: item 13 (AC 3's storage cases unchanged), item 15 (own key, not the snooze key).
+14. **S133, item 11.** Impact ("one big addition"), the retired-version note ("the update notice keeps its link and its addition", "neither the addition (`?after=`)") and the turn cap's assumption ("no addition, one and more than one") contradicted AC 1's no-addition notice. **Amended** to match. Held: the gold header has a token to draw from (Accent `#F5AD1D`, VISUAL-DESIGN:135); the fourth kind is open with the owner.
+15. **S129.** Item 11: the mobile full-width bullet contradicts A7 and FEATURES' Standings row ("only as wide as it needs"). **Amended:** the amendment says it overrides A7 at mobile only and FEATURES records it at ratification (S129 fences FEATURES). Held: morning bullet matches the owner's words and S139 AC 2.
+16. **S139.** Items 3, 7, 11, 12 applied. AC 2 default and AC 3's three answers on 2027-02-19 are consistent with each other and with AC 1 (spring opens first from `springStartDate`); AC 4's budget holds (default that morning reads one table; `regularSeason` by name two); 2027-02-18 test added. Only the earlier review note at line 84 contradicted the new AC 3: marked superseded. AC 1's playoffs end is still with the owner.
+17. **S134.** Items 9, 11: `/changelog` route in `web/src/routes.tsx` (fenced `web/src/`); the gold header is "as S133 draws them". Nothing broken.
+18. **S131, S140, S107, S127.** Notes only; nothing contradicts their ACs (S131 AC 1's kinds wait on the fourth-kind answer; S140 AC 2's days on the owner).
+19. **S143, S136** (next 3): items 1–15 applied at `3ce55d3`; no code or note change since. Nothing new.
+
+**Check 3: prioritization**
+
+20. S144/S145 at 75 sit above S139/S140 (76), which spring 2027 (2027-02-19) makes time-bound. Argued against: S144 needs an owner session and S145 is gated on it, so the loop skips them until ratified and S139/S140 stay the next startable work after S143 and S136; the order costs the standings nothing. S132 is smaller now (finding 12). S142 may now wait on S134 (finding 11), which already sits above it (81 vs 84). S127 (89) and S144 both ask about Search's play link; S144's "where else" bullet names S127, so whichever is ratified first constrains the other; no reorder. Nothing obsolete or quietly done.
+21. **Current baseline:** no story `done` since `3ce55d3`; the As of line now also records this review's S132 re-scope and the no-dead-links rule.
+
+**Duplication sweep (ADR-025):** no story `done` since the last review and no code changed (`git diff 3ce55d3..HEAD` touches only `docs/`). In the stories: S145 keeps one kind-word table (`KIND_LABELS`) and one play word (note); S142's year, if any, is one function (note). None found.
+
+**Personal-data sweep (ADR-028):** S144/S145 add no store, field, browser key or log line; S141/S142 now draw only links (no contact form, so no inventory entry); S132 loses a query, adds nothing; S135's key is unchanged. Checked the notes of S141, S142, S144, S145, S132, S135. None found.
+
+**Questions for the owner (non-blocking):** (1) ADR-014's "Freshness is visible" row (ARCHITECTURE.md, `fetchedAt` / `windowMode` render per D9) and VISUAL-DESIGN's D9 principle predate "just get rid of the fetched label": amend ADR-014's row to match? (2) Still open from earlier: how long the playoffs choice and the World Series box stay after the Series (S139 AC 1, S140 AC 2); a fourth change log kind (S131).
+
+**Verdict: `amended`.** No owner question blocks the next story (S143).
+
+---
+
+## 2026-11-10 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-11T01:45:52Z` |
+| HEAD at review | `5acc927` (tree dirty) |
+| Trigger | FEATURES.md changed (2eaa555); S144 added; S145 added |
+| Stories `done` since last review | — (corrected 2026-11-11: this row named S144, S145, S143, S136 and S125, which were all still `todo`; found by Claude's review of PR #31) |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context subagent at HEAD `5acc927`. Scope: S144, S145 (added), FEATURES' rows changed by `2eaa555` (Standings, Update / change log UX, Calendar date picker, Site footer, Video play links, Installable app's user-visible line), the two items the 2026-11-10 (evening) backlog review queued, and the next 3 `todo` stories by priority (S143 at 73, S136 and S125 at 74).
+
+**1. Citation honesty**
+- **S144 / S145 → Feature: Video play links.** Holds. Both stories' Gap quotes the owner (*"Move hte play link to the 2nd line. Replace "Highlight" with "Play" in red. If there's no play, just keep "Highlight""*), and FEATURES' Video play links row records the same words and names S144 (design) and S145 (build). The row is about exactly this link, not a nearby theme.
+- **S143 → Feature: Modern membership.** Holds; the staging sign-in bullet was added and checked by the 2026-11-10 parity review (`8b8a1a0`), and S143's Source, Gap and Impact are unchanged since.
+- **S136, S125 → Feature: Calendar date picker.** Hold. The row quotes the favorite-team corner and *"the API for that needs to return the teams that played each day"* (S136) and the calendar itself, with the evening answers (year crossing, Esc, no URL or back stack on mobile) that S123/S125 now carry.
+- **Open questions:** no story's Source is `Open:` (grep of `docs/v3/backlog/stories/` for `**Source:** Open` is empty). No pillar-cited story's Gap, Impact or ACs changed since `8b8a1a0`.
+
+**2. Doc reflects reality: FEATURES edits (amended)**
+- **Standings row: mobile width.** The row quoted A7's *"it should only be as wide as it needs to be"* with no exception, while S129 AC 1 and S130 now draw and build the standings full width on mobile, from the owner's evening answer quoted in S129 (*"Make the standings full width on mobile at a minimum"*, recorded in `2eaa555`). The row now says so, in those words, and that A7's rule holds above mobile only (queued by the 2026-11-10 evening backlog review, `5acc927`).
+- **Update / change log UX row: no "what's new since".** The row kept the 2026-11-08 quote (*"via API data comparing versions"*) and said the addition was dropped, but not that the comparison went with it. S132 AC 2 now says the releases route takes no `after` query (`5acc927`). The row now says nothing asks the API what is new since a version, citing the owner's *"I would rather not show the headline."* and marking the link between the two as the agent's reading.
+- **Same row: dangling reading.** The retired-version sentence said the notice hides "neither the link nor an addition" and that this "rests on the "+N more" reading above", a sentence `2eaa555` removed. It now says the retired-version notice shows no link either, with the owner's quote unchanged, matching S133 AC 1 and S135 AC 2.
+- Calendar date picker, Site footer, Video play links and the Installable app line read consistently with S123, S125, S141, S142, S144, S145 and S135 as they stand.
+
+**Conflicts outside this review's write scope (for the owner)**
+- **ADR-014 / VISUAL-DESIGN D9 vs the Site footer row.** FEATURES' Site footer row records *"just get rid of the fetched label"* (every page). ARCHITECTURE.md:918 (ADR-014's debuggability table) still says **"Freshness is visible"** with `fetchedAt` / `windowMode` rendering per D9, and VISUAL-DESIGN D9 (line 44, "Freshness and source are readable"), its Meta row (line 227, "fetched-at") and quiet-meta line (line 292, "last fetched (D9)") still promise it. S141 AC 3 rewrites the VISUAL-DESIGN quiet-meta line, but neither review may edit an ADR or D9. The owner's answer settles the product side, so this does not block; asked of the owner. FEATURES principle 6 ("Honest about data") does not mention freshness, so FEATURES itself is consistent.
+- **Installable app line: "marked with their age".** It says pages viewed earlier stay readable offline "marked with their age". If that age is the "Fetched … ago" footer, the owner's "just get rid of the fetched label" removes it too; S142 AC 2 already leaves this to S141 ("kept if S141 keeps an age anywhere (the offline footer)"). Not edited; asked of the owner along with the ADR question.
+
+**3. For the next backlog review**
+- **S129 AC 1's width bullet** says FEATURES' Standings row "records the change in the owner's words in the same change set". This review recorded it now, so when `scripts/verify-S129.sh` is updated before S129 ships (rule 7) it must not require S129's own commits to add that quote to FEATURES (it is already there); the bullet's FEATURES clause can say it is done.
+- **Offline age:** S141's ratified list/frames should say whether an offline page keeps an age marker, so the Installable app line and S142 AC 2 agree (the owner's answer to the question above decides it).
+- No FEATURES item added by this review needs a new story.
+
+---
+
 ## 2026-11-11 — backlog review skipped
 
 | | |
@@ -18073,6 +18260,61 @@ Asked whether this needs a backlog review, the owner answered: "skip".
 | | |
 |---|---|
 | Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-11T22:20:37Z` |
+| HEAD at capture | `fbe0aab` (tree dirty) |
+| Change | `fbe0aab` — Backlog: answer Claude's review of PR #31 |
+
+**What changed, and the owner's answer**
+
+S129 AC 1 and S130 AC 2 were rewritten to answer Claude's review of pull request #31 (S129: FEATURES already holds the owner's quote; S130: a lost full stop). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
+
+---
+
+## 2026-11-11 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-11T22:48:11Z` |
+| HEAD at capture | `eb677a3` (tree dirty) |
+| Change | `eb677a3` — Backlog: answer Claude's review of PR #31 at cbc4cd5 |
+
+**What changed, and the owner's answer**
+
+S141 AC 2 was rewritten to answer Claude's review of pull request #31 (a link's destination "that exists" contradicted its own No dead links clause). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
+
+---
+
+## 2026-11-11 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-11T22:54:38Z` |
+| HEAD at capture | `a3202d0` (tree dirty) |
+| Change | `a3202d0` — Backlog: answer Claude's review of PR #31 at 4182295 |
+
+**What changed, and the owner's answer**
+
+S145 AC 2 and S132 AC 2 were rewritten to answer Claude's review of pull request #31 (S145: an existing meta-line test it said didn't exist; S132: a grep with no pattern). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
+
+---
+
+## 2026-11-11 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-11T22:58:28Z` |
+| HEAD at capture | `77965ad` (tree dirty) |
+| Change | `77965ad` — Backlog: S145 AC 2 names S97's play-link tests too |
+
+**What changed, and the owner's answer**
+
+S145 AC 2 was rewritten to answer Claude's review of pull request #31 (two S97 tests it breaks weren't named). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
+
+---
+
 | Captured (UTC) | `2026-11-11T22:44:06Z` |
 | HEAD at capture | `9704399` (tree dirty) |
 | Change | `9704399` — Deploy: decide a staging deploy from the commit staging serves |
@@ -18082,3 +18324,18 @@ Asked whether this needs a backlog review, the owner answered: "skip".
 Owner-directed change (2026-11-11: "Can we avoid deploying when the only change was docs?", then "yeah, I like your plan"): a docs-only push to `stage` no longer deploys staging, and a staging run deploys unless staging already serves its commit or a newer one (`bt-commit.txt`). It edits CLAUDE.md's release and push rules, LOOP.md, README, wrangler.jsonc's comment, the baseline frame's deploy line, and law P11's test. Commits 705a855, 9704399.
 
 Asked whether this needs a backlog review, the owner answered: "skip".
+
+---
+
+## 2026-11-11 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-11T23:50:41Z` |
+| HEAD at capture | `c2a7efc` (tree dirty) |
+| Change | `c2a7efc` — Backlog: answer Claude's review of PR #31 at 61d3307 |
+
+**What changed, and the owner's answer**
+
+S131 AC 1 was rewritten to answer Claude's review of pull request #31 (headline described as what the update notice shows, which the owner's evening answers removed). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."

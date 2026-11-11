@@ -12,12 +12,12 @@
 
 Assembled, in this order and around the stories, into BACKLOG.md.
 
-- [00 Baseball Theater v3 — Checkable backlog](<backlog/frame/00 Baseball Theater v3 — Checkable backlog.md>) — 112 KB
+- [00 Baseball Theater v3 — Checkable backlog](<backlog/frame/00 Baseball Theater v3 — Checkable backlog.md>) — 116 KB
   - `127–145` Verify-script contract
   - `146–159` Story status
-  - `160–494` Backlog reviews
-  - `495–514` Doc parity reviews
-  - `515–519` Goal command for multiple stories
+  - `160–508` Backlog reviews
+  - `509–528` Doc parity reviews
+  - `529–533` Goal command for multiple stories
   - Rules, by number:
     - `10–10` 1. Acceptance criteria map to commands, tests, or file invariants (exit codes / assertions).
     - `11–11` 2. Vague phrases (“works correctly”, “handles errors gracefully”) are forbidden until rewrit…
@@ -50,8 +50,8 @@ Assembled, in this order and around the stories, into BACKLOG.md.
     - `55–80` Later themes (not yet story-sliced)
 - [05 Gap map (doc → story)](<backlog/frame/05 Gap map (doc → story).md>) — 9 KB
   - `1–44` Gap map (doc → story)
-- [06 Baseline history](<backlog/frame/06 Baseline history.md>) — 43 KB
-  - `1–126` Baseline history
+- [06 Baseline history](<backlog/frame/06 Baseline history.md>) — 45 KB
+  - `1–128` Baseline history
 
 ## Product and architecture docs
 
@@ -377,19 +377,19 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `2167–2170` System Consistency
   - `2171–2174` Originality
   - `2175–2221` Small-Size Test
-- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 56 KB
+- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 59 KB
   - `12–19` North star
   - `20–34` Principles (product)
   - `35–46` Scope legend
   - `47–81` Carry / cut from v2 (working table)
     - `76–81` Dropped (summary)
-  - `82–258` New product themes
-    - `106–258` Theme detail
-  - `259–275` Build checklist (working — not a “feel” gate)
-  - `276–304` Patronage & access (product-level)
-    - `288–304` Tiers (carry from v2)
-  - `305–315` Success signals
-  - `316–323` Open product questions
+  - `82–259` New product themes
+    - `106–259` Theme detail
+  - `260–276` Build checklist (working — not a “feel” gate)
+  - `277–305` Patronage & access (product-level)
+    - `289–305` Tiers (carry from v2)
+  - `306–316` Success signals
+  - `317–324` Open product questions
 - [FIGMA-EXPLORATION.md — FIGMA-EXPLORATION.md](FIGMA-EXPLORATION.md) — 19 KB
   - `161–164` Verdict
   - `165–167` Fails
@@ -405,7 +405,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `47–432` Every grader, sorted
   - `433–449` Graders edited after their story shipped
   - `450–514` Re-verified at shipping commits
-- [LOOP.md — Loop-ready automation guide](LOOP.md) — 17 KB
+- [LOOP.md — Loop-ready automation guide](LOOP.md) — 19 KB
   - `5–19` Checklist status
   - `20–32` 1 — Baseline
   - `33–53` 2 — Verify
@@ -413,10 +413,10 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `58–67` 4 — Backlog
   - `68–75` 5 — Boundaries
   - `76–79` 6 — Pilot (do this next, watched)
-  - `80–133` 7 — Reviewer pass
-    - `113–133` Review-class checklist
-  - `134–143` 8 — Scale → loop
-  - `144–148` Habit
+  - `80–136` 7 — Reviewer pass
+    - `113–136` Review-class checklist
+  - `137–146` 8 — Scale → loop
+  - `147–151` Habit
 - [ORIGIN.md — Baseball Theater v3 — Origin](ORIGIN.md) — 4 KB
 - [SAVANT-DATA.md — Baseball Savant data](SAVANT-DATA.md) — 8 KB
   - `10–15` Terms of use
@@ -493,8 +493,11 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 
 | Priority | Story | Status | Depends on | Design |
 |---|---|---|---|---|
+| 73 | [S143](backlog/stories/S143.md) Mock sign-in on staging | `todo` | S116 | — |
 | 74 | [S136](backlog/stories/S136.md) Teams per day in the month counts | `todo` | S124 | — |
 | 74 | [S125](backlog/stories/S125.md) Calendar date picker | `todo` | S124, S136, S81 | S123 |
+| 75 | [S144](backlog/stories/S144.md) Design: play link on the meta line | `todo` | — | — |
+| 75 | [S145](backlog/stories/S145.md) Play link on the meta line | `todo` | S97, S81 | S144 |
 | 76 | [S139](backlog/stories/S139.md) Standings views in the API | `todo` | S128 | — |
 | 76 | [S140](backlog/stories/S140.md) World Series winner in standings | `todo` | S128 | — |
 | 77 | [S130](backlog/stories/S130.md) Standings views | `todo` | S128, S139, S140, S81 | S129 |
@@ -502,9 +505,9 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 | 77 | [S138](backlog/stories/S138.md) Standings date picker | `todo` | S125, S130, S81 | S137 |
 | 79 | [S132](backlog/stories/S132.md) Release notes API | `todo` | S131 | — |
 | 81 | [S134](backlog/stories/S134.md) Change log page | `todo` | S132, S81 | S133 |
-| 82 | [S135](backlog/stories/S135.md) Update notice and after-update pointer | `todo` | S132, S134, S81 | S133 |
+| 82 | [S135](backlog/stories/S135.md) Update notice and after-update pointer | `todo` | S131, S134, S81 | S133 |
 | 83 | [S141](backlog/stories/S141.md) Design: site footer | `todo` | — | — |
-| 84 | [S142](backlog/stories/S142.md) Site footer and its pages | `todo` | S81 | S141 |
+| 84 | [S142](backlog/stories/S142.md) Site footer of links | `todo` | S81 | S141 |
 | 89 | [S127](backlog/stories/S127.md) Design: play link in Search's player | `todo` | — | — |
 | 90 | [S5](backlog/stories/S5.md) Search page queries highlights fixture | `todo` | S70, S61, S68, S81 | S34, S56 |
 | 91 | [S72](backlog/stories/S72.md) Search chips: date / team / tag | `todo` | S5, S69, S81 | S34 |

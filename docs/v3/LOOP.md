@@ -89,7 +89,7 @@ Before any pull request opens or merges into `stage` (a story, a backlog change,
      - **correctness and edge cases:** checklist items 1, 2, 3, 4, 5, 12, 13 and 15
      - **contracts and every caller:** items 6, 7, 8, 14 and 16, plus every port, adapter, test double, script and caller of anything whose behavior changes
      - **tests and the grader:** item 12's edges are tested, and no test or grader check would pass on broken code
-     - **docs and records:** items 9, 10 and 11, plus comments, specs, `CHANGELOG.md`, the baseline and the ledger
+     - **docs and records:** items 9, 10, 11, 17, 18 and 19, plus comments, specs, `CHANGELOG.md`, the baseline and the ledger
 
      Each still reads every changed file and reports anything it sees outside its slice. The coordinator merges the reports and drops duplicates. A docs-only diff, or one under about 100 changed lines, may get one reviewer covering all four slices.
    - `/code-review` with the checklist can stand in for the reviewers.
@@ -130,6 +130,9 @@ What the pull request review (GitHub Copilot's until 2026-11-11, Claude's since)
 14. **Matching too broadly.** A glob, prefix or pattern matches only what it should (a `settings-*` override must not swallow frames another amendment draws).
 15. **Shared state between unrelated features.** One flag or key serving two features (one snooze hiding both the update notice and the retired-version notice) is split, or the coupling is intended and said.
 16. **What a tool actually sees.** A tool that changes the working tree before it runs (claude-code-action puts the base branch's `CLAUDE.md` and `.claude/` back on disk) or reads from a checkout other than the one meant (a pull request's merge ref, not its head): every step that reads those files reads the version it means to, and says how (`git show <sha>:<path>`). Caught by Claude's review of PR #29.
+17. **A structured value says what its label says.** A ledger row, table cell or field filled from an argument holds what its label names, checked against the source it summarizes (a "Stories `done` since last review" row given the review's scope listed `todo` stories as done). Caught by Claude's review of PR #31.
+18. **Work the same change set already did isn't still queued or still contradicted.** No later AC, note, Impact, turn cap or frame bullet asks for, schedules, or still describes as true what the change set itself made or settled (wording fixed in FEATURES left in a story's Impact; a turn cap still justified by work an AC dropped) (an AC still requiring a story to add a FEATURES quote the parity review had added; a frame bullet sending finished FEATURES edits to the next review), and no sentence says both that a story owns a fix and that none does. Caught by Claude's review of PR #31.
+19. **Splices keep their sentence boundaries.** Text inserted into an AC or rule still reads as the sentences it was (a lost full stop ran an AC's two requirements into one). Caught by Claude's review of PR #31.
 
 ## 8 — Scale → loop
 
