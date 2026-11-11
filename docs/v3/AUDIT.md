@@ -18197,3 +18197,41 @@ Fresh-context review at `2eaa555`, triggered by the owner's evening answers of 2
 **Questions for the owner (non-blocking):** (1) ADR-014's "Freshness is visible" row (ARCHITECTURE.md, `fetchedAt` / `windowMode` render per D9) and VISUAL-DESIGN's D9 principle predate "just get rid of the fetched label": amend ADR-014's row to match? (2) Still open from earlier: how long the playoffs choice and the World Series box stay after the Series (S139 AC 1, S140 AC 2); a fourth change log kind (S131).
 
 **Verdict: `amended`.** No owner question blocks the next story (S143).
+
+---
+
+## 2026-11-10 — doc parity review (`amended`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-11T01:45:52Z` |
+| HEAD at review | `5acc927` (tree dirty) |
+| Trigger | FEATURES.md changed (2eaa555); S144 added; S145 added |
+| Stories `done` since last review | S144, S145, S143, S136, S125 |
+| Verdict | `amended` |
+
+**Findings / amendments**
+
+Fresh-context subagent at HEAD `5acc927`. Scope: S144, S145 (added), FEATURES' rows changed by `2eaa555` (Standings, Update / change log UX, Calendar date picker, Site footer, Video play links, Installable app's user-visible line), the two items the 2026-11-10 (evening) backlog review queued, and the next 3 `todo` stories by priority (S143 at 73, S136 and S125 at 74).
+
+**1. Citation honesty**
+- **S144 / S145 → Feature: Video play links.** Holds. Both stories' Gap quotes the owner (*"Move hte play link to the 2nd line. Replace "Highlight" with "Play" in red. If there's no play, just keep "Highlight""*), and FEATURES' Video play links row records the same words and names S144 (design) and S145 (build). The row is about exactly this link, not a nearby theme.
+- **S143 → Feature: Modern membership.** Holds; the staging sign-in bullet was added and checked by the 2026-11-10 parity review (`8b8a1a0`), and S143's Source, Gap and Impact are unchanged since.
+- **S136, S125 → Feature: Calendar date picker.** Hold. The row quotes the favorite-team corner and *"the API for that needs to return the teams that played each day"* (S136) and the calendar itself, with the evening answers (year crossing, Esc, no URL or back stack on mobile) that S123/S125 now carry.
+- **Open questions:** no story's Source is `Open:` (grep of `docs/v3/backlog/stories/` for `**Source:** Open` is empty). No pillar-cited story's Gap, Impact or ACs changed since `8b8a1a0`.
+
+**2. Doc reflects reality: FEATURES edits (amended)**
+- **Standings row: mobile width.** The row quoted A7's *"it should only be as wide as it needs to be"* with no exception, while S129 AC 1 and S130 now draw and build the standings full width on mobile, from the owner's evening answer quoted in S129 (*"Make the standings full width on mobile at a minimum"*, recorded in `2eaa555`). The row now says so, in those words, and that A7's rule holds above mobile only (queued by the 2026-11-10 evening backlog review, `5acc927`).
+- **Update / change log UX row: no "what's new since".** The row kept the 2026-11-08 quote (*"via API data comparing versions"*) and said the addition was dropped, but not that the comparison went with it. S132 AC 2 now says the releases route takes no `after` query (`5acc927`). The row now says nothing asks the API what is new since a version, citing the owner's *"I would rather not show the headline."* and marking the link between the two as the agent's reading.
+- **Same row: dangling reading.** The retired-version sentence said the notice hides "neither the link nor an addition" and that this "rests on the "+N more" reading above", a sentence `2eaa555` removed. It now says the retired-version notice shows no link either, with the owner's quote unchanged, matching S133 AC 1 and S135 AC 2.
+- Calendar date picker, Site footer, Video play links and the Installable app line read consistently with S123, S125, S141, S142, S144, S145 and S135 as they stand.
+
+**Conflicts outside this review's write scope (for the owner)**
+- **ADR-014 / VISUAL-DESIGN D9 vs the Site footer row.** FEATURES' Site footer row records *"just get rid of the fetched label"* (every page). ARCHITECTURE.md:918 (ADR-014's debuggability table) still says **"Freshness is visible"** with `fetchedAt` / `windowMode` rendering per D9, and VISUAL-DESIGN D9 (line 44, "Freshness and source are readable"), its Meta row (line 227, "fetched-at") and quiet-meta line (line 292, "last fetched (D9)") still promise it. S141 AC 3 rewrites the VISUAL-DESIGN quiet-meta line, but neither review may edit an ADR or D9. The owner's answer settles the product side, so this does not block; asked of the owner. FEATURES principle 6 ("Honest about data") does not mention freshness, so FEATURES itself is consistent.
+- **Installable app line: "marked with their age".** It says pages viewed earlier stay readable offline "marked with their age". If that age is the "Fetched … ago" footer, the owner's "just get rid of the fetched label" removes it too; S142 AC 2 already leaves this to S141 ("kept if S141 keeps an age anywhere (the offline footer)"). Not edited; asked of the owner along with the ADR question.
+
+**3. For the next backlog review**
+- **S129 AC 1's width bullet** says FEATURES' Standings row "records the change in the owner's words in the same change set". This review recorded it now, so when `scripts/verify-S129.sh` is updated before S129 ships (rule 7) it must not require S129's own commits to add that quote to FEATURES (it is already there); the bullet's FEATURES clause can say it is done.
+- **Offline age:** S141's ratified list/frames should say whether an offline page keeps an age marker, so the Installable app line and S142 AC 2 agree (the owner's answer to the question above decides it).
+- No FEATURES item added by this review needs a new story.
