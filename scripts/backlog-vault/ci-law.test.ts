@@ -61,6 +61,11 @@ describe("CI runs pnpm verify (law P11)", () =>
 		// 2026-11-11: "Can we avoid deploying when the only change was docs?").
 		expect(staging).toContain("needs.changes.outputs.code == 'true' && needs.verify.result == 'success'");
 		expect(staging).not.toContain("needs.verify.result == 'skipped'");
+		// Whether to deploy is decided from the commit staging serves, never from what else is on
+		// stage, so a newer run that fails can't strand an older commit that passed.
+		expect(staging).toContain('echo "${{ github.sha }}" >web/dist/bt-commit.txt');
+		expect(staging).toContain('git merge-base --is-ancestor "${{ github.sha }}" "$served"');
+		expect(staging).not.toContain("origin/stage)");
 		expect(staging).toContain("!cancelled()");
 		expect(staging).not.toMatch(/always\(\)/);
 	});

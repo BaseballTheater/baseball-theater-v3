@@ -225,51 +225,63 @@ jobs:
               with:
                   fetch-depth: 0
 
-            # The deploy-staging group queues runs but doesn't keep them in push order, so an older run
-            # could deploy over a newer one, and a docs-only push no longer redeploys the head to fix it.
-            # So a run whose commit is already followed on stage by a newer code commit deploys nothing:
-            # that commit's own run deploys it (or, if it fails, the next passing push still sees its
-            # code, since its base is the last passing run). Docs-only commits after this one don't count.
-            - name: Is newer code already on stage?
-              id: newer
+            # The deploy-staging group runs one deploy at a time but doesn't keep push order, and a
+            # docs-only push no longer redeploys the head to heal an older run landing last. So each run
+            # reads the commit staging serves (bt-commit.txt, written into the build below) and deploys
+            # unless staging already serves this commit or one that contains it. Deciding from what is
+            # served, not from what is on stage, means a newer run that fails or is cancelled never
+            # strands an older commit that passed. A missing or unreadable file (the first deploy, a
+            # by-hand rollback to a build without it) deploys.
+            - name: Does staging already serve this commit or a newer one?
+              id: served
               run: |
                   git fetch --no-tags origin stage
-                  scripts/ci-changes.sh push "${{ github.sha }}" origin/stage
+                  served="$(curl -sf "https://stage.baseball.theater/bt-commit.txt?run=${{ github.run_id }}" || true)"
+                  if [[ "$served" =~ ^[0-9a-f]{40}$ ]] && git cat-file -e "${served}^{commit}" 2>/dev/null &&
+                      git merge-base --is-ancestor "${{ github.sha }}" "$served"; then
+                      echo "staging serves $served, which already contains ${{ github.sha }}: nothing to deploy"
+                      echo "deploy=false" >>"$GITHUB_OUTPUT"
+                  else
+                      echo "deploy=true" >>"$GITHUB_OUTPUT"
+                  fi
 
             - uses: pnpm/action-setup@v4
-              if: steps.newer.outputs.code == 'false'
+              if: steps.served.outputs.deploy == 'true'
               with:
                   version: 9.15.0
 
             - uses: actions/setup-node@v4
-              if: steps.newer.outputs.code == 'false'
+              if: steps.served.outputs.deploy == 'true'
               with:
                   node-version-file: ".nvmrc"
                   cache: pnpm
 
             - name: Install
-              if: steps.newer.outputs.code == 'false'
+              if: steps.served.outputs.deploy == 'true'
               run: pnpm install --frozen-lockfile
 
+            # bt-commit.txt is how the next run learns what staging serves (see above).
             - name: Build the web app
-              if: steps.newer.outputs.code == 'false'
-              run: pnpm --filter @bt/web run build
+              if: steps.served.outputs.deploy == 'true'
+              run: |
+                  pnpm --filter @bt/web run build
+                  echo "${{ github.sha }}" >web/dist/bt-commit.txt
 
             - name: Bootstrap (schema-only staging branch, bt-staging, Worker config and secrets)
-              if: steps.newer.outputs.code == 'false'
+              if: steps.served.outputs.deploy == 'true'
               id: bootstrap
               run: pnpm run deploy:bootstrap staging
 
             - name: Migrate the staging database
-              if: steps.newer.outputs.code == 'false'
+              if: steps.served.outputs.deploy == 'true'
               run: pnpm db:migrate
 
             - name: Re-apply deletions
-              if: steps.newer.outputs.code == 'false'
+              if: steps.served.outputs.deploy == 'true'
               run: pnpm db:reapply-deletions
 
             - name: Deploy staging
-              if: steps.newer.outputs.code == 'false'
+              if: steps.served.outputs.deploy == 'true'
               run: pnpm --filter @bt/functions exec wrangler deploy --config "${{ steps.bootstrap.outputs.config }}" --env staging --secrets-file "${{ steps.bootstrap.outputs.secrets_file }}"
 
     # next.baseball.theater (until the owner's cutover, S119), when the owner publishes a GitHub Release,
