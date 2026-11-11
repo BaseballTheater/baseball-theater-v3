@@ -87,7 +87,7 @@ Before any pull request opens or merges into `stage` (a story, a backlog change,
 2. Run a **fresh-context pre-PR review** (no prior loop transcript) on the branch's whole diff, **every time**, for every pull request (a story, a backlog change, a fix, a rule change): the goal is that Claude's review finds nothing (owner, 2026-11-07, of Copilot's review, which Claude's replaced on 2026-11-11: "Our goal should be zero Copilot discoveries for each pull request"). The reviewer reads every changed file in full, applies the [review-class checklist](#review-class-checklist) below to each change (for a backlog change, to every acceptance criterion it adds or rewrites), and reports each finding with the **exact input or sequence that breaks it**, as Claude's review does. "Looks fine" without the checklist items it checked is not a review.
    - **Parallel reviewers, one per slice** (owner, 2026-11-08, asked whether reviews could be "conducted by multiple subagents in tandem, orchestrated by the main agent, rather than multiple passes": "Yes, make that change"). The coordinator starts these fresh-context `general-purpose` subagents at once, each given this section, the branch's own diff (`git fetch origin`, then `git diff <base>...HEAD`, where `<base>` is the branch it was cut from: `origin/stage`, or for a stacked `story/S<N>` the earlier story's branch) and one slice of the checklist to own:
      - **correctness and edge cases:** checklist items 1, 2, 3, 4, 5, 12, 13 and 15
-     - **contracts and every caller:** items 6, 7, 8 and 14, plus every port, adapter, test double, script and caller of anything whose behavior changes
+     - **contracts and every caller:** items 6, 7, 8, 14 and 16, plus every port, adapter, test double, script and caller of anything whose behavior changes
      - **tests and the grader:** item 12's edges are tested, and no test or grader check would pass on broken code
      - **docs and records:** items 9, 10 and 11, plus comments, specs, `CHANGELOG.md`, the baseline and the ledger
 
@@ -129,6 +129,7 @@ What the pull request review (GitHub Copilot's until 2026-11-11, Claude's since)
 13. **Untrusted stored values.** Browser storage can throw (blocked site data, private modes) and can hold stale or out-of-range values (a clock corrected backwards): keep an in-memory fallback, and bound what is read back.
 14. **Matching too broadly.** A glob, prefix or pattern matches only what it should (a `settings-*` override must not swallow frames another amendment draws).
 15. **Shared state between unrelated features.** One flag or key serving two features (one snooze hiding both the update notice and the retired-version notice) is split, or the coupling is intended and said.
+16. **What a tool actually sees.** A tool that changes the working tree before it runs (claude-code-action puts the base branch's `CLAUDE.md` and `.claude/` back on disk) or reads from a checkout other than the one meant (a pull request's merge ref, not its head): every step that reads those files reads the version it means to, and says how (`git show <sha>:<path>`). Caught by Claude's review of PR #29.
 
 ## 8 — Scale → loop
 
