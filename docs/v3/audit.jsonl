@@ -327,3 +327,4 @@
 {"line":18303,"date":"2026-11-11","kind":"skip","review":"backlog","heading":"## 2026-11-11 — backlog review skipped"}
 {"line":18330,"date":"2026-11-11","kind":"skip","review":"backlog","heading":"## 2026-11-11 — backlog review skipped"}
 {"line":18345,"date":"2026-11-11","kind":"skip","review":"backlog","heading":"## 2026-11-11 — backlog review skipped"}
+{"line":18362,"date":"2026-11-11","kind":"review","review":"parity","verdict":"continue","heading":"## 2026-11-11 — doc parity review (`continue`)"}
