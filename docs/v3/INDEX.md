@@ -523,6 +523,7 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 | 115 | [S90](backlog/stories/S90.md) Next-pitch model (train + evaluate) | `todo` | S63 | — |
 | 116 | [S92](backlog/stories/S92.md) Design: next-pitch odds (owner-ratified) | `todo` | S64 | — |
 | 117 | [S91](backlog/stories/S91.md) Next-pitch odds in Live (paid) | `todo` | S90, S64 | S92 |
+| 118 | [S146](backlog/stories/S146.md) Skip deploys with unchanged build inputs | `todo` | — | — |
 | 72 | [S123](backlog/stories/S123.md) Design: calendar date picker | `blocked` | — | — |
 | 76 | [S129](backlog/stories/S129.md) Design: Standings views | `blocked` | — | — |
 | 78 | [S131](backlog/stories/S131.md) Approved release notes | `blocked` | — | — |
