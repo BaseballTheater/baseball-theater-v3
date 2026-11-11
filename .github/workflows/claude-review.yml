@@ -1,0 +1,102 @@
+name: Claude review
+
+# Claude's pull request review (owner, 2026-11-11: "Yes, let's replace the entire copilot review system
+# with the claude one"). It replaces GitHub Copilot's review and works the same way: it runs when a pull
+# request opens and again on each push, reads the diff against docs/v3/LOOP.md §7's review-class checklist,
+# and posts each real finding as an inline comment the coordinator must fix or answer and resolve before
+# the pull request merges (CLAUDE.md → "Claude's review is handled before a pull request merges"; the
+# `stage` ruleset's "Require conversation resolution before merging" backs it up). The run on the head
+# sha finishing, and its summary review naming that sha, is how the coordinator knows the review of the
+# newest commits has posted. The summary is a pull request review (event COMMENT), not an issue comment:
+# deploy.yml's preview step edits the bot's last issue comment (`gh pr comment --edit-last`), and both
+# workflows post as github-actions[bot], so a summary posted as a comment would be overwritten.
+#
+# workflow_dispatch reviews one pull request by number, merged or not: it is how a pull request
+# labelled `copilot-review-owed` (merged while Copilot had no quota) gets its review after the fact.
+#
+# Auth: the ANTHROPIC_API_KEY repository secret, or CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`) to
+# bill a Claude subscription instead; set one of them. Comments post as github-actions[bot] through
+# this run's own token, so no GitHub App is needed.
+on:
+    pull_request:
+        types: [opened, synchronize, reopened, ready_for_review]
+    workflow_dispatch:
+        inputs:
+            pr:
+                description: "Pull request number to review (merged or open)"
+                required: true
+                type: number
+
+concurrency:
+    group: claude-review-${{ github.event.pull_request.number || inputs.pr }}
+    cancel-in-progress: true
+
+jobs:
+    claude-review:
+        # A draft isn't reviewed until it's marked ready (ready_for_review then triggers it).
+        if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
+        runs-on: ubuntu-latest
+        timeout-minutes: 45
+        permissions:
+            contents: read
+            pull-requests: write
+            issues: write
+            id-token: write
+        env:
+            PR: ${{ github.event.pull_request.number || inputs.pr }}
+        steps:
+            # The pull request's head commit (not the refs/pull/N/merge commit a pull_request event checks
+            # out by default), with full history so the reviewer can read every changed file in full and
+            # diff against the base. A dispatched review checks out the reviewed pull request's own head,
+            # not this workflow's branch.
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  ref: ${{ github.event.pull_request.head.sha || format('refs/pull/{0}/head', inputs.pr) }}
+
+            - uses: anthropics/claude-code-action@v1
+              with:
+                  anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+                  claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+                  github_token: ${{ github.token }}
+                  claude_args: >-
+                      --model claude-opus-5-5
+                      --max-turns 80
+                      --allowedTools "mcp__github_inline_comment__create_inline_comment,Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*)"
+                  prompt: |
+                      REPO: ${{ github.repository }}
+                      PULL REQUEST: #${{ env.PR }}
+                      HEAD SHA: ${{ github.event.pull_request.head.sha || 'not given (a dispatched run)' }}
+                      (the commit this run checked out; for a dispatched run take it from
+                      `gh pr view ${{ env.PR }} --json headRefOid --jq .headRefOid`; never `git rev-parse HEAD`)
+
+                      You are this repository's pull request reviewer. Your job is the one GitHub Copilot's
+                      review did before you: find the real problems our own pre-PR review missed. The goal
+                      the owner set is zero discoveries per pull request, so every finding you post is
+                      treated as a miss and its class is added to the checklist; post only what is real.
+
+                      1. Read CLAUDE.md, then docs/v3/LOOP.md §7 and its "Review-class checklist". The
+                         checklist is your method: ask each item of every change, and answer it with the
+                         input that breaks the change or why none can.
+                      2. Read the pull request (`gh pr view ${{ env.PR }}`) and its whole diff
+                         (`gh pr diff ${{ env.PR }}`). Read every changed file in full, and every caller of
+                         anything whose behavior changes.
+                      3. Read the review comments already on it
+                         (`gh api repos/${{ github.repository }}/pulls/${{ env.PR }}/comments --paginate`).
+                         Do not repeat a finding already raised, whether it was fixed, answered by a reply,
+                         or resolved. Comment again only if the newest commits reintroduce it or the reply
+                         is wrong, and then say why.
+                      4. For each real finding, post one inline comment on the line it concerns with
+                         mcp__github_inline_comment__create_inline_comment (if that tool can't post to this
+                         pull request, because it is merged, use
+                         `gh api repos/${{ github.repository }}/pulls/${{ env.PR }}/comments` with
+                         commit_id = its head sha, path, line and side=RIGHT). Each comment names the
+                         problem, the exact input or sequence that breaks it, and the fix. No praise, no
+                         style nits ESLint or Prettier already own, no speculation without a concrete input.
+                      5. Finish with one summary review, never an issue comment (another workflow edits
+                         the bot's last issue comment):
+                         `gh api repos/${{ github.repository }}/pulls/${{ env.PR }}/reviews -f event=COMMENT -f commit_id=<HEAD SHA> -f body=...`
+                         Its body starts "Claude review of <HEAD SHA>:" and says how many findings you
+                         posted, or "no findings" and which checklist items you checked.
+
+                      Do not edit files, push, approve, request changes, merge, resolve threads, or post issue comments.

@@ -176,7 +176,7 @@ of PRs basically"; asked who merges a story's pull request and whether `main` st
 automatically 2. Mirror"):
 
 - Every story arrives as its own pull request from a `story/S<N>` branch into `stage`. The agent
-  opens it, handles Copilot's review, then turns on auto-merge, so it merges once `ci-passed` is green; each merge deploys
+  opens it, handles Claude's review, then turns on auto-merge, so it merges once `ci-passed` is green; each merge deploys
   staging, `stage.baseball.theater`. Every pull request that changes code also gets a preview (below); a docs-only change runs only the docs checks, and a docs-only merge deploys staging without re-running `pnpm verify`.
 - Production, at `next.baseball.theater` until the owner's cutover (below), deploys only when a
   GitHub Release is published (by the coordinator, on the owner's word), and deploys exactly that release's tag, with no approval wait
