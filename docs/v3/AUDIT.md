@@ -18048,3 +18048,20 @@ Fresh-context review at `29e8c9e`, after the owner's 2026-11-10 answers (`2e6ae4
 **What changed, and the owner's answer**
 
 Acceptance criteria of S123, S130, S133, S135, S139, S140, S141 and S142 were rewritten to answer the pre-PR review of this branch (LOOP.md section 7). Owner, 2026-11-07, asked whether such a rewrite needs a backlog review: "This shouldn't even trigger a question. Always skip."
+
+---
+
+## 2026-11-11 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-11T21:28:07Z` |
+| HEAD at capture | `b49e528` (tree dirty) |
+| Change | `b49e528` — Claude review: run stage's copy, and let the reviewer only read |
+
+**What changed, and the owner's answer**
+
+Rule change (owner-directed, 2026-11-11): GitHub Copilot's pull request review is replaced by Claude's review (`.github/workflows/claude-review.yml`, running `stage`'s copy on `pull_request_target`, read-only reviewer, findings posted by a trusted step). CLAUDE.md's Copilot rules, the 2026-12-01 quota exception and LOOP.md §7 now name Claude's review; the checklist is renamed "Review-class checklist" and gains item 16; `copilot-review-owed` pull requests are cleared by dispatching Claude's review; `scripts/verify-S131.sh`'s end anchor no longer names the Copilot bullet (byte-identical extraction). Commits 0a5982e, 1a0ce91, b49e528.
+
+Asked whether this needs a backlog review, the owner answered: "skip".
