@@ -18065,3 +18065,20 @@ Acceptance criteria of S123, S130, S133, S135, S139, S140, S141 and S142 were re
 Rule change (owner-directed, 2026-11-11): GitHub Copilot's pull request review is replaced by Claude's review (`.github/workflows/claude-review.yml`, running `stage`'s copy on `pull_request_target`, read-only reviewer, findings posted by a trusted step). CLAUDE.md's Copilot rules, the 2026-12-01 quota exception and LOOP.md §7 now name Claude's review; the checklist is renamed "Review-class checklist" and gains item 16; `copilot-review-owed` pull requests are cleared by dispatching Claude's review; `scripts/verify-S131.sh`'s end anchor no longer names the Copilot bullet (byte-identical extraction). Commits 0a5982e, 1a0ce91, b49e528.
 
 Asked whether this needs a backlog review, the owner answered: "skip".
+
+---
+
+## 2026-11-11 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-11T22:44:06Z` |
+| HEAD at capture | `9704399` (tree dirty) |
+| Change | `9704399` — Deploy: decide a staging deploy from the commit staging serves |
+
+**What changed, and the owner's answer**
+
+Owner-directed change (2026-11-11: "Can we avoid deploying when the only change was docs?", then "yeah, I like your plan"): a docs-only push to `stage` no longer deploys staging, and a staging run deploys unless staging already serves its commit or a newer one (`bt-commit.txt`). It edits CLAUDE.md's release and push rules, LOOP.md, README, wrangler.jsonc's comment, the baseline frame's deploy line, and law P11's test. Commits 705a855, 9704399.
+
+Asked whether this needs a backlog review, the owner answered: "skip".
