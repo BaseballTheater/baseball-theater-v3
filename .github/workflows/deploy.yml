@@ -231,13 +231,12 @@ jobs:
             # unless staging already serves this commit or one that contains it. Deciding from what is
             # served, not from what is on stage, means a newer run that fails or is cancelled never
             # strands an older commit that passed.
-            # - Staging answers 200 with a sha: compare. Read twice, a few seconds apart, so a deploy
-            #   still spreading to the edge is seen; either read showing a commit containing this one
-            #   skips.
-            # - Staging answers 200 without a sha (the SPA's index.html for a missing file: the first
-            #   deploy, or a rollback to a build without the marker): deploy.
-            # - Staging can't be read (a timeout, a 5xx, DNS) even after retries: fail the step, so the
-            #   run is re-run rather than deploying an older commit over a newer one blind.
+            # - A 200 with a sha: compare. Read twice, a few seconds apart, so a deploy still spreading to
+            #   the edge is seen; either read showing a commit containing this one skips.
+            # - A 404, or a 200 without a sha (the SPA's index.html for a missing file): no marker yet
+            #   (the first deploy, or a rollback to a build without it), so deploy.
+            # - Anything else (no connection, a 5xx, a 408 or 429) after curl's retries: fail the step,
+            #   so the run is re-run rather than deploying an older commit over a newer one blind.
             - name: Does staging already serve this commit or a newer one?
               id: served
               run: |
@@ -246,9 +245,14 @@ jobs:
                   contains=false
                   for attempt in 1 2; do
                       [ "$attempt" = 2 ] && sleep 10
-                      served="$(curl -fsS --retry 5 --retry-all-errors --max-time 10 \
+                      status="$(curl -sS --retry 5 --max-time 10 -o "$RUNNER_TEMP/served" -w '%{http_code}' \
                           "https://stage.baseball.theater/bt-commit.txt?run=${{ github.run_id }}-$attempt")"
-                      if [[ "$served" =~ ^[0-9a-f]{40}$ ]] && git cat-file -e "${served}^{commit}" 2>/dev/null &&
+                      case "$status" in
+                          200 | 404) ;;
+                          *) echo "staging answered $status for bt-commit.txt; re-run this job" >&2; exit 1 ;;
+                      esac
+                      served="$(head -c 100 "$RUNNER_TEMP/served" | tr -d '[:space:]')"
+                      if [ "$status" = 200 ] && [[ "$served" =~ ^[0-9a-f]{40}$ ]] && git cat-file -e "${served}^{commit}" 2>/dev/null &&
                           git merge-base --is-ancestor "${{ github.sha }}" "$served"; then
                           contains=true
                           echo "staging serves $served, which already contains ${{ github.sha }}"

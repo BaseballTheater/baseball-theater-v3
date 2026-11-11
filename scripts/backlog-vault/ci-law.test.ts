@@ -66,9 +66,11 @@ describe("CI runs pnpm verify (law P11)", () =>
 		expect(staging).toContain('echo "${{ github.sha }}" >web/dist/bt-commit.txt');
 		expect(staging).toContain('git merge-base --is-ancestor "${{ github.sha }}" "$served"');
 		expect(staging).not.toContain("origin/stage)");
-		// An unreadable staging fails the step (no `|| true` swallowing it) after retries, and the
-		// marker is read twice so a deploy still spreading to the edge is seen.
-		expect(staging).toContain("curl -fsS --retry 5 --retry-all-errors --max-time 10");
+		// A 404 or a 200 without a sha (no marker yet) deploys; any other answer fails the step after
+		// curl's retries (no `|| true` swallowing it); the marker is read twice so a deploy still
+		// spreading to the edge is seen.
+		expect(staging).toContain("curl -sS --retry 5 --max-time 10");
+		expect(staging).toContain("200 | 404) ;;");
 		expect(staging).not.toMatch(/bt-commit\.txt[^\n]*\|\| true/);
 		expect(staging).toContain("for attempt in 1 2; do");
 		expect(staging).toContain("!cancelled()");
