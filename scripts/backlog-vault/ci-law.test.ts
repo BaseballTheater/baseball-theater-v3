@@ -57,7 +57,10 @@ describe("CI runs pnpm verify (law P11)", () =>
 		const deploy = readFileSync(DEPLOY_YML, "utf8");
 		expect(deploy).toMatch(/= release \]; then\n\s+echo "code=true" >> "\$GITHUB_OUTPUT"/);
 		const staging = deploy.slice(deploy.indexOf("\n    staging:\n"), deploy.indexOf("\n    production:\n"));
-		expect(staging).toContain("needs.verify.result == 'success' || (needs.verify.result == 'skipped' && needs.changes.outputs.code == 'false')");
+		// Staging deploys only code that verify passed; a docs-only push deploys nothing (owner,
+		// 2026-11-11: "Can we avoid deploying when the only change was docs?").
+		expect(staging).toContain("needs.changes.outputs.code == 'true' && needs.verify.result == 'success'");
+		expect(staging).not.toContain("needs.verify.result == 'skipped'");
 		expect(staging).toContain("!cancelled()");
 		expect(staging).not.toMatch(/always\(\)/);
 	});

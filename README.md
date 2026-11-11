@@ -177,7 +177,7 @@ automatically 2. Mirror"):
 
 - Every story arrives as its own pull request from a `story/S<N>` branch into `stage`. The agent
   opens it, handles Claude's review, then turns on auto-merge, so it merges once `ci-passed` is green; each merge deploys
-  staging, `stage.baseball.theater`. Every pull request that changes code also gets a preview (below); a docs-only change runs only the docs checks, and a docs-only merge deploys staging without re-running `pnpm verify`.
+  staging, `stage.baseball.theater`. Every pull request that changes code also gets a preview (below); a docs-only change runs only the docs checks, and a docs-only merge doesn't deploy staging at all.
 - Production, at `next.baseball.theater` until the owner's cutover (below), deploys only when a
   GitHub Release is published (by the coordinator, on the owner's word), and deploys exactly that release's tag, with no approval wait
   (S118). A push to `main` deploys nothing.
@@ -193,7 +193,7 @@ automatically 2. Mirror"):
   Hyperdrive config, so a pull request that adds a migration migrates staging before it merges: keep
   migrations additive, so staging still serves `stage` meanwhile. Previews run no cron (they read MLB
   on request only). Closing the pull request deletes its Worker.
-- **Staging.** Every push to `stage` deploys `stage.baseball.theater` on the Neon `staging` branch.
+- **Staging.** Every push to `stage` that changes code deploys `stage.baseball.theater` (a docs-only push deploys nothing) on the Neon `staging` branch.
   The branch is created schema-only from production the first time (production's tables, none of its
   rows) and filled only by `pnpm db:migrate`, so it never holds a fan's data. Copying production's
   baseball data into it is a separate step the owner runs by hand (S117, **Copy baseball data**
