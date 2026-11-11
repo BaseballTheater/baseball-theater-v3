@@ -41,7 +41,18 @@
 			"Bash(git push *:main*)",
 			"Bash(git push *:stage*)",
 			"Bash(git push * main)",
-			"Bash(git push * stage)"
+			"Bash(git push * stage)",
+			"Bash(git push * main *)",
+			"Bash(git push * stage *)",
+			"Bash(git push *-fu*)",
+			"Bash(git push *-uf*)",
+			"Bash(git push *--mirror*)",
+			"Bash(git push *--all*)",
+			"Bash(git push *refs/heads/main*)",
+			"Bash(git push *refs/heads/stage*)",
+			"Bash(gh pr edit *-B=*)",
+			"Bash(gh pr create *-B=main *)",
+			"Bash(gh pr create *-B=main)"
 		],
 		"ask": [
 			"Bash(neonctl *)",
