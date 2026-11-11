@@ -18113,7 +18113,7 @@ S133 / S135 (parity queue, items 11): **amended** wording only — the retired-v
 | Captured (UTC) | `2026-11-10T22:26:54Z` |
 | HEAD at review | `5c61a56` (tree dirty) |
 | Trigger | docs/v3/FEATURES.md changed; S143 added |
-| Stories `done` since last review | S143, S125, S136, S139 |
+| Stories `done` since last review | — (corrected 2026-11-11: this row named S143, S125, S136 and S139, which were all still `todo`; found by Claude's review of PR #31) |
 | Verdict | `amended` |
 
 **Findings / amendments**
@@ -18208,7 +18208,7 @@ Fresh-context review at `2eaa555`, triggered by the owner's evening answers of 2
 | Captured (UTC) | `2026-11-11T01:45:52Z` |
 | HEAD at review | `5acc927` (tree dirty) |
 | Trigger | FEATURES.md changed (2eaa555); S144 added; S145 added |
-| Stories `done` since last review | S144, S145, S143, S136, S125 |
+| Stories `done` since last review | — (corrected 2026-11-11: this row named S144, S145, S143, S136 and S125, which were all still `todo`; found by Claude's review of PR #31) |
 | Verdict | `amended` |
 
 **Findings / amendments**
