@@ -8,7 +8,7 @@ alwaysApply: true
 ## Never do without an explicit user request in this turn
 
 - `git push`, force push
-- `gh pr create` / `gh pr merge` other than a story's or change's own pull request into `stage` and its auto-merge, as CLAUDE.md's pull request rules describe (owner, 2026-11-11, removed the prompt for those); never a pull request into `main`, never `--admin`
+- `gh pr create` / `gh pr merge` other than a story's or change's own pull request into `stage` and its auto-merge, as CLAUDE.md's pull request rules describe (owner, 2026-11-11, removed the prompt for those); never a pull request into `main` or retargeting one (`gh pr edit --base`), never `--admin`. These deny rules catch the usual spellings only; `main` itself is guarded by moving only on a release
 - `wrangler deploy`, `wrangler secret`, `neonctl`, Logto production tenant changes, `firebase deploy`, `gcloud`, production secrets changes
 - Committing `.env`, credentials, service-account JSON, Patreon tokens
 

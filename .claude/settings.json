@@ -21,12 +21,11 @@
 			"Bash(git push -f *)",
 			"Bash(git reset --hard *)",
 			"Bash(git clean -fd *)",
-			"Bash(gh pr merge --admin*)",
-			"Bash(gh pr merge * --admin*)",
-			"Bash(gh pr create --base main*)",
-			"Bash(gh pr create * --base main*)",
-			"Bash(gh pr create -B main*)",
-			"Bash(gh pr create * -B main*)"
+			"Bash(gh pr merge *--admin*)",
+			"Bash(gh pr create *--base*main*)",
+			"Bash(gh pr create *-B*main*)",
+			"Bash(gh pr edit *--base*)",
+			"Bash(gh pr edit *-B*)"
 		],
 		"ask": [
 			"Bash(git push *)",
