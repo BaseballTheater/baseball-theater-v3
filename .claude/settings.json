@@ -32,7 +32,16 @@
 			"Bash(gh pr create *-Bmain)",
 			"Bash(gh pr edit *--base *)",
 			"Bash(gh pr edit *--base=*)",
-			"Bash(gh pr edit *-B *)"
+			"Bash(gh pr edit *-B *)",
+			"Bash(gh pr edit *-Bmain*)",
+			"Bash(git push *--force*)",
+			"Bash(git push *-f *)",
+			"Bash(git push *-f)",
+			"Bash(git push * +*)",
+			"Bash(git push *:main*)",
+			"Bash(git push *:stage*)",
+			"Bash(git push * main)",
+			"Bash(git push * stage)"
 		],
 		"ask": [
 			"Bash(neonctl *)",
