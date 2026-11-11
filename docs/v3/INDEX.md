@@ -405,7 +405,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `47–432` Every grader, sorted
   - `433–449` Graders edited after their story shipped
   - `450–514` Re-verified at shipping commits
-- [LOOP.md — Loop-ready automation guide](LOOP.md) — 18 KB
+- [LOOP.md — Loop-ready automation guide](LOOP.md) — 19 KB
   - `5–19` Checklist status
   - `20–32` 1 — Baseline
   - `33–53` 2 — Verify

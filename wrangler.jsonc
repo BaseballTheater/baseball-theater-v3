@@ -90,7 +90,7 @@
 				"BT_USE_LIVE_MLB": "1"
 			}
 		},
-		// Every push to stage, at stage.baseball.theater, on the Neon `staging` branch through
+		// Every push to stage that changes code (a docs-only one deploys nothing), at stage.baseball.theater, on the Neon `staging` branch through
 		// `bt-staging`: a schema-only branch that never holds a fan's data (S114 AC 9).
 		"staging": {
 			"name": "baseball-theater-staging",

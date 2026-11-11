@@ -18312,3 +18312,15 @@ S145 AC 2 and S132 AC 2 were rewritten to answer Claude's review of pull request
 **What changed, and the owner's answer**
 
 S145 AC 2 was rewritten to answer Claude's review of pull request #31 (two S97 tests it breaks weren't named). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
+
+---
+
+| Captured (UTC) | `2026-11-11T22:44:06Z` |
+| HEAD at capture | `9704399` (tree dirty) |
+| Change | `9704399` — Deploy: decide a staging deploy from the commit staging serves |
+
+**What changed, and the owner's answer**
+
+Owner-directed change (2026-11-11: "Can we avoid deploying when the only change was docs?", then "yeah, I like your plan"): a docs-only push to `stage` no longer deploys staging, and a staging run deploys unless staging already serves its commit or a newer one (`bt-commit.txt`). It edits CLAUDE.md's release and push rules, LOOP.md, README, wrangler.jsonc's comment, the baseline frame's deploy line, and law P11's test. Commits 705a855, 9704399.
+
+Asked whether this needs a backlog review, the owner answered: "skip".
