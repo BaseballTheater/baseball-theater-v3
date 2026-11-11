@@ -57,7 +57,22 @@ describe("CI runs pnpm verify (law P11)", () =>
 		const deploy = readFileSync(DEPLOY_YML, "utf8");
 		expect(deploy).toMatch(/= release \]; then\n\s+echo "code=true" >> "\$GITHUB_OUTPUT"/);
 		const staging = deploy.slice(deploy.indexOf("\n    staging:\n"), deploy.indexOf("\n    production:\n"));
-		expect(staging).toContain("needs.verify.result == 'success' || (needs.verify.result == 'skipped' && needs.changes.outputs.code == 'false')");
+		// Staging deploys only code that verify passed; a docs-only push deploys nothing (owner,
+		// 2026-11-11: "Can we avoid deploying when the only change was docs?").
+		expect(staging).toContain("needs.changes.outputs.code == 'true' && needs.verify.result == 'success'");
+		expect(staging).not.toContain("needs.verify.result == 'skipped'");
+		// Whether to deploy is decided from the commit staging serves, never from what else is on
+		// stage, so a newer run that fails can't strand an older commit that passed.
+		expect(staging).toContain('echo "${{ github.sha }}" >web/dist/bt-commit.txt');
+		expect(staging).toContain('git merge-base --is-ancestor "${{ github.sha }}" "$served"');
+		expect(staging).not.toContain("origin/stage)");
+		// A 404 or a 200 without a sha (no marker yet) deploys; any other answer fails the step after
+		// curl's retries (no `|| true` swallowing it); the marker is read twice so a deploy still
+		// spreading to the edge is seen.
+		expect(staging).toContain("curl -sS --retry 5 --max-time 10");
+		expect(staging).toContain("200 | 404) ;;");
+		expect(staging).not.toMatch(/bt-commit\.txt[^\n]*\|\| true/);
+		expect(staging).toContain("for attempt in 1 2; do");
 		expect(staging).toContain("!cancelled()");
 		expect(staging).not.toMatch(/always\(\)/);
 	});
