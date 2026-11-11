@@ -35,12 +35,11 @@
 			"Bash(gh pr edit *-B *)"
 		],
 		"ask": [
-			"Bash(git push *)",
 			"Bash(neonctl *)",
 			"Bash(pnpm publish *)",
 			"Bash(npm publish *)"
 		],
-		"allow": ["Bash(pnpm *)", "Bash(git status *)", "Bash(git diff *)", "Bash(git log *)", "Bash(git branch *)"]
+		"allow": ["Bash(pnpm *)", "Bash(git push *)", "Bash(git status *)", "Bash(git diff *)", "Bash(git log *)", "Bash(git branch *)"]
 	},
 	"hooks": {
 		"UserPromptSubmit": [
