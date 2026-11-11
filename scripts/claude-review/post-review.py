@@ -14,8 +14,13 @@ posts and the coordinator re-runs it rather than taking silence for "no findings
 Any secret value given as REDACT_* (and GH_TOKEN) is blanked out of everything posted, in case
 untrusted pull request text talked the reviewer into quoting one.
 
-Env: EXECUTION_FILE (claude-code-action's execution_file output), HEAD_SHA, PR, GITHUB_REPOSITORY,
-GH_TOKEN, REDACT_*. `--dry-run` prints the review payload instead of posting it.
+Every summary ends with what kind of review it was, what paid for it, and a hidden record
+(plan-review.py reads the newest one to review only what changed since). Its findings list carries the
+earlier records' findings forward, so a settled finding isn't raised again. MODE=unchanged posts with no
+model call: nothing in the pull request changed since the recorded review.
+
+Env: EXECUTION_FILE (claude-code-action's execution_file output; unset when MODE=unchanged), HEAD_SHA,
+PR, GITHUB_REPOSITORY, GH_TOKEN, MODE, WHY, PAID_BY, RECORD_FILE, PREVIOUS_FILE, REDACT_*. `--dry-run` prints the review payload instead of posting it.
 """
 
 import base64
@@ -49,15 +54,44 @@ def parse_review(text: str) -> dict:
     return review
 
 
+def inert(text: str) -> str:
+    """Model-written text with HTML comment markers broken, so it can't open or close a hidden block
+    (a fake review record, or one that cuts the real record short)."""
+    return text.replace("<!--", "<\u200b!--").replace("-->", "--\u200b>")
+
+
+MAX_CARRIED_FINDINGS = 60
+
+
+def footer(review: dict) -> str:
+    """What the review was and what paid for it, then the record the next review reads."""
+    record = {}
+    try:
+        with open(os.environ["RECORD_FILE"], encoding="utf-8") as f:
+            record = json.load(f)
+        with open(os.environ["PREVIOUS_FILE"], encoding="utf-8") as f:
+            previous = json.load(f)
+    except (OSError, KeyError, ValueError):
+        previous = {}
+    carried = previous.get("findings", []) if isinstance(previous.get("findings"), list) else []
+    new = [{"path": f["path"], "line": f["line"], "at": os.environ.get("HEAD_SHA", "")[:7], "gist": f["body"][:160]} for f in review["findings"]]
+    record["findings"] = (carried + new)[-MAX_CARRIED_FINDINGS:]
+    note = f"_{os.environ.get('WHY', '')}; paid by {os.environ.get('PAID_BY', 'n/a')}._"
+    # One line, with < and > escaped so no path or gist can end the comment early.
+    encoded = json.dumps(record, separators=(",", ":")).replace("<", "\\u003c").replace(">", "\\u003e")
+    return f"\n\n{note}\n\n<!-- claude-review-record {encoded} -->"
+
+
 def payload(review: dict, head: str, inline: bool) -> dict:
     """One COMMENT review; with inline False every finding goes in the body instead."""
-    body = f"Claude review of {head}: {review['summary']}"
+    body = f"Claude review of {head}: {inert(review['summary'])}"
     comments = []
     for finding in review["findings"]:
         if inline:
-            comments.append({"path": finding["path"], "line": finding["line"], "side": "RIGHT", "body": finding["body"]})
+            comments.append({"path": finding["path"], "line": finding["line"], "side": "RIGHT", "body": inert(finding["body"])})
         else:
-            body += f"\n\n**{finding['path']}:{finding['line']}**\n\n{finding['body']}"
+            body += f"\n\n**{inert(finding['path'])}:{finding['line']}**\n\n{inert(finding['body'])}"
+    body += footer(review)
     result = {"event": "COMMENT", "commit_id": head, "body": body}
     if comments:
         result["comments"] = comments
@@ -87,6 +121,12 @@ def post(data: dict) -> str:
 
 def main() -> int:
     head = os.environ["HEAD_SHA"]
+    if os.environ.get("MODE") == "unchanged":
+        review = {"summary": "no changes to review: no file of this pull request changed since the last recorded review.", "findings": []}
+        if "--dry-run" in sys.argv:
+            print(redact(json.dumps(payload(review, head, inline=False), indent=2)))
+            return 0
+        return 0 if post(payload(review, head, inline=False)) == "ok" else 1
     try:
         review = parse_review(final_text(os.environ["EXECUTION_FILE"]))
     except (OSError, ValueError, KeyError) as error:
