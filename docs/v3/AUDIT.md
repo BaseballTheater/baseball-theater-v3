@@ -18339,3 +18339,20 @@ Asked whether this needs a backlog review, the owner answered: "skip".
 **What changed, and the owner's answer**
 
 S131 AC 1 was rewritten to answer Claude's review of pull request #31 (headline described as what the update notice shows, which the owner's evening answers removed). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
+
+---
+
+## 2026-11-11 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-11T23:52:19Z` |
+| HEAD at capture | `47cf4ac` (tree dirty) |
+| Change | `47cf4ac` — Backlog: S146, skip a deploy when its recorded build inputs are unchanged |
+
+**What changed, and the owner's answer**
+
+S146 (skip a staging or preview deploy when its recorded build inputs are unchanged) added at the owner's direction (2026-11-11: "ultimately it'd be nice if this used some kind of hashing or something rather than directory allow/blocklists", then "yeah, I like your plan"; its Source, the Delightful pillar: "delightful").
+
+Asked whether adding S146 needs a backlog review, the owner answered: "no backlog review".
