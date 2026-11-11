@@ -230,16 +230,31 @@ jobs:
             # reads the commit staging serves (bt-commit.txt, written into the build below) and deploys
             # unless staging already serves this commit or one that contains it. Deciding from what is
             # served, not from what is on stage, means a newer run that fails or is cancelled never
-            # strands an older commit that passed. A missing or unreadable file (the first deploy, a
-            # by-hand rollback to a build without it) deploys.
+            # strands an older commit that passed.
+            # - Staging answers 200 with a sha: compare. Read twice, a few seconds apart, so a deploy
+            #   still spreading to the edge is seen; either read showing a commit containing this one
+            #   skips.
+            # - Staging answers 200 without a sha (the SPA's index.html for a missing file: the first
+            #   deploy, or a rollback to a build without the marker): deploy.
+            # - Staging can't be read (a timeout, a 5xx, DNS) even after retries: fail the step, so the
+            #   run is re-run rather than deploying an older commit over a newer one blind.
             - name: Does staging already serve this commit or a newer one?
               id: served
               run: |
+                  set -euo pipefail
                   git fetch --no-tags origin stage
-                  served="$(curl -sf "https://stage.baseball.theater/bt-commit.txt?run=${{ github.run_id }}" || true)"
-                  if [[ "$served" =~ ^[0-9a-f]{40}$ ]] && git cat-file -e "${served}^{commit}" 2>/dev/null &&
-                      git merge-base --is-ancestor "${{ github.sha }}" "$served"; then
-                      echo "staging serves $served, which already contains ${{ github.sha }}: nothing to deploy"
+                  contains=false
+                  for attempt in 1 2; do
+                      [ "$attempt" = 2 ] && sleep 10
+                      served="$(curl -fsS --retry 5 --retry-all-errors --max-time 10 \
+                          "https://stage.baseball.theater/bt-commit.txt?run=${{ github.run_id }}-$attempt")"
+                      if [[ "$served" =~ ^[0-9a-f]{40}$ ]] && git cat-file -e "${served}^{commit}" 2>/dev/null &&
+                          git merge-base --is-ancestor "${{ github.sha }}" "$served"; then
+                          contains=true
+                          echo "staging serves $served, which already contains ${{ github.sha }}"
+                      fi
+                  done
+                  if [ "$contains" = true ]; then
                       echo "deploy=false" >>"$GITHUB_OUTPUT"
                   else
                       echo "deploy=true" >>"$GITHUB_OUTPUT"
