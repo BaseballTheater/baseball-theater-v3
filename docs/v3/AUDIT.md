@@ -18415,3 +18415,18 @@ S146 AC 3 was rewritten to answer Claude's review of pull request #34 (a preview
 **What changed, and the owner's answer**
 
 S146 AC 3 was rewritten again to answer Claude's review of pull request #34 (the record's deletion needs actions: write). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
+
+---
+
+## 2026-11-12 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-12T23:04:16Z` |
+| HEAD at capture | `096032d` (tree clean) |
+| Change | `d7bdcca` — Rules: release step (4) moves a held-back fix's issue with it |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-12, asked whether the rule change in PR #37 (a bug gets an issue and its fix closes it; release step (4) moves a held-back fix's issue with it) needs a backlog review: "oh, no backlog review needed for that"
