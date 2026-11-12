@@ -18339,3 +18339,79 @@ Asked whether this needs a backlog review, the owner answered: "skip".
 **What changed, and the owner's answer**
 
 S131 AC 1 was rewritten to answer Claude's review of pull request #31 (headline described as what the update notice shows, which the owner's evening answers removed). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
+
+---
+
+## 2026-11-11 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-11T23:52:19Z` |
+| HEAD at capture | `47cf4ac` (tree dirty) |
+| Change | `47cf4ac` — Backlog: S146, skip a deploy when its recorded build inputs are unchanged |
+
+**What changed, and the owner's answer**
+
+S146 (skip a staging or preview deploy when its recorded build inputs are unchanged) added at the owner's direction (2026-11-11: "ultimately it'd be nice if this used some kind of hashing or something rather than directory allow/blocklists", then "yeah, I like your plan"; its Source, the Delightful pillar: "delightful").
+
+Asked whether adding S146 needs a backlog review, the owner answered: "no backlog review".
+
+---
+
+## 2026-11-11 — doc parity review (`continue`)
+
+| | |
+|---|---|
+| Entry | doc parity review pass |
+| Captured (UTC) | `2026-11-11T23:53:55Z` |
+| HEAD at review | `1ca6f13` (tree dirty) |
+| Trigger | S146 added (since 4182295) |
+| Stories `done` since last review | none |
+| Verdict | `continue` |
+
+**Findings / amendments**
+
+**1. Citation honesty** (scope: S146, plus the next 3 `todo` stories by priority: S143, S136, S125)
+- **S146 — Pillar: Delightful.** No feature applies: FEATURES.md line 8 says it "does not describe frameworks, repos, or deploy targets", and S146 changes only how staging/preview deploys are decided (scope files are `functions/src/deploy/`, `deploy.yml`, `web/vite.config.ts`, README). INTENT.md line 14 defines Delightful as applying "to developers as well", the same reading S89 was approved under ("Delightful", 2026-10-29). The approval quote "delightful" is recorded in the adding commit 47cf4ac ("Source: the Delightful pillar, approved by the owner") and in the ledger skip entry of 1ca6f13 ("its Source, the Delightful pillar: \"delightful\""). The note has one commit (`git log -- docs/v3/backlog/stories/S146.md` → 47cf4ac only), so it has not been re-scoped since the approval. Holds.
+- **S143 — Feature: Modern membership.** FEATURES "Modern membership" (line 230) carries the "Signing in on staging" bullet (line 236): a mock sign-in as one shared test account, and no Sign in button on a site without sign-in — exactly S143's Gap and Impact. Holds.
+- **S136 — Feature: Calendar date picker.** The FEATURES row (line 101) quotes the owner, 2026-11-09: the API "needs to return the teams that played each day"; S136 adds those teams to the month answer. Holds.
+- **S125 — Feature: Calendar date picker.** Same row: calendar from the scoreboard date, year switching, typed date, games per day — S125's Gap quotes the same 2026-11-07 words. Holds.
+- **Open questions:** none. `grep "Source:\*\* Open"` over `docs/v3/backlog/stories/` finds no story.
+
+**2. Doc reflects reality**
+- S146 adds nothing fan-facing, so FEATURES needs no row; no FEATURES or INTENT statement mentions the `scripts/ci-changes.sh` path list or docs-only deploy skipping (grep of FEATURES, INTENT, ARCHITECTURE for "ci-changes", "docs-only", "path list": no hits), so nothing goes stale when S146 ships.
+- No contradiction found between INTENT's Delightful pillar and S146 or ARCHITECTURE.
+
+**3. Coverage for the backlog review**
+- No features added this review. No new uncovered FEATURES item surfaced in the rows checked.
+
+---
+
+## 2026-11-11 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-12T00:22:11Z` |
+| HEAD at capture | `5659e7a` (tree dirty) |
+| Change | `5659e7a` — Backlog: S146 AC 3, a preview record dies with its Worker |
+
+**What changed, and the owner's answer**
+
+S146 AC 3 was rewritten to answer Claude's review of pull request #34 (a preview record outliving its torn-down Worker). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
+
+---
+
+## 2026-11-11 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-12T00:23:23Z` |
+| HEAD at capture | `8ecca2f` (tree dirty) |
+| Change | `8ecca2f` — Backlog: S146 AC 3, teardown can delete the record |
+
+**What changed, and the owner's answer**
+
+S146 AC 3 was rewritten again to answer Claude's review of pull request #34 (the record's deletion needs actions: write). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
