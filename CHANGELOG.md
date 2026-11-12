@@ -14,6 +14,14 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## Deleting your account works on the live site
+
+- **Before, deleting your account on the live site always failed with "Couldn't finish deleting your account", and
+  nothing was deleted. Now it deletes your Baseball Theater account and your sign-in account, as it was meant to.**
+  Details: follow-up to S116 — `LogtoManagementApi` called the global `fetch` as a method (`this.fetch(...)`), which
+  the Workers runtime refuses ("Illegal invocation"); it now wraps it, and a test stubs `fetch` the way workerd checks
+  it. Found from production's logs, 2026-11-11.
+
 ## How many games each day has, a month at a time
 
 - **Before, a calendar wanting to show how many games each day has would have needed a separate request for every
