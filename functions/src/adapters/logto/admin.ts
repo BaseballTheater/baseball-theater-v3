@@ -48,9 +48,15 @@ export class LogtoManagementApi
 		return `https://${this.config.tenantId}.logto.app`;
 	}
 
+	/**
+	 * The stand-in, or the global `fetch` wrapped so it is never called as a method: the Workers
+	 * runtime throws "Illegal invocation" when `fetch` gets any `this` but the global one, and
+	 * `this.fetch(...)` would hand it this API (production's account deletion failed that way,
+	 * 2026-11-11; Node, where the deploy script runs, doesn't check).
+	 */
 	private get fetch(): Fetch
 	{
-		return this.config.fetch ?? fetch;
+		return this.config.fetch ?? ((input, init) => fetch(input, init));
 	}
 
 	private now(): number

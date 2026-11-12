@@ -4,7 +4,7 @@
  * answers; nothing reaches Logto.
  */
 import {
-	describe, expect, it,
+	afterEach, describe, expect, it, vi,
 } from "vitest";
 import { createManagementStandIn } from "../../test/logto-management.js";
 import { LogtoIdentityAdmin, LogtoManagementApi } from "./admin.js";
@@ -78,5 +78,30 @@ describe("LogtoIdentityAdmin (S116)", () =>
 
 		const wrong = setup("wrong-secret");
 		await expect(wrong.admin.listAccounts()).rejects.toThrow(/Logto token: 401/);
+	});
+
+	afterEach(() =>
+	{
+		vi.unstubAllGlobals();
+	});
+
+	it("uses the global fetch the way the Workers runtime requires: never called as a method", async () =>
+	{
+		// Production's account deletion failed with "Illegal invocation: function called with incorrect
+		// `this` reference" (2026-11-11): workerd's fetch refuses any `this` but the global one, and the
+		// API called it as `this.fetch(...)`. Node doesn't care, so only a stand-in that refuses the
+		// same way catches it.
+		const tenant = createManagementStandIn("tenant1");
+		vi.stubGlobal("fetch", function (this: unknown, input: string, init?: RequestInit)
+		{
+			if (this !== undefined && this !== globalThis) throw new TypeError("Illegal invocation: function called with incorrect `this` reference.");
+			return tenant.fetch(input, init);
+		});
+		const admin = new LogtoIdentityAdmin(new LogtoManagementApi({
+			tenantId: "tenant1",
+			appId: "m2m-app",
+			secret: "m2m-secret",
+		}));
+		await expect(admin.deleteAccount("no-such-user")).resolves.toBeUndefined();
 	});
 });
