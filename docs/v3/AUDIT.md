@@ -18400,3 +18400,18 @@ Asked whether adding S146 needs a backlog review, the owner answered: "no backlo
 **What changed, and the owner's answer**
 
 S146 AC 3 was rewritten to answer Claude's review of pull request #34 (a preview record outliving its torn-down Worker). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
+
+---
+
+## 2026-11-11 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-12T00:23:23Z` |
+| HEAD at capture | `8ecca2f` (tree dirty) |
+| Change | `8ecca2f` — Backlog: S146 AC 3, teardown can delete the record |
+
+**What changed, and the owner's answer**
+
+S146 AC 3 was rewritten again to answer Claude's review of pull request #34 (the record's deletion needs actions: write). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
