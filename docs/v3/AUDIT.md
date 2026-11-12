@@ -18385,3 +18385,18 @@ Asked whether adding S146 needs a backlog review, the owner answered: "no backlo
 
 **3. Coverage for the backlog review**
 - No features added this review. No new uncovered FEATURES item surfaced in the rows checked.
+
+---
+
+## 2026-11-11 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-12T00:22:11Z` |
+| HEAD at capture | `5659e7a` (tree dirty) |
+| Change | `5659e7a` — Backlog: S146 AC 3, a preview record dies with its Worker |
+
+**What changed, and the owner's answer**
+
+S146 AC 3 was rewritten to answer Claude's review of pull request #34 (a preview record outliving its torn-down Worker). Owner, 2026-11-07, asked whether an acceptance-criteria rewrite answering a pull request's review needs a backlog review: "This shouldn't even trigger a question. Always skip."
