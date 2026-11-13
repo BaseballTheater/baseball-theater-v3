@@ -399,7 +399,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `10–22` Pillars
   - `23–36` Document set
   - `37–67` Open decisions (fill as we go)
-- [LAWS.md — Laws](LAWS.md) — 61 KB
+- [LAWS.md — Laws](LAWS.md) — 62 KB
   - `13–39` The laws
   - `40–46` Overrides
   - `47–432` Every grader, sorted
