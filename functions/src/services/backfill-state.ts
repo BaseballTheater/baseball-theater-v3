@@ -1,5 +1,5 @@
 /**
- * The backfill's resume file (S122 AC 8): each extra source's give-up streak, kept per target
+ * The backfill's resume file (S122 AC 8): each extra source's counted stretches, kept per target
  * database in a git-ignored folder (`.backfill/` at the repo root by default), so a resumed run
  * doesn't re-probe a source it gave up and a different database starts fresh. The file is
  * named by the database's host and name only — never its connection string, which carries a
@@ -11,8 +11,8 @@ import {
 } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { SourceStreak } from "@bt/domain";
-import { isCalendarDate } from "@bt/domain";
+import type { SourceStreak, SourceStretch } from "@bt/domain";
+import { GIVE_UP_AFTER_DAYS, isCalendarDate } from "@bt/domain";
 import type {
 	BackfillState, ExtraSource, ResumeStore,
 } from "./backfill.js";
@@ -29,18 +29,101 @@ export function resumeFilePath(dir: string, target: { host: string;
 	return path.join(dir, `${safe(target.host)}--${safe(target.name)}.json`);
 }
 
-/** Why `value` isn't a {@link SourceStreak}, or undefined when it is one. */
-function streakProblem(value: unknown): string | undefined
+/** Why `record[key]` isn't a calendar date (or absent, when `optional`), or undefined when it is. */
+function dateProblem(record: Record<string, unknown>, key: string, optional: boolean): string | undefined
+{
+	const day = record[key];
+	if (day === undefined && optional) return undefined;
+	return typeof day === "string" && isCalendarDate(day) ? undefined : `${key} is not a date`;
+}
+
+/** Why `record[key]` isn't a whole number of days at least 0, or undefined when it is one. */
+function wholeProblem(record: Record<string, unknown>, key: string): string | undefined
+{
+	const value = record[key];
+	return Number.isInteger(value) && (value as number) >= 0 ? undefined : `${key} is not a whole number`;
+}
+
+/**
+ * The shape saved before streaks were kept per stretch, `{ streak, lastCountedDay?, givenUpAt? }`,
+ * as one stretch at its last counted day. The file never said which newer days it counted, so
+ * the stretch is marked not all failed, with no failures at its newest end: days a resume counts
+ * again just above it join it without adding to its streak (no early give-up from counting them
+ * twice; unless it is given up: then they count a stretch of their own), the walk below carries its streak on as before, and a newer range counts a streak of
+ * its own. One narrow case can still
+ * give up early: a resume that recounts 14 or more days left incomplete among answered ones,
+ * failing in a row on the second asking. And the file can't say which days its streak covers,
+ * so a streak or `givenUpAt` the old code counted across ranges that didn't touch is taken as it
+ * was: the walk below carries such a streak on, and such a give-up still holds for older days.
+ * A `givenUpAt` must be what the old code wrote (its last counted day, with a streak of 14 or
+ * more).
+ */
+function readOldStreak(record: Record<string, unknown>): SourceStreak | string
+{
+	const problem = wholeProblem(record, "streak") ?? dateProblem(record, "lastCountedDay", true) ?? dateProblem(record, "givenUpAt", true);
+	if (problem) return problem;
+	const streak = record.streak as number;
+	const oldest = record.lastCountedDay as string | undefined;
+	const givenUp = record.givenUpAt !== undefined;
+	if (givenUp && (record.givenUpAt !== oldest || streak < GIVE_UP_AFTER_DAYS)) return "givenUpAt is not its last counted day of a full streak";
+	if (!givenUp && streak >= GIVE_UP_AFTER_DAYS) return "a full streak has no givenUpAt";
+	if (oldest === undefined) return {
+		stretches: [],
+	};
+	return {
+		stretches: [{
+			newest: oldest,
+			oldest,
+			streak,
+			newestStreak: 0,
+			allFailed: false,
+			givenUp,
+		}],
+	};
+}
+
+/**
+ * `value` as a {@link SourceStreak}, or why it isn't one. Each stretch is rebuilt from its
+ * checked fields (anything else in the file is dropped), and stretches may not overlap. The old
+ * shape is read too ({@link readOldStreak}), so a resume file from an earlier run still loads.
+ */
+function readStreak(value: unknown): SourceStreak | string
 {
 	if (typeof value !== "object" || value === null || Array.isArray(value)) return "not an object";
-	const streak = value as Record<string, unknown>;
-	if (!Number.isInteger(streak.streak) || (streak.streak as number) < 0) return "streak is not a whole number";
-	for (const key of ["lastCountedDay", "givenUpAt"])
+	const record = value as Record<string, unknown>;
+	if (!("stretches" in record)) return readOldStreak(record);
+	if (!Array.isArray(record.stretches)) return "stretches is not a list";
+	const stretches: SourceStretch[] = [];
+	for (const stretch of record.stretches as unknown[])
 	{
-		const day = streak[key];
-		if (day !== undefined && (typeof day !== "string" || !isCalendarDate(day))) return `${key} is not a date`;
+		if (typeof stretch !== "object" || stretch === null || Array.isArray(stretch)) return "a stretch is not an object";
+		const fields = stretch as Record<string, unknown>;
+		const problem = wholeProblem(fields, "streak") ?? wholeProblem(fields, "newestStreak") ?? dateProblem(fields, "newest", false) ?? dateProblem(fields, "oldest", false);
+		if (problem) return problem;
+		if (typeof fields.allFailed !== "boolean") return "allFailed is not true or false";
+		if (typeof fields.givenUp !== "boolean") return "givenUp is not true or false";
+		const streak = fields.streak as number;
+		const newestStreak = fields.newestStreak as number;
+		if (fields.allFailed && (streak === 0 || newestStreak !== streak)) return "a stretch is all failed but its streaks don't say so";
+		if (!fields.givenUp && Math.max(streak, newestStreak) >= GIVE_UP_AFTER_DAYS) return "a full streak is not given up";
+		if ((fields.oldest as string) > (fields.newest as string)) return "a stretch's oldest day is after its newest";
+		stretches.push({
+			newest: fields.newest as string,
+			oldest: fields.oldest as string,
+			streak,
+			newestStreak,
+			allFailed: fields.allFailed,
+			givenUp: fields.givenUp,
+		});
 	}
-	return undefined;
+	stretches.sort((a, b) => (a.oldest < b.oldest ? 1 : -1));
+	for (let i = 1; i < stretches.length; i++)
+	{
+		if (stretches[i]!.newest >= stretches[i - 1]!.oldest) return "stretches overlap";
+	}
+	return {
+		stretches,
+	};
 }
 
 /**
@@ -72,9 +155,9 @@ function parseState(file: string, text: string): BackfillState
 	for (const [source, streak] of Object.entries(sources))
 	{
 		if (!(EXTRA_SOURCES as readonly string[]).includes(source)) return fail(`unknown source ${source}`);
-		const problem = streakProblem(streak);
-		if (problem) return fail(`${source}: ${problem}`);
-		state.sources[source as ExtraSource] = streak as SourceStreak;
+		const read = readStreak(streak);
+		if (typeof read === "string") return fail(`${source}: ${read}`);
+		state.sources[source as ExtraSource] = read;
 	}
 	return state;
 }

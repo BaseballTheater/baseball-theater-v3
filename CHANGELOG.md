@@ -14,6 +14,20 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## The game backfill stops asking for missing extras in later runs too
+
+- **Before, once the game backfill had counted anything for a game's extras (videos and recap, play metrics, the
+  extra game content), a later run over newer dates didn't count them at all: it asked for them for every game there
+  and never gave up, so ten seasons could mean tens of thousands of requests bound to fail. A run over older dates
+  that didn't touch the last one could give up too early, carrying on a count from years away. Now each run counts
+  the days it walks, joining the count of a run it continues: a newer range gives up on its own instead of asking
+  forever, and no extra is given up before it has been missing for 14 days of games in a row (except when resuming
+  from a resume file saved before this change: in one narrow case, or when that file already counted a streak across
+  runs that didn't touch).** This is a tool for filling Baseball Theater's game store; fans don't see it directly. Details: follow-up to S122 from Claude's after-the-fact review of PR #20 —
+  `recordSourceDay` (`packages/domain`) keeps each source's counted stretches and joins the ones a walk connects;
+  the resume file stores them (`functions/src/services/backfill-state.ts`, which still reads a file saved in the old
+  shape).
+
 ## Deleting your account works on the live site
 
 - **Before, deleting your account on the live site always failed with "Couldn't finish deleting your account", and
