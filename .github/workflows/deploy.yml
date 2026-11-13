@@ -305,12 +305,26 @@ jobs:
 
     # next.baseball.theater (until the owner's cutover, S119), when the owner publishes a GitHub Release,
     # once verify passes on its tag (S121). The release's tag is what deploys, never a branch head.
-    # Rolling back is `wrangler rollback` or re-running an older release's run (README).
+    # Rolling back is re-running the Deploy run of an earlier release that deployed before; only past
+    # GitHub's 30-day re-run window, `wrangler rollback` to the previous deploy as a last resort (README).
+    # A release published out of order fails before anything deploys (owner, 2026-11-13: "The only
+    # way a rollback should happen is using a REAL rollback to a prior verison that had been
+    # released. Otherwise, an unreleased release that is a lower version than the one that is live
+    # should fail to deploy. If it still needs to be deployed, it'd need a new release."): see the
+    # Release order step and scripts/release-order.sh.
     production:
         if: github.event_name == 'release' && github.event.action == 'published'
         needs: [verify]
         runs-on: ubuntu-latest
         timeout-minutes: 20
+        # Releases (contents) and past production deployments (deployments) for the Release order step;
+        # issues and pull-requests: read as #47's production job needs them, so whichever merges second
+        # keeps all four.
+        permissions:
+            contents: read
+            deployments: read
+            issues: read
+            pull-requests: read
         concurrency:
             group: deploy-production
             cancel-in-progress: false
@@ -326,9 +340,40 @@ jobs:
             LOGTO_S2S_APP_ID: ${{ secrets.LOGTO_S2S_APP_ID }}
             LOGTO_S2S_SECRET: ${{ secrets.LOGTO_S2S_SECRET }}
         steps:
+            # Full history, so the Release order step can check main's ancestry.
             - uses: actions/checkout@v4
               with:
                   ref: ${{ github.event.release.tag_name }}
+                  fetch-depth: 0
+
+            # Before anything installs, builds or deploys: the release must be higher than every
+            # other published release and contain main, unless this is a re-run of a release that
+            # deployed before (a real rollback). The tag reaches the shell only through env.
+            - name: Release order
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  TAG: ${{ github.event.release.tag_name }}
+                  RUN_ATTEMPT: ${{ github.run_attempt }}
+              # pipefail: a failed gh call fails the step instead of hiding behind awk or grep.
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  git fetch --no-tags origin main
+                  PUBLISHED_TAGS="$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate --jq '.[] | select(.draft | not) | .tag_name')"
+                  DEPLOYED_BEFORE=false
+                  # A production deployment of this tag that succeeded before (gh's --jq takes no
+                  # variables, so the tag is matched in awk, from env).
+                  ids="$(gh api "repos/$GITHUB_REPOSITORY/deployments?environment=production&per_page=100" --paginate --jq '.[] | "\(.id) \(.ref)"' |
+                      awk -v tag="$TAG" '$2 == tag || $2 == "refs/tags/" tag { print $1 }')"
+                  for id in $ids; do
+                      # Captured first, so grep -q exiting early can't SIGPIPE gh under pipefail.
+                      states="$(gh api "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" --paginate --jq '.[].state')"
+                      if grep -qx success <<<"$states"; then
+                          DEPLOYED_BEFORE=true
+                      fi
+                  done
+                  export PUBLISHED_TAGS DEPLOYED_BEFORE
+                  bash scripts/release-order.sh
 
             - uses: pnpm/action-setup@v4
               with:
