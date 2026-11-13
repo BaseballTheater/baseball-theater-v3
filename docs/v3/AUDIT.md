@@ -18430,3 +18430,18 @@ S146 AC 3 was rewritten again to answer Claude's review of pull request #34 (the
 **What changed, and the owner's answer**
 
 Owner, 2026-11-12, asked whether the rule change in PR #37 (a bug gets an issue and its fix closes it; release step (4) moves a held-back fix's issue with it) needs a backlog review: "oh, no backlog review needed for that"
+
+---
+
+## 2026-11-13 — backlog review answers (2026-11-08)
+
+| | |
+|---|---|
+| Entry | owner's answers to the 2026-11-08 backlog review — part of finishing that review, not new drift |
+| Captured (UTC) | `2026-11-13T09:37:03Z` |
+| HEAD at capture | `0eac7e0` (tree clean) |
+| Applied in | `0eac7e0` — Rules: fixes from the after-the-fact reviews of #11, #22 and #23 |
+
+**Answers and what was applied**
+
+Applies the owner's 2026-11-08 answer to that review's S131 question ("This is the go-ahead") to the frame bullet that still said S131's deploy-workflow edit needed a go-ahead, as flagged by Claude's after-the-fact review of PR #22.
