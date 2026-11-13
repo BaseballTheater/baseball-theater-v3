@@ -18445,3 +18445,18 @@ Owner, 2026-11-12, asked whether the rule change in PR #37 (a bug gets an issue 
 **Answers and what was applied**
 
 Applies the owner's 2026-11-08 answer to that review's S131 question ("This is the go-ahead") to the frame bullet that still said S131's deploy-workflow edit needed a go-ahead, as flagged by Claude's after-the-fact review of PR #22.
+
+---
+
+## 2026-11-13 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-13T23:54:42Z` |
+| HEAD at capture | `bb6819f` (tree clean) |
+| Change | `bb6819f` — S135, S133: the build's release comes from #47, in the acceptance criteria too |
+
+**What changed, and the owner's answer**
+
+S135 AC 1 and AC 4 (and S133 AC 1 wording) were rewritten to answer Claude's review of PR #50 (comment 4569986624), applying the owner's 2026-11-13 re-scope ("1 and 2 both yes"). Per CLAUDE.md, ACs rewritten to answer a PR review are always skipped (owner, 2026-11-07: "This shouldn't even trigger a question. Always skip.").
