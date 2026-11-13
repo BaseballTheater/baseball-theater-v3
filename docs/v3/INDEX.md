@@ -505,7 +505,7 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 | 77 | [S138](backlog/stories/S138.md) Standings date picker | `todo` | S125, S130, S81 | S137 |
 | 79 | [S132](backlog/stories/S132.md) Release notes API | `todo` | S131 | — |
 | 81 | [S134](backlog/stories/S134.md) Change log page | `todo` | S132, S81 | S133 |
-| 82 | [S135](backlog/stories/S135.md) Update notice and after-update pointer | `todo` | S131, S134, S81 | S133 |
+| 82 | [S135](backlog/stories/S135.md) Update notice and after-update pointer | `todo` | S131, S81 | S133 |
 | 83 | [S141](backlog/stories/S141.md) Design: site footer | `todo` | — | — |
 | 84 | [S142](backlog/stories/S142.md) Site footer of links | `todo` | S81 | S141 |
 | 89 | [S127](backlog/stories/S127.md) Design: play link in Search's player | `todo` | — | — |
