@@ -49,7 +49,8 @@ jobs:
 
     # What a docs-only change can break: the generated backlog (pnpm backlog:check, also the first
     # step of pnpm lint), the backlog vault's own tests (ledger, laws, index) and the format of the
-    # Markdown Prettier checks (outside docs/, which .prettierignore leaves out).
+    # Markdown Prettier checks (outside docs/, which .prettierignore leaves out). The verify job runs
+    # the same Markdown check for code changes, since they can change Markdown too.
     docs:
         needs: changes
         if: needs.changes.outputs.code == 'false'
@@ -98,6 +99,12 @@ jobs:
 
             - name: Install
               run: pnpm install --frozen-lockfile
+
+            # The docs job's Markdown check, run for code changes too (Claude's review of PR #14):
+            # pnpm verify runs no Prettier, so without it a code change could merge unformatted
+            # Markdown and the next docs-only change would fail on a file it never touched.
+            - name: Markdown format
+              run: pnpm exec prettier --check "**/*.md"
 
             # The one gate (S62; law P11): build (lint, then each package's typecheck
             # and build), dup:check, test:coverage and size — every law pnpm verify

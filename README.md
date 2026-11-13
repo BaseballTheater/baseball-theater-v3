@@ -80,13 +80,14 @@ pnpm mlb:backfill --from 2024-03-20 --to 2024-11-02      # any range, both dates
   is tracked on its own and given up once it fails (or comes back empty) for 14 consecutive days of games; after
   that it isn't asked for any older date. A run over dates that don't touch an earlier run's counts its own 14 days;
   a run that carries on where another stopped (from the same `--to`, from the day below where it stopped, from a
-  later `--to` whose walk reaches the days it counted, or a newer run ending the day above it) carries on its count.
-  Days with no games aren't remembered, so a run that starts below a game-less gap (an All-Star break, an off day
-  between one-day runs) starts its count again there: that can ask a few more days, but never gives up before 14
-  failed days of games in a row, except after resuming from a resume file saved before this was changed: in one
-  narrow case (a resume that asks again 14 or more incomplete days among answered ones, and they all fail), and when
-  that file's streak or give-up was already counted across runs that didn't touch, which is kept as it was. The live
-  feed itself is never given up: a game whose feed fails leaves its day for the next run.
+  later `--to` whose walk reaches the days it counted, or a newer run ending the day above it) carries on its count
+  (unless that run gave up: then the newer days count their own 14). Days with no games aren't remembered, so a run
+  that starts below a game-less gap (an All-Star break, an off day between one-day runs) starts its count again
+  there: that can ask a few more days, but never gives up before 14 failed days of games in a row, except after
+  resuming from a resume file saved before this was changed: in one narrow case (a resume that asks again 14 or more
+  incomplete days among answered ones, and they all fail), and when that file's streak or give-up was already
+  counted across runs that didn't touch, which is kept as it was. The live feed itself is never given up: a game
+  whose feed fails leaves its day for the next run.
 - **Stopping and resuming.** Stop it any time (Ctrl-C finishes the day in progress; a kill is fine too) and run
   the same command again to resume: a day already complete in the database (its schedule stored, every game
   settled, every final game stored) asks MLB nothing and writes nothing, so it picks up at the first incomplete

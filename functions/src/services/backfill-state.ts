@@ -49,7 +49,7 @@ function wholeProblem(record: Record<string, unknown>, key: string): string | un
  * as one stretch at its last counted day. The file never said which newer days it counted, so
  * the stretch is marked not all failed, with no failures at its newest end: days a resume counts
  * again just above it join it without adding to its streak (no early give-up from counting them
- * twice), the walk below carries its streak on as before, and a newer range counts a streak of
+ * twice; unless it is given up: then they count a stretch of their own), the walk below carries its streak on as before, and a newer range counts a streak of
  * its own. One narrow case can still
  * give up early: a resume that recounts 14 or more days left incomplete among answered ones,
  * failing in a row on the second asking. And the file can't say which days its streak covers,
