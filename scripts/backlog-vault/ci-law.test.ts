@@ -4,7 +4,9 @@
  * including `pnpm dup:check` (L7) and `pnpm size` (L5) — also holds on every change to
  * code, not only where someone runs it locally. A docs-only change runs only the docs
  * checks (owner, 2026-11-07: "Things like this shouldn't trigger CI."), as
- * `scripts/ci-changes.sh` decides; nothing else may skip the gate.
+ * `scripts/ci-changes.sh` decides; nothing else may skip the gate. A code change also runs
+ * the docs job's Markdown format check (Claude's review of PR #14), so unformatted Markdown
+ * can't merge with code and then fail the next docs-only change.
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -19,6 +21,24 @@ const DEPLOY_YML = fileURLToPath(new URL("../../.github/workflows/deploy.yml", i
 export function runSteps(workflow: string): string[]
 {
 	return [...workflow.matchAll(/^\s*run:\s*(.+?)\s*$/gm)].map((m) => m[1]!);
+}
+
+/** The docs job's Markdown format command, which the verify job runs too (Claude's review of PR #14). */
+const MARKDOWN_CHECK = 'pnpm exec prettier --check "**/*.md"';
+
+/**
+ * Asserts a job has a "Markdown format" step that runs `MARKDOWN_CHECK` on every run: its text,
+ * from its `- name:` to the next step's, has no `if:` and no `continue-on-error`.
+ */
+function expectUnconditionalMarkdownStep(job: string): void
+{
+	const start = job.indexOf("- name: Markdown format");
+	expect(start, "a Markdown format step").toBeGreaterThanOrEqual(0);
+	const next = job.indexOf("- name:", start + 1);
+	const step = job.slice(start, next === -1 ? undefined : next);
+	expect(runSteps(step)).toContain(MARKDOWN_CHECK);
+	expect(step).not.toMatch(/^\s*if:/m);
+	expect(step).not.toContain("continue-on-error");
 }
 
 describe("CI runs pnpm verify (law P11)", () =>
@@ -40,6 +60,34 @@ describe("CI runs pnpm verify (law P11)", () =>
 		expect(verifyJob).toContain("if: needs.changes.outputs.code == 'true'");
 		expect([...verifyJob.matchAll(/^ {8}if:/gm)]).toHaveLength(1);
 		expect(ci).toContain('test "$VERIFY $FLOWS $DESIGN $LIGHTHOUSE" = "success success success success"');
+	});
+
+	// Claude's review of PR #14: Markdown format was checked only in the docs job, so a code
+	// change could merge unformatted Markdown and the next docs-only pull request failed on a file
+	// it never touched. The verify job runs the docs job's exact check too (owner, 2026-11-13,
+	// asked "May I add a Markdown formatting check to CI's main verify job?": "yes").
+	it("the Markdown format check runs for code changes too, the same command as the docs job", () =>
+	{
+		const ci = readFileSync(CI_YML, "utf8");
+		const docsJob = ci.slice(ci.indexOf("\n    docs:\n"), ci.indexOf("\n    verify:\n"));
+		const verifyJob = ci.slice(ci.indexOf("\n    verify:\n"), ci.indexOf("\n    flows:\n"));
+		expectUnconditionalMarkdownStep(docsJob);
+		expectUnconditionalMarkdownStep(verifyJob);
+	});
+
+	it("catches a Markdown step in either job that is switched off or allowed to fail", () =>
+	{
+		const ci = readFileSync(CI_YML, "utf8");
+		const docsJob = ci.slice(ci.indexOf("\n    docs:\n"), ci.indexOf("\n    verify:\n"));
+		const verifyJob = ci.slice(ci.indexOf("\n    verify:\n"), ci.indexOf("\n    flows:\n"));
+		const named = "            - name: Markdown format\n";
+		for (const job of [docsJob, verifyJob])
+		{
+			for (const extra of ["              if: false\n", "              continue-on-error: true\n"])
+			{
+				expect(() => expectUnconditionalMarkdownStep(job.replace(named, named + extra)), extra).toThrow();
+			}
+		}
 	});
 
 	it("a pull request is compared with its base and a push with the last commit whose run passed, in CI and Deploy", () =>
