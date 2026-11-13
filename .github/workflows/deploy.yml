@@ -25,6 +25,13 @@ name: Deploy
 # every Worker secret from GitHub secrets. Each step is idempotent (owner, 2026-11-05: "It should be
 # idempotent so it can happen with every deployment. All the bootstrapping should be like that."),
 # so a re-run changes nothing. Secrets come only from GitHub secrets; agents never run this.
+# The version line (#47; owner, 2026-11-13: "Yes, build it that way"): every deploy build first looks
+# up its release with scripts/build-release.sh, the milestone of the pull request whose merge commit it
+# builds (a preview: its own pull request's milestone and head commit), and prints it with the commit,
+# e.g. "v3.2.0 (40767e9)", so the same code reads the same on staging and production. A release can
+# target a docs-only stage commit newer than the one staging serves, so the commits can differ (owner,
+# 2026-11-13: releasing only the served commit "would prevent iterating on stage while waiting to push
+# a release to prod"). Staging and production both write bt-commit.txt, the commit they serve.
 # Sign-in (S116): only production has Logto's machine-to-machine app, so only the production job
 # reads its secrets (LOGTO_S2S_APP_ID, LOGTO_S2S_SECRET; owner, 2026-11-07: "LOGTO_S2S_APP_ID and
 # LOGTO_S2S_SECRET, go ahead"), pushes them as Worker secrets and, after deploying, sets the web
@@ -142,7 +149,20 @@ jobs:
             - name: Install
               run: pnpm install --frozen-lockfile
 
+            # Its own pull request's milestone (#47), read live: it is assigned just after opening.
+            - name: Which release is this build?
+              id: release
+              # Explicit, so pipefail is on too (GitHub's default shell runs bash -e only).
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: scripts/build-release.sh pr ${{ github.event.pull_request.number }}
+
+            # The head commit, not GITHUB_SHA (GitHub's test merge, which no one can look up).
             - name: Build the web app
+              env:
+                  BT_RELEASE: ${{ steps.release.outputs.release }}
+                  BT_COMMIT: ${{ github.event.pull_request.head.sha }}
               run: pnpm --filter @bt/web run build
 
             - name: Bootstrap (staging branch, bt-staging, Worker config and secrets)
@@ -279,9 +299,21 @@ jobs:
               if: steps.served.outputs.deploy == 'true'
               run: pnpm install --frozen-lockfile
 
+            # The milestone of the pull request this merge commit merged (#47).
+            - name: Which release is this build?
+              if: steps.served.outputs.deploy == 'true'
+              id: release
+              # Explicit, so pipefail is on too (GitHub's default shell runs bash -e only).
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: scripts/build-release.sh merged "${{ github.sha }}"
+
             # bt-commit.txt is how the next run learns what staging serves (see above).
             - name: Build the web app
               if: steps.served.outputs.deploy == 'true'
+              env:
+                  BT_RELEASE: ${{ steps.release.outputs.release }}
               run: |
                   pnpm --filter @bt/web run build
                   echo "${{ github.sha }}" >web/dist/bt-commit.txt
@@ -309,6 +341,11 @@ jobs:
     production:
         if: github.event_name == 'release' && github.event.action == 'published'
         needs: [verify]
+        # Its own, so a change to it keeps what the release lookup needs: reading which pull request
+        # merged the released commit (scripts/build-release.sh merged, #47).
+        permissions:
+            contents: read
+            pull-requests: read
         runs-on: ubuntu-latest
         timeout-minutes: 20
         concurrency:
@@ -342,8 +379,31 @@ jobs:
             - name: Install
               run: pnpm install --frozen-lockfile
 
+            # The tag's commit is the stage merge commit staging built, so the lookup, and the label,
+            # match staging's (#47). The release procedure gives that pull request the release's
+            # milestone; a mismatch is only warned about, since the build is still the tagged code.
+            - name: Which release is this build?
+              id: release
+              # Explicit, so pipefail is on too (GitHub's default shell runs bash -e only).
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  TAG: ${{ github.event.release.tag_name }}
+              run: |
+                  out="$(scripts/build-release.sh merged "$(git rev-parse HEAD)")"
+                  echo "$out"
+                  release="${out#release=}"
+                  if [ "$release" != "$TAG" ]; then
+                      echo "::warning::the released commit's pull request is in milestone '$release', not $TAG"
+                  fi
+
+            # bt-commit.txt names the commit production serves, as on staging (#47).
             - name: Build the web app
-              run: pnpm --filter @bt/web run build
+              env:
+                  BT_RELEASE: ${{ steps.release.outputs.release }}
+              run: |
+                  pnpm --filter @bt/web run build
+                  git rev-parse HEAD >web/dist/bt-commit.txt
 
             - name: Bootstrap (production branch, bt-production, Worker config and secrets)
               id: bootstrap

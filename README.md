@@ -185,7 +185,18 @@ automatically 2. Mirror"):
   always shows what production runs. It never forces `main`.
 - Agents never push directly to `stage` or `main` and never merge into `main`. The coordinator
   publishes a release only when the owner says so; each release has a milestone, and every pull
-  request into `stage` is assigned to the next one. The DNS cutover stays the owner's.
+  request into `stage` is assigned to the next one; CI's `milestone` job fails `ci-passed` until it
+  is (#47; owner, 2026-11-13: "Yes, build it that way"). The DNS cutover stays the owner's.
+- **The version line.** The foot of the nav rail reads `<release> (<commit>)`, e.g. `v3.2.0 (40767e9)`: the
+  milestone of the pull request whose merge commit was built (`scripts/build-release.sh`), so staging
+  and production read the same for the same code (#47). A deployed commit that no pull request merged
+  reads `unreleased (…)`; a preview reads its own pull request's milestone and head commit; local and
+  CI builds read `dev (…)`. A release may target a docs-only `stage` commit newer than the one staging
+  serves, and then the commits differ between the two sites though the code is the same (owner,
+  2026-11-13: releasing only the served commit "would prevent iterating on stage while waiting to
+  push a release to prod"). The label is fixed when the build runs: if a merged pull request's
+  milestone is changed after staging built it, staging keeps the old label until its next deploy. Both
+  sites serve `bt-commit.txt`, the full commit they run.
 
 - **Previews.** Every pull request that changes code gets its own Worker, `baseball-theater-pr-<number>` on workers.dev,
   once `pnpm verify` passes, and the workflow posts its address on the pull request. Previews share

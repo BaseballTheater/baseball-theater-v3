@@ -212,13 +212,35 @@ jobs:
             - name: Performance budgets (Lighthouse CI)
               run: pnpm lighthouse
 
+    # Every pull request into stage has an open milestone, the release it ships in (#47; owner, 2026-11-13:
+    # "Yes, build it that way"): the site's version line names it, and a release is its milestone's
+    # pull requests. Read live, not from this run's event: the release rule assigns the milestone
+    # just after opening the pull request, and a re-run replays the old event. Docs-only pull
+    # requests need one too, so it doesn't wait for `changes`. Adding or removing a milestone later
+    # re-runs this job (and so ci-passed) from milestone-recheck.yml, not a whole CI run.
+    milestone:
+        if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'stage'
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        permissions:
+            contents: read
+            issues: read
+            pull-requests: read
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: The pull request has a milestone
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: scripts/build-release.sh require ${{ github.event.pull_request.number }}
+
     # One check that stands for all of them, for a branch rule to require (so the rule needn't
     # change when the jobs do). It passes only when the jobs this change needed ran and passed:
     # all four for code, the docs job for a docs-only change; a skipped job is fine only when the
-    # change didn't need it.
+    # change didn't need it. A pull request into stage also needs its milestone (#47).
     ci-passed:
         if: always()
-        needs: [changes, docs, verify, flows, design-specs, lighthouse]
+        needs: [changes, docs, verify, flows, design-specs, lighthouse, milestone]
         runs-on: ubuntu-latest
         steps:
             - name: Every CI job this change needed passed
@@ -230,8 +252,11 @@ jobs:
                   FLOWS: ${{ needs.flows.result }}
                   DESIGN: ${{ needs.design-specs.result }}
                   LIGHTHOUSE: ${{ needs.lighthouse.result }}
+                  MILESTONE: ${{ needs.milestone.result }}
+                  INTO_STAGE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'stage' }}
               run: |
                   test "$CHANGES" = success
+                  if [ "$INTO_STAGE" = true ]; then test "$MILESTONE" = success; else test "$MILESTONE" = skipped; fi
                   if [ "$CODE" = true ]; then
                       test "$VERIFY $FLOWS $DESIGN $LIGHTHOUSE" = "success success success success"
                   else

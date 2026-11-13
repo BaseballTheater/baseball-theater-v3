@@ -14,6 +14,19 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## Staging and the live site show the same version for the same build
+
+- **Before, the version at the foot of the menu was a deploy counter, so the same code read v3.0.191 on staging
+  and v3.0.193 on the live site, and its "3.0" never matched the release. Now it names the release the change
+  ships in and its commit, like `v3.2.0 (40767e9)`, the same wherever that code runs.** Details: fixes #47 —
+  each deploy looks up the milestone of the pull request whose merge commit it builds
+  (`scripts/build-release.sh`); CI's new `milestone` job makes every pull request into `stage` carry one
+  (`ci-passed` needs it; `milestone-recheck.yml` re-checks when one is added); production now writes
+  `bt-commit.txt` too. A commit no pull request merged reads `unreleased`, a local build `dev`. Two
+  caveats: a release may target a docs-only commit newer than the one staging serves, so the commits shown can
+  differ though the code is the same; and the label is fixed at build time, so if a merged pull request's milestone
+  changes after staging built it, staging keeps the old label until its next deploy.
+
 ## Deleting your account works on the live site
 
 - **Before, deleting your account on the live site always failed with "Couldn't finish deleting your account", and

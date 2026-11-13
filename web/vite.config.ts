@@ -2,36 +2,29 @@ import { execSync } from "node:child_process";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { buildInfo } from "./src/layout/version.js";
 import { PWA_OPTIONS } from "./src/pwa/options.js";
 
-/**
- * The commit this build is from: Actions names it, a local build asks git, and
- * a build outside a checkout says so. Short form only (S60 version line).
- */
-function buildCommit(): string
+/** A local build's commit, short form; throws outside a checkout (`buildInfo` then says "unknown"). */
+function gitShort(): string
 {
-	if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA.slice(0, 7);
-	try
-	{
-		return execSync("git rev-parse --short=7 HEAD", {
-			encoding: "utf8",
-		}).trim();
-	}
-	catch
-	{
-		return "unknown";
-	}
+	return execSync("git rev-parse --short=7 HEAD", {
+		encoding: "utf8",
+	}).trim();
 }
+
+const BUILD = buildInfo(process.env, gitShort);
 
 export default defineConfig({
 	// The installed app (ADR-023, S73): manifest, icons and the service worker, from src/pwa/options.ts.
 	plugins: [react(), VitePWA(PWA_OPTIONS)],
-	// The rail's version line (S60, `src/layout/version.ts`): the Actions run
-	// number counts up on every GitHub Actions build without touching
-	// package.json (owner, 2026-10-21); any other build says "dev".
+	// The rail's version line (S60, #47, `src/layout/version.ts`): the release a
+	// deploy looked up (its pull request's milestone, `scripts/build-release.sh`)
+	// and the commit, the same for the same code on staging and production; any
+	// build that looked nothing up says "dev". Nothing is written to package.json.
 	define: {
-		__BT_BUILD__: JSON.stringify(process.env.GITHUB_RUN_NUMBER ?? "dev"),
-		__BT_COMMIT__: JSON.stringify(buildCommit()),
+		__BT_RELEASE__: JSON.stringify(BUILD.release),
+		__BT_COMMIT__: JSON.stringify(BUILD.commit),
 	},
 	server: {
 		port: 5173,
