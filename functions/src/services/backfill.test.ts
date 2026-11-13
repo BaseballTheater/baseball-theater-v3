@@ -14,7 +14,9 @@ import path from "node:path";
 import type {
 	GameSnapshot, ScheduleDay, ScheduleGameSummary, Unversioned,
 } from "@bt/domain";
-import { addDays, GIVE_UP_AFTER_DAYS } from "@bt/domain";
+import {
+	addDays, GIVE_UP_AFTER_DAYS, sourceGivenUpAt,
+} from "@bt/domain";
 import type {
 	GameProjectionRepository, GameRepository, MlbGameSources, ScheduleRepository,
 } from "@bt/ports";
@@ -401,6 +403,32 @@ describe("runBackfill (S122)", () =>
 		expect(flaky.count("schedule", "2026-07-03")).toBe(1);
 	});
 
+	it("revisits: a run that asks again only for days it already counted saves no resume state", async () =>
+	{
+		const mlb = new FakeMlb();
+		// Each day's second game has no live feed on the first run, so every day is counted but left incomplete.
+		mlb.fails.feed = (pk) => pk % 10 === 1;
+		const repos = counted(memoryRepos());
+		const state = memoryStore();
+		await runBackfill(deps(mlb, repos, state), JULY);
+		expect(sourceGivenUpAt(state.saved?.sources.content)).toBeUndefined();
+		expect(state.saved?.sources.content?.stretches).toHaveLength(1);
+		mlb.fails.feed = undefined;
+		let saves = 0;
+		const second = await runBackfill(deps(mlb, repos, {
+			load: () => state.load(),
+			save: async (saved) =>
+			{
+				saves++;
+				await state.save(saved);
+			},
+		}), JULY);
+		// Each day's second game is fetched now and every source answers for it, but every day was already counted.
+		expect(second.incomplete).toEqual([]);
+		expect(mlb.count("content", "2026-07-01")).toBe(2);
+		expect(saves).toBe(0);
+	});
+
 	it("gives up a source after 14 consecutive failed days of games, asking it for no older day; a day with any success resets the count", async () =>
 	{
 		const mlb = new FakeMlb();
@@ -440,8 +468,14 @@ describe("runBackfill (S122)", () =>
 		expect(first.days).toBe(13);
 		expect(first.givenUp).toEqual({});
 		expect(state.saved?.sources.graphContent).toEqual({
-			streak: 13,
-			lastCountedDay: "2026-07-19",
+			stretches: [{
+				newest: "2026-07-31",
+				oldest: "2026-07-19",
+				streak: 13,
+				newestStreak: 13,
+				allFailed: true,
+				givenUp: false,
+			}],
 		});
 		const before = mlb.count("graphContent");
 		const second = await runBackfill(deps(mlb, repos, state), range);
@@ -449,7 +483,77 @@ describe("runBackfill (S122)", () =>
 			graphContent: "2026-07-18",
 		});
 		expect(mlb.count("graphContent") - before).toBe(2);
-		expect(state.saved?.sources.graphContent?.givenUpAt).toBe("2026-07-18");
+		expect(sourceGivenUpAt(state.saved?.sources.graphContent)).toBe("2026-07-18");
+	});
+
+	it("two runs over ranges that don't touch: a newer range after a give-up counts its own streak and gives the source up again", async () =>
+	{
+		const mlb = new FakeMlb();
+		mlb.fails.content = () => true;
+		const state = memoryStore();
+		const older = await runBackfill(deps(mlb, counted(memoryRepos()), state), {
+			from: "2026-06-01",
+			to: "2026-06-30",
+		});
+		expect(older.givenUp).toEqual({
+			content: "2026-06-17",
+		});
+		mlb.requests.length = 0;
+		const lines: string[] = [];
+		const newer = await runBackfill(deps(mlb, counted(memoryRepos()), state, {
+			log: (line) => lines.push(line),
+		}), {
+			from: "2026-07-01",
+			to: "2026-07-31",
+		});
+		const gaveUp = lines.filter((line) => line.includes("gave up content"));
+		expect(gaveUp).toHaveLength(1);
+		expect(gaveUp[0]).toMatch(/^2026-07-18: /);
+		// Content is asked for 07-31 … 07-18 (14 days, two games each) and for no older day of the newer range.
+		expect(newer.givenUp).toEqual({
+			content: "2026-07-18",
+		});
+		expect(mlb.count("content")).toBe(GIVE_UP_AFTER_DAYS * 2);
+		expect(mlb.count("content", "2026-07-17")).toBe(0);
+	});
+
+	it("a newer range with fewer than 14 failed days keeps the earlier give-up and reports no new one", async () =>
+	{
+		const mlb = new FakeMlb();
+		mlb.fails.content = () => true;
+		const state = memoryStore();
+		await runBackfill(deps(mlb, counted(memoryRepos()), state), {
+			from: "2026-06-01",
+			to: "2026-06-30",
+		});
+		const lines: string[] = [];
+		const newer = await runBackfill(deps(mlb, counted(memoryRepos()), state, {
+			log: (line) => lines.push(line),
+		}), {
+			from: "2026-07-20",
+			to: "2026-07-31",
+		});
+		expect(newer.givenUp).toEqual({
+			content: "2026-06-17",
+		});
+		expect(lines.filter((line) => line.includes("gave up"))).toEqual([]);
+		expect(mlb.count("content", "2026-07-20")).toBe(2);
+	});
+
+	it("a day whose schedule MLB didn't serve is walked but not counted: it neither breaks nor adds to the streak", async () =>
+	{
+		const mlb = new FakeMlb();
+		mlb.fails.content = () => true;
+		mlb.fails.schedule = (_pk, date) => date === "2026-07-25";
+		const result = await runBackfill(deps(mlb, counted(memoryRepos()), memoryStore()), {
+			from: "2026-06-01",
+			to: "2026-07-31",
+		});
+		// 07-31 … 07-26 and 07-24 … 07-17 are the 14 failed days of games.
+		expect(result.givenUp).toEqual({
+			content: "2026-07-17",
+		});
+		expect(result.incomplete).toEqual(["2026-07-25"]);
 	});
 
 	it("live feed: a game whose feed fails is never given up; its day stays incomplete and is retried next run", async () =>
@@ -494,7 +598,7 @@ describe("runBackfill (S122)", () =>
 		expect(await readdir(dir)).toEqual(["localhost--bt.json"]);
 		const saved = JSON.parse(await readFile(path.join(dir, "localhost--bt.json"), "utf8")) as BackfillState & { database: unknown };
 		expect(saved.database).toEqual(local);
-		expect(saved.sources.content?.givenUpAt).toBe("2026-07-18");
+		expect(sourceGivenUpAt(saved.sources.content)).toBe("2026-07-18");
 
 		// Resumed against the same database (fresh repos stand in for days not yet stored): no content request at or before 07-18.
 		mlb.requests.length = 0;
@@ -526,12 +630,325 @@ describe("runBackfill (S122)", () =>
 			name: "bt",
 		};
 		const file = path.join(dir, "localhost--bt.json");
-		for (const text of ["", "{nope", "[]", "{\"sources\":{\"content\":{\"streak\":\"x\"}}}", "{\"sources\":{\"videos\":{\"streak\":1}}}", "{\"sources\":{\"content\":{\"streak\":1,\"givenUpAt\":\"2026-02-30\"}}}"])
+		// Each bad stretch is a good one with one thing wrong, so the check it trips is the one named.
+		const good = {
+			newest: "2026-07-31",
+			oldest: "2026-07-01",
+			streak: 1,
+			newestStreak: 0,
+			allFailed: false,
+			givenUp: false,
+		};
+		const stretches = (...list: unknown[]) => JSON.stringify({
+			sources: {
+				content: {
+					stretches: list,
+				},
+			},
+		});
+		const old = (streak: Record<string, unknown>) => JSON.stringify({
+			sources: {
+				content: streak,
+			},
+		});
+		const { allFailed: _allFailed, ...noAllFailed } = good;
+		const { newestStreak: _newestStreak, ...noNewestStreak } = good;
+		const { givenUp: _givenUp, ...noGivenUp } = good;
+		for (const text of ["", "{nope", "[]", "{\"sources\":{\"content\":{\"streak\":\"x\"}}}", "{\"sources\":{\"videos\":{\"streak\":1}}}", "{\"sources\":{\"content\":{\"streak\":1,\"givenUpAt\":\"2026-02-30\"}}}",
+			"{\"sources\":{\"content\":{\"stretches\":\"x\"}}}", stretches(1),
+			stretches({
+				...good,
+				newest: "x",
+			}), stretches({
+				...good,
+				newest: "2026-06-30",
+			}), stretches({
+				...good,
+				streak: -1,
+			}), stretches({
+				...good,
+				newestStreak: 1.5,
+			}), stretches(noAllFailed), stretches(noNewestStreak), stretches(noGivenUp),
+			stretches({
+				...good,
+				streak: 0,
+				newestStreak: 0,
+				allFailed: true,
+			}), stretches({
+				...good,
+				streak: 3,
+				newestStreak: 2,
+				allFailed: true,
+			}), stretches({
+				...good,
+				streak: GIVE_UP_AFTER_DAYS,
+			}), stretches({
+				...good,
+				newestStreak: GIVE_UP_AFTER_DAYS,
+			}), stretches(good, {
+				...good,
+				newest: "2026-07-15",
+				oldest: "2026-06-20",
+			}), stretches(good, {
+				...good,
+				newest: "2026-07-01",
+				oldest: "2026-06-20",
+			}),
+			old({
+				streak: 14,
+				givenUpAt: "2026-07-18",
+			}), old({
+				streak: 14,
+				lastCountedDay: "2026-07-17",
+				givenUpAt: "2026-07-18",
+			}), old({
+				streak: 3,
+				lastCountedDay: "2026-07-18",
+				givenUpAt: "2026-07-18",
+			}), old({
+				streak: 14,
+				lastCountedDay: "2026-07-18",
+			})])
 		{
 			await writeFile(file, text);
 			await expect(fileResumeStore(dir, target).load(), text).rejects.toThrow(`${file} is not a readable backfill resume file`);
 			await expect(fileResumeStore(dir, target).load(), text).rejects.toThrow("delete it");
 		}
+	});
+
+	it("resume file: a file saved before streaks were kept per stretch still loads, as one stretch at its last counted day", async () =>
+	{
+		const dir = await mkdtemp(path.join(tmpdir(), "bt-backfill-"));
+		dirs.push(dir);
+		const target = {
+			host: "localhost",
+			name: "bt",
+		};
+		await writeFile(path.join(dir, "localhost--bt.json"), JSON.stringify({
+			sources: {
+				content: {
+					streak: 13,
+					lastCountedDay: "2026-07-19",
+				},
+				playMetrics: {
+					streak: 14,
+					lastCountedDay: "2026-07-18",
+					givenUpAt: "2026-07-18",
+				},
+				graphContent: {
+					streak: 0,
+				},
+			},
+		}));
+		expect((await fileResumeStore(dir, target).load()).sources).toEqual({
+			content: {
+				stretches: [{
+					newest: "2026-07-19",
+					oldest: "2026-07-19",
+					streak: 13,
+					newestStreak: 0,
+					allFailed: false,
+					givenUp: false,
+				}],
+			},
+			playMetrics: {
+				stretches: [{
+					newest: "2026-07-18",
+					oldest: "2026-07-18",
+					streak: 14,
+					newestStreak: 0,
+					allFailed: false,
+					givenUp: true,
+				}],
+			},
+			graphContent: {
+				stretches: [],
+			},
+		});
+	});
+
+	it("old resume file: a give-up saved in the old shape still holds for older days, and a newer range gives the source up again", async () =>
+	{
+		const dir = await mkdtemp(path.join(tmpdir(), "bt-backfill-"));
+		dirs.push(dir);
+		const target = {
+			host: "localhost",
+			name: "bt",
+		};
+		await writeFile(path.join(dir, "localhost--bt.json"), JSON.stringify({
+			sources: {
+				content: {
+					streak: 14,
+					lastCountedDay: "2026-06-17",
+					givenUpAt: "2026-06-17",
+				},
+			},
+		}));
+		const mlb = new FakeMlb();
+		mlb.fails.content = () => true;
+		const result = await runBackfill(deps(mlb, counted(memoryRepos()), fileResumeStore(dir, target)), {
+			from: "2026-06-10",
+			to: "2026-07-31",
+		});
+		expect(result.givenUp).toEqual({
+			content: "2026-07-18",
+		});
+		expect(mlb.count("content")).toBe(GIVE_UP_AFTER_DAYS * 2);
+	});
+
+	it("old resume file: the owner's shape (streak 0 at 2026-09-01) doesn't stop a newer range from counting and giving up", async () =>
+	{
+		const dir = await mkdtemp(path.join(tmpdir(), "bt-backfill-"));
+		dirs.push(dir);
+		const target = {
+			host: "localhost",
+			name: "bt",
+		};
+		await writeFile(path.join(dir, "localhost--bt.json"), JSON.stringify({
+			sources: Object.fromEntries(["content", "playMetrics", "graphContent"].map((source) => [source, {
+				streak: 0,
+				lastCountedDay: "2026-09-01",
+			}])),
+		}));
+		const mlb = new FakeMlb();
+		mlb.fails.graphContent = () => true;
+		const result = await runBackfill(deps(mlb, counted(memoryRepos()), fileResumeStore(dir, target)), {
+			from: "2026-09-10",
+			to: "2026-10-10",
+		});
+		expect(result.givenUp).toEqual({
+			graphContent: "2026-09-27",
+		});
+	});
+
+	it("old resume file: a resume that recounts days above an old streak of 13 doesn't add them to it", async () =>
+	{
+		const dir = await mkdtemp(path.join(tmpdir(), "bt-backfill-"));
+		dirs.push(dir);
+		const target = {
+			host: "localhost",
+			name: "bt",
+		};
+		await writeFile(path.join(dir, "localhost--bt.json"), JSON.stringify({
+			sources: {
+				content: {
+					streak: 13,
+					lastCountedDay: "2026-07-19",
+				},
+			},
+		}));
+		// Fresh repos: 07-31 … 07-20, which the old run counted, are incomplete and asked again.
+		const mlb = new FakeMlb();
+		mlb.fails.content = () => true;
+		const result = await runBackfill(deps(mlb, counted(memoryRepos()), fileResumeStore(dir, target)), {
+			from: "2026-07-01",
+			to: "2026-07-31",
+		});
+		expect(result.givenUp).toEqual({
+			content: "2026-07-18",
+		});
+		expect(mlb.count("content", "2026-07-18")).toBe(2);
+	});
+
+	it("old resume file: a plain resume from an old streak of 13 gives up on the next failed day", async () =>
+	{
+		const dir = await mkdtemp(path.join(tmpdir(), "bt-backfill-"));
+		dirs.push(dir);
+		const target = {
+			host: "localhost",
+			name: "bt",
+		};
+		const mlb = new FakeMlb();
+		mlb.fails.content = () => true;
+		const repos = counted(memoryRepos());
+		const range = {
+			from: "2026-06-01",
+			to: "2026-07-31",
+		};
+		// The first run stores 07-31 … 07-19; its streak is then written as an old file would have held it.
+		await runBackfill(deps(mlb, repos, memoryStore(), stopAfter(13)), range);
+		await writeFile(path.join(dir, "localhost--bt.json"), JSON.stringify({
+			sources: {
+				content: {
+					streak: 13,
+					lastCountedDay: "2026-07-19",
+				},
+			},
+		}));
+		mlb.requests.length = 0;
+		const resumed = await runBackfill(deps(mlb, repos, fileResumeStore(dir, target)), range);
+		expect(resumed.givenUp).toEqual({
+			content: "2026-07-18",
+		});
+		expect(mlb.count("content")).toBe(2);
+	});
+
+	it("resume file: stretches saved oldest first load newest first", async () =>
+	{
+		const dir = await mkdtemp(path.join(tmpdir(), "bt-backfill-"));
+		dirs.push(dir);
+		const target = {
+			host: "localhost",
+			name: "bt",
+		};
+		const older = {
+			newest: "2026-06-30",
+			oldest: "2026-06-01",
+			streak: 2,
+			newestStreak: 0,
+			allFailed: false,
+			givenUp: false,
+		};
+		const newer = {
+			newest: "2026-07-31",
+			oldest: "2026-07-01",
+			streak: 3,
+			newestStreak: 3,
+			allFailed: true,
+			givenUp: false,
+		};
+		await writeFile(path.join(dir, "localhost--bt.json"), JSON.stringify({
+			sources: {
+				content: {
+					stretches: [older, newer],
+				},
+			},
+		}));
+		expect((await fileResumeStore(dir, target).load()).sources.content?.stretches).toEqual([newer, older]);
+	});
+
+	it("resume file: a stretch counted just above a given-up one loads beside it", async () =>
+	{
+		const dir = await mkdtemp(path.join(tmpdir(), "bt-backfill-"));
+		dirs.push(dir);
+		const target = {
+			host: "localhost",
+			name: "bt",
+		};
+		const givenUp = {
+			newest: "2010-04-30",
+			oldest: "2010-04-17",
+			streak: GIVE_UP_AFTER_DAYS,
+			newestStreak: GIVE_UP_AFTER_DAYS,
+			allFailed: true,
+			givenUp: true,
+		};
+		const above = {
+			newest: "2010-05-07",
+			oldest: "2010-05-01",
+			streak: 7,
+			newestStreak: 7,
+			allFailed: true,
+			givenUp: false,
+		};
+		await writeFile(path.join(dir, "localhost--bt.json"), JSON.stringify({
+			sources: {
+				content: {
+					stretches: [above, givenUp],
+				},
+			},
+		}));
+		expect((await fileResumeStore(dir, target).load()).sources.content?.stretches).toEqual([above, givenUp]);
 	});
 
 	it("resume file: two saves at once to one database both finish, leaving one whole file", async () =>
@@ -544,20 +961,22 @@ describe("runBackfill (S122)", () =>
 		};
 		const a = fileResumeStore(dir, target);
 		const b = fileResumeStore(dir, target);
-		await Promise.all([a.save({
+		const saving = (streak: number) => ({
 			sources: {
 				content: {
-					streak: 1,
+					stretches: [{
+						newest: "2026-07-31",
+						oldest: "2026-07-31",
+						streak,
+						newestStreak: streak,
+						allFailed: true,
+						givenUp: false,
+					}],
 				},
 			},
-		}), b.save({
-			sources: {
-				content: {
-					streak: 2,
-				},
-			},
-		})]);
-		expect([1, 2]).toContain((await a.load()).sources.content?.streak);
+		});
+		await Promise.all([a.save(saving(1)), b.save(saving(2))]);
+		expect([1, 2]).toContain((await a.load()).sources.content?.stretches[0]?.streak);
 		expect(await readdir(dir)).toEqual(["localhost--bt.json"]);
 	});
 
@@ -570,8 +989,14 @@ describe("runBackfill (S122)", () =>
 		state.saved = {
 			sources: {
 				content: {
-					streak: GIVE_UP_AFTER_DAYS - 1,
-					lastCountedDay: "2026-07-11",
+					stretches: [{
+						newest: "2026-07-31",
+						oldest: "2026-07-11",
+						streak: GIVE_UP_AFTER_DAYS - 1,
+						newestStreak: GIVE_UP_AFTER_DAYS - 1,
+						allFailed: true,
+						givenUp: false,
+					}],
 				},
 			},
 		};
@@ -591,8 +1016,14 @@ describe("runBackfill (S122)", () =>
 		// 07-10's content answered, so the streak reset there; 07-09's failure is the first of a new one.
 		expect(resumed.givenUp).toEqual({});
 		expect(state.saved?.sources.content).toEqual({
-			streak: 1,
-			lastCountedDay: "2026-07-09",
+			stretches: [{
+				newest: "2026-07-31",
+				oldest: "2026-07-09",
+				streak: 1,
+				newestStreak: GIVE_UP_AFTER_DAYS - 1,
+				allFailed: false,
+				givenUp: false,
+			}],
 		});
 	});
 

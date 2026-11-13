@@ -10,7 +10,7 @@
  * today is past it) and every final game is stored, final, with a current projection. A complete day asks MLB nothing and writes nothing, so a second run, or
  * a run after a stop, goes straight to the first incomplete day. A game whose projection fell
  * behind its snapshot (a stop between `storeGame`'s two writes) is repaired from the stored
- * snapshot. The only state outside the database is each extra source's give-up streak
+ * snapshot. The only state outside the database is each extra source's counted stretches
  * ({@link ResumeStore}, AC 8).
  *
  * The game's three extra sources — content (videos and recap), play metrics and the GraphQL
@@ -24,13 +24,17 @@
  * the games unwritten, so the resume fetches and counts them, where writing first would leave
  * stored games the resume skips, with their answers never counted. A day is counted once,
  * from the games fetched that run: if only some of its feeds succeed, the day is counted from
- * those, and the rest, fetched by a later run, don't count toward the streak.
+ * those, and the rest, fetched by a later run, don't count toward the streak. A run that
+ * continues or touches an earlier run's counted days joins their streak; a run over dates that
+ * don't (a newer range, or an older one) counts a streak of its own, so it can give a source up
+ * again without continuing an unrelated streak.
  */
 import type {
 	GameGraphContent, GamePlayMetrics, GameSnapshot, ScheduleDay, SourceStreak, Unversioned,
 } from "@bt/domain";
 import {
-	backfillDays, isFinalStatus, isScheduleDaySettled, isSourceGivenUp, mlbToday, normalizeStatusCode, recordSourceDay, scheduleWindowMode,
+	backfillDays, GIVE_UP_AFTER_DAYS, isFinalStatus, isScheduleDaySettled, isSourceGivenUp, mlbToday, normalizeStatusCode, recordSourceDay, scheduleWindowMode,
+	sourceGivenUpAt,
 } from "@bt/domain";
 import type {
 	GameEditorial, GameProjectionRepository, GameRepository, MlbGameSources, ScheduleRepository,
@@ -42,10 +46,10 @@ import {
 
 /** The extra sources a game is hydrated from beside its live feed, each given up on its own. */
 export const EXTRA_SOURCES = ["content", "playMetrics", "graphContent"] as const;
-/** One of {@link EXTRA_SOURCES}: the key each give-up streak is kept under in {@link BackfillState}. */
+/** One of {@link EXTRA_SOURCES}: the key each source's counted stretches are kept under in {@link BackfillState}. */
 export type ExtraSource = (typeof EXTRA_SOURCES)[number];
 
-/** What a resumed run needs that the database doesn't hold: each extra source's give-up streak. */
+/** What a resumed run needs that the database doesn't hold: each extra source's counted stretches. */
 export type BackfillState = {
 	sources: Partial<Record<ExtraSource, SourceStreak>>;
 };
@@ -89,7 +93,7 @@ export type BackfillResult = {
 	repaired: number;
 	/** Days left incomplete, for the next run: unsettled games, or a schedule or feed MLB didn't serve. */
 	incomplete: string[];
-	/** Each given-up source and the day it was given up at. */
+	/** Each given-up source and the newest day it was given up at (it is skipped on that day and every older one). */
 	givenUp: Partial<Record<ExtraSource, string>>;
 	/** Whether the walk stopped early (`signal`). */
 	stopped: boolean;
@@ -189,7 +193,7 @@ export async function runBackfill(deps: BackfillDeps, range: { from: string;
 	};
 	for (const source of EXTRA_SOURCES)
 	{
-		const givenUpAt = state.sources[source]?.givenUpAt;
+		const givenUpAt = sourceGivenUpAt(state.sources[source]);
 		if (givenUpAt) result.givenUp[source] = givenUpAt;
 	}
 
@@ -251,16 +255,18 @@ export async function runBackfill(deps: BackfillDeps, range: { from: string;
 			const answers = outcomes.flatMap((outcome) => outcome.kind === "fetched" && outcome.answered[source] !== undefined ? [outcome.answered[source]] : []);
 			if (answers.length === 0) continue;
 			const before = state.sources[source] ?? {
-				streak: 0,
+				stretches: [],
 			};
-			const after = recordSourceDay(before, day, !answers.includes(true));
+			const after = recordSourceDay(before, day, !answers.includes(true), range.to);
 			if (after === before) continue;
 			state.sources[source] = after;
 			stateChanged = true;
-			if (after.givenUpAt && !before.givenUpAt)
+			// Every counted day is newer than any give-up so far, so a new give-up moves the newest one.
+			const givenUpAt = sourceGivenUpAt(after);
+			if (givenUpAt !== undefined && givenUpAt !== sourceGivenUpAt(before))
 			{
-				result.givenUp[source] = after.givenUpAt;
-				log(`${day}: gave up ${source} after ${after.streak} days of games without it; not asked again for older days`);
+				result.givenUp[source] = givenUpAt;
+				log(`${day}: gave up ${source} after ${GIVE_UP_AFTER_DAYS} days of games without it in a row; not asked again for older days`);
 			}
 		}
 		// Saved before the day's games are written, so a stop between the two can't lose the day's answers.
