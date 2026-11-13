@@ -269,11 +269,31 @@ describe("recordSourceDay (S122 AC 7)", () =>
 		// Run 1, --to 2010-04-30: 04-30 answered, then 14 failed days give up at 04-16.
 		const first = countDays(recordSourceDay(FRESH, "2010-04-30", false, "2010-04-30"), "2010-04-29", GIVE_UP_AFTER_DAYS, "2010-04-30");
 		expect(sourceGivenUpAt(first)).toBe("2010-04-16");
-		// Catch-up run --to 2010-05-01, 05-01 answered: it joins the stretch below, give-up and all.
+		// Catch-up run --to 2010-05-01, 05-01 answered: it counts a stretch of its own, and the give-up below holds.
 		const caughtUp = recordSourceDay(first, "2010-05-01", false, "2010-05-01");
-		expect(caughtUp.stretches).toHaveLength(1);
+		expect(caughtUp.stretches).toHaveLength(2);
 		expect(sourceGivenUpAt(caughtUp)).toBe("2010-04-16");
 		expect(isSourceGivenUp(caughtUp, "2010-04-15")).toBe(true);
+	});
+
+	it("one-day runs above a given-up stretch count their own streak: the 14th failed day above moves the give-up", () =>
+	{
+		// --from 2010-04-01 --to 2010-04-30, every day failing: given up at 04-17.
+		let state = countDays(FRESH, "2010-04-30", GIVE_UP_AFTER_DAYS);
+		expect(sourceGivenUpAt(state)).toBe("2010-04-17");
+		for (let i = 0; i < GIVE_UP_AFTER_DAYS - 1; i++) state = countDays(state, addDays("2010-05-01", i), 1);
+		expect(sourceGivenUpAt(state)).toBe("2010-04-17");
+		state = countDays(state, "2010-05-14", 1);
+		expect(sourceGivenUpAt(state)).toBe("2010-05-01");
+		expect(isSourceGivenUp(state, "2010-04-17")).toBe(true);
+	});
+
+	it("weekly runs above a given-up stretch count their own streak: two failed weeks move the give-up", () =>
+	{
+		const first = countDays(FRESH, "2010-04-30", GIVE_UP_AFTER_DAYS);
+		const week = countDays(first, "2010-05-07", 7);
+		expect(sourceGivenUpAt(week)).toBe("2010-04-17");
+		expect(sourceGivenUpAt(countDays(week, "2010-05-14", 7))).toBe("2010-05-01");
 	});
 
 	it("joining a stretch with a success in it adds no failures across the success", () =>

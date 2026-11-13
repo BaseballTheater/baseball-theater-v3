@@ -150,9 +150,11 @@ function joinStretches(upper: SourceStretch, lower: SourceStretch): SourceStretc
  *   above the stretch, or a resume from just below a stop, or across the off-season). So a run
  *   carries a streak down through an older stretch, and folds in what it counted above that.
  * - The day joins the stretch directly below it (no day the walk would visit between), unless
- *   the day's own stretch is already given up (it keeps its own, newer give-up): so catch-up
- *   runs, each ending the day above the last one's newest day, count failures in a row across
- *   them, whatever the older days below them hold.
+ *   either is already given up: so catch-up runs, each ending the day above the last one's
+ *   newest day, count failures in a row across them, whatever the older days below them hold.
+ *   A given-up stretch is never joined from above, so newer days count a streak of their own
+ *   and give up after their own 14, while the older give-up still holds below (PR #46's
+ *   review: joining kept the old give-up day, and newer failures never moved it).
  * - Anything else starts a stretch of its own, counting from zero.
  *
  * Days with no games aren't recorded, so a stretch never joins across one this run didn't walk
@@ -186,7 +188,7 @@ export function recordSourceDay(state: SourceStreak, day: string, failed: boolea
 	}
 	const below = rest.filter((stretch) => stretch.newest < day).reduce<SourceStretch | undefined>((nearest, stretch) =>
 		nearest === undefined || stretch.newest > nearest.newest ? stretch : nearest, undefined);
-	if (below !== undefined && !top.givenUp && !walkedDayBetween(below.newest, day))
+	if (below !== undefined && !top.givenUp && !below.givenUp && !walkedDayBetween(below.newest, day))
 	{
 		top = joinStretches(top, below);
 		rest = rest.filter((stretch) => stretch !== below);

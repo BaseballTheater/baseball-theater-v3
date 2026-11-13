@@ -917,6 +917,40 @@ describe("runBackfill (S122)", () =>
 		expect((await fileResumeStore(dir, target).load()).sources.content?.stretches).toEqual([newer, older]);
 	});
 
+	it("resume file: a stretch counted just above a given-up one loads beside it", async () =>
+	{
+		const dir = await mkdtemp(path.join(tmpdir(), "bt-backfill-"));
+		dirs.push(dir);
+		const target = {
+			host: "localhost",
+			name: "bt",
+		};
+		const givenUp = {
+			newest: "2010-04-30",
+			oldest: "2010-04-17",
+			streak: GIVE_UP_AFTER_DAYS,
+			newestStreak: GIVE_UP_AFTER_DAYS,
+			allFailed: true,
+			givenUp: true,
+		};
+		const above = {
+			newest: "2010-05-07",
+			oldest: "2010-05-01",
+			streak: 7,
+			newestStreak: 7,
+			allFailed: true,
+			givenUp: false,
+		};
+		await writeFile(path.join(dir, "localhost--bt.json"), JSON.stringify({
+			sources: {
+				content: {
+					stretches: [above, givenUp],
+				},
+			},
+		}));
+		expect((await fileResumeStore(dir, target).load()).sources.content?.stretches).toEqual([above, givenUp]);
+	});
+
 	it("resume file: two saves at once to one database both finish, leaving one whole file", async () =>
 	{
 		const dir = await mkdtemp(path.join(tmpdir(), "bt-backfill-"));
