@@ -7454,7 +7454,7 @@ Inserted by the owner, 2026-11-07: told the findings and offered "a small follow
 
 **Design:** S133 — build to the approved frames. This story may only move to `doing` once every design story named here is `done` (rule 18; `pnpm backlog:check` enforces it).
 
-**Depends on:** **S131** (`compareReleaseVersions` and `parseReleaseVersion`, which AC 3 uses; AC 1 reads #47's build-time release, not `currentRelease`), **S134** (the page the links open, and the menu's link the pointer aims at). Also **S81** (design capture).
+**Depends on:** **S131** (`compareReleaseVersions` and `parseReleaseVersion`, which AC 3 uses, while AC 1 reads #47's build-time release in place of `currentRelease`), **S134** (the page the links open, and the menu's link the pointer aims at). Also **S81** (design capture).
 
 **Scope files:** `web/src/`, `web/vite.config.ts`, `web/vitest.config.ts`, `docs/v3/BACKLOG.md`, `docs/v3/backlog/`, `docs/v3/AUDIT.md`, `docs/v3/audit.jsonl`, `docs/v3/INDEX.md`, `CHANGELOG.md`, `e2e/design/`, `e2e/flows/`, `docs/v3/design-checks/`
 
