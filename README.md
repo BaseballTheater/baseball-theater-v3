@@ -196,11 +196,22 @@ automatically 2. Mirror"):
   request into `stage` is assigned to the next one. The DNS cutover stays the owner's.
 
 - **Previews.** Every pull request that changes code gets its own Worker, `baseball-theater-pr-<number>` on workers.dev,
-  once `pnpm verify` passes, and the workflow posts its address on the pull request. Previews share
-  staging's database (owner, 2026-11-05: "Previews share staging db") through the `bt-staging`
-  Hyperdrive config, so a pull request that adds a migration migrates staging before it merges: keep
-  migrations additive, so staging still serves `stage` meanwhile. Previews run no cron (they read MLB
-  on request only). Closing the pull request deletes its Worker.
+  once `pnpm verify` passes, and the workflow posts its address on the pull request. Each preview runs on
+  its own Neon branch, `preview-pr-<number>`, a copy of the `staging` branch, through its own Hyperdrive
+  config, `bt-preview-pr-<number>` (query caching off) (issue #42; owner, 2026-11-13: "Yes, do that.").
+  Every deploy resets the branch from `staging` and then runs the pull request's migrations on it, so
+  the preview is staging as it is now plus that pull request's changes, and staging's database only
+  ever runs `stage`'s migrations. Previews run no cron (they read MLB on request only). Closing the pull
+  request deletes its Worker, config and branch (`pnpm deploy:teardown`); a run that finds its pull
+  request closed tears it down instead of deploying, and a teardown that finds it reopened deletes
+  nothing. **Preview cleanup** (`.github/workflows/preview-cleanup.yml`, weekly and by hand from
+  Actions) deletes any preview whose pull request is closed and leaves every open one alone. A preview
+  copies staging, which never holds a fan's data, so it holds none either. Limits: Neon allows 10
+  branches per project on Free and Launch (25 on Scale; paid plans charge for more), counting
+  production and `staging`, and `staging`, being schema-only, also uses one of the plan's root branches;
+  Cloudflare allows 25 Hyperdrive configs per account on Workers Paid (10 on Free), counting
+  `bt-staging` and `bt-production`. A preview past either limit fails its bootstrap step, saying so;
+  staging and production are unaffected.
 - **Staging.** Every push to `stage` that changes code deploys `stage.baseball.theater` (a docs-only push deploys nothing) on the Neon `staging` branch.
   The branch is created schema-only from production the first time (production's tables, none of its
   rows) and filled only by `pnpm db:migrate`, so it never holds a fan's data. Copying production's
@@ -246,9 +257,10 @@ automatically 2. Mirror"):
   itself to its previous version, but does not move DNS.
 
 **What every deploy does**, in order, each step safe to repeat: `pnpm deploy:bootstrap <env>` finds
-the env's Neon branch (production's default branch, or `staging`, created schema-only if missing),
-finds its Hyperdrive config by name (`bt-production`, or `bt-staging` for staging and previews) or
-creates it, and writes the Worker config with that config's id; then `pnpm db:migrate` and
+the env's Neon branch (production's default branch, or `staging`, created schema-only if missing, or
+a preview's `preview-pr-<number>`, made from `staging` or reset from it), finds its Hyperdrive config
+by name (`bt-production`, `bt-staging`, or a preview's `bt-preview-pr-<number>`, whose origin is
+rewritten every deploy) or creates it, and writes the Worker config with that config's id; then `pnpm db:migrate` and
 `pnpm db:reapply-deletions` run on that database; then `wrangler deploy` pushes the Worker and every
 Worker secret from GitHub secrets (`--secrets-file`), so none is ever set by hand with
 `wrangler secret put`. Every deployed env serves live MLB, names its own address as `BT_APP_ORIGIN`,
@@ -261,7 +273,7 @@ production's deploy then registers its Logto sign-in addresses (`pnpm deploy:log
 | --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
 | `CLOUDFLARE_API_TOKEN`      | secret      | Workers Scripts edit, Hyperdrive edit, Workers custom domains / routes and DNS edit on the `baseball.theater` zone |
 | `CLOUDFLARE_ACCOUNT_ID`     | variable    | the Cloudflare account                                                                                             |
-| `NEON_API_KEY`              | secret      | creates and reads branches and connection strings in the project                                                   |
+| `NEON_API_KEY`              | secret      | creates, reads, resets and deletes branches, and reads connection strings, in the project                          |
 | `NEON_PROJECT_ID`           | variable    | `old-sun-72319473`                                                                                                 |
 | `BT_SESSION_KEY_STAGING`    | secret      | signs sessions on staging and previews                                                                             |
 | `BT_SESSION_KEY_PRODUCTION` | secret      | signs sessions on production                                                                                       |
