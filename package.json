@@ -17,6 +17,8 @@
 		"db:reapply-deletions": "pnpm --filter @bt/functions exec tsx src/scripts/db-reapply-deletions.ts",
 		"deploy:bootstrap": "pnpm --filter @bt/functions exec tsx src/scripts/deploy-bootstrap.ts",
 		"deploy:logto": "pnpm --filter @bt/functions exec tsx src/scripts/deploy-logto.ts",
+		"deploy:teardown": "pnpm --filter @bt/functions exec tsx src/scripts/deploy-teardown.ts",
+		"deploy:cleanup-previews": "pnpm --filter @bt/functions exec tsx src/scripts/deploy-cleanup-previews.ts",
 		"build": "pnpm lint && pnpm -r --filter=!baseball-theater-v3 run build",
 		"typecheck": "pnpm -r --filter=!baseball-theater-v3 run typecheck",
 		"lint": "pnpm backlog:check && eslint .",

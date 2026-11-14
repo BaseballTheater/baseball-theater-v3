@@ -1,0 +1,41 @@
+name: Milestone recheck
+
+# CI's `milestone` job requires every pull request into stage to have a milestone (#47; owner,
+# 2026-11-13: "Yes, build it that way"). When one is added or removed after that job has given its
+# verdict, scripts/milestone-recheck.sh re-runs just that job of the pull request's latest CI run, and
+# only when the verdict is now wrong and the run is still the pull request's newest (see the script);
+# GitHub re-runs the jobs that need it with it, so `ci-passed` follows. Adding these event types to ci.yml instead would start a whole CI run for each
+# and, through its cancel-in-progress concurrency group, cancel the run already going. Only open pull
+# requests from this repository: a merged one moved to the next milestone needs nothing re-checked,
+# and a fork's token can't re-run jobs.
+
+on:
+    pull_request:
+        types: [milestoned, demilestoned]
+
+permissions:
+    actions: write
+    contents: read
+    issues: read
+    pull-requests: read
+
+concurrency:
+    group: milestone-recheck-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+jobs:
+    recheck:
+        if: github.event.pull_request.state == 'open' && github.event.pull_request.base.ref == 'stage' && github.event.pull_request.head.repo.full_name == github.repository
+        runs-on: ubuntu-latest
+        # Waits only when a re-run is due, for the CI run to finish (CI's longest job is 30 minutes).
+        timeout-minutes: 45
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Re-run CI's milestone job if its verdict is now wrong
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  ACTION: ${{ github.event.action }}
+                  PR: ${{ github.event.pull_request.number }}
+                  SHA: ${{ github.event.pull_request.head.sha }}
+              run: scripts/milestone-recheck.sh "$ACTION" "$PR" "$SHA"

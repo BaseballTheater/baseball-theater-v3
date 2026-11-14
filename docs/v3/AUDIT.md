@@ -18445,3 +18445,33 @@ Owner, 2026-11-12, asked whether the rule change in PR #37 (a bug gets an issue 
 **Answers and what was applied**
 
 Applies the owner's 2026-11-08 answer to that review's S131 question ("This is the go-ahead") to the frame bullet that still said S131's deploy-workflow edit needed a go-ahead, as flagged by Claude's after-the-fact review of PR #22.
+
+---
+
+## 2026-11-13 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-13T23:54:42Z` |
+| HEAD at capture | `bb6819f` (tree clean) |
+| Change | `bb6819f` — S135, S133: the build's release comes from #47, in the acceptance criteria too |
+
+**What changed, and the owner's answer**
+
+S135 AC 1 and AC 4 (and S133 AC 1 wording) were rewritten to answer Claude's review of PR #50 (comment 4569986624), applying the owner's 2026-11-13 re-scope ("1 and 2 both yes"). Per CLAUDE.md, ACs rewritten to answer a PR review are always skipped (owner, 2026-11-07: "This shouldn't even trigger a question. Always skip.").
+
+---
+
+## 2026-11-13 — backlog review skipped
+
+| | |
+|---|---|
+| Entry | the owner declined a backlog review for this change — its drift no longer makes one due; the stories-done count is unchanged |
+| Captured (UTC) | `2026-11-14T01:04:43Z` |
+| HEAD at capture | `65f9463` (tree clean) |
+| Change | `9cbc539` — Backlog: S139 serves standings by season phase; the views move to S130 |
+
+**What changed, and the owner's answer**
+
+Owner, 2026-11-13, asked "The S139/S130 change: a backlog review after #56 merges, or a logged skip?": "for your first question, skip it". The change: S139 re-scoped from views to season phases with includePhases (owner, 2026-11-13), the view rules moved to S130 (turn cap 12 -> 16), S129, S137, S138 and S140 re-pointed at S130, ADR-021 amended for standings (30-day cap), and the World Series box from the day after the Series ("option a"); commits 9cbc539, 966f7cd and 65f9463 on backlog/s139-phases (PR #56).

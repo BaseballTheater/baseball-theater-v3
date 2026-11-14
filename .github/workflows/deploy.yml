@@ -1,9 +1,13 @@
 name: Deploy
 
 # S114: Baseball Theater on Cloudflare Workers (ADR-017).
-# - Every pull request that changes code gets its own preview Worker on workers.dev, on staging's database (owner,
-#   2026-11-05: "Previews share staging db"), and its address is posted on the pull request. It is
-#   deleted when the pull request closes.
+# - Every pull request that changes code gets its own preview Worker on workers.dev, and its address is
+#   posted on the pull request. It runs on its own Neon branch, `preview-pr-<N>`, a copy of staging's
+#   branch reset from it on every deploy, through its own Hyperdrive config, `bt-preview-pr-<N>`, so a
+#   pull request's migrations never reach staging's database (issue #42; owner, 2026-11-13, asked "may I
+#   change deploy.yml so each PR's preview gets its own Neon branch, deleted when the PR closes?": "Yes,
+#   do that."). The Worker, config and branch are deleted when the pull request closes, and the weekly
+#   Preview cleanup workflow (preview-cleanup.yml) deletes any a closed pull request left behind.
 # - Every push to stage that changes code deploys staging at stage.baseball.theater (a docs-only push
 #   deploys nothing), on the Neon `staging` branch: a schema-only branch that never holds a fan's data.
 # - Production, at next.baseball.theater, deploys only when the owner publishes a GitHub Release
@@ -20,11 +24,19 @@ name: Deploy
 #   production runs (owner, 2026-11-07: "2. Mirror"). Never forced: if main can't fast-forward (a
 #   rollback to an older release, or main moved by hand) the job fails loudly and main stays put.
 # Every deploy first runs `pnpm deploy:bootstrap` (find or create the Neon branch and the Hyperdrive
-# config by name, write the Worker config and secrets), then `pnpm db:migrate` and
+# config by name, a preview's branch reset from staging; write the Worker config and secrets), then `pnpm db:migrate` and
 # `pnpm db:reapply-deletions` on its own database, and only then `wrangler deploy`, which pushes
 # every Worker secret from GitHub secrets. Each step is idempotent (owner, 2026-11-05: "It should be
 # idempotent so it can happen with every deployment. All the bootstrapping should be like that."),
-# so a re-run changes nothing. Secrets come only from GitHub secrets; agents never run this.
+# so a re-run changes nothing; a preview's re-run resets its branch from staging and rewrites its
+# Hyperdrive config, ending as the first run did. Secrets come only from GitHub secrets; agents never run this.
+# The version line (#47; owner, 2026-11-13: "Yes, build it that way"): every deploy build first looks
+# up its release with scripts/build-release.sh, the milestone of the pull request whose merge commit it
+# builds (a preview: its own pull request's milestone and head commit), and prints it with the commit,
+# e.g. "v3.2.0 (40767e9)", so the same code reads the same on staging and production. A release can
+# target a docs-only stage commit newer than the one staging serves, so the commits can differ (owner,
+# 2026-11-13: releasing only the served commit "would prevent iterating on stage while waiting to push
+# a release to prod"). Staging and production both write bt-commit.txt, the commit they serve.
 # Sign-in (S116): only production has Logto's machine-to-machine app, so only the production jobs
 # read its secrets (LOGTO_S2S_APP_ID, LOGTO_S2S_SECRET; owner, 2026-11-07: "LOGTO_S2S_APP_ID and
 # LOGTO_S2S_SECRET, go ahead"): the production job pushes them as Worker secrets and, after it
@@ -112,8 +124,12 @@ jobs:
                       pnpm --filter @bt/functions exec wrangler deploy --config ../wrangler.jsonc --env "$env" --dry-run --outdir "$RUNNER_TEMP/dry-run-$env"
                   done
 
-    # One Worker per pull request that changes code (a docs-only one gets none), on the shared staging database (bt-staging). Pull requests from
-    # forks get no secrets, so they get no preview.
+    # One Worker per pull request that changes code (a docs-only one gets none), on the pull request's own
+    # Neon branch and Hyperdrive config (issue #42). Pull requests from forks get no secrets, so they get
+    # no preview. A run can wait in the pull request's concurrency group while it closes (or a close can
+    # cancel it), so it asks GitHub whether the pull request is still open first and again just before
+    # deploying, and if it has closed it tears the preview down instead and stops: a closed pull
+    # request's preview is never recreated.
     preview:
         if: github.event_name == 'pull_request' && github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository && needs.verify.result == 'success'
         needs: [verify]
@@ -131,6 +147,12 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
+            - name: Is the pull request still open?
+              id: open
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: scripts/preview-pr-open.sh ${{ github.event.pull_request.number }}
+
             - uses: pnpm/action-setup@v4
               with:
                   version: 9.15.0
@@ -143,61 +165,110 @@ jobs:
             - name: Install
               run: pnpm install --frozen-lockfile
 
+            - name: It closed, so delete its preview (Worker, Hyperdrive config, Neon branch)
+              if: steps.open.outputs.open == 'false'
+              run: pnpm run deploy:teardown preview --pr ${{ github.event.pull_request.number }}
+
+            # Its own pull request's milestone (#47), read live: it is assigned just after opening.
+            - name: Which release is this build?
+              if: steps.open.outputs.open == 'true'
+              id: release
+              # Explicit, so pipefail is on too (GitHub's default shell runs bash -e only).
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: scripts/build-release.sh pr ${{ github.event.pull_request.number }}
+
+            # The head commit, not GITHUB_SHA (GitHub's test merge, which no one can look up).
             - name: Build the web app
+              if: steps.open.outputs.open == 'true'
+              env:
+                  BT_RELEASE: ${{ steps.release.outputs.release }}
+                  BT_COMMIT: ${{ github.event.pull_request.head.sha }}
               run: pnpm --filter @bt/web run build
 
-            - name: Bootstrap (staging branch, bt-staging, Worker config and secrets)
+            - name: Bootstrap (the pull request's own Neon branch from staging, its Hyperdrive config, Worker config and secrets)
+              if: steps.open.outputs.open == 'true'
               id: bootstrap
               run: pnpm run deploy:bootstrap preview --pr ${{ github.event.pull_request.number }}
 
-            - name: Migrate the staging database
+            - name: Migrate the preview's database
+              if: steps.open.outputs.open == 'true'
               run: pnpm db:migrate
 
             - name: Re-apply deletions
+              if: steps.open.outputs.open == 'true'
               run: pnpm db:reapply-deletions
 
-            - name: Deploy the preview Worker
-              run: pnpm --filter @bt/functions exec wrangler deploy --config "${{ steps.bootstrap.outputs.config }}" --env preview --secrets-file "${{ steps.bootstrap.outputs.secrets_file }}"
-
-            - name: Post the preview's address
+            - name: Is the pull request still open, just before deploying?
+              if: steps.open.outputs.open == 'true'
+              id: still_open
               env:
                   GH_TOKEN: ${{ github.token }}
-              run: gh pr comment ${{ github.event.pull_request.number }} --edit-last --create-if-none --body "Preview for ${{ github.event.pull_request.head.sha }}, on the staging database, at ${{ steps.bootstrap.outputs.origin }}"
+              run: scripts/preview-pr-open.sh ${{ github.event.pull_request.number }}
 
-    # A closed pull request's Worker goes away; the staging database stays. Deleting a Worker that
-    # is already gone is not a failure.
+            - name: Deploy the preview Worker
+              if: steps.still_open.outputs.open == 'true'
+              run: pnpm --filter @bt/functions exec wrangler deploy --config "${{ steps.bootstrap.outputs.config }}" --env preview --secrets-file "${{ steps.bootstrap.outputs.secrets_file }}"
+
+            - name: It closed meanwhile, so delete its preview
+              if: steps.still_open.outputs.open == 'false'
+              run: pnpm run deploy:teardown preview --pr ${{ github.event.pull_request.number }}
+
+            - name: Post the preview's address
+              if: steps.still_open.outputs.open == 'true'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: gh pr comment ${{ github.event.pull_request.number }} --edit-last --create-if-none --body "Preview for ${{ github.event.pull_request.head.sha }}, on its own database (a copy of staging's), at ${{ steps.bootstrap.outputs.origin }}"
+
+    # A closed pull request's preview goes away: its Worker, its Hyperdrive config and its Neon branch
+    # (issue #42), through `pnpm deploy:teardown`. Whatever is already gone is skipped; any other
+    # failure fails the job, so nothing is left behind quietly. It shares the pull request's
+    # concurrency group, so closing cancels a preview deploy still running; and if the pull request
+    # was reopened while this waited, it deletes nothing (the reopen's preview run owns it).
     preview-teardown:
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
         runs-on: ubuntu-latest
         timeout-minutes: 10
+        # Reads the pull request's state, nothing more (the workflow's write is for the preview's comment).
+        permissions:
+            contents: read
+            pull-requests: read
+        concurrency:
+            group: deploy-preview-${{ github.event.pull_request.number }}
+            cancel-in-progress: true
         env:
             CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
             CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+            NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+            NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
         steps:
             - uses: actions/checkout@v4
 
+            - name: Was the pull request reopened meanwhile?
+              id: open
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: scripts/preview-pr-open.sh ${{ github.event.pull_request.number }}
+
             - uses: pnpm/action-setup@v4
+              if: steps.open.outputs.open == 'false'
               with:
                   version: 9.15.0
 
             - uses: actions/setup-node@v4
+              if: steps.open.outputs.open == 'false'
               with:
                   node-version-file: ".nvmrc"
                   cache: pnpm
 
             - name: Install
+              if: steps.open.outputs.open == 'false'
               run: pnpm install --frozen-lockfile
 
-            - name: Delete the preview Worker
-              run: |
-                  name="baseball-theater-pr-${{ github.event.pull_request.number }}"
-                  if output=$(pnpm --filter @bt/functions exec wrangler delete --name "$name" --force 2>&1); then
-                      echo "$output"
-                  elif echo "$output" | grep -qiE "does not exist|not found|10007"; then
-                      echo "$name was already deleted"
-                  else
-                      echo "$output"; exit 1
-                  fi
+            - name: Delete the preview (Worker, Hyperdrive config, Neon branch)
+              if: steps.open.outputs.open == 'false'
+              run: pnpm run deploy:teardown preview --pr ${{ github.event.pull_request.number }}
 
     # Every push to stage that changes code: stage.baseball.theater on the Neon staging branch (bt-staging).
     staging:
@@ -280,9 +351,21 @@ jobs:
               if: steps.served.outputs.deploy == 'true'
               run: pnpm install --frozen-lockfile
 
+            # The milestone of the pull request this merge commit merged (#47).
+            - name: Which release is this build?
+              if: steps.served.outputs.deploy == 'true'
+              id: release
+              # Explicit, so pipefail is on too (GitHub's default shell runs bash -e only).
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: scripts/build-release.sh merged "${{ github.sha }}"
+
             # bt-commit.txt is how the next run learns what staging serves (see above).
             - name: Build the web app
               if: steps.served.outputs.deploy == 'true'
+              env:
+                  BT_RELEASE: ${{ steps.release.outputs.release }}
               run: |
                   pnpm --filter @bt/web run build
                   echo "${{ github.sha }}" >web/dist/bt-commit.txt
@@ -318,9 +401,10 @@ jobs:
         needs: [verify]
         runs-on: ubuntu-latest
         timeout-minutes: 20
-        # Releases (contents) and past production deployments (deployments) for the Release order step;
-        # issues and pull-requests: read as #47's production job needs them, so whichever merges second
-        # keeps all four.
+        # Its own, so a change to it keeps what the steps need: releases (contents) and past production
+        # deployments (deployments) for the Release order step, and which pull request merged the
+        # released commit (pull-requests, issues) for the release lookup (scripts/build-release.sh
+        # merged, #47).
         permissions:
             contents: read
             deployments: read
@@ -388,8 +472,31 @@ jobs:
             - name: Install
               run: pnpm install --frozen-lockfile
 
+            # The tag's commit is the stage merge commit staging built, so the lookup, and the label,
+            # match staging's (#47). The release procedure gives that pull request the release's
+            # milestone; a mismatch is only warned about, since the build is still the tagged code.
+            - name: Which release is this build?
+              id: release
+              # Explicit, so pipefail is on too (GitHub's default shell runs bash -e only).
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  TAG: ${{ github.event.release.tag_name }}
+              run: |
+                  out="$(scripts/build-release.sh merged "$(git rev-parse HEAD)")"
+                  echo "$out"
+                  release="${out#release=}"
+                  if [ "$release" != "$TAG" ]; then
+                      echo "::warning::the released commit's pull request is in milestone '$release', not $TAG"
+                  fi
+
+            # bt-commit.txt names the commit production serves, as on staging (#47).
             - name: Build the web app
-              run: pnpm --filter @bt/web run build
+              env:
+                  BT_RELEASE: ${{ steps.release.outputs.release }}
+              run: |
+                  pnpm --filter @bt/web run build
+                  git rev-parse HEAD >web/dist/bt-commit.txt
 
             - name: Bootstrap (production branch, bt-production, Worker config and secrets)
               id: bootstrap

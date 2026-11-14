@@ -39,9 +39,9 @@
 		"enabled": true
 	},
 	// Postgres through Hyperdrive (ADR-018, S50). No deploy uses this top-level binding or any
-	// `id` in this file: each deploy finds its env's config by name (`bt-production`, `bt-staging`)
-	// and writes the id it resolves into the config it deploys (S114, `pnpm deploy:bootstrap`), so
-	// the zeros below are placeholders. Locally, `wrangler dev` and the Workers tests connect to
+	// `id` in this file: each deploy finds its env's config by name (`bt-production`, `bt-staging`,
+	// a preview's `bt-preview-pr-<N>`) and writes the id it resolves into the config it deploys
+	// (S114, `pnpm deploy:bootstrap`), so the zeros below are placeholders. Locally, `wrangler dev` and the Workers tests connect to
 	// `localConnectionString` instead: a local Postgres (S51's Docker), never a hosted database.
 	// No credential for one is committed.
 	"hyperdrive": [
@@ -65,9 +65,11 @@
 	// one or a fake shim"); its vars are then added to env.staging, never production's.
 	"env": {
 		// One Worker per pull request (`baseball-theater-pr-<N>` on workers.dev, its name and
-		// BT_APP_ORIGIN set at deploy time) on staging's database, `bt-staging` (owner, 2026-11-05:
-		// "Previews share staging db"). No cron: a preview reads MLB through on request only, so
-		// open pull requests don't each poll on ADR-002's cadence.
+		// BT_APP_ORIGIN set at deploy time) on its own Neon branch, `preview-pr-<N>`, a copy of
+		// staging's reset from it on every deploy, through its own Hyperdrive config,
+		// `bt-preview-pr-<N>`, whose id the deploy resolves by name into the config it deploys
+		// (issue #42; owner, 2026-11-13: "Yes, do that."). No cron: a preview reads MLB through on request only, so open pull requests
+		// don't each poll on ADR-002's cadence.
 		"preview": {
 			"name": "baseball-theater-preview",
 			"workers_dev": true,

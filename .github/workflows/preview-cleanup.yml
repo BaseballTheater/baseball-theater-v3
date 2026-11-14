@@ -1,0 +1,52 @@
+name: Preview cleanup
+
+# Issue #42: every pull request's preview has its own Neon branch (`preview-pr-<N>`), Hyperdrive config
+# (`bt-preview-pr-<N>`) and Worker, which Deploy's `preview-teardown` job deletes when the pull request
+# closes. This sweep catches any that teardown missed (a failed or cancelled run): it lists every
+# preview branch and config, asks GitHub for each pull request's state, and deletes the preview only
+# when its pull request is closed. An open pull request's preview is never touched, however old. A pull
+# request whose state can't be read is skipped and the run fails at the end, naming it. Weekly, and by
+# hand from Actions → Preview cleanup → Run workflow (owner, 2026-11-13: "Yes, I like the cleanup option
+# better. Need to be able to manually run it though, as well."). Agents never run it: only GitHub holds
+# the keys.
+
+on:
+    schedule:
+        - cron: "17 9 * * 1"
+    workflow_dispatch:
+
+permissions:
+    contents: read
+    pull-requests: read
+
+concurrency:
+    group: preview-cleanup
+    cancel-in-progress: false
+
+jobs:
+    cleanup:
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        env:
+            CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+            CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+            NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+            NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
+            GH_TOKEN: ${{ github.token }}
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 9.15.0
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: ".nvmrc"
+                  cache: pnpm
+
+            - name: Install
+              run: pnpm install --frozen-lockfile
+
+            - name: Delete closed pull requests' previews
+              run: pnpm run deploy:cleanup-previews

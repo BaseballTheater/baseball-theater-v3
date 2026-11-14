@@ -13,7 +13,12 @@
  */
 import { databaseTarget, isLocalDbHost } from "../adapters/postgres/local.js";
 import type { NeonApi } from "../deploy/bootstrap.js";
-import { findOrCreateBranch, projectEndpoints } from "../deploy/bootstrap.js";
+import {
+	endpointHost, findOrCreateBranch, projectEndpoints,
+} from "../deploy/bootstrap.js";
+
+// The one implementation lives beside the other Neon helpers, where the preview deploy's host guard uses it too (issue #42).
+export { endpointHost };
 
 /** The database a run writes, by host and name only: what logs print and the resume file is named by. */
 export type BackfillTarget = {
@@ -29,13 +34,6 @@ export type TargetCheck =
 	| { allowed: false;
 		target: BackfillTarget;
 		why: string; };
-
-/** A Neon host without its pooler suffix: `ep-x-1-pooler.region.aws.neon.tech` → `ep-x-1.region.aws.neon.tech`. */
-export function endpointHost(host: string): string
-{
-	const [first = "", ...rest] = host.split(".");
-	return [first.replace(/-pooler$/, ""), ...rest].join(".");
-}
 
 /**
  * Decides whether the backfill may write `connectionString`'s database. `neon` is the Neon

@@ -36,7 +36,7 @@ Count triggers are cheap to satisfy and easy to ignore; the event list is the pa
 
 ## Fresh context is required
 
-Run this **without** the transcript that produced the stories being reviewed — a separate agent, a subagent, or a new session. An agent reviewing its own recent plan will confirm it. This mirrors the fresh-context reviewer pass in `docs/v3/LOOP.md` §7.
+Run this **without** the transcript that produced the stories being reviewed — a separate agent, a subagent (the `backlog-reviewer` agent type, `.claude/agents/backlog-reviewer.md`, which loads this skill), or a new session. An agent reviewing its own recent plan will confirm it. This mirrors the fresh-context reviewer pass in `docs/v3/LOOP.md` §7.
 
 ## The four checks
 
@@ -66,7 +66,7 @@ For **each** of the next 3 stories:
 
 Check 2 confirms a story's names exist; this check asks whether its plan holds. The goal is that Claude's pull request review finds nothing in the backlog's pull request (owner, 2026-11-07, of Copilot's review, which Claude's replaced on 2026-11-11: "Our goal should be zero Copilot discoveries for each pull request"); on 2026-11-07 Copilot found twelve real problems in the backlog pull request #10 after two reviews had passed it, all of this kind.
 
-Scope: every acceptance criterion and note of the next 3 stories **and of every story inserted, re-scoped or rewritten since the last review**. For each, apply the [review-class checklist](../../../docs/v3/LOOP.md#review-class-checklist) in `docs/v3/LOOP.md` §7 (LOOP.md holds the authoritative list; read it there, every time) reading the code each criterion touches at HEAD, not just its name.
+Scope: every acceptance criterion and note of the next 3 stories **and of every story inserted, re-scoped or rewritten since the last review**. For each, apply the [review-class checklist](../../../docs/v3/LOOP.md#review-class-checklist) in `docs/v3/LOOP.md` §7 (LOOP.md holds the authoritative list; read it there, every time) reading the code each criterion touches at HEAD, not just its name. A story in scope that adds or reshapes a table, column, index, migration or query pattern is also held to the database checks in `.claude/agents/db-reviewer.md` (its **What to examine** list and its evidence rule): this review runs in a subagent that can't start another, so it applies that list to the story's ACs itself, and a design that would make a feature in FEATURES or a later story expensive is an amendment or an owner question, not a `continue`.
 
 Each finding names the **exact input or sequence that breaks the criterion** (for example "stopped after 13 failed days, the resumed run skips those days and never reaches 14") and becomes an amendment to that story. The ledger entry lists, for each story in scope, the checklist items that applied and what was checked; a story recorded with no items checked fails the evidence requirement below.
 

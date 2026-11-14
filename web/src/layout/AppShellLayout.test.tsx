@@ -136,7 +136,7 @@ describe("desktop rail", () =>
 		expect(screen.queryByRole("button", {
 			name: "Open navigation",
 		})).toBeNull();
-		expect(within(rail).getByTestId("version-line")).toHaveTextContent(/^v3\.0\.dev \(unknown\)$/);
+		expect(within(rail).getByTestId("version-line")).toHaveTextContent(/^dev \(unknown\)$/);
 	});
 
 	const cases: [string, string][] = [

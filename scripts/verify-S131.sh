@@ -197,7 +197,10 @@ const isCheck = (keys) => {
 };
 const parsed = steps.map(keysOf);
 const name = (k) => (k.name ? unquote(k.name.value) : "");
-const isWork = (k) => /\bBuild\b/.test(name(k)) || /\bbuild\b|wrangler deploy|deploy:|db:migrate/.test(script(k.run));
+// #47's release lookup (`scripts/build-release.sh`, step "Which release is this build?") only reads GitHub; its
+// path says "build" but it builds nothing, so it is not work (Claude's review of #50).
+const isWork = (k) => /\bBuild\b/.test(name(k)) ||
+  /\bbuild\b|wrangler deploy|deploy:|db:migrate/.test(script(k.run).replace(/scripts\/build-release\.sh/g, ""));
 const install = parsed.findIndex((k) => name(k) === "Install");
 const check = parsed.findIndex(isCheck);
 const work = parsed.findIndex((k, i) => i > install && i !== check && isWork(k));

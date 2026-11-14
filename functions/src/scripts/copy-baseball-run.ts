@@ -8,13 +8,14 @@
  * else is printed; the target is checked (`checkCopyTarget`: never production) before either
  * database is opened; only the target is migrated; production is only read
  * (`copyBaseballData`, one read-only transaction per read). Lines name hosts, tables and counts,
- * never a connection string.
+ * never a connection string. A copy that refuses (`CopyRefused`: the target has run a migration
+ * this checkout doesn't have) has written no row and exits 2, like any other refusal.
  */
 import { parse } from "pg-connection-string";
 import { databaseTarget } from "../adapters/postgres/local.js";
 import type { PostgresDb } from "../adapters/postgres/repos.js";
 import type { NeonApi } from "../deploy/bootstrap.js";
-import { copyBaseballData } from "../services/baseball-copy.js";
+import { copyBaseballData, CopyRefused } from "../services/baseball-copy.js";
 import { checkCopyTarget, neonCopyDatabases } from "../services/baseball-copy-target.js";
 
 /** What the run reaches the world through; the entry passes the real ones. */
@@ -22,8 +23,13 @@ export type CopyRunDeps = {
 	/** Opens one database (`openPostgres`). */
 	open: (connectionString: string) => Promise<{ db: PostgresDb;
 		close: () => Promise<void>; }>;
-	/** Applies the committed migrations to one database (`migratePostgres`); only ever given the target. */
-	migrate: (db: PostgresDb) => Promise<void>;
+	/**
+	 * Applies the migrations in `migrationsFolder` to one database (`migratePostgres`); only ever given the target, and
+	 * the same folder the copy compares the two databases' migration records against.
+	 */
+	migrate: (db: PostgresDb, migrationsFolder: string) => Promise<void>;
+	/** The checkout's migrations (`MIGRATIONS_FOLDER` when left out); tests pass a folder of their own. */
+	migrationsFolder?: string;
 	/** Neon's API, for `--neon`. */
 	fetch: (input: string, init?: RequestInit) => Promise<Response>;
 	out: (line: string) => void;
@@ -106,16 +112,27 @@ export async function runCopy(env: Record<string, string | undefined>, args: str
 		try
 		{
 			say(`copying baseball tables from ${from.host}/${from.name} to ${to}, migrating ${to} first`);
-			await copyBaseballData({
-				source: reader.db,
-				target: writer.db,
-				migrateTarget: async () =>
-				{
-					say(`migrating ${to} (allowed: ${check.why})`);
-					await deps.migrate(writer.db);
-				},
-				log: say,
-			});
+			try
+			{
+				await copyBaseballData({
+					source: reader.db,
+					target: writer.db,
+					...deps.migrationsFolder && {
+						migrationsFolder: deps.migrationsFolder,
+					},
+					migrateTarget: async (migrationsFolder) =>
+					{
+						say(`migrating ${to} (allowed: ${check.why})`);
+						await deps.migrate(writer.db, migrationsFolder);
+					},
+					log: say,
+				});
+			}
+			catch (error)
+			{
+				if (error instanceof CopyRefused) return refuse(`refusing: ${error.message}`);
+				throw error;
+			}
 			say("done: nothing in the target was deleted, and no personal table or deletion log was read or written");
 		}
 		finally
