@@ -1,8 +1,10 @@
 /**
  * S41's design match (rule 22): the Plays room in the state and pairing of each
  * game-rooms frame it builds — `plays-mobile`, `plays-medium`, `plays-desktop` (the
- * default view: the 9th, its last at-bat open) and `plays-scoring-mobile` (Runs chosen),
- * on the 823823 fixture (CHC @ MIA, Final 6–5).
+ * default view: the 9th, with its last at-bat opened by the spec, since the frames draw it
+ * open but nothing opens by itself any more — owner, 2026-11-12: "the plays view shouldn't
+ * expand any plays by default") and `plays-scoring-mobile` (Runs chosen), on the 823823
+ * fixture (CHC @ MIA, Final 6–5).
  *
  * Expected differences, not judged (owner, 2026-10-28: "Judge only the story's own
  * parts"): the frames' sample game (NYY @ BOS, 5–3) versus the fixture game, so names,
@@ -15,7 +17,9 @@
  */
 import { test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { capture, hideDevControls } from "./helpers.js";
+import {
+	capture, hideDevControls, openLastAtBat,
+} from "./helpers.js";
 
 async function plays(page: Page, runs: boolean): Promise<void>
 {
@@ -33,7 +37,7 @@ async function plays(page: Page, runs: boolean): Promise<void>
 	}
 	else
 	{
-		await page.getByTestId("catcher-view").waitFor();
+		await openLastAtBat(page);
 	}
 	await page.evaluate(async () =>
 	{

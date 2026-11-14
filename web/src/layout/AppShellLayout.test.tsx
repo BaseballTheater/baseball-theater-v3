@@ -122,6 +122,20 @@ describe("mobile and medium header + drawer", () =>
 			await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 		});
 	}
+
+	it("mobile: the drawer's wordmark goes home and closes the drawer (owner, 2026-11-12: \"clicking the logo should go to the home page\")", async () =>
+	{
+		renderShell("/standings", WIDTHS.mobile);
+		await userEvent.click(within(screen.getByRole("banner")).getByRole("button", {
+			name: "Open navigation",
+		}));
+		const drawer = await screen.findByRole("dialog");
+		await userEvent.click(within(drawer).getByRole("link", {
+			name: "Baseball Theater home",
+		}));
+		expect(screen.getByLabelText("path")).toHaveTextContent(/^\/$/);
+		await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+	});
 });
 
 describe("desktop rail", () =>
@@ -133,6 +147,13 @@ describe("desktop rail", () =>
 			name: "Main",
 		});
 		expect(rail.style.width).toBe("240px");
+		// One logo on desktop, the rail's (owner, 2026-11-12: "The rightmost one should go away on desktop").
+		expect(screen.getAllByRole("img", {
+			name: "Baseball Theater",
+		})).toHaveLength(1);
+		expect(within(rail).getByRole("link", {
+			name: "Baseball Theater home",
+		})).toHaveAttribute("href", "/");
 		expect(screen.queryByRole("button", {
 			name: "Open navigation",
 		})).toBeNull();
@@ -194,9 +215,9 @@ describe("account control, signed out and signed in", () =>
 			name: "Sign in",
 		}));
 		// signIn() is the dev sign-in locally (S59): the session turns signed in.
-		expect(await screen.findByRole("link", {
+		expect(await screen.findByRole("button", {
 			name: "Account",
-		})).toHaveAttribute("href", "/settings");
+		})).toBeInTheDocument();
 		expect(within(rail).getByRole("link", {
 			name: "Settings",
 		})).toBeInTheDocument();
@@ -213,12 +234,15 @@ describe("account control, signed out and signed in", () =>
 		})).toBeNull();
 	});
 
-	it("signed in: the account control leads to Settings", async () =>
+	it("signed in: the account control's menu leads to Settings", async () =>
 	{
 		setSessionToken(DEV_SIGN_IN_TOKEN);
 		renderShell("/games/2024-07-04", WIDTHS.mobile);
-		await userEvent.click(await screen.findByRole("link", {
+		await userEvent.click(await screen.findByRole("button", {
 			name: "Account",
+		}));
+		await userEvent.click(await screen.findByRole("menuitem", {
+			name: "Settings",
 		}));
 		expect(screen.getByLabelText("path")).toHaveTextContent(/^\/settings$/);
 		expect(screen.queryByRole("button", {

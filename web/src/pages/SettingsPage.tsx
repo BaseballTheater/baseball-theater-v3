@@ -4,9 +4,11 @@ import type {
 import {
 	GAME_ROW_SLOTS, MLB_TEAMS, OPENS_FIRST_ROOMS, VIDEO_PLAYERS,
 } from "@bt/domain";
+import type { OptionsFilter } from "@mantine/core";
 import {
-	Anchor, Divider, MultiSelect, Paper, Radio, SimpleGrid, Stack, Switch, Text, Title,
+	Anchor, Box, Divider, Group, MultiSelect, Paper, Radio, SimpleGrid, Stack, Switch, Text, Title,
 } from "@mantine/core";
+import { IconCheck } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { roomLabel } from "../components/game/format.js";
 import type { LayoutVariant } from "../layout/variant.js";
@@ -18,10 +20,27 @@ import {
 	setCollapseNonFavorites, setFavoriteTeams, setGameRowSlot, setHideScores, setOpensFirst, setVideoPlayer, useSettings,
 } from "../settings/store.js";
 
+/**
+ * Favorite Teams' options (owner, 2026-11-12: "the favorite team setting should use the city team
+ * name long form in the dropdown (Chicago Cubs) but the team name only in the selected list
+ * (Cubs)"). MultiSelect writes an option's `label` on its chosen pill, so the label is the club
+ * name; the dropdown draws each option by `TEAM_FULL_NAMES` instead (`renderOption`), and
+ * searching matches the full name, so "Chicago" finds both Chicago clubs.
+ */
 const TEAM_OPTIONS = MLB_TEAMS.map((team) => ({
 	value: String(team.id),
-	label: team.abbreviation,
+	label: team.name,
 }));
+
+/** Each team's full name ("Chicago Cubs") by its option value (the team id as a string). */
+const TEAM_FULL_NAMES = new Map(MLB_TEAMS.map((team) => [String(team.id), team.fullName]));
+
+/** Keeps the options whose full name contains what was typed, ignoring case. */
+const filterTeams: OptionsFilter = ({ options, search }) =>
+{
+	const typed = search.trim().toLowerCase();
+	return options.filter((option) => "value" in option && (TEAM_FULL_NAMES.get(option.value) ?? option.label).toLowerCase().includes(typed));
+};
 
 /** The Game-Row Slot choices as the Settings frame labels them; the frame's third choice is left out at launch (owner, 2026-10-19). */
 const SLOT_LABELS: Readonly<Record<GameRowSlot, string>> = {
@@ -101,6 +120,14 @@ export function SettingsPage({ variant }: { variant: LayoutVariant })
 							data={TEAM_OPTIONS}
 							value={settings.favoriteTeamIds.map(String)}
 							onChange={(ids) => void setFavoriteTeams(ids.map(Number))}
+							renderOption={({ option, checked }) => (
+								<Group gap={8} wrap="nowrap">
+									{/* Mantine's own check mark goes with a custom option, so it is drawn here. */}
+									{checked ? <IconCheck size={14} aria-hidden /> : <Box w={14} />}
+									{TEAM_FULL_NAMES.get(option.value) ?? option.label}
+								</Group>
+							)}
+							filter={filterTeams}
 							searchable
 						/>
 						<Radio.Group

@@ -149,9 +149,19 @@ describe("Hide Scores in the rooms (S75)", () =>
 
 	it("S75 pitch call: an in-play pitch that scored reads IN PLAY with scores hidden, MLB's call with them shown, in the sequence of an open at-bat", async () =>
 	{
-		// Through Conine's home run (bottom 5th), so it is the open at-bat; its last pitch is "In play, run(s)".
-		const game = () => finalGame(PLAYS.slice(0, 47));
-		const { hidden, shown } = await onAndOff("plays", game, "pitch-row", (panel) => within(panel).getAllByTestId("pitch-row")[0]!.textContent);
+		// Through Conine's home run (bottom 5th), the last at-bat; its last pitch is "In play, run(s)".
+		// No at-bat opens by default (owner, 2026-11-12), so open it.
+		vi.stubGlobal("scrollBy", vi.fn());
+		const plays = PLAYS.slice(0, 47);
+		const game = () => finalGame(plays);
+		const openLast = async (panel: HTMLElement) =>
+		{
+			await userEvent.click(within(panel).getByRole("button", {
+				name: new RegExp(`${plays.at(-1)!.matchup.batter.fullName} —`),
+			}));
+			return (await within(panel).findAllByTestId("pitch-row"))[0]!.textContent;
+		};
+		const { hidden, shown } = await onAndOff("plays", game, "game-topbar", openLast);
 		expect(hidden).toMatch(/IN PLAY/);
 		expect(hidden).not.toMatch(/run\(s\)/);
 		expect(shown).toMatch(/In play, run\(s\)/);
@@ -166,7 +176,7 @@ describe("Hide Scores in the rooms (S75)", () =>
 			});
 			return within(table).getAllByRole("row").slice(1).map((row) => [...row.querySelectorAll("td")].map((td) => td.textContent).filter((text) => text !== ""));
 		};
-		const plays = await onAndOff("plays", () => finalGame(), "pitch-row", cells);
+		const plays = await onAndOff("plays", () => finalGame(), "game-topbar", cells);
 		for (const row of plays.hidden)
 		{
 			// Nine innings, then R H E.
@@ -198,7 +208,7 @@ describe("Hide Scores in the rooms (S75)", () =>
 				masked: within(row).queryAllByTestId("hidden-score").length,
 			}));
 		};
-		const { hidden, shown } = await onAndOff("plays", () => finalGame(), "pitch-row", runs);
+		const { hidden, shown } = await onAndOff("plays", () => finalGame(), "game-topbar", runs);
 		expect(hidden).toHaveLength(9);
 		expect(hidden.map((row) => row.label)).toEqual(shown.map((row) => row.label));
 		for (const [i, row] of hidden.entries())

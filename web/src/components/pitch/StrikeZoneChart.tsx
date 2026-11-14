@@ -364,6 +364,8 @@ export function StrikeZoneChart({
 							<g
 								role="button"
 								tabIndex={0}
+								// The dot grows a little under the pointer (styles.css), like every clickable.
+								className="bt-pitch-dot"
 								aria-label={`Pitch ${pitch.pitchNumber}`}
 								aria-pressed={selected}
 								onClick={() => onSelectPitch(pitch.pitchNumber)}

@@ -177,6 +177,21 @@ describe("PitchSequence", () =>
 		expect(chevrons[0]!.querySelector(".tabler-icon-chevron-up")).not.toBeNull();
 		expect(chevrons[1]!.querySelector(".tabler-icon-chevron-down")).not.toBeNull();
 	});
+
+	it("a row never clips its button, so the focus ring drawn outside it stays whole; the button carries the rounding for its hover wash", () =>
+	{
+		const second: PitchEvent = {
+			...BARE,
+			pitchNumber: 2,
+			playId: "p2",
+		};
+		wrap(<PitchSequence pitches={[BARE, second]} selectedPitchNumber={2} onSelectPitch={() => undefined} variant="mobile" />);
+		const rows = screen.getAllByTestId("pitch-row");
+		for (const row of rows) expect(row.style.overflow).toBe("");
+		const [open, closed] = rows.map((row) => row.querySelector<HTMLElement>("button[aria-expanded]")!);
+		expect(open!.style.borderRadius).toMatch(/^7px 7px 0(px)? 0(px)?$/);
+		expect(closed!.style.borderRadius).toBe("7px");
+	});
 });
 
 describe("MatchupCards", () =>

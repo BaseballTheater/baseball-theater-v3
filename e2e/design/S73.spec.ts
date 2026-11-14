@@ -31,7 +31,7 @@ import { readFileSync } from "node:fs";
 import { test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import {
-	capture, hideDevControls, signInDev,
+	capture, hideDevControls, openSettings, signInDev,
 } from "./helpers.js";
 
 const IPHONE = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
@@ -83,11 +83,9 @@ async function settings(page: Page, ios: boolean): Promise<void>
 			version: 1,
 		}),
 	}));
-	// Signed out, /settings goes to the scoreboard; sign in there, then open Settings.
+	// Signed out, /settings goes to the scoreboard; sign in there, then open Settings from the account menu.
 	await signInDev(page, "/games/2026-09-05");
-	await page.getByRole("link", {
-		name: "Account",
-	}).click();
+	await openSettings(page);
 	await page.getByRole("heading", {
 		name: "Account",
 	}).waitFor();

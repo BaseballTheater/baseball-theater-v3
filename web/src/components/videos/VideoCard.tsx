@@ -25,7 +25,9 @@ const OVERLAY = "rgb(16 16 15 / 50%)";
  * A clip's 16:9 still (6px radius) with the duration at the bottom right. No play mark on any
  * thumbnail (game-shell A5; owner, 2026-11-04: "No thumbnails should have a play icon").
  * `bare` drops the duration too, for a row that writes it beside the still instead (the day
- * digest, S71).
+ * digest, S71). The frame is a `.bt-zoom`: inside a `.bt-zoom-host` (the card that plays it)
+ * the still zooms on hover while the frame keeps its size (owner, 2026-11-12: "hover effects
+ * that zoom an image inside its container").
  */
 export function VideoStill({
 	video, width, bare = false,
@@ -35,7 +37,7 @@ export function VideoStill({
 {
 	const duration = bare ? null : clipDuration(video.duration);
 	return (
-		<Box pos="relative" w={width} style={{
+		<Box pos="relative" w={width} className="bt-zoom" style={{
 			flexShrink: 0,
 			aspectRatio: "16 / 9",
 			borderRadius: 6,
@@ -70,7 +72,8 @@ export function VideoStill({
  * One video (S69; game-shell Videos frames): the still with its duration, the title and
  * a `Highlight · Sep 5, 2026` meta line. One component for both modes — a grid cell
  * (still above the text) and a list row (a small still beside it). The whole card is
- * the button: choosing it calls `onPlay` with the video; the player is S70's. A video with a
+ * the button, its still zooming on hover (`.bt-zoom-host`): choosing it calls `onPlay`
+ * with the video; the player is S70's. A video with a
  * play gets `playLink` (S97; game-shell A5): `Play · Top 6th →` on its own line under the
  * meta line, a sibling of the button (a link inside it would also start the clip). Its title is
  * `highlightTitle`'s: the game page passes `scoresHidden`, so there the recap clip reads
@@ -99,6 +102,7 @@ export function VideoCard({
 		<UnstyledButton
 			data-testid="video-card"
 			data-layout={layout}
+			className="bt-zoom-host"
 			aria-label={`Play ${title}`}
 			onClick={() => onPlay(video)}
 			style={{

@@ -21,6 +21,7 @@ export * from "./game-phase.js";
 export * from "./pitch-outcome.js";
 export * from "./recap.js";
 export * from "./video-play-links.js";
+export * from "./video-quality.js";
 export * from "./teams.js";
 export * from "./team-colors.js";
 export * from "./linescore.js";

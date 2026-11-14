@@ -18,9 +18,12 @@ import {
 import { roomLabel } from "../components/game/format.js";
 import { useSettings } from "../settings/store.js";
 
+/** The widest a room tab grows, in px: wide enough for "Videos" with room to spare, narrow enough that five tabs sit centered on desktop. */
+const TAB_MAX_WIDTH = 160;
+
 /**
- * One game: the game top bar (in place of the app header, S60), the room tabs
- * across the full width at every pairing (S56 game-rooms A2), and the room.
+ * One game: the game top bar (in place of the app header, S60), the room tabs —
+ * equal widths up to `TAB_MAX_WIDTH`, centered (owner, 2026-11-12) — and the room.
  * `variant` comes from the layout host; rooms take their tablet and desktop
  * layouts from it as they're built (S63/S64 and on).
  */
@@ -80,15 +83,25 @@ export function GamePage({ variant }: { variant: LayoutVariant })
 					}
 				}}
 			>
+				{/* Equal-width tabs, each at most TAB_MAX_WIDTH, centered as a group (owner, 2026-11-12: "tab menu
+				    on games should have a max width per tab and the tabs should be centered, and equal width to each other"). */}
 				<Tabs.List
-					justify="space-between"
+					grow
+					justify="center"
 					style={{
 						flexWrap: "nowrap",
 						overflowX: "auto",
 					}}
 				>
 					{rooms.map((room) => (
-						<Tabs.Tab key={room} value={room}>
+						<Tabs.Tab
+							key={room}
+							value={room}
+							style={{
+								flex: "1 1 0",
+								maxWidth: TAB_MAX_WIDTH,
+							}}
+						>
 							{roomLabel(room)}
 						</Tabs.Tab>
 					))}

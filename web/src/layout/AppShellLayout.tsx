@@ -19,7 +19,8 @@ const RAIL_WIDTH = 240;
  *
  * - **mobile / medium:** the app header with the burger, which opens the nav
  *   rail as a drawer from the left over the page (S56 A2); following a link closes it.
- * - **desktop:** the 240px rail beside the page and no burger.
+ * - **desktop:** the 240px rail beside the page; the header has no burger and no wordmark,
+ *   since the rail's wordmark is right beside it (owner, 2026-11-12).
  * - **game routes** (`/game/:pk`) draw the game top bar in place of the app
  *   header; on desktop the rail stays.
  *
@@ -86,7 +87,7 @@ export function AppShellLayout({ children, notice = null }: {
 				display: "flex",
 				flexDirection: "column",
 			}}>
-				{gameRoute ? null : <AppHeader burger={!desktop} drawerOpened={opened} onBurger={toggle} />}
+				{gameRoute ? null : <AppHeader burger={!desktop} wordmark={!desktop} drawerOpened={opened} onBurger={toggle} />}
 				<NoticeSlot notice={notice} />
 				<Box component="main" px="md" pb="md" pt={gameRoute ? 0 : "md"} style={{
 					flex: 1,

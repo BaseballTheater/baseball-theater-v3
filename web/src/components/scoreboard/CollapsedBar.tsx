@@ -33,7 +33,8 @@ function Team({ team, side }: { team: ScoreboardGame["teams"]["away"];
  * `inningLabel` like every live label. The bar is a link: choosing it opens the game, at
  * `/game/<gamePk>` like the full module's link, so it lands in the room Settings' Opens
  * First picks; it never expands in place (S126; owner, 2026-11-07: "collapsed games in the
- * game list should not expand on click, they should go to the game page.").
+ * game list should not expand on click, they should go to the game page."). It lifts on
+ * hover like the full module (`.bt-card`).
  */
 export function CollapsedBar({ game }: { game: ScoreboardGame })
 {
@@ -47,6 +48,7 @@ export function CollapsedBar({ game }: { game: ScoreboardGame })
 			component={Link}
 			to={`/game/${game.gamePk}`}
 			data-testid="collapsed-bar"
+			className="bt-card"
 			aria-label={`${game.teams.away.abbreviation} at ${game.teams.home.abbreviation}${live ? `, ${live}` : ""}: open the game`}
 			style={{
 				display: "block",

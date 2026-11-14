@@ -110,6 +110,12 @@ export type GameBoxscore = {
  */
 export type HighlightKind = "highlight" | "recap" | "condensed" | "video";
 
+/** One encoding of a clip as MLB lists it: its playback name (`mp4Avc`, `highBit`, `hlsCloud`) and URL. */
+export type VideoRendition = {
+	name: string;
+	url: string;
+};
+
 export type MediaHighlight = {
 	id: string;
 	/** The pitch the video shows (S95): MLB's link, or a matched ABS challenge (`playLink`); null when it shows no single play. */
@@ -120,7 +126,14 @@ export type MediaHighlight = {
 	blurb: string | null;
 	duration: string | null;
 	imageUrl: string | null;
+	/** The encoding BT plays first: MLB's `mp4Avc`, else its HLS stream (`pickPlaybackUrl`). */
 	playbackUrl: string | null;
+	/**
+	 * Every video encoding MLB lists for the clip (`mp4Avc`, `highBit`, `hlsCloud`), one per
+	 * distinct URL, for the player's quality choice (`videoQualities`); absent on older
+	 * recordings, which play `playbackUrl` alone.
+	 */
+	renditions?: VideoRendition[];
 	/** S69: what the video is; absent on older recordings. */
 	kind?: HighlightKind;
 	/** S69: when MLB published it (ISO instant); absent on older recordings. */

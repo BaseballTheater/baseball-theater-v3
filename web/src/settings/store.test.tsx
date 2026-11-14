@@ -199,7 +199,7 @@ describe("settings follow the signed-in account (S120)", () =>
 				},
 				uid,
 			},
-			signIn: vi.fn(async () => undefined),
+			signIn: vi.fn(async () => false),
 			finishSignIn: vi.fn(async () => "/"),
 			signOut: vi.fn(),
 		};

@@ -25,7 +25,7 @@ function renderCallback(finishSignIn: Session["finishSignIn"])
 {
 	const session: Session = {
 		status: "signedOut",
-		signIn: vi.fn(),
+		signIn: vi.fn(async () => false),
 		finishSignIn,
 		signOut: vi.fn(),
 	};

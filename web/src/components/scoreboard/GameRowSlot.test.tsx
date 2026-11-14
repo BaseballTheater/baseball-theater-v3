@@ -270,3 +270,49 @@ describe("sparse data (S66 module, S67 slot)", () =>
 		expect(module.queryAllByText(/\(\.\d{3}\)/)).toHaveLength(0);
 	});
 });
+
+describe("the whole module is the game link (owner, 2026-11-12: \"the entire game card should be clickable in the games list\")", () =>
+{
+	function renderModule(game: ScoreboardGame)
+	{
+		render(
+			<MantineProvider>
+				<MemoryRouter>
+					<ScoreboardModule game={game} />
+				</MemoryRouter>
+			</MantineProvider>,
+		);
+		return screen.getByTestId("scoreboard-module");
+	}
+
+	it("the game link's box is stretched over the card, which is its positioning box and lifts on hover", () =>
+	{
+		const card = renderModule(GAMES.final);
+		const link = within(card).getByRole("link", {
+			name: /at/,
+		});
+		expect(link).toHaveAttribute("href", `/game/${GAMES.final.gamePk}`);
+		// `.bt-card-link::after` covers its nearest positioned ancestor: the card, padding and slot included.
+		expect(link).toHaveClass("bt-card-link");
+		expect(card.style.position).toBe("relative");
+		expect(card).toHaveClass("bt-card");
+		// The slot is not positioned, so the stretched link sits over it and a press on it opens the game.
+		expect(within(card).getByTestId("game-row-slot").style.position).toBe("");
+		// One link per card while the slot shows Status: nothing nested, nothing competing.
+		expect(within(card).getAllByRole("link")).toHaveLength(1);
+	});
+
+	it("Room Menu links stay their own links, raised above the card's link", () =>
+	{
+		render(
+			<MantineProvider>
+				<MemoryRouter>
+					<GameRowSlot game={GAMES.final} setting="roomMenu" />
+				</MemoryRouter>
+			</MantineProvider>,
+		);
+		const links = within(screen.getByTestId("slot-room-menu")).getAllByRole("link");
+		expect(links.length).toBeGreaterThan(0);
+		for (const link of links) expect(link).toHaveClass("bt-above-card-link");
+	});
+});

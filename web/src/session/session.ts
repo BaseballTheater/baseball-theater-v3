@@ -24,8 +24,12 @@ export type Session = SessionState & {
 	 * browser to Logto's hosted sign-in, always for a fresh emailed code; locally it is
 	 * the dev sign-in as `dev:test-user`; a production build without Logto (previews)
 	 * does nothing.
+	 *
+	 * Answers true when the browser is now leaving for Logto (a caller showing progress keeps
+	 * showing it), false when sign-in finished or couldn't start here (the dev sign-in, a
+	 * production build without Logto), so a caller can put its control back.
 	 */
-	signIn(): Promise<void>;
+	signIn(): Promise<boolean>;
 	/**
 	 * At the sign-in callback route (S116): hands Logto's ID token to BT once, keeps
 	 * BT's session, and answers the path the sign-in started from. Calling it again

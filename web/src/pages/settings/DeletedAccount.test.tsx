@@ -145,7 +145,8 @@ describe("the deleted-account page (A5)", () =>
 				const rail = screen.getByRole("navigation", {
 					name: "Main",
 				});
-				for (const link of within(rail).getAllByRole("link"))
+				// The section items, not the wordmark's link home above them.
+				for (const link of within(within(rail).getByRole("list")).getAllByRole("link"))
 				{
 					expect(link).not.toHaveAttribute("aria-current");
 					const label = link.querySelector("span");

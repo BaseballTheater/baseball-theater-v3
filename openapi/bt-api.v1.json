@@ -650,7 +650,15 @@
 						"enum": ["mlb", "challenge"],
 						"type": "string"
 					},
-					"playbackUrl": { "type": ["string", "null"] },
+					"playbackUrl": {
+						"description": "The encoding BT plays first: MLB's `mp4Avc`, else its HLS stream (`pickPlaybackUrl`).",
+						"type": ["string", "null"]
+					},
+					"renditions": {
+						"description": "Every video encoding MLB lists for the clip (`mp4Avc`, `highBit`, `hlsCloud`), one per distinct URL, for the player's quality choice (`videoQualities`); absent on older recordings, which play `playbackUrl` alone.",
+						"items": { "$ref": "#/components/schemas/VideoRendition" },
+						"type": "array"
+					},
 					"tags": {
 						"description": "S69: MLB's taxonomy tags (`data-visualization`, `home-run`, …); absent on older recordings.",
 						"items": { "type": "string" },
@@ -1156,7 +1164,14 @@
 				"required": ["videoId", "playId"],
 				"type": "object"
 			},
-			"VideoPlayerMode": { "enum": ["dialog", "stage"], "type": "string" }
+			"VideoPlayerMode": { "enum": ["dialog", "stage"], "type": "string" },
+			"VideoRendition": {
+				"additionalProperties": false,
+				"description": "One encoding of a clip as MLB lists it: its playback name (`mp4Avc`, `highBit`, `hlsCloud`) and URL.",
+				"properties": { "name": { "type": "string" }, "url": { "type": "string" } },
+				"required": ["name", "url"],
+				"type": "object"
+			}
 		}
 	},
 	"info": {

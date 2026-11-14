@@ -10,16 +10,18 @@
 	--bt-hairline: rgb(255 242 211 / 12%);
 	--bt-accent: #f5ad1d;
 	--bt-accent-2: #72d991;
-	/* The day digest's dull gold (shell-scoreboard DESIGN: base #3A2A0E, two soft highlights at about 30°, darkest #2E220B). */
-	--bt-digest-gold: linear-gradient(
-		30deg,
-		#2e220b 0%,
-		#3a2a0e 28%,
-		#56401a 42%,
-		#3a2a0e 58%,
-		#4e3916 74%,
-		#2e220b 100%
-	);
+	/*
+	 * Hover feedback (owner, 2026-11-12: "quick animated hover effects, like 0.25-0.5s with a
+	 * snappy Bézier curve. Use the material design Bézier curve"): Material's standard easing,
+	 * 0.3s for color and lift, 0.4s for an image zooming inside its frame.
+	 */
+	--bt-ease: cubic-bezier(0.4, 0, 0.2, 1);
+	--bt-hover-ms: 0.3s;
+	--bt-zoom-ms: 0.4s;
+	/* What a hovered control's ground turns to: Light at 10%, visible on Dark and on Raised alike. */
+	--bt-hover-wash: rgb(255 242 211 / 10%);
+	/* A hovered card's edge: Light at 35%, up from the 12% hairline. */
+	--bt-hover-edge: rgb(255 242 211 / 35%);
 
 	/* Pitch-outcome roles (S31): ball = Accent 2, strike = Primary Light. */
 	--bt-pitch-ball: #72d991;
@@ -60,4 +62,229 @@ a {
 		padding-bottom: env(safe-area-inset-bottom);
 		background: var(--bt-dark);
 	}
+}
+
+/*
+ * Hover feedback, site wide (owner, 2026-11-12: "Anything that is clickable needs at least a
+ * basic hover effect"). Every `:hover` rule sits under `(hover: hover)` so a touch screen never
+ * keeps a hover stuck on after a tap. Keyboard focus (`:focus-visible`, on any screen) gets the
+ * same colours, without the lift or the zoom.
+ *
+ * - `.bt-card`: a clickable raised module (a scoreboard game, a digest clip, a collapsed bar).
+ *   Its edge brightens, its ground lifts to Raised current, and it rises 2px with a shadow
+ *   (VISUAL-DESIGN §6 "Hover / focus"; no bounce, no glow wash). The card is its own hover
+ *   target, so while it is lifted a 2px strip (`::before`) fills the gap it rose from: a pointer
+ *   resting on its bottom edge stays over it instead of flickering in and out.
+ * - `.bt-zoom-host` around a `.bt-zoom` frame: the image inside zooms while the frame stays put
+ *   (owner: "hover effects that zoom an image inside its container").
+ * - `.bt-hover`: a plain clickable (a nav item, a text button) gets the Light wash behind it.
+ * - `.bt-pitch-dot`: a pitch on the catcher's view grows a little.
+ * - `.bt-video`: the playing picture, which pauses and plays on a click, brightens a touch.
+ * - Mantine's own controls (icon buttons, buttons, links, tabs, accordion rows, menu items, close
+ *   buttons, list options, radios, checkboxes, switches, text fields) get the same timing and a wash or edge
+ *   that shows on the dark palette, where Mantine's gray barely does.
+ */
+.bt-card,
+.bt-hover,
+.bt-zoom img,
+.bt-pitch-dot circle,
+.bt-video,
+.mantine-ActionIcon-root,
+.mantine-Button-root,
+.mantine-Anchor-root,
+.mantine-Tabs-tab,
+.mantine-Accordion-control,
+.mantine-Menu-item,
+.mantine-Burger-root,
+.mantine-CloseButton-root,
+.mantine-Combobox-option,
+.mantine-MultiSelect-option,
+.mantine-SegmentedControl-label,
+.mantine-Radio-radio,
+.mantine-Checkbox-input,
+.mantine-Input-input,
+.mantine-Switch-track {
+	transition-property: background-color, border-color, color, opacity, transform, box-shadow, filter;
+	transition-duration: var(--bt-hover-ms);
+	transition-timing-function: var(--bt-ease);
+}
+
+.bt-zoom img {
+	transition-duration: var(--bt-zoom-ms);
+}
+
+.bt-card {
+	/* For the hover strip below; the scoreboard card also sets it inline for its stretched link. */
+	position: relative;
+}
+
+.bt-pitch-dot circle {
+	/* Grow about the dot's own centre, not the chart's origin. */
+	transform-box: fill-box;
+	transform-origin: center;
+}
+
+.bt-video {
+	cursor: pointer;
+}
+
+/* A card that is one big link: the link's box covers the whole card, so its padding and slot click through to the game. */
+.bt-card-link::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+}
+
+/* A real control inside such a card (the Room Menu's links) stays clickable above the card's link. */
+.bt-above-card-link {
+	position: relative;
+	z-index: 1;
+}
+
+@media (hover: hover) {
+	.bt-card:hover {
+		border-color: var(--bt-hover-edge) !important;
+		background-color: var(--bt-raised-current) !important;
+		transform: translateY(-2px);
+		box-shadow: 0 6px 16px rgb(0 0 0 / 35%);
+	}
+
+	/* The lifted card's strip over the 2px it rose from (see the note at the top). */
+	.bt-card:hover::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: -2px;
+		height: 2px;
+	}
+
+	.bt-zoom-host:hover .bt-zoom img {
+		transform: scale(1.08);
+	}
+
+	.bt-pitch-dot:hover circle {
+		transform: scale(1.2);
+	}
+
+	.bt-video:hover {
+		filter: brightness(1.06);
+	}
+
+	/* `!important` because these controls set their resting ground inline (`transparent`). */
+	.bt-hover:hover {
+		background-color: var(--bt-hover-wash) !important;
+	}
+
+	.mantine-Button-root[data-variant="default"]:hover {
+		border-color: var(--bt-hover-edge) !important;
+		background-color: var(--bt-hover-wash) !important;
+	}
+
+	.mantine-ActionIcon-root[data-variant="subtle"]:hover,
+	.mantine-Button-root[data-variant="subtle"]:hover,
+	.mantine-Tabs-tab:hover,
+	.mantine-Accordion-control:hover,
+	.mantine-Menu-item:hover,
+	.mantine-Burger-root:hover,
+	.mantine-CloseButton-root:hover,
+	.mantine-Combobox-option:not([data-combobox-selected]):not([data-combobox-disabled]):hover,
+	.mantine-MultiSelect-option:not([data-combobox-selected]):not([data-combobox-disabled]):hover {
+		background-color: var(--bt-hover-wash);
+	}
+
+	.mantine-Button-root:not([data-variant="subtle"]):not([data-variant="default"]):not(:disabled):hover {
+		filter: brightness(1.15);
+	}
+
+	/* A link keeps its resting underline (ratified where it has one) and gets the wash behind it. */
+	.mantine-Anchor-root:not(:disabled):not([data-disabled]):hover {
+		background-color: var(--bt-hover-wash);
+	}
+
+	.mantine-SegmentedControl-label:hover {
+		color: var(--bt-light);
+	}
+
+	/* An unchecked radio, checkbox or switch (pointer anywhere on it, label included), or a text field not being typed in (MultiSelect's box is a div that holds the focused input, hence `:focus-within`): its edge brightens, never over the focus border. */
+	.mantine-Radio-root:hover .mantine-Radio-radio:not(:checked):not(:disabled),
+	.mantine-Checkbox-root:hover .mantine-Checkbox-input:not(:checked):not(:disabled),
+	.mantine-Switch-root:hover .mantine-Switch-input:not(:checked):not(:disabled) + .mantine-Switch-track,
+	.mantine-Input-input:not(:disabled):not(:focus):not(:focus-within):hover {
+		border-color: var(--bt-hover-edge);
+	}
+}
+
+/* Keyboard focus: the hover colours, on any screen, with nothing moving. */
+.bt-card:focus-visible,
+.bt-card:has(:focus-visible) {
+	border-color: var(--bt-hover-edge) !important;
+	background-color: var(--bt-raised-current) !important;
+}
+
+.bt-hover:focus-visible {
+	background-color: var(--bt-hover-wash) !important;
+}
+
+.mantine-Button-root[data-variant="default"]:focus-visible {
+	border-color: var(--bt-hover-edge) !important;
+	background-color: var(--bt-hover-wash) !important;
+}
+
+.mantine-ActionIcon-root[data-variant="subtle"]:focus-visible,
+.mantine-Button-root[data-variant="subtle"]:focus-visible,
+.mantine-Tabs-tab:focus-visible,
+.mantine-Accordion-control:focus-visible,
+.mantine-Menu-item:focus-visible,
+.mantine-Burger-root:focus-visible,
+.mantine-CloseButton-root:focus-visible,
+.mantine-Anchor-root:focus-visible {
+	background-color: var(--bt-hover-wash);
+}
+
+/* Reduced motion: colors still change, but nothing moves, lifts or zooms, and nothing animates. */
+@media (prefers-reduced-motion: reduce) {
+	.bt-card,
+	.bt-hover,
+	.bt-zoom img,
+	.bt-pitch-dot circle,
+	.bt-video,
+	.mantine-ActionIcon-root,
+	.mantine-Button-root,
+	.mantine-Anchor-root,
+	.mantine-Tabs-tab,
+	.mantine-Accordion-control,
+	.mantine-Menu-item,
+	.mantine-Burger-root,
+	.mantine-CloseButton-root,
+	.mantine-Combobox-option,
+	.mantine-MultiSelect-option,
+	.mantine-SegmentedControl-label,
+	.mantine-Radio-radio,
+	.mantine-Checkbox-input,
+	.mantine-Input-input,
+	.mantine-Switch-track {
+		transition: none;
+	}
+
+	.bt-card,
+	.bt-zoom img,
+	.bt-pitch-dot circle {
+		transform: none !important;
+	}
+}
+
+/*
+ * The dialog player's frame (S70; owner, 2026-11-12: "video player on desktop needs to play
+ * videos larger, taking more of the screen"): as wide as the screen allows, up to 1280px, but
+ * no wider than lets the 16:9 clip and everything around it fit the screen's height. That
+ * chrome measured 234px with a two-line title and the actions on one row (the dialog's 16px
+ * padding top and bottom, the Close row, the controls, actions, title and disclaimer), so 260px
+ * is held back. It never drops below the old 560px (or the screen's width, if narrower), so on
+ * a short landscape screen (under about 575px tall) the dialog can run past the screen's height
+ * and scroll. A phone gets its full width.
+ */
+.bt-player-frame {
+	width: max(min(100%, 560px), min(100%, 1280px, calc((100dvh - 260px) * 16 / 9)));
 }

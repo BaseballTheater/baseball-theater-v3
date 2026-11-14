@@ -1,4 +1,5 @@
 import { Group, Text } from "@mantine/core";
+import { Link } from "react-router-dom";
 
 /** The pole (Light) and the pennant (Primary) of BT's flag mark, from the Figma `wordmark` (236:3024). */
 const POLE = "M0.207271 16.4018L3.25347 15.2153L3.25013 7.89629L0.328131 9.07636C0.254586 9.10618 0.153783 9.08484 0.110067 9.05321C0.0663518 9.02158 0.00669327 8.95472 0.00669327 8.87526L0.00772209 6.86641C0.00772209 6.72832 0.0858959 6.65323 0.203156 6.60669L3.25475 5.39603L3.25553 3.01302C2.74868 2.65583 2.45013 2.08033 2.52188 1.4588C2.61548 0.649807 3.28793 0.0552766 4.08792 0.00358947C4.8154 -0.043469 5.45673 0.376457 5.72005 1.01162C6.00369 1.69564 5.80388 2.46323 5.22581 2.92327L5.22684 22.7513C5.22684 22.9061 5.09363 22.9985 4.96043 22.9987L3.51859 23C3.39027 23 3.2509 22.9095 3.2509 22.7601L3.24987 17.6616L0.355132 18.819C0.262301 18.8563 0.184899 18.8709 0.108268 18.8259C0.0267513 18.7781 -0.000507178 18.6884 7.12203e-06 18.5809L0.0102938 16.6782C0.0110652 16.5458 0.0709812 16.4555 0.207271 16.4023V16.4018Z";
@@ -36,5 +37,26 @@ export function Wordmark()
 			</Text>
 			<FlagMark />
 		</Group>
+	);
+}
+
+/**
+ * The wordmark as the link home (owner, 2026-11-12: "clicking the logo should go to the home
+ * page"): `/`, which opens the scoreboard's default day (S111). The header and the rail both
+ * show it through this, so the logo goes to the same place wherever it is; `onClick` lets the
+ * drawer close when it is followed.
+ */
+export function HomeLink({ onClick }: { onClick?: () => void })
+{
+	return (
+		<Link to="/" aria-label="Baseball Theater home" onClick={onClick} className="bt-hover" style={{
+			display: "inline-flex",
+			borderRadius: 6,
+			padding: 4,
+			margin: -4,
+		}}
+		>
+			<Wordmark />
+		</Link>
 	);
 }

@@ -81,8 +81,9 @@ export function PlayerDialog({
 						{playLink.label}
 					</Anchor>
 				) : <span />}
-				<UnstyledButton onClick={onClose} aria-label="Close video" c="var(--bt-light)" style={{
+				<UnstyledButton onClick={onClose} aria-label="Close video" c="var(--bt-light)" className="bt-hover" px={8} py={4} mx={-8} my={-4} style={{
 					flexShrink: 0,
+					borderRadius: 8,
 				}}
 				>
 					Close ✕
@@ -101,7 +102,10 @@ export function PlayerDialog({
 					justifyContent: "center",
 				}}
 			>
-				<Box w="100%" maw={560}>
+				{/* `.bt-player-frame` (styles.css): as wide as the screen allows, up to 1280px, while the clip,
+				    its controls and the disclaimer still fit the screen's height (owner, 2026-11-12: "video
+				    player on desktop needs to play videos larger, taking more of the screen"). */}
+				<Box className="bt-player-frame">
 					<VideoPlayer video={video} title={title} autoPlay />
 				</Box>
 			</Box>

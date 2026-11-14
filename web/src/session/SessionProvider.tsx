@@ -121,14 +121,15 @@ export function SessionProvider({ children, authClient = deployedAuthClient }: {
 				// The callback returns here once Logto is done (`finishSignIn`).
 				writeStored("bt.signInReturnTo", `${location.pathname}${location.search}`);
 				await client.signIn();
-				return;
+				return true;
 			}
-			if (import.meta.env.PROD) return;
+			if (import.meta.env.PROD) return false;
 			setSessionToken(DEV_SIGN_IN_TOKEN);
 			await applySession();
 			await queryClient.invalidateQueries({
 				queryKey: ACCOUNT_QUERY_KEY,
 			});
+			return false;
 		},
 		finishSignIn(callbackUrl)
 		{

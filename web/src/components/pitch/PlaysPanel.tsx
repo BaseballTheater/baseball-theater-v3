@@ -114,6 +114,7 @@ function InningSidebar({
 			key={label}
 			aria-current={view === value ? "true" : undefined}
 			onClick={() => onChoose(value)}
+			className={view === value ? undefined : "bt-hover"}
 			w={36}
 			h={30}
 			fz={value === "runs" ? 11 : 14}
@@ -160,7 +161,9 @@ function InningSidebar({
  * score after it (owner, 2026-10-14: "Plays is basically like browsing a list of the
  * individual batters in Live … you need to be able to select the inning you're looking
  * at. By default, it should show the most recent inning that has any actual information
- * to show"). An open at-bat is Live's cards, zone and pitch sequence (`AtBatViewer`).
+ * to show"). Every at-bat starts closed (owner, 2026-11-12: "the plays view shouldn't expand
+ * any plays by default"), except the one a video's play link arrives on (S97). An open
+ * at-bat is Live's cards, zone and pitch sequence (`AtBatViewer`).
  * With Hide Scores on (S75; game-rooms A4 `plays-hidden-nonotice-mobile`,
  * `plays-scoring-hidden-nonotice-mobile`) the linescore masks every inning and R·H·E, the
  * Runs view masks the score after each play, and an in-play pitch reads "IN PLAY"; the
@@ -226,14 +229,16 @@ export function PlaysPanel({ game }: { game: GamePayload })
 					<Text fz={11} fw={700} tt="uppercase">{heading}</Text>
 					{rows.length === 0 ? <Text c="dimmed">No scoring plays yet.</Text> : (
 						<PlaysAccordion
-							// A new view starts fresh, its last row open (game-rooms DESIGN: "In the default view the game's last at-bat is the open row").
+							// A new view starts fresh with every row closed (owner, 2026-11-12: "the plays view shouldn't
+							// expand any plays by default", over game-rooms DESIGN's open last at-bat). Only a video's play
+							// link opens one: the reader asked for that play (S97).
 							key={String(shown)}
 							plays={plays}
 							sections={sections}
 							tagged={shown === "runs"}
 							end={end}
 							scoresHidden={scoresHidden}
-							defaultOpen={view === null ? (arrival?.about.atBatIndex ?? rows.at(-1)!.about.atBatIndex) : null}
+							defaultOpen={view === null ? (arrival?.about.atBatIndex ?? null) : null}
 							marked={arrival?.about.atBatIndex ?? null}
 							videoLines={videoLines}
 						/>

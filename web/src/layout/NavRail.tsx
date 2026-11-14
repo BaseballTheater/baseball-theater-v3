@@ -6,10 +6,10 @@ import { DevSessionControl } from "../session/DevSessionControl.js";
 import { useSession } from "../session/session.js";
 import { NAV, activeSection } from "./nav.js";
 import { VERSION_LINE } from "./version.js";
-import { Wordmark } from "./Wordmark.js";
+import { HomeLink } from "./Wordmark.js";
 
 /**
- * The 240px nav rail (S31 `nav-rail`): wordmark, sections with the active one
+ * The 240px nav rail (S31 `nav-rail`): wordmark (the link home), sections with the active one
  * filled Primary and marked `aria-current`, and the build's version line at its
  * foot with no label (S56 A2). The desktop host shows it beside the page; on
  * mobile and medium it is the drawer's content, and `onNavigate` closes the drawer.
@@ -20,7 +20,8 @@ import { Wordmark } from "./Wordmark.js";
  * before the label, Primary Light on the active item and transparent on the
  * others, so every label sits at the same inset; labels 15px Light, the active
  * one SemiBold; the active item filled Primary (`color/brand/primary`, #CE0F0F);
- * the version line 11px Light.
+ * the version line 11px Light. An item that isn't active takes the Light wash on hover
+ * (`.bt-hover`); the active one is already filled.
  */
 export function NavRail({ onNavigate }: { onNavigate?: () => void })
 {
@@ -31,7 +32,9 @@ export function NavRail({ onNavigate }: { onNavigate?: () => void })
 	return (
 		<Stack h="100%" justify="space-between" p={24} gap="md">
 			<Stack gap={32}>
-				<Wordmark />
+				<Box>
+					<HomeLink onClick={onNavigate} />
+				</Box>
 				<Stack gap={8} component="ul" m={0} p={0} style={{
 					listStyle: "none",
 				}}>
@@ -46,6 +49,7 @@ export function NavRail({ onNavigate }: { onNavigate?: () => void })
 									onClick={onNavigate}
 									aria-current={isActive ? "page" : undefined}
 									data-active={isActive || undefined}
+									className={isActive ? undefined : "bt-hover"}
 									style={{
 										display: "flex",
 										alignItems: "center",
