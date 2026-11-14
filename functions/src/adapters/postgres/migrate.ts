@@ -15,11 +15,14 @@ import type { PostgresDb } from "./repos.js";
 /** The committed SQL migrations beside the schema (`drizzle-kit generate`, S50). */
 export const MIGRATIONS_FOLDER = fileURLToPath(new URL("./migrations", import.meta.url));
 
-/** Migrates a database opened by `openPostgres` (node-postgres). */
-export async function migratePostgres(db: PostgresDb): Promise<void>
+/**
+ * Migrates a database opened by `openPostgres` (node-postgres) from `migrationsFolder`, the committed
+ * migrations unless a caller (the baseball-data copy, which compares against the same folder) names one.
+ */
+export async function migratePostgres(db: PostgresDb, migrationsFolder: string = MIGRATIONS_FOLDER): Promise<void>
 {
 	await migrateNodePostgres(db as Parameters<typeof migrateNodePostgres>[0], {
-		migrationsFolder: MIGRATIONS_FOLDER,
+		migrationsFolder,
 	});
 }
 
