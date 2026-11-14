@@ -50,8 +50,8 @@ Assembled, in this order and around the stories, into BACKLOG.md.
     - `55–80` Later themes (not yet story-sliced)
 - [05 Gap map (doc → story)](<backlog/frame/05 Gap map (doc → story).md>) — 9 KB
   - `1–44` Gap map (doc → story)
-- [06 Baseline history](<backlog/frame/06 Baseline history.md>) — 45 KB
-  - `1–128` Baseline history
+- [06 Baseline history](<backlog/frame/06 Baseline history.md>) — 46 KB
+  - `1–129` Baseline history
 
 ## Product and architecture docs
 
