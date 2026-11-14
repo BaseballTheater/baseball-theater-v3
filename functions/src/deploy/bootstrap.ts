@@ -81,7 +81,8 @@ export const WORKER_SECRETS = ["BT_SESSION_KEY"] as const;
 /**
  * Production's alone (S116 AC 5): its one Logto machine-to-machine app, which deletes fans' Logto
  * accounts (the Worker, `worker-app.ts`) and registers production's sign-in addresses (the
- * deploy, `src/deploy/logto.ts`). Only the `production` job maps them, from the GitHub secrets of
+ * deploy, `src/deploy/logto.ts`). Only the `production` job (Worker secrets) and the
+ * `production-logto` job (the registration) map them, from the GitHub secrets of
  * the same names (owner, 2026-11-07: "LOGTO_S2S_APP_ID and LOGTO_S2S_SECRET, go ahead"); staging
  * and previews have no machine-to-machine app.
  */

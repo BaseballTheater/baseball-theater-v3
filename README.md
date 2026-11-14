@@ -192,8 +192,9 @@ automatically 2. Mirror"):
 - After production is live, the workflow fast-forwards `main` to the released commit, so `main`
   always shows what production runs. It never forces `main`.
 - Agents never push directly to `stage` or `main` and never merge into `main`. The coordinator
-  publishes a release only when the owner says so; each release has a milestone, and every pull
-  request into `stage` is assigned to the next one; CI's `milestone` job fails `ci-passed` until it
+  prepares a release (a checked draft) and later publishes it, each only when the owner says so,
+  publishing drafts in version order; each release has a milestone, and every pull request into
+  `stage` is assigned to the next one; CI's `milestone` job fails `ci-passed` until it
   is (#47; owner, 2026-11-13: "Yes, build it that way"). The DNS cutover stays the owner's.
 - **The version line.** The foot of the nav rail reads `<release> (<commit>)`, e.g. `v3.2.0 (40767e9)`: the
   milestone of the pull request whose merge commit was built (`scripts/build-release.sh`), so staging
@@ -228,25 +229,54 @@ automatically 2. Mirror"):
   rows) and filled only by `pnpm db:migrate`, so it never holds a fan's data. Copying production's
   baseball data into it is a separate step the owner runs by hand (S117, **Copy baseball data**
   below); no deploy copies data.
-- **Releasing.** On GitHub, Releases → Draft a new release: choose a new tag `v*` (e.g. `v3.0.0`)
-  with its target the exact `stage` commit that passed the release checks (not the moving branch), then press
-  **Generate release notes**: `.github/release.yml` makes the notes the list of pull requests merged
-  into `stage` since the last release, which is the stories the release ships. Publishing it
-  (`gh release create v3.0.0 --target <checked stage sha> --generate-notes` does the same) runs the deploy workflow
-  on that tag: `pnpm verify`, then production's steps (below), then `main` fast-forwards to the
-  tagged commit. A release ships everything on `stage` up to its target; there is no picking single
-  stories out of the middle, and releasing is no longer done by merging `stage` into `main`. The
-  first release must target a commit that has S121's workflow (a release runs the workflow as it is at
-  its tag). The owner decides when to release; the coordinator publishes it, on the owner's word (CLAUDE.md).
-- **Rolling back.** Three ways, quickest first. (1) `npx wrangler rollback --env production` (from
-  `functions/`, with `--config ../wrangler.jsonc`) returns production's Worker to its previous version
-  in seconds; add a version id to pick an older one (`npx wrangler deployments list --env production`
-  lists them). (2) Re-run the previous release's run of the Deploy workflow (Actions → Deploy → that
-  release's run → Re-run all jobs): it deploys that release's tag again, with the workflow as it was at
-  that tag. GitHub re-runs a run only within 30 days of it. (3) Otherwise publish a new release with a
-  new tag (e.g. `v0.1.1`) whose target is the older release's commit: tag it with
-  `git tag v0.1.1 'v0.1.0^{}'` and `git push origin v0.1.1`, then publish a release from that tag.
-  This works only if that commit has S121's workflow. In (2) and (3) production goes back but `main` does not: the mirror job fails red on purpose
+- **Releasing.** A release is prepared at one time and published later (owner, 2026-11-13: "I might
+  want to prepare a release, but not deploy it to production, then continue to iterate on stage for a
+  while, then deploy that earlier release"). Preparing checks the `stage` commit staging serves and
+  saves it as a draft GitHub Release: a new tag `v*` (e.g. `v3.0.0`) with its target the exact
+  `stage` commit that passed the release checks (not the moving branch), made with
+  `gh release create v3.0.0 --draft --target <checked stage sha> --title v3.0.0 --generate-notes --notes-file <file>`
+  (or Releases → Draft a new release on GitHub, then **Generate release notes** and **Save draft**).
+  A draft has no tag, so `gh release view`, `edit` and `delete` can't find it (they fall back to
+  GraphQL); reach drafts through REST: find one with
+  `gh api "repos/<repo>/releases?per_page=100" --jq '.[] | select(.draft and .tag_name == "v3.0.0") | "\(.id) \(.target_commitish)"'`,
+  edit its notes with `gh api -X PATCH repos/<repo>/releases/<id> -F body=@<file>`, publish it with
+  `gh api -X PATCH repos/<repo>/releases/<id> -F draft=false`, and discard it with
+  `gh api -X DELETE repos/<repo>/releases/<id>`.
+  `.github/release.yml` makes the generated notes the list of pull requests merged into `stage` since
+  the last published release; while an earlier draft still waits, edit the list down to the new
+  release's own milestone, so no pull request is listed by two releases. A draft deploys nothing and
+  has no tag yet, and `stage` keeps moving meanwhile. More than one draft may wait, but they publish
+  in version order. Publishing a draft, unchanged and never retargeted
+  (`-F draft=false`, above), creates its tag and runs the deploy workflow on it:
+  `pnpm verify`, then production's steps (below), then `main` fast-forwards to the tagged commit.
+  Production's Release order step, before anything installs, refuses a release out of order (owner, 2026-11-13: "The only way a rollback
+  should happen is using a REAL rollback to a prior verison that had been released. Otherwise, an
+  unreleased release that is a lower version than the one that is live should fail to deploy. If it
+  still needs to be deployed, it'd need a new release."): `scripts/release-order.sh` fails the run
+  before anything installs or deploys when another published release (pre-releases included) has the
+  same or a higher version, or when the release's commit doesn't contain `main`. If an older draft
+  holds something production doesn't already run and still needs to ship, discard it (the REST
+  delete above, safe since a draft has no tag) and prepare a new release. A discarded draft's pull
+  requests move into the milestone of the published release whose commit already contains them (its
+  notes edited to add them, with the owner's approval); those no published release contains move
+  into the lowest remaining draft whose commit contains them (its notes re-edited with the owner's
+  approval), otherwise into the next open milestone. A published release the Release order step refused never counts as released: with the
+  owner's OK, delete it and its tag (`git push origin :refs/tags/<tag>`) and move its pull requests
+  the same way. A release ships everything on `stage` up to its target; there is no
+  picking single stories out of the middle, and releasing is no longer done by merging `stage` into
+  `main`. The first release must target a commit that has S121's workflow (a release runs the
+  workflow as it is at its tag), and every release from now on must target a commit that has the
+  Release order step, since a draft targeting an older commit runs the older workflow without the check. The owner decides when to prepare and when to publish; the
+  coordinator does each, on the owner's word (CLAUDE.md).
+- **Rolling back.** By re-running the Deploy run of an earlier release that deployed to
+  production before (Actions → Deploy → that release's run → Re-run all jobs): it deploys that
+  release's tag again, with the workflow as it was at that tag, and the Release order step lets a
+  re-run of a release that deployed before through (it checks the `production` environment's
+  deployments of that tag). A release that never deployed can't be pushed out this way: its re-run is
+  checked like a first run. GitHub re-runs a run only within 30 days of it; only past that, as a last
+  resort, `npx wrangler rollback --env production` (from `functions/`, with `--config ../wrangler.jsonc`)
+  returns production's Worker to its previous deploy, itself a released version (owner, 2026-11-13: "1
+  and 2 both yes"). Production goes back but `main` does not: the mirror job fails red on purpose
   ("main … is not an ancestor"), because `main` never moves backwards; the next forward release
   fast-forwards it again. No rollback undoes a migration, which is another reason they stay additive.
 - **Production's address until the cutover** (S119; owner, 2026-11-07: "Do the temporary address").
@@ -264,8 +294,9 @@ automatically 2. Mirror"):
   the Elastic Beanstalk record (its CNAME/alias target) before you do it. **Rolling the cutover back:**
   point the `baseball.theater` DNS record back at Elastic Beanstalk in the Cloudflare dashboard
   (remove the Worker's custom domain for `baseball.theater` first, or the next deploy re-claims it),
-  and revert the `wrangler.jsonc` change; `npx wrangler rollback --env production` returns the Worker
-  itself to its previous version, but does not move DNS.
+  and revert the `wrangler.jsonc` change. Roll the Worker itself back as **Rolling back** above says
+  (re-run the last good release's Deploy run; `npx wrangler rollback --env production` only past
+  GitHub's 30-day re-run window); neither moves DNS.
 
 **What every deploy does**, in order, each step safe to repeat: `pnpm deploy:bootstrap <env>` finds
 the env's Neon branch (production's default branch, or `staging`, created schema-only if missing, or
@@ -276,21 +307,21 @@ rewritten every deploy) or creates it, and writes the Worker config with that co
 Worker secret from GitHub secrets (`--secrets-file`), so none is ever set by hand with
 `wrangler secret put`. Every deployed env serves live MLB, names its own address as `BT_APP_ORIGIN`,
 and refuses `dev:` sign-in (no `BT_LOCAL`); production signs in through Logto (S116, below), and
-production's deploy then registers its Logto sign-in addresses (`pnpm deploy:logto production`).
+production's deploy is followed by the `production-logto` job, which registers its Logto sign-in addresses (`pnpm deploy:logto production`).
 
 **What the workflow reads from GitHub** (the owner sets these up once; the automation never does):
 
-| Name                        | Kind        | What                                                                                                               |
-| --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
-| `CLOUDFLARE_API_TOKEN`      | secret      | Workers Scripts edit, Hyperdrive edit, Workers custom domains / routes and DNS edit on the `baseball.theater` zone |
-| `CLOUDFLARE_ACCOUNT_ID`     | variable    | the Cloudflare account                                                                                             |
-| `NEON_API_KEY`              | secret      | creates, reads, resets and deletes branches, and reads connection strings, in the project                          |
-| `NEON_PROJECT_ID`           | variable    | `old-sun-72319473`                                                                                                 |
-| `BT_SESSION_KEY_STAGING`    | secret      | signs sessions on staging and previews                                                                             |
-| `BT_SESSION_KEY_PRODUCTION` | secret      | signs sessions on production                                                                                       |
-| `LOGTO_S2S_APP_ID`          | secret      | production's Logto machine-to-machine app ID (the `production` job only; a Worker secret too)                      |
-| `LOGTO_S2S_SECRET`          | secret      | that app's secret: deletes fans' Logto accounts and sets production's sign-in addresses (`production` job only)    |
-| `production`                | environment | no required reviewers; deployments only from `v*` tags, so only a release reaches production's secrets             |
+| Name                        | Kind        | What                                                                                                                                    |
+| --------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`      | secret      | Workers Scripts edit, Hyperdrive edit, Workers custom domains / routes and DNS edit on the `baseball.theater` zone                      |
+| `CLOUDFLARE_ACCOUNT_ID`     | variable    | the Cloudflare account                                                                                                                  |
+| `NEON_API_KEY`              | secret      | creates, reads, resets and deletes branches, and reads connection strings, in the project                                               |
+| `NEON_PROJECT_ID`           | variable    | `old-sun-72319473`                                                                                                                      |
+| `BT_SESSION_KEY_STAGING`    | secret      | signs sessions on staging and previews                                                                                                  |
+| `BT_SESSION_KEY_PRODUCTION` | secret      | signs sessions on production                                                                                                            |
+| `LOGTO_S2S_APP_ID`          | secret      | production's Logto machine-to-machine app ID (the `production` and `production-logto` jobs only; a Worker secret too)                   |
+| `LOGTO_S2S_SECRET`          | secret      | that app's secret: deletes fans' Logto accounts and sets production's sign-in addresses (`production` and `production-logto` jobs only) |
+| `production`                | environment | no required reviewers; deployments only from `v*` tags, so only a release reaches production's secrets                                  |
 
 **GitHub settings the owner sets** (S118, S121; agents never change repo settings), in this order:
 

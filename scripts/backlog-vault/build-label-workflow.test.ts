@@ -89,7 +89,10 @@ describe("deploy builds name their release (#47)", () =>
 	it("production's own permissions keep the pull request read its lookup needs", () =>
 	{
 		const prod = job(DEPLOY, "production");
-		expect(prod).toMatch(/^ {8}permissions:\n {12}contents: read\n {12}pull-requests: read$/m);
+		// The job's permissions block, which the Release order step widens (PR #51): it must still
+		// hold the reads the lookup needs.
+		const block = /^ {8}permissions:\n((?: {12}[a-z-]+: [a-z]+\n)+)/m.exec(`${prod}\n`)?.[1] ?? "";
+		expect(block.split("\n")).toEqual(expect.arrayContaining(["            contents: read", "            pull-requests: read"]));
 	});
 
 	it("production writes bt-commit.txt from the commit it built, as staging does", () =>

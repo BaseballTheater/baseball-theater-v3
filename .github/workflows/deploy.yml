@@ -37,10 +37,11 @@ name: Deploy
 # target a docs-only stage commit newer than the one staging serves, so the commits can differ (owner,
 # 2026-11-13: releasing only the served commit "would prevent iterating on stage while waiting to push
 # a release to prod"). Staging and production both write bt-commit.txt, the commit they serve.
-# Sign-in (S116): only production has Logto's machine-to-machine app, so only the production job
-# reads its secrets (LOGTO_S2S_APP_ID, LOGTO_S2S_SECRET; owner, 2026-11-07: "LOGTO_S2S_APP_ID and
-# LOGTO_S2S_SECRET, go ahead"), pushes them as Worker secrets and, after deploying, sets the web
-# app's sign-in and sign-out addresses with `pnpm deploy:logto`. Staging and previews read nothing
+# Sign-in (S116): only production has Logto's machine-to-machine app, so only the production jobs
+# read its secrets (LOGTO_S2S_APP_ID, LOGTO_S2S_SECRET; owner, 2026-11-07: "LOGTO_S2S_APP_ID and
+# LOGTO_S2S_SECRET, go ahead"): the production job pushes them as Worker secrets and, after it
+# deploys, the production-logto job sets the web app's sign-in and sign-out addresses with
+# `pnpm deploy:logto`. Staging and previews read nothing
 # of Logto's.
 
 on:
@@ -388,17 +389,27 @@ jobs:
 
     # next.baseball.theater (until the owner's cutover, S119), when the owner publishes a GitHub Release,
     # once verify passes on its tag (S121). The release's tag is what deploys, never a branch head.
-    # Rolling back is `wrangler rollback` or re-running an older release's run (README).
+    # Rolling back is re-running the Deploy run of an earlier release that deployed before; only past
+    # GitHub's 30-day re-run window, `wrangler rollback` to the previous deploy as a last resort (README).
+    # A release published out of order fails before anything deploys (owner, 2026-11-13: "The only
+    # way a rollback should happen is using a REAL rollback to a prior verison that had been
+    # released. Otherwise, an unreleased release that is a lower version than the one that is live
+    # should fail to deploy. If it still needs to be deployed, it'd need a new release."): see the
+    # Release order step and scripts/release-order.sh.
     production:
         if: github.event_name == 'release' && github.event.action == 'published'
         needs: [verify]
-        # Its own, so a change to it keeps what the release lookup needs: reading which pull request
-        # merged the released commit (scripts/build-release.sh merged, #47).
-        permissions:
-            contents: read
-            pull-requests: read
         runs-on: ubuntu-latest
         timeout-minutes: 20
+        # Its own, so a change to it keeps what the steps need: releases (contents) and past production
+        # deployments (deployments) for the Release order step, and which pull request merged the
+        # released commit (pull-requests, issues) for the release lookup (scripts/build-release.sh
+        # merged, #47).
+        permissions:
+            contents: read
+            deployments: read
+            issues: read
+            pull-requests: read
         concurrency:
             group: deploy-production
             cancel-in-progress: false
@@ -414,9 +425,40 @@ jobs:
             LOGTO_S2S_APP_ID: ${{ secrets.LOGTO_S2S_APP_ID }}
             LOGTO_S2S_SECRET: ${{ secrets.LOGTO_S2S_SECRET }}
         steps:
+            # Full history, so the Release order step can check main's ancestry.
             - uses: actions/checkout@v4
               with:
                   ref: ${{ github.event.release.tag_name }}
+                  fetch-depth: 0
+
+            # Before anything installs, builds or deploys: the release must be higher than every
+            # other published release and contain main, unless this is a re-run of a release that
+            # deployed before (a real rollback). The tag reaches the shell only through env.
+            - name: Release order
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  TAG: ${{ github.event.release.tag_name }}
+                  RUN_ATTEMPT: ${{ github.run_attempt }}
+              # pipefail: a failed gh call fails the step instead of hiding behind awk or grep.
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  git fetch --no-tags origin main
+                  PUBLISHED_TAGS="$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate --jq '.[] | select(.draft | not) | .tag_name')"
+                  DEPLOYED_BEFORE=false
+                  # A production deployment of this tag that succeeded before (gh's --jq takes no
+                  # variables, so the tag is matched in awk, from env).
+                  ids="$(gh api "repos/$GITHUB_REPOSITORY/deployments?environment=production&per_page=100" --paginate --jq '.[] | "\(.id) \(.ref)"' |
+                      awk -v tag="$TAG" '$2 == tag || $2 == "refs/tags/" tag { print $1 }')"
+                  for id in $ids; do
+                      # Captured first, so grep -q exiting early can't SIGPIPE gh under pipefail.
+                      states="$(gh api "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" --paginate --jq '.[].state')"
+                      if grep -qx success <<<"$states"; then
+                          DEPLOYED_BEFORE=true
+                      fi
+                  done
+                  export PUBLISHED_TAGS DEPLOYED_BEFORE
+                  bash scripts/release-order.sh
 
             - uses: pnpm/action-setup@v4
               with:
@@ -466,13 +508,11 @@ jobs:
             - name: Re-apply deletions
               run: pnpm db:reapply-deletions
 
+            # The job's last step: its `production` environment deployment succeeds exactly when the
+            # Worker went live, which the Release order step reads to allow a rollback re-run. Logto's
+            # registration runs in production-logto, after this job.
             - name: Deploy production
               run: pnpm --filter @bt/functions exec wrangler deploy --config "${{ steps.bootstrap.outputs.config }}" --env production --secrets-file "${{ steps.bootstrap.outputs.secrets_file }}"
-
-            # After the Worker is live, so a Logto hiccup never holds a release back; it fails the job
-            # visibly instead. Idempotent: an unchanged origin changes nothing in Logto.
-            - name: Register production's Logto sign-in and sign-out addresses
-              run: pnpm run deploy:logto production
 
     # main mirrors production (S121; owner, 2026-11-07: "2. Mirror"): once the release is live, move
     # main to the released commit, as a fast-forward only. A plain `git push` already refuses a
@@ -517,3 +557,41 @@ jobs:
                   fi
                   git push origin "$released:refs/heads/main"
                   echo "main fast-forwarded from $current to $TAG ($released)"
+
+    # After the Worker is live, so a Logto hiccup never holds a release back; it fails this job
+    # visibly instead. Idempotent: an unchanged origin changes nothing in Logto. Its own job (Claude's
+    # review of PR #51), so a Logto failure doesn't mark the production job's environment deployment
+    # failed: the Release order step reads that status to tell a release that went live (a rollback
+    # may re-run it) from one that never did. This job's own `production` deployment may fail; the
+    # Release order step needs only one successful deployment of the tag.
+    production-logto:
+        if: github.event_name == 'release' && github.event.action == 'published'
+        needs: [production]
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        # For LOGTO_S2S_APP_ID and LOGTO_S2S_SECRET, held for production only.
+        environment: production
+        permissions:
+            contents: read
+        env:
+            LOGTO_S2S_APP_ID: ${{ secrets.LOGTO_S2S_APP_ID }}
+            LOGTO_S2S_SECRET: ${{ secrets.LOGTO_S2S_SECRET }}
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.release.tag_name }}
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 9.15.0
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: ".nvmrc"
+                  cache: pnpm
+
+            - name: Install
+              run: pnpm install --frozen-lockfile
+
+            - name: Register production's Logto sign-in and sign-out addresses
+              run: pnpm run deploy:logto production
