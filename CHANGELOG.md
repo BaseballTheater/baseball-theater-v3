@@ -27,6 +27,31 @@ explicitly where that's the case. For what's still ahead, see
   differ though the code is the same; and the label is fixed at build time, so if a merged pull request's milestone
   changes after staging built it, staging keeps the old label until its next deploy.
 
+## Test previews no longer change the staging site's database
+
+- **Before, every pull request's test preview ran its database changes on the staging site's database, and they stayed
+  there even after the pull request was closed or rewritten, which could leave staging's database out of step with
+  staging's code and make it skip later changes. Now each preview gets its own copy of staging's database, refreshed
+  from staging on every update and deleted when the pull request closes (with a weekly sweep for any left behind), so
+  staging's database only ever gets the changes that actually merged.** Details: fixes #42 —
+  `pnpm deploy:bootstrap preview --pr N` makes or resets the Neon branch `preview-pr-<N>` from `staging` and writes
+  the Hyperdrive config `bt-preview-pr-<N>`; `preview-teardown` and the new Preview cleanup workflow delete both with
+  the preview's Worker (`pnpm deploy:teardown`, `pnpm deploy:cleanup-previews`). Replaces "Previews share staging db"
+  (S114) on the owner's word, 2026-11-13.
+
+## Copying production's games into staging keeps the newest one
+
+- **Before, copying production's games into staging could keep a game staging had caught halfway through instead of
+  production's finished one, or replace a game staging had updated more recently with production's older copy,
+  because it compared counters each database keeps on its own. Now it keeps whichever changed last, staging's live
+  updates keep working on a copied game, and it leaves alone any table staging has reshaped that production hasn't
+  caught up with.** Details: follow-up to S117. `copyBaseballData` adopts a row only when production's
+  `lastChangedAt` is later (`adoptAcrossStores` in `@bt/domain`, ADR-025) and moves staging's `version` past its own
+  (ADR-022). It rebuilds copied games' projections with `projectGame`, still compares replay artifacts by patch
+  count, and skips every table a migration production hasn't run touches (owner, 2026-11-13: "option A" and "I
+  think option b is better"). It refuses when staging has run a migration the checkout lacks. It still runs by hand
+  only. Found by Claude's review of PR #21. Fixes #53.
+
 ## The game backfill stops asking for missing extras in later runs too
 
 - **Before, once the game backfill had counted anything for a game's extras (videos and recap, play metrics, the

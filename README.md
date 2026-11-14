@@ -207,11 +207,22 @@ automatically 2. Mirror"):
   sites serve `bt-commit.txt`, the full commit they run.
 
 - **Previews.** Every pull request that changes code gets its own Worker, `baseball-theater-pr-<number>` on workers.dev,
-  once `pnpm verify` passes, and the workflow posts its address on the pull request. Previews share
-  staging's database (owner, 2026-11-05: "Previews share staging db") through the `bt-staging`
-  Hyperdrive config, so a pull request that adds a migration migrates staging before it merges: keep
-  migrations additive, so staging still serves `stage` meanwhile. Previews run no cron (they read MLB
-  on request only). Closing the pull request deletes its Worker.
+  once `pnpm verify` passes, and the workflow posts its address on the pull request. Each preview runs on
+  its own Neon branch, `preview-pr-<number>`, a copy of the `staging` branch, through its own Hyperdrive
+  config, `bt-preview-pr-<number>` (query caching off) (issue #42; owner, 2026-11-13: "Yes, do that.").
+  Every deploy resets the branch from `staging` and then runs the pull request's migrations on it, so
+  the preview is staging as it is now plus that pull request's changes, and staging's database only
+  ever runs `stage`'s migrations. Previews run no cron (they read MLB on request only). Closing the pull
+  request deletes its Worker, config and branch (`pnpm deploy:teardown`); a run that finds its pull
+  request closed tears it down instead of deploying, and a teardown that finds it reopened deletes
+  nothing. **Preview cleanup** (`.github/workflows/preview-cleanup.yml`, weekly and by hand from
+  Actions) deletes any preview whose pull request is closed and leaves every open one alone. A preview
+  copies staging, which never holds a fan's data, so it holds none either. Limits: Neon allows 10
+  branches per project on Free and Launch (25 on Scale; paid plans charge for more), counting
+  production and `staging`, and `staging`, being schema-only, also uses one of the plan's root branches;
+  Cloudflare allows 25 Hyperdrive configs per account on Workers Paid (10 on Free), counting
+  `bt-staging` and `bt-production`. A preview past either limit fails its bootstrap step, saying so;
+  staging and production are unaffected.
 - **Staging.** Every push to `stage` that changes code deploys `stage.baseball.theater` (a docs-only push deploys nothing) on the Neon `staging` branch.
   The branch is created schema-only from production the first time (production's tables, none of its
   rows) and filled only by `pnpm db:migrate`, so it never holds a fan's data. Copying production's
@@ -257,9 +268,10 @@ automatically 2. Mirror"):
   itself to its previous version, but does not move DNS.
 
 **What every deploy does**, in order, each step safe to repeat: `pnpm deploy:bootstrap <env>` finds
-the env's Neon branch (production's default branch, or `staging`, created schema-only if missing),
-finds its Hyperdrive config by name (`bt-production`, or `bt-staging` for staging and previews) or
-creates it, and writes the Worker config with that config's id; then `pnpm db:migrate` and
+the env's Neon branch (production's default branch, or `staging`, created schema-only if missing, or
+a preview's `preview-pr-<number>`, made from `staging` or reset from it), finds its Hyperdrive config
+by name (`bt-production`, `bt-staging`, or a preview's `bt-preview-pr-<number>`, whose origin is
+rewritten every deploy) or creates it, and writes the Worker config with that config's id; then `pnpm db:migrate` and
 `pnpm db:reapply-deletions` run on that database; then `wrangler deploy` pushes the Worker and every
 Worker secret from GitHub secrets (`--secrets-file`), so none is ever set by hand with
 `wrangler secret put`. Every deployed env serves live MLB, names its own address as `BT_APP_ORIGIN`,
@@ -272,7 +284,7 @@ production's deploy then registers its Logto sign-in addresses (`pnpm deploy:log
 | --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
 | `CLOUDFLARE_API_TOKEN`      | secret      | Workers Scripts edit, Hyperdrive edit, Workers custom domains / routes and DNS edit on the `baseball.theater` zone |
 | `CLOUDFLARE_ACCOUNT_ID`     | variable    | the Cloudflare account                                                                                             |
-| `NEON_API_KEY`              | secret      | creates and reads branches and connection strings in the project                                                   |
+| `NEON_API_KEY`              | secret      | creates, reads, resets and deletes branches, and reads connection strings, in the project                          |
 | `NEON_PROJECT_ID`           | variable    | `old-sun-72319473`                                                                                                 |
 | `BT_SESSION_KEY_STAGING`    | secret      | signs sessions on staging and previews                                                                             |
 | `BT_SESSION_KEY_PRODUCTION` | secret      | signs sessions on production                                                                                       |
@@ -314,16 +326,31 @@ production's deploy then registers its Logto sign-in addresses (`pnpm deploy:log
   (`functions/src/services/data-classification.ts`) labels `none`: `schedule_days`, `games`,
   `game_projections` and `replay_artifacts`. It never reads or writes a fan's account, settings,
   sign-in links or entitlements, or the deletion log, so none of them ever reaches staging, not even
-  for a moment. A new table is copied only once the manifest labels it `none`.
+  for a moment. A new table is copied only once the manifest labels it `none` and the copy's
+  `COPY_RULES` (`functions/src/services/baseball-copy.ts`) says how its rows are compared; a `none`
+  table with no rule stops the copy before it touches anything.
 - **It only adds.** It never deletes, truncates or drops anything in the target, and rows only
-  staging has stay as they are. Every write is version-guarded like ingest's (ADR-022): a row
-  staging already holds at a newer version is kept, so running it again changes nothing and never
-  rolls staging back. It copies only the columns both sides have: a column or table only staging
-  has (a migration production hasn't had yet) is left untouched, and a column only production has is
-  skipped. A column a staging-only migration renamed or reshaped gets nothing from production under
-  its new name. A column staging generates itself is left to staging. A column only staging has that
-  is required with no default (`NOT NULL`, nothing to fill it) makes that table be skipped: it gets
-  none of production's rows, the log says why, and the other tables are still copied.
+  staging has stay as they are. It copies only the columns both sides have: a column only staging
+  has is left untouched, and a column only production has is skipped. A column staging generates
+  itself is left to staging. A column only staging has that is required with no default (`NOT NULL`,
+  nothing to fill it) makes that table be skipped: it gets none of production's rows, the log says
+  why, and the other tables are still copied.
+- **Which copy of a row wins** (owner, 2026-11-13: "option A"). Each database counts its own
+  versions, so they are never compared between the two. A schedule day or game both sides have is
+  replaced only when production's content changed later (`lastChangedAt`). The replaced row gets
+  staging's version + 1, so staging's live updates and open pages keep taking only what is newer
+  (ADR-022). A row staging changed later, the same content, a change time that can't be read, or a
+  game staging is still ingesting (in its active window and changed within the window's trail plus
+  an hour) keeps staging's copy, and running the copy again changes nothing. Projections are never
+  copied: those of every game it writes, and any a stopped copy left behind, are rebuilt with
+  staging's code. A game that can't be projected is named in the log. Games and their projections
+  are skipped together (when the target has a `game_projections` table). Replay recordings keep
+  whichever has more patches.
+- **Tables staging has reshaped are left alone** (owner, 2026-11-13: "I think option b is better").
+  It compares the migrations each database has run. A table that a migration production hasn't run
+  touches gets none of production's rows, and the log names the migration. If staging's database
+  has run a migration this checkout doesn't have, the copy refuses and copies nothing. If production
+  has run one staging hasn't, every table is skipped.
 - **Migrations:** it migrates the target first (with the checked-out code's migrations; the workflow
   checks out `stage`) and never migrates or changes production. Every read of production runs in a
   read-only transaction of its own, which holds through Neon's pooler too; nothing is set on
@@ -332,9 +359,10 @@ production's deploy then registers its Logto sign-in addresses (`pnpm deploy:log
   Neon branch (the project's default branch) or by host (the same guard as `pnpm mlb:backfill`, with
   no override), and can't be the database it reads from.
 - **No deploy runs it.** No deploy, pull request or push workflow runs it; it runs only when someone
-  asks. From GitHub: Actions → **Copy baseball data** → Run workflow (target `staging`). It reads
-  both connection strings from Neon's API with the `NEON_API_KEY` secret, masks them, and logs hosts,
-  tables and row counts only. From a terminal, with both connection strings:
+  asks (owner, 2026-11-13: "I want it to be a manual thing for now"). From GitHub: Actions → **Copy
+  baseball data** → Run workflow (target `staging`). It reads both connection strings from Neon's
+  API with the `NEON_API_KEY` secret, masks them, and logs hosts, tables and row counts only. From a
+  terminal, with both connection strings:
 
 ```bash
 BT_SOURCE_DATABASE_URL="<production>" BT_DATABASE_URL="<target>" pnpm db:copy-baseball
