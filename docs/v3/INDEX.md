@@ -50,8 +50,8 @@ Assembled, in this order and around the stories, into BACKLOG.md.
     - `55–80` Later themes (not yet story-sliced)
 - [05 Gap map (doc → story)](<backlog/frame/05 Gap map (doc → story).md>) — 9 KB
   - `1–44` Gap map (doc → story)
-- [06 Baseline history](<backlog/frame/06 Baseline history.md>) — 45 KB
-  - `1–128` Baseline history
+- [06 Baseline history](<backlog/frame/06 Baseline history.md>) — 46 KB
+  - `1–129` Baseline history
 
 ## Product and architecture docs
 
@@ -82,7 +82,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
     - `439–480` Research notes (feasibility — 2026)
   - `481–496` Lessons from v2 (problems to solve or consciously accept)
   - `497–527` Target picture (partial)
-  - `528–1374` Major decision records
+  - `528–1375` Major decision records
     - `532–537` ADR-001 — Clean slate (accepted)
     - `538–556` ADR-002 — Data-access topology for schedule & game details (accepted)
     - `557–579` ADR-003 — Client delivery (accepted)
@@ -103,46 +103,46 @@ Assembled, in this order and around the stories, into BACKLOG.md.
     - `1098–1124` ADR-018 — Storage: all BT data in Postgres (accepted 2026-10-18)
     - `1125–1144` ADR-019 — Identity: Logto behind identity ports (accepted 2026-10-18)
     - `1145–1182` ADR-020 — Live delivery & cadence: Durable Objects (accepted 2026-10-18)
-    - `1183–1196` ADR-021 — Graduated cache freshness (accepted 2026-10-18)
-    - `1197–1219` ADR-022 — Idempotent updates (accepted 2026-10-18)
-    - `1220–1246` ADR-023 — Web client: SPA + installable PWA (accepted 2026-10-19)
-    - `1247–1258` ADR-024 — Client state: simple, direct, followable (accepted 2026-10-19)
-    - `1259–1275` ADR-025 — Code that stays understandable: comments and one implementation (accepted 2026-10-19)
-    - `1276–1305` ADR-026 — Performance budgets and test coverage (accepted 2026-10-19)
-    - `1306–1315` ADR-027 — Settings live on the account (accepted 2026-10-19)
-    - `1316–1357` ADR-028 — Personal data: one inventory, and deletion reaches all of it (accepted 2026-10-23)
-    - `1358–1374` ADR-029 — Highlight search asks MLB on every query, for now (accepted 2026-11-02)
-  - `1375–1445` 4. Impact curation pipeline
-    - `1380–1394` Mental model
-    - `1395–1401` Why not rank in the browser
-    - `1402–1415` Heuristic bootstrap (Phase A)
-    - `1416–1422` Model / agent layer (Phase B–D)
-    - `1423–1436` Storage sketch
-    - `1437–1445` Open design knobs
-  - `1446–1529` 5. Inning insight feed & game package
-    - `1451–1474` Pipeline
-    - `1475–1487` Insight item (sketch)
-    - `1488–1502` Game package (sketch)
-    - `1503–1508` Triggering vs polling
-    - `1509–1520` Cost intuition (Meter A)
-    - `1521–1529` Open design knobs
-  - `1530–1589` System contexts (to flesh out)
-    - `1532–1535` Clients
-    - `1536–1539` Application / API layer
-    - `1540–1557` Data ingestion & cache
-    - `1558–1566` Enrichment & AI
-    - `1567–1573` Identity, billing, entitlements
-    - `1574–1577` Media playback
-    - `1578–1581` Observability & ops
-    - `1582–1589` Security baseline
-  - `1590–1630` Repo & package shape
-  - `1631–1654` BT store shapes
-  - `1655–1707` 6. Developer experience, testing & delivery
-    - `1659–1669` Local development
-    - `1670–1680` Testing
-    - `1681–1688` Lint & commit hooks
-    - `1689–1707` GitHub Actions
-  - `1708–1720` Open architecture questions
+    - `1183–1197` ADR-021 — Graduated cache freshness (accepted 2026-10-18)
+    - `1198–1220` ADR-022 — Idempotent updates (accepted 2026-10-18)
+    - `1221–1247` ADR-023 — Web client: SPA + installable PWA (accepted 2026-10-19)
+    - `1248–1259` ADR-024 — Client state: simple, direct, followable (accepted 2026-10-19)
+    - `1260–1276` ADR-025 — Code that stays understandable: comments and one implementation (accepted 2026-10-19)
+    - `1277–1306` ADR-026 — Performance budgets and test coverage (accepted 2026-10-19)
+    - `1307–1316` ADR-027 — Settings live on the account (accepted 2026-10-19)
+    - `1317–1358` ADR-028 — Personal data: one inventory, and deletion reaches all of it (accepted 2026-10-23)
+    - `1359–1375` ADR-029 — Highlight search asks MLB on every query, for now (accepted 2026-11-02)
+  - `1376–1446` 4. Impact curation pipeline
+    - `1381–1395` Mental model
+    - `1396–1402` Why not rank in the browser
+    - `1403–1416` Heuristic bootstrap (Phase A)
+    - `1417–1423` Model / agent layer (Phase B–D)
+    - `1424–1437` Storage sketch
+    - `1438–1446` Open design knobs
+  - `1447–1530` 5. Inning insight feed & game package
+    - `1452–1475` Pipeline
+    - `1476–1488` Insight item (sketch)
+    - `1489–1503` Game package (sketch)
+    - `1504–1509` Triggering vs polling
+    - `1510–1521` Cost intuition (Meter A)
+    - `1522–1530` Open design knobs
+  - `1531–1590` System contexts (to flesh out)
+    - `1533–1536` Clients
+    - `1537–1540` Application / API layer
+    - `1541–1558` Data ingestion & cache
+    - `1559–1567` Enrichment & AI
+    - `1568–1574` Identity, billing, entitlements
+    - `1575–1578` Media playback
+    - `1579–1582` Observability & ops
+    - `1583–1590` Security baseline
+  - `1591–1631` Repo & package shape
+  - `1632–1655` BT store shapes
+  - `1656–1708` 6. Developer experience, testing & delivery
+    - `1660–1670` Local development
+    - `1671–1681` Testing
+    - `1682–1689` Lint & commit hooks
+    - `1690–1708` GitHub Actions
+  - `1709–1721` Open architecture questions
 - [CHATGPT-LOGO-BACKLOG.md — MLB Team Identifier Design Tracker](CHATGPT-LOGO-BACKLOG.md) — 25 KB
   - `3–22` Purpose
   - `23–35` Priority Order
@@ -377,7 +377,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `2167–2170` System Consistency
   - `2171–2174` Originality
   - `2175–2221` Small-Size Test
-- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 59 KB
+- [FEATURES.md — Baseball Theater v3 — Features](FEATURES.md) — 60 KB
   - `12–19` North star
   - `20–34` Principles (product)
   - `35–46` Scope legend
@@ -498,7 +498,7 @@ Open stories, in order (`doing`, then `todo`, then `blocked`; by priority within
 | 74 | [S125](backlog/stories/S125.md) Calendar date picker | `todo` | S124, S136, S81 | S123 |
 | 75 | [S144](backlog/stories/S144.md) Design: play link on the meta line | `todo` | — | — |
 | 75 | [S145](backlog/stories/S145.md) Play link on the meta line | `todo` | S97, S81 | S144 |
-| 76 | [S139](backlog/stories/S139.md) Standings views in the API | `todo` | S128 | — |
+| 76 | [S139](backlog/stories/S139.md) Standings by season phase in the API | `todo` | S128 | — |
 | 76 | [S140](backlog/stories/S140.md) World Series winner in standings | `todo` | S128 | — |
 | 77 | [S130](backlog/stories/S130.md) Standings views | `todo` | S128, S139, S140, S81 | S129 |
 | 77 | [S137](backlog/stories/S137.md) Design: Standings date picker | `todo` | S123, S129 | — |
