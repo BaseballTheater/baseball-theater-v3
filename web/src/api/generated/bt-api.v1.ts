@@ -542,7 +542,10 @@ export interface components {
              * @enum {string}
              */
             playLink?: "mlb" | "challenge";
+            /** @description The encoding BT plays first: MLB's `mp4Avc`, else its HLS stream (`pickPlaybackUrl`). */
             playbackUrl: string | null;
+            /** @description Every video encoding MLB lists for the clip (`mp4Avc`, `highBit`, `hlsCloud`), one per distinct URL, for the player's quality choice (`videoQualities`); absent on older recordings, which play `playbackUrl` alone. */
+            renditions?: components["schemas"]["VideoRendition"][];
             /** @description S69: MLB's taxonomy tags (`data-visualization`, `home-run`, …); absent on older recordings. */
             tags?: string[];
             /** @description S69: the MLB team ids it features (`team_id` keywords); absent on older recordings. */
@@ -810,6 +813,11 @@ export interface components {
         };
         /** @enum {string} */
         VideoPlayerMode: "dialog" | "stage";
+        /** @description One encoding of a clip as MLB lists it: its playback name (`mp4Avc`, `highBit`, `hlsCloud`) and URL. */
+        VideoRendition: {
+            name: string;
+            url: string;
+        };
     };
     responses: never;
     parameters: never;

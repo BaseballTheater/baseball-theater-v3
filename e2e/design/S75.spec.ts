@@ -23,7 +23,7 @@ import { readFileSync } from "node:fs";
 import { test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import {
-	capture, hideDevControls, signInDev, stubApi,
+	capture, hideDevControls, openLastAtBat, signInDev, stubApi,
 } from "./helpers.js";
 
 const LIVE = JSON.parse(readFileSync(new URL("../../fixtures/game-823823-live.json", import.meta.url), "utf8"));
@@ -88,7 +88,8 @@ const FRAMES: { frame: string;
 		ready: async (page) =>
 		{
 			await page.getByTestId("hidden-score").first().waitFor();
-			await page.getByTestId("catcher-view").waitFor();
+			// The frame draws the last at-bat open; nothing opens by itself any more (owner, 2026-11-12).
+			await openLastAtBat(page);
 		},
 	},
 	{

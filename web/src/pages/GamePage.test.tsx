@@ -289,8 +289,15 @@ describe("GamePage room tabs (S60, S56 game-rooms A2)", () =>
 			name: "Live",
 		})).toHaveAttribute("aria-selected", "true");
 		expect(container.querySelector("[data-variant]")).toHaveAttribute("data-variant", "medium");
-		// Mantine's Tabs.List spreads the tabs edge to edge through `--tabs-justify`.
-		expect(screen.getAllByRole("tablist")[0]!.getAttribute("style")).toMatch(/--tabs-justify:\s*space-between/);
+		// Owner, 2026-11-12: "the tabs should be centered, and equal width to each other", each with a max width.
+		const list = screen.getAllByRole("tablist")[0]!;
+		expect(list.getAttribute("style")).toMatch(/--tabs-justify:\s*center/);
+		expect(list).toHaveAttribute("data-grow");
+		for (const tab of within(list).getAllByRole("tab"))
+		{
+			expect(tab.style.flex).toBe("1 1 0px");
+			expect(tab.style.maxWidth).toBe("160px");
+		}
 	});
 
 	it("shows the footer with the payload's fetch age", async () =>

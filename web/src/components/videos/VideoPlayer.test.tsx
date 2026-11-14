@@ -187,11 +187,28 @@ describe("PlayerDialog", () =>
 
 		const own = wrap(<PlayerDialog video={VIDEO} onClose={() => undefined} game={game} fromGamePk={823823} />);
 		await screen.findByRole("dialog");
-		expect(screen.queryByRole("link")).toBeNull();
+		// No game link; the player's own Direct link and Download are its only links.
+		expect(screen.queryByRole("link", {
+			name: /^Go to game/,
+		})).toBeNull();
+		expect(screen.getAllByRole("link").map((link) => link.textContent)).toEqual(["Direct link", "Download"]);
 		own.unmount();
 
 		wrap(<PlayerDialog video={VIDEO} onClose={() => undefined} />);
 		await screen.findByRole("dialog");
-		expect(screen.queryByRole("link")).toBeNull();
+		// No game link; the player's own Direct link and Download are its only links.
+		expect(screen.queryByRole("link", {
+			name: /^Go to game/,
+		})).toBeNull();
+		expect(screen.getAllByRole("link").map((link) => link.textContent)).toEqual(["Direct link", "Download"]);
+	});
+
+	it("plays larger: as wide as the screen allows up to 1280px, held to what fits the screen's height (owner, 2026-11-12)", async () =>
+	{
+		wrap(<PlayerDialog video={VIDEO} onClose={() => undefined} />);
+		const frame = (await screen.findByTestId("video-player")).parentElement!;
+		// The rule itself is pinned in styles.test.ts; jsdom drops `min()` from inline styles.
+		expect(frame).toHaveClass("bt-player-frame");
+		expect(frame.getAttribute("style") ?? "").not.toMatch(/max-width/);
 	});
 });

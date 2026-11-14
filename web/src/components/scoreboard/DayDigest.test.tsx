@@ -93,8 +93,48 @@ afterEach(() =>
 	vi.unstubAllGlobals();
 });
 
+/** Each digest column's ranks, top to bottom, left column first. */
+function columnRanks(digest: HTMLElement): string[][]
+{
+	return within(digest).getAllByTestId("digest-column").map((column) => within(column).queryAllByTestId("digest-rank").map((rank) => rank.textContent ?? ""));
+}
+
+/** Serves a digest of the first `n` clips (the fixture's four, plus a fifth copied from the fourth). */
+function serveDigest(n: number): void
+{
+	const fifth = {
+		...DIGEST.items[3]!,
+		rank: 5,
+		watchFirst: false,
+		highlight: {
+			...DIGEST.items[3]!.highlight,
+			id: "fifth",
+		},
+	};
+	const items = [...DIGEST.items, fifth].slice(0, n);
+	vi.stubGlobal("fetch", vi.fn((request: Request) =>
+	{
+		const { pathname } = new URL(request.url);
+		if (pathname === "/api/v1/digest") return Promise.resolve(jsonResponse({
+			...DIGEST,
+			items,
+		}));
+		if (pathname === "/api/v1/me/settings") return Promise.resolve(jsonResponse(DEFAULT_SETTINGS));
+		return Promise.resolve(jsonResponse(SCHEDULE));
+	}));
+}
+
 describe("the day digest (S71)", () =>
 {
+	it("two columns rank down the left, then the right: five clips read 1–3 then 4–5; one clip sits alone at the top of the left column", async () =>
+	{
+		serveDigest(5);
+		expect(columnRanks(await renderScoreboard("desktop"))).toEqual([["1", "2", "3"], ["4", "5"]]);
+		cleanup();
+		serveDigest(1);
+		expect(columnRanks(await renderScoreboard("desktop"))).toEqual([["1"], []]);
+	});
+
 	it("digest: Best of Jul 4, then rank, still, title and duration per clip, and one WATCH FIRST on the top one", async () =>
 	{
 		const digest = await renderScoreboard();
@@ -133,6 +173,17 @@ describe("the day digest (S71)", () =>
 		expect(screen.getByTestId("day-digest")).toBeInTheDocument();
 	});
 
+	it("mobile: one column; no row carries the old gold ground (owner, 2026-11-12: \"Let's remove that for now\")", async () =>
+	{
+		const digest = await renderScoreboard();
+		expect(within(digest).getAllByTestId("digest-column")).toHaveLength(1);
+		for (const row of within(digest).getAllByTestId("digest-item"))
+		{
+			expect(row.getAttribute("style")).not.toMatch(/gold|gradient/);
+			expect(row).toHaveClass("bt-card", "bt-zoom-host");
+		}
+	});
+
 	it("hidden: with Hide Scores on, the digest renders the same, titles as MLB writes them", async () =>
 	{
 		const shown = rows(await renderScoreboard());
@@ -169,10 +220,12 @@ describe("the day digest (S71)", () =>
 		expect(within(first!).getByTestId("watch-first")).toBeInTheDocument();
 	});
 
-	it("at medium the clips sit two to a row; a day with no clips shows no digest", async () =>
+	it("at medium the clips sit in two columns, ranked down the first then the second; a day with no clips shows no digest", async () =>
 	{
 		const digest = await renderScoreboard("medium");
 		expect(within(digest).getAllByTestId("digest-item")).toHaveLength(4);
+		// Owner, 2026-11-12: "those 5 are sorted LR then TB should be TB then LR".
+		expect(columnRanks(digest)).toEqual([["1", "2"], ["3", "4"]]);
 		cleanup();
 
 		vi.stubGlobal("fetch", vi.fn((request: Request) => Promise.resolve(jsonResponse(new URL(request.url).pathname === "/api/v1/digest" ? {

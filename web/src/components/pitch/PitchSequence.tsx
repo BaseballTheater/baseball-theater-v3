@@ -96,9 +96,16 @@ export function PitchSequence({
 							aria-expanded={open}
 							onClick={() => onSelectPitch(pitch.pitchNumber)}
 							onKeyDown={(event) => onKeyDown(event, index)}
+							className="bt-hover"
 							w="100%"
 							px={14}
 							py={10}
+							style={{
+								// The hover wash keeps inside the row's rounded edge (8px less its 1px border), squared
+								// below while the row is open over its detail. Rounding the button, not clipping the row,
+								// leaves the focus ring, drawn outside the button, whole.
+								borderRadius: open ? "7px 7px 0 0" : 7,
+							}}
 						>
 							<Group justify="space-between" wrap="nowrap">
 								<Group gap={10} wrap="nowrap">

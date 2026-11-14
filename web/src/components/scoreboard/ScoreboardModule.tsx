@@ -94,8 +94,12 @@ function TeamCell({
  * the record with its percentage, the start time and the venue. Team color is a 4px
  * edge only; names and numbers stay Light. Every label comes from `packages/domain`
  * (phase, inning, record, start time); this only lays them out. The right-hand slot
- * (S67) shows what the user's Game-Row Slot setting picks; the rest of the module
- * links to the game. With Hide Scores on (S68, `useScoresHidden`) the R · H · E cells,
+ * (S67) shows what the user's Game-Row Slot setting picks. The whole module is the link
+ * to the game (owner, 2026-11-12: "the entire game card should be clickable in the games
+ * list"): the link's box is stretched over the card (`.bt-card-link`), so the slot and the
+ * padding click through to it, while the Room Menu's own links sit above it
+ * (`.bt-above-card-link`) — one link, no link nested in another. The card lifts on hover
+ * (`.bt-card`). With Hide Scores on (S68, `useScoresHidden`) the R · H · E cells,
  * records and pitchers of record are masked by `HiddenValue` in place, so the module
  * keeps its size; collapsed bars are `CollapsedBar`.
  */
@@ -114,7 +118,9 @@ export function ScoreboardModule({ game }: { game: ScoreboardGame })
 			bg="var(--bt-raised)"
 			radius="md"
 			p={12}
+			className="bt-card"
 			style={{
+				position: "relative",
 				display: "flex",
 				gap: 12,
 				border: "1px solid var(--bt-hairline)",
@@ -124,6 +130,7 @@ export function ScoreboardModule({ game }: { game: ScoreboardGame })
 				component={Link}
 				to={`/game/${game.gamePk}`}
 				aria-label={`${game.teams.away.teamName} at ${game.teams.home.teamName}`}
+				className="bt-card-link"
 				style={{
 					flex: 1,
 					minWidth: 0,

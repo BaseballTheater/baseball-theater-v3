@@ -108,7 +108,13 @@ describe("SessionProvider", () =>
 			hideScores: false,
 		});
 		const { result } = renderSession(queryClient);
-		await act(() => result.current.signIn());
+		let leaving: boolean | undefined;
+		await act(async () =>
+		{
+			leaving = await result.current.signIn();
+		});
+		// The page stays: a caller showing progress puts its control back.
+		expect(leaving).toBe(false);
 		expect(result.current.status).toBe("signedIn");
 		expect(getSessionToken()).toBe(DEV_SIGN_IN_TOKEN);
 		expect(queryClient.getQueryState([...ACCOUNT_QUERY_KEY, "settings"])?.isInvalidated).toBe(true);
@@ -122,7 +128,12 @@ describe("SessionProvider", () =>
 		}) : jsonResponse({}, 401)));
 		vi.stubGlobal("fetch", fetchMock);
 		const { result } = renderSession();
-		await act(() => result.current.signIn());
+		let leaving: boolean | undefined;
+		await act(async () =>
+		{
+			leaving = await result.current.signIn();
+		});
+		expect(leaving).toBe(false);
 		expect(result.current.status).toBe("signedOut");
 		expect(getSessionToken()).toBeNull();
 		expect(fetchMock.mock.calls.map(([request]) => new URL(request.url).pathname)).toEqual(["/api/v1/sign-in"]);
@@ -245,7 +256,13 @@ describe("SessionProvider with Logto (S116)", () =>
 		window.history.replaceState(null, "", "/settings");
 		const { result } = renderSession(createQueryClient(), loader);
 
-		await act(() => result.current.signIn());
+		let leaving: boolean | undefined;
+		await act(async () =>
+		{
+			leaving = await result.current.signIn();
+		});
+		// The browser is leaving for Logto: a caller keeps showing its progress.
+		expect(leaving).toBe(true);
 		expect(sdk().signIn).toHaveBeenCalledWith(expect.objectContaining({
 			redirectUri: `${location.origin}/sign-in/callback`,
 			prompt: "login",

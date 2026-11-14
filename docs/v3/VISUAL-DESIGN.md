@@ -276,7 +276,7 @@ Mantine `AppShell` stays as chrome, not as a content metaphor.
 
 | Region | Mobile | Medium | Desktop |
 |--------|--------|--------|---------|
-| Header | 56–64px; burger / wordmark / account | Burger + wordmark + date + search + account | Wordmark + date + search + account — no burger (the rail shows) |
+| Header | 56–64px; burger / wordmark / account | Burger + wordmark + date + search + account | Date + search + account — no burger and no wordmark: the rail shows both, its wordmark just left of the header (owner, 2026-11-12: "the site logo appears in the top bar and the menu top bar on desktop. The rightmost one should go away on desktop") |
 | Nav | Overlay drawer the burger opens | Overlay drawer the burger opens (owner, 2026-10-19) | Persistent ~240px rail |
 | Main | One column of modules | Module canvas | Same canvas beside the rail |
 
@@ -453,7 +453,7 @@ The test: a superfan can land on the scoreboard and reach any deeper fact (a pit
 |--------|----------|
 | Open game | Host chooses how to place the game view and which pairing to give it; entry **room** comes from settings (Videos if unset) |
 | Change date | `/games/:date`; remember last date for the session |
-| Hover / focus | Border/contrast; optional 160ms lift — no bounce, no glow wash |
+| Hover / focus | Edge brightens to Light 35%, ground to Raised current, and the card lifts 2px with a soft shadow, over 0.3s on Material's standard curve (`cubic-bezier(0.4, 0, 0.2, 1)`); a still inside a card zooms in its frame over 0.4s (owner, 2026-11-12: "quick animated hover effects, like 0.25-0.5s with a snappy Bézier curve. Use the material design Bézier curve … hover effects that zoom an image inside its container"). Keyboard focus gets the same colours without moving; with reduced motion on nothing moves or animates. No bounce, no glow wash |
 | Live | Accent 2 blinking dot + status label; no colored background on the indicator |
 | Open collapsed bar | Opens the game page, like **Open game**; it does not expand in place (owner, 2026-11-07; S126) |
 | Structured score hidden | Score *fields* follow the setting; card size stays stable. Free-text titles need their own rule (§5a) — blanking numerals is not enough |
@@ -488,7 +488,7 @@ The test: a superfan can land on the scoreboard and reach any deeper fact (a pit
   | Player position | Needs join | `player_id` → roster/position |
   | Impact on the game | BT-owned | Impact ranking / “Watch first” — sort and/or filter |
 
-  Domain `MediaHighlight` today keeps id, playId, title, blurb, duration, imageUrl, playbackUrl — project more keyword/taxonomy fields as facets ship.
+  Domain `MediaHighlight` today keeps id, playId, title, blurb, duration, imageUrl, playbackUrl, renditions (every MP4 and HLS encoding MLB lists, for the player's quality picker) — project more keyword/taxonomy fields as facets ship.
 - A cell/row is the control. Click plays **in-app** (settings may allow external).
 - Queue: previous / next; autoplay from settings.
 - **Player:** a dialog over the page by default; the Video player setting switches to a persistent stage above the grid ([decided](./visual/game-shell/DESIGN.md)). Space play/pause; Esc closes the dialog.
@@ -527,10 +527,10 @@ Tooltips are extra; accordion rows carry the same facts.
 |---------|------------|
 | Pitch / batted-ball flight (user-started) | Auto-animating lists, parallax, gradient motion |
 | Slow live-indicator blink (Accent 2 dot only; label has no colored bg/pill) | Module throb, staggered entrances, live status pill fills |
-| 160ms border/lift | Springy overshoot |
+| Hover: 0.3s border/lift, 0.4s still zoom, on Material's standard curve (owner, 2026-11-12) | Springy overshoot |
 | Tab / accordion height | Layout thrash on every live tick |
 
-`prefers-reduced-motion: reduce` kills flight and live pulse.
+`prefers-reduced-motion: reduce` kills flight and live pulse, and hover's lift and zoom (colours still change, without animating).
 
 ### Empty, loading, error
 

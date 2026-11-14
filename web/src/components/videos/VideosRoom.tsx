@@ -278,6 +278,13 @@ export function VideosRoom({ game, variant }: { game: GamePayload;
 				return (
 					<Stack key={group} gap="xs" component="section" aria-label={GROUP_LABELS[group]} data-testid="videos-group" data-group={group}>
 						<UnstyledButton
+							className="bt-hover"
+							px={6}
+							py={4}
+							mx={-6}
+							style={{
+								borderRadius: 6,
+							}}
 							aria-expanded={open}
 							onClick={() =>
 							{

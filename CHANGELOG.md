@@ -14,6 +14,23 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## The site answers your pointer, and the video player does more
+
+- **Before, little on the site reacted when you hovered it, only part of a game card opened the game, the logo did
+  nothing on a game page, "Sign in" gave no sign it was working, and the video player was a small window with play
+  and pause. Now everything clickable reacts to the pointer with a quick, smooth change (cards lift, video stills
+  zoom), the whole game card opens the game, the logo always goes home, "Sign in" shows it's signing you in, and
+  your account icon opens a menu with Settings and Sign out. The player is larger on big screens, lets you pick
+  the video quality MLB offers, and can copy, open, download or share the clip.** Also: the day's top highlights
+  drop their gold background and read down each column, the game's tabs are equal widths and centered, the Plays
+  room opens with every play closed, desktop shows one logo instead of two, and Favorite Teams lists "Chicago
+  Cubs" in the dropdown and "Cubs" once chosen. Details: fixes #38 (the owner's list of 2026-11-12, built without
+  backlog stories at the owner's direction). Hover timing is Material's standard curve over 0.3–0.4s, keyboard
+  focus shows the same colours, and nothing moves with reduced motion on. Copy, open, download and share use the
+  clip's MP4 file (`fileQuality` in `@bt/domain`), never an HLS playlist, when MLB gives one. Qualities come from the renditions MLB's content API lists for each clip, now
+  stored on each highlight (`renditions`, optional in the API; `videoQualities` in `@bt/domain`); clips stored
+  before this play their one URL until they are fetched again.
+
 ## Staging and the live site show the same version for the same build
 
 - **Before, the version at the foot of the menu was a deploy counter, so the same code read v3.0.191 on staging

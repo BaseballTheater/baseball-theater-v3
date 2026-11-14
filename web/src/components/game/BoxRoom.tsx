@@ -59,6 +59,7 @@ export function BoxRoom({ game, variant }: { game: GamePayload;
 							key={s}
 							aria-pressed={selected}
 							onClick={() => setSide(s)}
+							className={selected ? undefined : "bt-hover"}
 							h={38}
 							style={{
 								borderRadius: "var(--mantine-radius-md)",

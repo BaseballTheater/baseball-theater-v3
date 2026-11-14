@@ -77,7 +77,8 @@ function Probables({ game }: { game: ScoreboardGame })
 /**
  * Room menu: a link per room the game offers in its phase (R14a). The scoreboard
  * doesn't know whether MLB has published a recap, so a final lists Recap; without
- * one the game page opens its default room instead (`resolveRoom`).
+ * one the game page opens its default room instead (`resolveRoom`). Each link sits above
+ * the module's card-wide game link (`.bt-above-card-link`), so it still opens its own room.
  */
 function RoomMenu({ game }: { game: ScoreboardGame })
 {
@@ -85,7 +86,7 @@ function RoomMenu({ game }: { game: ScoreboardGame })
 	return (
 		<Stack gap={4} component="nav" aria-label="Rooms" data-testid="slot-room-menu">
 			{rooms.map((room) => (
-				<Anchor key={room} component={Link} to={`/game/${game.gamePk}/${room}`} fz={12} c="inherit" underline="always">
+				<Anchor key={room} component={Link} to={`/game/${game.gamePk}/${room}`} fz={12} c="inherit" underline="always" className="bt-above-card-link">
 					{roomLabel(room)}
 				</Anchor>
 			))}

@@ -31,9 +31,9 @@ function ActionLink({
 })
 {
 	return (
-		<Anchor component="button" type="button" underline="always" fw={500} c={color} ta="left" disabled={disabled} onClick={onClick} style={{
-			opacity: disabled ? 0.5 : 1,
-		}}>
+		<Anchor component="button" type="button" underline="always" fw={500} c={color} ta="left" disabled={disabled} onClick={onClick} style={disabled ? {
+			opacity: 0.5,
+		} : undefined}>
 			{children}
 		</Anchor>
 	);

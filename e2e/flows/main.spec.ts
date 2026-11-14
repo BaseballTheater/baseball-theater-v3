@@ -16,7 +16,7 @@
  */
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { signInDev } from "../design/helpers.js";
+import { openSettings, signInDev } from "../design/helpers.js";
 
 const SCOREBOARD = "/games/2024-07-04";
 
@@ -72,9 +72,7 @@ test("search", async ({ page }) =>
 test("settings, signed in through the dev sign-in", async ({ page }) =>
 {
 	await signInDev(page, SCOREBOARD);
-	await page.getByRole("link", {
-		name: "Account",
-	}).click();
+	await openSettings(page);
 	await expect(page).toHaveURL(/\/settings$/);
 	await expect(page.getByRole("heading", {
 		name: "Settings",

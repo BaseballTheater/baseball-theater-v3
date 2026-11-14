@@ -6,17 +6,44 @@
  * not include them.
  */
 import type {
-	GameRecap, HighlightKind, MediaHighlight,
+	GameRecap, HighlightKind, MediaHighlight, VideoRendition,
 } from "@bt/domain";
 import type { ContentHighlightItem, GameContentResponse } from "@bt/mlb-api";
 import { isGameRecapHighlight } from "@bt/domain";
 
-/** Prefers the highest-fidelity MP4, falling back to the HLS cloud stream. */
+/**
+ * The clip's one default URL: MLB's standard MP4 (`mp4Avc`, 720p at about 4 Mbps), which
+ * every browser plays at a modest bitrate, not its sharpest (`highBit`, about 16 Mbps, offered
+ * in the player's quality picker from `renditions`); else the HLS cloud stream; else whatever
+ * MLB lists first.
+ */
 export function pickPlaybackUrl(item: ContentHighlightItem): string | null
 {
 	const mp4 = item.playbacks.find((playback) => playback.name.startsWith("mp4Avc"));
 	const hls = item.playbacks.find((playback) => playback.name === "hlsCloud");
 	return mp4?.url ?? hls?.url ?? item.playbacks[0]?.url ?? item.mediaPlaybackUrl ?? null;
+}
+
+/**
+ * Every video encoding MLB lists for a clip, for the player's quality choice
+ * (`videoQualities`): MP4 files and HLS playlists, each URL once (MLB lists its HLS stream
+ * under three names), in MLB's order. The `trickplay` thumbnail strip is not a video and is
+ * left out.
+ */
+export function pickRenditions(item: ContentHighlightItem): VideoRendition[]
+{
+	const seen = new Set<string>();
+	const renditions: VideoRendition[] = [];
+	for (const playback of item.playbacks)
+	{
+		if (!/\.(mp4|m3u8)(\?|$)/.test(playback.url) || seen.has(playback.url)) continue;
+		seen.add(playback.url);
+		renditions.push({
+			name: playback.name,
+			url: playback.url,
+		});
+	}
+	return renditions;
 }
 
 function pickImageUrl(item: ContentHighlightItem): string | null
@@ -58,6 +85,7 @@ export function mapHighlightItem(item: ContentHighlightItem): MediaHighlight
 		duration: item.duration ?? null,
 		imageUrl: pickImageUrl(item),
 		playbackUrl: pickPlaybackUrl(item),
+		renditions: pickRenditions(item),
 		kind: highlightKind(tags, keywords.map((k) => k.value ?? "")),
 		date: item.date ?? null,
 		teamIds,

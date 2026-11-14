@@ -444,7 +444,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
     - `97–109` Checkpoint — go / no-go for V3
     - `110–159` V3 — Story files become the source
     - `160–162` V4 — *(optional)* Slim `BACKLOG.md`
-- [VISUAL-DESIGN.md — Baseball Theater v3 — Visual Design](VISUAL-DESIGN.md) — 47 KB
+- [VISUAL-DESIGN.md — Baseball Theater v3 — Visual Design](VISUAL-DESIGN.md) — 48 KB
   - `16–29` North star (visual)
   - `30–75` 1. Design goals
     - `50–60` Hard bans

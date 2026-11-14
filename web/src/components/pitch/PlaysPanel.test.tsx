@@ -137,10 +137,23 @@ describe("the Plays room on 823823 (S41)", () =>
 		})).toHaveLength(PLAYS.filter((play) => play.about.inning === 8).length);
 	});
 
-	it("default: the 9th's last at-bat is open, with the zone and its pitches newest first", async () =>
+	it("default: no at-bat is open (owner, 2026-11-12: \"the plays view shouldn't expand any plays by default\")", async () =>
 	{
 		const panel = await playsPanel();
+		expect(within(panel).queryByTestId("catcher-view")).toBeNull();
+		for (const play of PLAYS.filter((p) => p.about.inning === 9)) expect(control(panel, play)).toHaveAttribute("aria-expanded", "false");
+	});
+
+	it("open: the 9th's last at-bat shows the zone and its pitches newest first", async () =>
+	{
+		vi.stubGlobal("scrollBy", vi.fn());
+		const panel = await playsPanel();
 		const last = PLAYS.filter((play) => play.about.inning === 9).at(-1)!;
+		fireEvent.click(control(panel, last));
+		act(() =>
+		{
+			window.dispatchEvent(new Event("scrollend"));
+		});
 		const open = item(last);
 		expect(within(open).getByTestId("catcher-view")).toBeInTheDocument();
 		const rows = within(open).getAllByTestId("pitch-row");
@@ -253,11 +266,20 @@ describe("opening an at-bat (S64 choreography, kept in S41)", () =>
 			top: atTop ? 0 : 300,
 		}) as DOMRect);
 		const { container } = wrap(<PlaysPanel game={game(PLAYS.slice(0, 3))} />);
-		// The last at-bat starts open; tap the second.
+		// Nothing starts open: open the last at-bat first, then tap the second.
 		const first = item(PLAYS[2]!);
+		expect(within(first).queryByTestId("catcher-view")).toBeNull();
+		fireEvent.click(control(container, PLAYS[2]!));
+		act(() =>
+		{
+			window.dispatchEvent(new Event("scrollend"));
+		});
+		expect(within(first).getByTestId("catcher-view")).toBeInTheDocument();
+		scrolled.length = 0;
+		scrollBy.mockClear();
+		atTop = false;
 		const second = PLAYS[1]!;
 		const tapped = item(second);
-		expect(within(first).getByTestId("catcher-view")).toBeInTheDocument();
 		const button = control(container, second);
 		fireEvent.click(button);
 		// 1. The open one has shut, the tapped one held in place; 2. it scrolls up, not yet open.

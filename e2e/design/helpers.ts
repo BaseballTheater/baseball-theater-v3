@@ -31,9 +31,39 @@ export async function signInDev(page: Page, path = "/games/2024-07-04"): Promise
 	await page.getByRole("button", {
 		name: "Sign in",
 	}).first().click();
-	await page.getByRole("link", {
+	await page.getByRole("button", {
 		name: "Account",
 	}).waitFor();
+}
+
+/**
+ * Open Settings the way a signed-in reader does: the header's Account icon opens a menu
+ * (owner, 2026-11-12: "the user icon should provide a menu on click that offers: Settings,
+ * Sign Out"), and its Settings item goes there.
+ */
+export async function openSettings(page: Page): Promise<void>
+{
+	await page.getByRole("button", {
+		name: "Account",
+	}).click();
+	await page.getByRole("menuitem", {
+		name: "Settings",
+	}).click();
+}
+
+/**
+ * Open the Plays room's last at-bat, which the ratified frames draw open (game-rooms DESIGN)
+ * but which no longer opens by itself (owner, 2026-11-12: "the plays view shouldn't expand any
+ * plays by default"). Waits for its catcher's view and for the pitch replay to end (the
+ * selected pitch's ring, `r=10`, is drawn only once the replay is over), then scrolls back to
+ * the top, since opening an at-bat scrolls it into view.
+ */
+export async function openLastAtBat(page: Page): Promise<void>
+{
+	await page.locator("[id^=\"at-bat-\"]").last().locator("button[aria-expanded]").first().click();
+	await page.getByTestId("catcher-view").waitFor();
+	await page.locator("g[role=button][aria-pressed=\"true\"] circle[r=\"10\"]").first().waitFor();
+	await page.evaluate(() => window.scrollTo(0, 0));
 }
 
 /**
@@ -99,6 +129,10 @@ export async function capture(page: Page, testInfo: TestInfo, frame: string): Pr
 		});
 		path = join(dir, `${frame}.png`);
 	}
+	// No frame draws a hover: park the pointer off every control (the last click left it on
+	// one) and wait out the hover transitions (0.3–0.4s, styles.css) before the photograph.
+	await page.mouse.move(0, 0);
+	await page.waitForTimeout(500);
 	await page.screenshot({
 		path,
 		fullPage: true,

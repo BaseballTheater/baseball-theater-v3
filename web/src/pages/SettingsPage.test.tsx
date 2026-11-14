@@ -152,7 +152,7 @@ describe("SettingsPage Favorite Teams", () =>
 			name: "Favorite Teams",
 		}));
 		await userEvent.click(await screen.findByRole("option", {
-			name: "NYY",
+			name: "New York Yankees",
 		}));
 		first.unmount();
 
@@ -160,8 +160,37 @@ describe("SettingsPage Favorite Teams", () =>
 		resetSettings();
 		clearPersonalData();
 		renderSettings();
-		const pills = await screen.findByText("NYY");
+		const pills = await screen.findByText("Yankees");
 		expect(pills).toBeInTheDocument();
+	});
+
+	it("the dropdown lists city and club (Chicago Cubs); the chosen team's pill reads the club alone (Cubs); typing a city finds its clubs", async () =>
+	{
+		stubAccountApi();
+		renderSettings();
+		await screen.findByText(`Signed in as ${DEV_ACCOUNT.email}`);
+		const input = screen.getByRole("textbox", {
+			name: "Favorite Teams",
+		});
+		await userEvent.click(input);
+		const options = await screen.findAllByRole("option");
+		expect(options).toHaveLength(30);
+		expect(options.map((option) => option.textContent)).toContain("Chicago Cubs");
+		expect(options.map((option) => option.textContent)).not.toContain("Cubs");
+
+		await userEvent.type(input, "chicago");
+		expect((await screen.findAllByRole("option")).map((option) => option.textContent)).toEqual(["Chicago Cubs", "Chicago White Sox"]);
+		await userEvent.click(screen.getByRole("option", {
+			name: "Chicago Cubs",
+		}));
+		// The chosen team stays marked in the dropdown.
+		expect(screen.getByRole("option", {
+			name: "Chicago Cubs",
+		}).querySelector("svg")).not.toBeNull();
+		// The pill is the club name; the full name shows only in the dropdown.
+		const field = input.closest(".mantine-MultiSelect-root") as HTMLElement;
+		expect(within(field).getByText("Cubs")).toBeInTheDocument();
+		expect(within(field).queryByText("Chicago Cubs")).toBeNull();
 	});
 });
 

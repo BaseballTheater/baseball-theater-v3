@@ -13,6 +13,18 @@ describe("MLB_TEAMS", () =>
 		expect(MLB_TEAMS).toHaveLength(30);
 		expect(new Set(MLB_TEAMS.map((t) => t.id)).size).toBe(30);
 		expect(new Set(MLB_TEAMS.map((t) => t.abbreviation)).size).toBe(30);
+		expect(new Set(MLB_TEAMS.map((t) => t.fullName)).size).toBe(30);
+	});
+
+	it("each club's full name ends with its club name, the city before it (the Athletics have no city)", () =>
+	{
+		for (const team of MLB_TEAMS)
+		{
+			if (team.id === 109) expect(team.fullName).toBe("Arizona Diamondbacks");
+			else expect(team.fullName.endsWith(team.name), team.fullName).toBe(true);
+		}
+		expect(MLB_TEAMS.find((t) => t.id === 112)?.fullName).toBe("Chicago Cubs");
+		expect(MLB_TEAMS.find((t) => t.id === 133)?.fullName).toBe("Athletics");
 	});
 });
 

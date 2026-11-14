@@ -5,7 +5,7 @@ import {
 	describe, expect, it,
 } from "vitest";
 import {
-	articleParagraphs, mapContentHighlights, mapRecap, pickPlaybackUrl,
+	articleParagraphs, mapContentHighlights, mapRecap, pickPlaybackUrl, pickRenditions,
 } from "./content.js";
 
 const content = parseGameContentResponse(
@@ -36,6 +36,19 @@ describe("mapContentHighlights", () =>
 			expect(highlight.title).toBeTruthy();
 			expect(highlight.playbackUrl).toBeTruthy();
 		}
+	});
+
+	it("renditions: every video MLB lists, each URL once, no trickplay strip (owner, 2026-11-12: quality selector)", () =>
+	{
+		for (const highlight of highlights)
+		{
+			const urls = highlight.renditions!.map((rendition) => rendition.url);
+			expect(new Set(urls).size).toBe(urls.length);
+			expect(urls.every((url) => /\.(mp4|m3u8)$/.test(url))).toBe(true);
+			expect(urls).toContain(highlight.playbackUrl);
+		}
+		const first = content.highlights!.highlights!.items[0]!;
+		expect(pickRenditions(first).map((rendition) => rendition.name)).toEqual(["hlsCloud", "mp4Avc", "highBit"]);
 	});
 
 	it("keywords: kind, date, team ids and tags come from MLB's keywords (S69)", () =>

@@ -126,7 +126,7 @@ function signedIn(): Session
 	return {
 		status: "signedIn",
 		account: DEV_ACCOUNT as never,
-		signIn: vi.fn(() => Promise.resolve()),
+		signIn: vi.fn(async () => false),
 		finishSignIn: vi.fn(() => Promise.resolve("/")),
 		signOut: vi.fn(),
 	};
@@ -201,7 +201,7 @@ describe("Account ways in (A4 settings-data-*)", () =>
 		stubApi();
 		renderData("mobile", {
 			status: "signedOut",
-			signIn: vi.fn(),
+			signIn: vi.fn(async () => false),
 			finishSignIn: vi.fn(),
 			signOut: vi.fn(),
 		});
