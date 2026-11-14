@@ -285,7 +285,7 @@ creates it, and writes the Worker config with that config's id; then `pnpm db:mi
 Worker secret from GitHub secrets (`--secrets-file`), so none is ever set by hand with
 `wrangler secret put`. Every deployed env serves live MLB, names its own address as `BT_APP_ORIGIN`,
 and refuses `dev:` sign-in (no `BT_LOCAL`); production signs in through Logto (S116, below), and
-production's deploy then registers its Logto sign-in addresses (`pnpm deploy:logto production`).
+production's deploy is followed by the `production-logto` job, which registers its Logto sign-in addresses (`pnpm deploy:logto production`).
 
 **What the workflow reads from GitHub** (the owner sets these up once; the automation never does):
 

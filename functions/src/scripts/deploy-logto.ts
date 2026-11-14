@@ -1,6 +1,8 @@
 /**
- * `pnpm deploy:logto production` (S116 AC 5): the `production` job's Logto step
- * (`.github/workflows/deploy.yml`), run after production's Worker deploys. It registers the
+ * `pnpm deploy:logto production` (S116 AC 5): the `production-logto` job's Logto step
+ * (`.github/workflows/deploy.yml`), run after the `production` job deploys the Worker. It is a job
+ * of its own so production's environment deployment status reflects only the Worker deploy, which
+ * the Release order step reads to allow a rollback re-run (Claude's review of PR #51). It registers the
  * single-page app's sign-in and sign-out addresses (from `BT_APP_ORIGIN`) and the email
  * one-time-code sign-in through the Management API (`src/deploy/logto.ts`), changing nothing
  * when they are already set.
