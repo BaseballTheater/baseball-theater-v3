@@ -26,6 +26,33 @@ explicitly where that's the case. For what's still ahead, see
   the preview's Worker (`pnpm deploy:teardown`, `pnpm deploy:cleanup-previews`). Replaces "Previews share staging db"
   (S114) on the owner's word, 2026-11-13.
 
+## Copying production's games into staging keeps the newest one
+
+- **Before, copying production's games into staging could keep a game staging had caught halfway through instead of
+  production's finished one, or replace a game staging had updated more recently with production's older copy,
+  because it compared counters each database keeps on its own. Now it keeps whichever changed last, staging's live
+  updates keep working on a copied game, and it leaves alone any table staging has reshaped that production hasn't
+  caught up with.** Details: follow-up to S117. `copyBaseballData` adopts a row only when production's
+  `lastChangedAt` is later (`adoptAcrossStores` in `@bt/domain`, ADR-025) and moves staging's `version` past its own
+  (ADR-022). It rebuilds copied games' projections with `projectGame`, still compares replay artifacts by patch
+  count, and skips every table a migration production hasn't run touches (owner, 2026-11-13: "option A" and "I
+  think option b is better"). It refuses when staging has run a migration the checkout lacks. It still runs by hand
+  only. Found by Claude's review of PR #21. Fixes #53.
+
+## The game backfill stops asking for missing extras in later runs too
+
+- **Before, once the game backfill had counted anything for a game's extras (videos and recap, play metrics, the
+  extra game content), a later run over newer dates didn't count them at all: it asked for them for every game there
+  and never gave up, so ten seasons could mean tens of thousands of requests bound to fail. A run over older dates
+  that didn't touch the last one could give up too early, carrying on a count from years away. Now each run counts
+  the days it walks, joining the count of a run it continues: a newer range gives up on its own instead of asking
+  forever, and no extra is given up before it has been missing for 14 days of games in a row (except when resuming
+  from a resume file saved before this change: in one narrow case, or when that file already counted a streak across
+  runs that didn't touch).** This is a tool for filling Baseball Theater's game store; fans don't see it directly. Details: follow-up to S122 from Claude's after-the-fact review of PR #20 —
+  `recordSourceDay` (`packages/domain`) keeps each source's counted stretches and joins the ones a walk connects;
+  the resume file stores them (`functions/src/services/backfill-state.ts`, which still reads a file saved in the old
+  shape).
+
 ## Deleting your account works on the live site
 
 - **Before, deleting your account on the live site always failed with "Couldn't finish deleting your account", and

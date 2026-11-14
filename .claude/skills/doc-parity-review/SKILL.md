@@ -21,7 +21,7 @@ Rule 19 in `docs/v3/BACKLOG.md` is the contract. Every story's `**Source:**` lin
 
 Other story-text edits don't count: a feature citation is checked against FEATURES, not the story text, and a pillar story's scope list, goal-line paths, work items or notes don't change what it is for (owner, 2026-10-23).
 
-Do not start a story while it is due. Run it with **fresh context** (a separate agent or session). An agent that wrote a story will defend its citation.
+Do not start a story while it is due. Run it with **fresh context** (a separate agent or session; as a subagent, the `doc-parity-reviewer` agent type, which loads this skill). An agent that wrote a story will defend its citation.
 
 ## Write scope: this is what prevents thrash
 

@@ -76,16 +76,24 @@ pnpm mlb:backfill --from 2024-03-20 --to 2024-11-02      # any range, both dates
   that host (waiting at least as long as `Retry-After` asks). A `429` is retried for as long as it takes, so
   throttling never makes it give up on a day; a `5xx` or a dropped connection is tried 6 times and then counts as
   that request failing (an extra source's failure, or for a schedule or live feed a day left for the next run).
-- **Giving up on old-game extras.** Videos, play metrics and the GraphQL content exist only for recent games.
-  Each is tracked on its own and given up once it fails (or comes back empty) for 14 consecutive days of games;
-  after that it isn't asked for any older date. The live feed itself is never given up: a game whose feed fails
-  leaves its day for the next run.
+- **Giving up on old-game extras.** Videos, play metrics and the GraphQL content exist only for recent games. Each
+  is tracked on its own and given up once it fails (or comes back empty) for 14 consecutive days of games; after
+  that it isn't asked for any older date. A run over dates that don't touch an earlier run's counts its own 14 days;
+  a run that carries on where another stopped (from the same `--to`, from the day below where it stopped, from a
+  later `--to` whose walk reaches the days it counted, or a newer run ending the day above it) carries on its count
+  (unless that run gave up: then the newer days count their own 14). Days with no games aren't remembered, so a run
+  that starts below a game-less gap (an All-Star break, an off day between one-day runs) starts its count again
+  there: that can ask a few more days, but never gives up before 14 failed days of games in a row, except after
+  resuming from a resume file saved before this was changed: in one narrow case (a resume that asks again 14 or more
+  incomplete days among answered ones, and they all fail), and when that file's streak or give-up was already
+  counted across runs that didn't touch, which is kept as it was. The live feed itself is never given up: a game
+  whose feed fails leaves its day for the next run.
 - **Stopping and resuming.** Stop it any time (Ctrl-C finishes the day in progress; a kill is fine too) and run
   the same command again to resume: a day already complete in the database (its schedule stored, every game
   settled, every final game stored) asks MLB nothing and writes nothing, so it picks up at the first incomplete
   day. Days with games not yet settled (today's, say) are checked again on every run. Each extra source's
-  failure streak and give-up date are kept in `.backfill/<host>--<database>.json` (git-ignored), so a resumed run
-  doesn't re-probe a source it gave up, and a different database starts fresh. To ask a given-up source again
+  failure streaks and give-up dates are kept in `.backfill/<host>--<database>.json` (git-ignored), so a resumed
+  run doesn't re-probe a source it gave up, and a different database starts fresh. To ask a given-up source again
   (or if the command says the file is unreadable), delete that file: every source's streak starts over.
 - **Which database.** It writes the database `BT_DATABASE_URL` names, else the local Docker Postgres (as
   `pnpm db:seed` does), and migrates it first. It refuses production: any host that isn't local is refused
@@ -307,16 +315,31 @@ production's deploy then registers its Logto sign-in addresses (`pnpm deploy:log
   (`functions/src/services/data-classification.ts`) labels `none`: `schedule_days`, `games`,
   `game_projections` and `replay_artifacts`. It never reads or writes a fan's account, settings,
   sign-in links or entitlements, or the deletion log, so none of them ever reaches staging, not even
-  for a moment. A new table is copied only once the manifest labels it `none`.
+  for a moment. A new table is copied only once the manifest labels it `none` and the copy's
+  `COPY_RULES` (`functions/src/services/baseball-copy.ts`) says how its rows are compared; a `none`
+  table with no rule stops the copy before it touches anything.
 - **It only adds.** It never deletes, truncates or drops anything in the target, and rows only
-  staging has stay as they are. Every write is version-guarded like ingest's (ADR-022): a row
-  staging already holds at a newer version is kept, so running it again changes nothing and never
-  rolls staging back. It copies only the columns both sides have: a column or table only staging
-  has (a migration production hasn't had yet) is left untouched, and a column only production has is
-  skipped. A column a staging-only migration renamed or reshaped gets nothing from production under
-  its new name. A column staging generates itself is left to staging. A column only staging has that
-  is required with no default (`NOT NULL`, nothing to fill it) makes that table be skipped: it gets
-  none of production's rows, the log says why, and the other tables are still copied.
+  staging has stay as they are. It copies only the columns both sides have: a column only staging
+  has is left untouched, and a column only production has is skipped. A column staging generates
+  itself is left to staging. A column only staging has that is required with no default (`NOT NULL`,
+  nothing to fill it) makes that table be skipped: it gets none of production's rows, the log says
+  why, and the other tables are still copied.
+- **Which copy of a row wins** (owner, 2026-11-13: "option A"). Each database counts its own
+  versions, so they are never compared between the two. A schedule day or game both sides have is
+  replaced only when production's content changed later (`lastChangedAt`). The replaced row gets
+  staging's version + 1, so staging's live updates and open pages keep taking only what is newer
+  (ADR-022). A row staging changed later, the same content, a change time that can't be read, or a
+  game staging is still ingesting (in its active window and changed within the window's trail plus
+  an hour) keeps staging's copy, and running the copy again changes nothing. Projections are never
+  copied: those of every game it writes, and any a stopped copy left behind, are rebuilt with
+  staging's code. A game that can't be projected is named in the log. Games and their projections
+  are skipped together (when the target has a `game_projections` table). Replay recordings keep
+  whichever has more patches.
+- **Tables staging has reshaped are left alone** (owner, 2026-11-13: "I think option b is better").
+  It compares the migrations each database has run. A table that a migration production hasn't run
+  touches gets none of production's rows, and the log names the migration. If staging's database
+  has run a migration this checkout doesn't have, the copy refuses and copies nothing. If production
+  has run one staging hasn't, every table is skipped.
 - **Migrations:** it migrates the target first (with the checked-out code's migrations; the workflow
   checks out `stage`) and never migrates or changes production. Every read of production runs in a
   read-only transaction of its own, which holds through Neon's pooler too; nothing is set on
@@ -325,9 +348,10 @@ production's deploy then registers its Logto sign-in addresses (`pnpm deploy:log
   Neon branch (the project's default branch) or by host (the same guard as `pnpm mlb:backfill`, with
   no override), and can't be the database it reads from.
 - **No deploy runs it.** No deploy, pull request or push workflow runs it; it runs only when someone
-  asks. From GitHub: Actions → **Copy baseball data** → Run workflow (target `staging`). It reads
-  both connection strings from Neon's API with the `NEON_API_KEY` secret, masks them, and logs hosts,
-  tables and row counts only. From a terminal, with both connection strings:
+  asks (owner, 2026-11-13: "I want it to be a manual thing for now"). From GitHub: Actions → **Copy
+  baseball data** → Run workflow (target `staging`). It reads both connection strings from Neon's
+  API with the `NEON_API_KEY` secret, masks them, and logs hosts, tables and row counts only. From a
+  terminal, with both connection strings:
 
 ```bash
 BT_SOURCE_DATABASE_URL="<production>" BT_DATABASE_URL="<target>" pnpm db:copy-baseball
