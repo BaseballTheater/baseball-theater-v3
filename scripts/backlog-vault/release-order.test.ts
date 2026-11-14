@@ -235,6 +235,29 @@ describe("deploy.yml's production job checks the release order before anything d
 		expect(checkout).toContain("fetch-depth: 0");
 	});
 
+	it("ends with the Worker deploy, so its environment deployment's status is the Worker's alone", () =>
+	{
+		// The Release order step lets a rollback through on a production deployment of the tag that
+		// succeeded before (Claude's review of PR #51): a Logto failure after the Worker went live
+		// must not mark that release as never deployed.
+		const steps = [...production.matchAll(/^ {12}- (?:name|uses): (.+)$/gm)].map((m) => m[1]);
+		expect(steps.at(-1)).toBe("Deploy production");
+		expect(production).not.toContain("deploy:logto");
+		const logtoStart = deploy.indexOf("\n    production-logto:\n");
+		expect(logtoStart).toBeGreaterThan(-1);
+		const logtoEnd = deploy.indexOf("\n    # ", logtoStart + 1);
+		const logto = deploy.slice(logtoStart, logtoEnd === -1 ? undefined : logtoEnd);
+		expect(logto).toContain("needs: [production]");
+		expect(logto).toContain("if: github.event_name == 'release' && github.event.action == 'published'");
+		expect(logto).toContain("ref: ${{ github.event.release.tag_name }}");
+		expect(logto).toContain("LOGTO_S2S_APP_ID: ${{ secrets.LOGTO_S2S_APP_ID }}");
+		expect(logto).toContain("LOGTO_S2S_SECRET: ${{ secrets.LOGTO_S2S_SECRET }}");
+		expect(logto).toContain("run: pnpm run deploy:logto production");
+		// mirror-main still waits on the Worker deploy only.
+		const mirror = deploy.slice(deploy.indexOf("\n    mirror-main:\n"), logtoStart);
+		expect(mirror).toContain("needs: [production]");
+	});
+
 	it("can read releases and deployments", () =>
 	{
 		expect(production).toMatch(/permissions:\n\s+contents: read\n\s+deployments: read\n\s+issues: read\n\s+pull-requests: read/);

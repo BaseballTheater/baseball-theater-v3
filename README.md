@@ -287,17 +287,17 @@ production's deploy then registers its Logto sign-in addresses (`pnpm deploy:log
 
 **What the workflow reads from GitHub** (the owner sets these up once; the automation never does):
 
-| Name                        | Kind        | What                                                                                                               |
-| --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
-| `CLOUDFLARE_API_TOKEN`      | secret      | Workers Scripts edit, Hyperdrive edit, Workers custom domains / routes and DNS edit on the `baseball.theater` zone |
-| `CLOUDFLARE_ACCOUNT_ID`     | variable    | the Cloudflare account                                                                                             |
-| `NEON_API_KEY`              | secret      | creates and reads branches and connection strings in the project                                                   |
-| `NEON_PROJECT_ID`           | variable    | `old-sun-72319473`                                                                                                 |
-| `BT_SESSION_KEY_STAGING`    | secret      | signs sessions on staging and previews                                                                             |
-| `BT_SESSION_KEY_PRODUCTION` | secret      | signs sessions on production                                                                                       |
-| `LOGTO_S2S_APP_ID`          | secret      | production's Logto machine-to-machine app ID (the `production` job only; a Worker secret too)                      |
-| `LOGTO_S2S_SECRET`          | secret      | that app's secret: deletes fans' Logto accounts and sets production's sign-in addresses (`production` job only)    |
-| `production`                | environment | no required reviewers; deployments only from `v*` tags, so only a release reaches production's secrets             |
+| Name                        | Kind        | What                                                                                                                                    |
+| --------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`      | secret      | Workers Scripts edit, Hyperdrive edit, Workers custom domains / routes and DNS edit on the `baseball.theater` zone                      |
+| `CLOUDFLARE_ACCOUNT_ID`     | variable    | the Cloudflare account                                                                                                                  |
+| `NEON_API_KEY`              | secret      | creates and reads branches and connection strings in the project                                                                        |
+| `NEON_PROJECT_ID`           | variable    | `old-sun-72319473`                                                                                                                      |
+| `BT_SESSION_KEY_STAGING`    | secret      | signs sessions on staging and previews                                                                                                  |
+| `BT_SESSION_KEY_PRODUCTION` | secret      | signs sessions on production                                                                                                            |
+| `LOGTO_S2S_APP_ID`          | secret      | production's Logto machine-to-machine app ID (the `production` and `production-logto` jobs only; a Worker secret too)                   |
+| `LOGTO_S2S_SECRET`          | secret      | that app's secret: deletes fans' Logto accounts and sets production's sign-in addresses (`production` and `production-logto` jobs only) |
+| `production`                | environment | no required reviewers; deployments only from `v*` tags, so only a release reaches production's secrets                                  |
 
 **GitHub settings the owner sets** (S118, S121; agents never change repo settings), in this order:
 

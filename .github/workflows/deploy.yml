@@ -25,10 +25,11 @@ name: Deploy
 # every Worker secret from GitHub secrets. Each step is idempotent (owner, 2026-11-05: "It should be
 # idempotent so it can happen with every deployment. All the bootstrapping should be like that."),
 # so a re-run changes nothing. Secrets come only from GitHub secrets; agents never run this.
-# Sign-in (S116): only production has Logto's machine-to-machine app, so only the production job
-# reads its secrets (LOGTO_S2S_APP_ID, LOGTO_S2S_SECRET; owner, 2026-11-07: "LOGTO_S2S_APP_ID and
-# LOGTO_S2S_SECRET, go ahead"), pushes them as Worker secrets and, after deploying, sets the web
-# app's sign-in and sign-out addresses with `pnpm deploy:logto`. Staging and previews read nothing
+# Sign-in (S116): only production has Logto's machine-to-machine app, so only the production jobs
+# read its secrets (LOGTO_S2S_APP_ID, LOGTO_S2S_SECRET; owner, 2026-11-07: "LOGTO_S2S_APP_ID and
+# LOGTO_S2S_SECRET, go ahead"): the production job pushes them as Worker secrets and, after it
+# deploys, the production-logto job sets the web app's sign-in and sign-out addresses with
+# `pnpm deploy:logto`. Staging and previews read nothing
 # of Logto's.
 
 on:
@@ -400,13 +401,11 @@ jobs:
             - name: Re-apply deletions
               run: pnpm db:reapply-deletions
 
+            # The job's last step: its `production` environment deployment succeeds exactly when the
+            # Worker went live, which the Release order step reads to allow a rollback re-run. Logto's
+            # registration runs in production-logto, after this job.
             - name: Deploy production
               run: pnpm --filter @bt/functions exec wrangler deploy --config "${{ steps.bootstrap.outputs.config }}" --env production --secrets-file "${{ steps.bootstrap.outputs.secrets_file }}"
-
-            # After the Worker is live, so a Logto hiccup never holds a release back; it fails the job
-            # visibly instead. Idempotent: an unchanged origin changes nothing in Logto.
-            - name: Register production's Logto sign-in and sign-out addresses
-              run: pnpm run deploy:logto production
 
     # main mirrors production (S121; owner, 2026-11-07: "2. Mirror"): once the release is live, move
     # main to the released commit, as a fast-forward only. A plain `git push` already refuses a
@@ -451,3 +450,41 @@ jobs:
                   fi
                   git push origin "$released:refs/heads/main"
                   echo "main fast-forwarded from $current to $TAG ($released)"
+
+    # After the Worker is live, so a Logto hiccup never holds a release back; it fails this job
+    # visibly instead. Idempotent: an unchanged origin changes nothing in Logto. Its own job (Claude's
+    # review of PR #51), so a Logto failure doesn't mark the production job's environment deployment
+    # failed: the Release order step reads that status to tell a release that went live (a rollback
+    # may re-run it) from one that never did. This job's own `production` deployment may fail; the
+    # Release order step needs only one successful deployment of the tag.
+    production-logto:
+        if: github.event_name == 'release' && github.event.action == 'published'
+        needs: [production]
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        # For LOGTO_S2S_APP_ID and LOGTO_S2S_SECRET, held for production only.
+        environment: production
+        permissions:
+            contents: read
+        env:
+            LOGTO_S2S_APP_ID: ${{ secrets.LOGTO_S2S_APP_ID }}
+            LOGTO_S2S_SECRET: ${{ secrets.LOGTO_S2S_SECRET }}
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.release.tag_name }}
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 9.15.0
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: ".nvmrc"
+                  cache: pnpm
+
+            - name: Install
+              run: pnpm install --frozen-lockfile
+
+            - name: Register production's Logto sign-in and sign-out addresses
+              run: pnpm run deploy:logto production
