@@ -59,7 +59,8 @@ function expectTokenOnlyOnGhSteps(list: string[], jobText: string): void
 	expect(header(jobText)).not.toMatch(/GH_TOKEN/);
 	for (const step of list)
 	{
-		if (/preview-pr-open\.sh|gh pr comment/.test(step)) expect(step, step).toMatch(/\n {14}env:\n {18}GH_TOKEN: \$\{\{ github\.token \}\}\n/);
+		// #47's release lookup (scripts/build-release.sh) reads the pull request's milestone from GitHub too.
+		if (/preview-pr-open\.sh|gh pr comment|scripts\/build-release\.sh/.test(step)) expect(step, step).toMatch(/\n {14}env:\n {18}GH_TOKEN: \$\{\{ github\.token \}\}\n/);
 		else expect(step, step).not.toMatch(/GH_TOKEN/);
 	}
 }
