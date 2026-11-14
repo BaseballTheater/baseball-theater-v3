@@ -36,7 +36,7 @@ Count triggers are cheap to satisfy and easy to ignore; the event list is the pa
 
 ## Fresh context is required
 
-Run this **without** the transcript that produced the stories being reviewed — a separate agent, a subagent, or a new session. An agent reviewing its own recent plan will confirm it. This mirrors the fresh-context reviewer pass in `docs/v3/LOOP.md` §7.
+Run this **without** the transcript that produced the stories being reviewed — a separate agent, a subagent (the `backlog-reviewer` agent type, `.claude/agents/backlog-reviewer.md`, which loads this skill), or a new session. An agent reviewing its own recent plan will confirm it. This mirrors the fresh-context reviewer pass in `docs/v3/LOOP.md` §7.
 
 ## The four checks
 
