@@ -14,6 +14,18 @@ explicitly where that's the case. For what's still ahead, see
 
 ---
 
+## Test previews no longer change the staging site's database
+
+- **Before, every pull request's test preview ran its database changes on the staging site's database, and they stayed
+  there even after the pull request was closed or rewritten, which could leave staging's database out of step with
+  staging's code and make it skip later changes. Now each preview gets its own copy of staging's database, refreshed
+  from staging on every update and deleted when the pull request closes (with a weekly sweep for any left behind), so
+  staging's database only ever gets the changes that actually merged.** Details: fixes #42 —
+  `pnpm deploy:bootstrap preview --pr N` makes or resets the Neon branch `preview-pr-<N>` from `staging` and writes
+  the Hyperdrive config `bt-preview-pr-<N>`; `preview-teardown` and the new Preview cleanup workflow delete both with
+  the preview's Worker (`pnpm deploy:teardown`, `pnpm deploy:cleanup-previews`). Replaces "Previews share staging db"
+  (S114) on the owner's word, 2026-11-13.
+
 ## Copying production's games into staging keeps the newest one
 
 - **Before, copying production's games into staging could keep a game staging had caught halfway through instead of

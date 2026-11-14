@@ -41,7 +41,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
     - `120–120` 20. Every story has a Reuse check section (ADR-025, owner, 2026-10-19: "I would prefer that a…
     - `121–121` 21. Coverage floors ratchet up, never down (ADR-026; owner, 2026-10-19: ratchet).
     - `123–123` 22. A UI story is checked against its ratified frames by the owner's eye (ADR-026, amended 20…
-- [01 Current baseline](<backlog/frame/01 Current baseline.md>) — 35 KB
+- [01 Current baseline](<backlog/frame/01 Current baseline.md>) — 36 KB
   - `1–43` Current baseline
 - [02 Stories](<backlog/frame/02 Stories.md>) — 2 KB
 - [03 Data platform — MLB access & types](<backlog/frame/03 Data platform — MLB access & types.md>) — 2 KB
@@ -51,7 +51,7 @@ Assembled, in this order and around the stories, into BACKLOG.md.
 - [05 Gap map (doc → story)](<backlog/frame/05 Gap map (doc → story).md>) — 9 KB
   - `1–44` Gap map (doc → story)
 - [06 Baseline history](<backlog/frame/06 Baseline history.md>) — 46 KB
-  - `1–129` Baseline history
+  - `1–130` Baseline history
 
 ## Product and architecture docs
 
