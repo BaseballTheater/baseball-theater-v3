@@ -1191,7 +1191,7 @@ Calls between objects retry on errors flagged `retryable`. Every deploy restarts
 - **Applied twice:** the edge `s-maxage` (how often a request reaches the Worker) and the MLB refresh-on-read (whether the Worker asks MLB again).
 - **`stale-while-revalidate`** so viewers never wait on a refresh; **Tiered Cache** so a miss checks other data centers first.
 - **The cap is the staleness guarantee** for late MLB scoring corrections; ingest may also purge a game it knows changed.
-- **Amended 2026-11-13 — standings only:** standings keep the graduated lifetime but not the 48h cap; their cap is 30 days (owner, 2026-11-13: *"Make an exception for standings. They should still use the graduated thing, but make it an exception for the 48h cap. Increase the cap to 30 days."*). The ladder carries on past 48h for them (S139). Games and schedules keep the 48h cap.
+- **Amended 2026-11-13 — standings only:** standings keep the graduated lifetime but not the 48h cap; their cap is 30 days (owner, 2026-11-13: *"Make an exception for standings. They should still use the graduated thing, but make it an exception for the 48h cap. Increase the cap to 30 days."*). The ladder carries on past 48h for them (S139), in the edge's `s-maxage` only, never a long browser `max-age`, which couldn't be purged. Games and schedules keep the 48h cap.
 
 **Why:** finished games stop costing MLB calls and Postgres reads within hours, without a fixed "forever" TTL that would hide corrections.
 
