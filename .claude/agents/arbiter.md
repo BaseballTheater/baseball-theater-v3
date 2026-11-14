@@ -1,6 +1,6 @@
 ---
 name: arbiter
-description: 'Fresh-context, read-only judge for a fix loop that won''t converge (`docs/v3/LOOP.md` §7 step 3, "Exit": a plan or change review repeats a handled finding, or three rounds pass without coming back clean). Give it the open findings, the replies to them and the branch; it rules each one.'
+description: 'Fresh-context, read-only judge for a fix loop that won''t converge (`docs/v3/LOOP.md` §7 step 3, "Exit": a plan or change review repeats a handled finding, or six rounds pass without coming back clean). Give it the open findings, the replies to them and the branch; it rules each one.'
 tools: Read, Grep, Glob, Bash
 model: opus
 color: red

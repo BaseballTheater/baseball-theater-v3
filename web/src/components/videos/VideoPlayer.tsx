@@ -49,6 +49,33 @@ function playableQualities(video: Video): VideoQuality[]
 }
 
 /**
+ * A press on play / pause (the button, the picture, Space). While a quality switch reloads the
+ * clip (`reloading`) the element reports itself paused whatever the reader wants, so the press
+ * follows `wantsPlay`, which the button shows during a reload (`switchTo`): a pause records it
+ * in `wantsPlay` (which the reload's `loadedmetadata` follows) and pauses the element in case an
+ * earlier press already started it; a play goes to the element, since `play()` also starts a
+ * load the browser may not have begun (iOS can skip `preload="metadata"`). On a failed load a
+ * press only changes what the reader wants; picking another quality reloads. Otherwise it plays or pauses the
+ * element; its play / pause events update `wantsPlay`.
+ */
+function togglePlayer(element: HTMLVideoElement | null, reloading: boolean, wantsPlay: { current: boolean }, setPlaying: (playing: boolean) => void): void
+{
+	if (!reloading)
+	{
+		toggleVideo(element);
+		return;
+	}
+	if (wantsPlay.current)
+	{
+		wantsPlay.current = false;
+		setPlaying(false);
+		element?.pause();
+		return;
+	}
+	void element?.play().catch(() => undefined);
+}
+
+/**
  * The one video player (S70; game-shell `video-player` frames): the clip, a Primary play /
  * pause control, the progress bar and `elapsed / total` (`clipClock`), the title, and the
  * MLBAM disclaimer. `PlayerDialog` and `PlayerStage` host it; neither repeats any of it.
@@ -59,7 +86,8 @@ function playableQualities(video: Video): VideoQuality[]
  * Under the progress row sit the quality picker (`QualityPicker`, the clip's
  * `videoQualities` this browser can play, starting on `playbackUrl`'s) and the palette of
  * actions (`PlayerActions`: copy link, direct link, download, share), both on the quality
- * being played. Switching quality keeps the place in the clip, and keeps playing if it was.
+ * being played. Switching quality keeps the place in the clip, and plays on only if the
+ * reader wants it playing (`wantsPlay`); only the first source autoplays.
  */
 export function VideoPlayer({
 	video, title = video.title, autoPlay = false,
@@ -76,20 +104,26 @@ export function VideoPlayer({
 	const qualities = playableQualities(video);
 	const [picked, setPicked] = useState<string | null>(null);
 	const quality = qualities.find((entry) => entry.id === picked) ?? defaultVideoQuality(qualities, video.playbackUrl);
-	// Where to pick up after a quality switch reloads the clip: its time, and whether it was playing.
-	const resume = useRef<{ time: number;
-		play: boolean } | null>(null);
+	// Where to pick up after a quality switch reloads the clip.
+	const resume = useRef<{ time: number } | null>(null);
+	// Whether the reader wants the clip playing: set by autoplay's intent and by their own
+	// play/pause, not sampled from the element at switch time, since a reloading or
+	// not-yet-autoplayed clip reports itself paused. The media load algorithm sets `paused`
+	// without firing `pause`, so only real plays and pauses move it.
+	const wantsPlay = useRef(autoPlay);
 
-	const toggle = () => toggleVideo(ref.current);
+	const toggle = () => togglePlayer(ref.current, resume.current !== null, wantsPlay, setPlaying);
 	const switchTo = (next: VideoQuality) =>
 	{
 		const element = ref.current;
 		if (next.id === quality?.id) return;
+		// A second switch before the first loads keeps the first one's time, not the reload's 0.
 		if (element) resume.current = {
-			time: element.currentTime,
-			play: !element.paused,
+			time: resume.current?.time ?? element.currentTime,
 		};
 		setPicked(next.id);
+		// During the reload the button shows what the reader wants, so a press means the same.
+		setPlaying(wantsPlay.current);
 	};
 	// The clip as a file (`fileQuality`): the MP4 playing, or the same cut's MP4 while a stream plays.
 	const fileUrl = fileQuality(qualities, quality)?.url ?? null;
@@ -100,7 +134,7 @@ export function VideoPlayer({
 		{
 			if (event.code !== "Space" || ownsSpace(event.target as HTMLElement)) return;
 			event.preventDefault();
-			toggleVideo(ref.current);
+			togglePlayer(ref.current, resume.current !== null, wantsPlay, setPlaying);
 		}
 		document.addEventListener("keydown", onKey);
 		return () => document.removeEventListener("keydown", onKey);
@@ -116,15 +150,25 @@ export function VideoPlayer({
 				className="bt-video"
 				src={quality?.url ?? video.playbackUrl ?? undefined}
 				poster={video.imageUrl ?? undefined}
-				autoPlay={autoPlay}
+				// Only the first source autoplays: a quality switch reloads the clip, and a reload
+				// would otherwise autoplay a clip the reader had paused (`wantsPlay` decides instead).
+				autoPlay={autoPlay && picked === null}
 				// Without these iOS takes a playing clip fullscreen; the prefixed one is for
 				// older iOS and in-app web views that still read it.
 				playsInline
 				webkit-playsinline="true"
 				preload="metadata"
 				onClick={toggle}
-				onPlay={() => setPlaying(true)}
-				onPause={() => setPlaying(false)}
+				onPlay={() =>
+				{
+					wantsPlay.current = true;
+					setPlaying(true);
+				}}
+				onPause={() =>
+				{
+					wantsPlay.current = false;
+					setPlaying(false);
+				}}
 				onTimeUpdate={(event) => setElapsed(event.currentTarget.currentTime)}
 				onLoadedMetadata={(event) =>
 				{
@@ -134,7 +178,7 @@ export function VideoPlayer({
 					if (!at) return;
 					resume.current = null;
 					element.currentTime = at.time;
-					if (at.play) void element.play().catch(() => undefined);
+					if (wantsPlay.current) void element.play().catch(() => undefined);
 				}}
 				style={{
 					display: "block",

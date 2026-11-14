@@ -68,12 +68,12 @@ afterEach(() =>
 	vi.useRealTimers();
 });
 
-function renderPlayer(video: Video = VIDEO)
+function renderPlayer(video: Video = VIDEO, autoPlay = false)
 {
 	render(
 		<MantineProvider>
 			<MemoryRouter>
-				<VideoPlayer video={video} />
+				<VideoPlayer video={video} autoPlay={autoPlay} />
 			</MemoryRouter>
 		</MantineProvider>,
 	);
@@ -136,6 +136,150 @@ describe("quality picker", () =>
 		expect(screen.getByRole("link", {
 			name: "Direct link",
 		})).toHaveAttribute("href", HIGH);
+	});
+
+	/** Opens the quality picker and chooses High, then returns `play`'s spy, cleared. */
+	async function chooseHigh(video: HTMLVideoElement)
+	{
+		await userEvent.click(screen.getByRole("button", {
+			name: /^Quality:/,
+		}));
+		await userEvent.click(await screen.findByRole("menuitem", {
+			name: "High · 720p, 16 Mbps",
+		}));
+		expect(video).toHaveAttribute("src", HIGH);
+		const play = vi.mocked(HTMLMediaElement.prototype.play);
+		play.mockClear();
+		return play;
+	}
+
+	it("a paused clip stays paused after a quality switch, and the reload doesn't autoplay", async () =>
+	{
+		hlsSupport(false);
+		const video = renderPlayer(VIDEO, true);
+		expect(video.autoplay).toBe(true);
+		// The clip had started, then the reader paused it at 0:12.
+		fireEvent(video, new Event("play"));
+		fireEvent(video, new Event("pause"));
+		video.currentTime = 12;
+		const play = await chooseHigh(video);
+		expect(video.autoplay).toBe(false);
+		fireEvent(video, new Event("loadedmetadata"));
+		expect(video.currentTime).toBe(12);
+		expect(play).not.toHaveBeenCalled();
+	});
+
+	it("an autoplaying clip switched before it started still plays", async () =>
+	{
+		hlsSupport(false);
+		const video = renderPlayer(VIDEO, true);
+		const play = await chooseHigh(video);
+		fireEvent(video, new Event("loadedmetadata"));
+		expect(play).toHaveBeenCalledTimes(1);
+	});
+
+	it("a press on Play while the new quality loads isn't undone when it loads", async () =>
+	{
+		hlsSupport(false);
+		const video = renderPlayer();
+		video.currentTime = 12;
+		const play = await chooseHigh(video);
+		await userEvent.click(screen.getByRole("button", {
+			name: "Play",
+		}));
+		// The press itself plays the element, which also starts a load the browser may not have begun.
+		expect(play).toHaveBeenCalledTimes(1);
+		const pause = vi.mocked(HTMLMediaElement.prototype.pause);
+		pause.mockClear();
+		fireEvent(video, new Event("loadedmetadata"));
+		expect(pause).not.toHaveBeenCalled();
+		expect(screen.getByRole("button", {
+			name: "Pause",
+		})).toBeInTheDocument();
+	});
+
+	it("a pause while the new quality loads keeps the clip paused when it loads", async () =>
+	{
+		hlsSupport(false);
+		const video = renderPlayer();
+		await userEvent.click(screen.getByRole("button", {
+			name: "Play",
+		}));
+		const play = await chooseHigh(video);
+		fireEvent(video, new Event("pause"));
+		fireEvent(video, new Event("loadedmetadata"));
+		expect(play).not.toHaveBeenCalled();
+	});
+
+	it("Pause pressed while a playing clip's new quality loads keeps it paused when it loads", async () =>
+	{
+		hlsSupport(false);
+		const video = renderPlayer();
+		await userEvent.click(screen.getByRole("button", {
+			name: "Play",
+		}));
+		const play = await chooseHigh(video);
+		// The reload leaves the element paused without a pause event, so the button still says Pause.
+		paused = true;
+		await userEvent.click(screen.getByRole("button", {
+			name: "Pause",
+		}));
+		expect(play).not.toHaveBeenCalled();
+		expect(screen.getByRole("button", {
+			name: "Play",
+		})).toBeInTheDocument();
+		fireEvent(video, new Event("loadedmetadata"));
+		expect(play).not.toHaveBeenCalled();
+	});
+
+	it("Play then Pause during one reload leaves the clip paused", async () =>
+	{
+		hlsSupport(false);
+		const video = renderPlayer();
+		await chooseHigh(video);
+		await userEvent.click(screen.getByRole("button", {
+			name: "Play",
+		}));
+		await userEvent.click(screen.getByRole("button", {
+			name: "Pause",
+		}));
+		expect(video.paused).toBe(true);
+		const play = vi.mocked(HTMLMediaElement.prototype.play);
+		play.mockClear();
+		fireEvent(video, new Event("loadedmetadata"));
+		expect(play).not.toHaveBeenCalled();
+		expect(screen.getByRole("button", {
+			name: "Play",
+		})).toBeInTheDocument();
+	});
+
+	it("an autoplaying clip switched before it starts shows Pause, and a press then pauses it", async () =>
+	{
+		hlsSupport(false);
+		const video = renderPlayer(VIDEO, true);
+		const play = await chooseHigh(video);
+		await userEvent.click(screen.getByRole("button", {
+			name: "Pause",
+		}));
+		fireEvent(video, new Event("loadedmetadata"));
+		expect(play).not.toHaveBeenCalled();
+	});
+
+	it("two quick switches keep the first switch's place", async () =>
+	{
+		hlsSupport(false);
+		const video = renderPlayer();
+		video.currentTime = 12;
+		await chooseHigh(video);
+		video.currentTime = 0;
+		await userEvent.click(screen.getByRole("button", {
+			name: /^Quality:/,
+		}));
+		await userEvent.click(await screen.findByRole("menuitem", {
+			name: "Standard · 720p, 4 Mbps",
+		}));
+		fireEvent(video, new Event("loadedmetadata"));
+		expect(video.currentTime).toBe(12);
 	});
 
 	it("a clip with one quality (recorded before renditions were kept) has no picker", () =>
