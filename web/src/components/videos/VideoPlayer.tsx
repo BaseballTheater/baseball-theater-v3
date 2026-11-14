@@ -49,6 +49,23 @@ function playableQualities(video: Video): VideoQuality[]
 }
 
 /**
+ * Plays the element for a reader who wants it playing. If the browser refuses (`NotAllowedError`:
+ * autoplay blocked by a site setting, Low Power Mode, or a play with no user gesture), they can't
+ * have it playing, so `wantsPlay` and the button go back to paused. Any other refusal (an
+ * `AbortError` when a newer load replaces this one) leaves the intent for that load to follow.
+ */
+function playWanted(element: HTMLVideoElement | null, wantsPlay: { current: boolean }, setPlaying: (playing: boolean) => void): void
+{
+	void element?.play().catch((error: unknown) =>
+	{
+		// A DOMException, which isn't an Error subclass everywhere, so read its name.
+		if ((error as { name?: unknown } | null)?.name !== "NotAllowedError") return;
+		wantsPlay.current = false;
+		setPlaying(false);
+	});
+}
+
+/**
  * A press on play / pause (the button, the picture, Space). While a quality switch reloads the
  * clip (`reloading`) the element reports itself paused whatever the reader wants, so the press
  * follows `wantsPlay`, which the button shows during a reload (`switchTo`): a pause records it
@@ -72,7 +89,7 @@ function togglePlayer(element: HTMLVideoElement | null, reloading: boolean, want
 		element?.pause();
 		return;
 	}
-	void element?.play().catch(() => undefined);
+	playWanted(element, wantsPlay, setPlaying);
 }
 
 /**
@@ -178,7 +195,7 @@ export function VideoPlayer({
 					if (!at) return;
 					resume.current = null;
 					element.currentTime = at.time;
-					if (wantsPlay.current) void element.play().catch(() => undefined);
+					if (wantsPlay.current) playWanted(element, wantsPlay, setPlaying);
 				}}
 				style={{
 					display: "block",

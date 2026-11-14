@@ -413,10 +413,10 @@ Assembled, in this order and around the stories, into BACKLOG.md.
   - `58–67` 4 — Backlog
   - `68–75` 5 — Boundaries
   - `76–79` 6 — Pilot (do this next, watched)
-  - `80–140` 7 — Reviewer pass
-    - `114–140` Review-class checklist
-  - `141–150` 8 — Scale → loop
-  - `151–155` Habit
+  - `80–141` 7 — Reviewer pass
+    - `114–141` Review-class checklist
+  - `142–151` 8 — Scale → loop
+  - `152–156` Habit
 - [ORIGIN.md — Baseball Theater v3 — Origin](ORIGIN.md) — 4 KB
 - [SAVANT-DATA.md — Baseball Savant data](SAVANT-DATA.md) — 8 KB
   - `10–15` Terms of use

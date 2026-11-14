@@ -265,6 +265,44 @@ describe("quality picker", () =>
 		expect(play).not.toHaveBeenCalled();
 	});
 
+	it("autoplay the browser blocks: after a switch the button goes back to Play when the new play is refused", async () =>
+	{
+		hlsSupport(false);
+		const video = renderPlayer(VIDEO, true);
+		// Autoplay refused: no play event, the clip sits paused under Play.
+		expect(screen.getByRole("button", {
+			name: "Play",
+		})).toBeInTheDocument();
+		const play = await chooseHigh(video);
+		play.mockImplementation(() => Promise.reject(new DOMException("blocked", "NotAllowedError")));
+		await act(async () =>
+		{
+			fireEvent(video, new Event("loadedmetadata"));
+		});
+		expect(play).toHaveBeenCalledTimes(1);
+		expect(screen.getByRole("button", {
+			name: "Play",
+		})).toBeInTheDocument();
+	});
+
+	it("a play aborted by a newer load keeps the reader's intent", async () =>
+	{
+		hlsSupport(false);
+		const video = renderPlayer();
+		await userEvent.click(screen.getByRole("button", {
+			name: "Play",
+		}));
+		const play = await chooseHigh(video);
+		play.mockImplementation(() => Promise.reject(new DOMException("replaced", "AbortError")));
+		await act(async () =>
+		{
+			fireEvent(video, new Event("loadedmetadata"));
+		});
+		expect(screen.getByRole("button", {
+			name: "Pause",
+		})).toBeInTheDocument();
+	});
+
 	it("two quick switches keep the first switch's place", async () =>
 	{
 		hlsSupport(false);
