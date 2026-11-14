@@ -1,12 +1,15 @@
 name: Copy baseball data
 
-# S117: copy production's baseball data (MLB schedules, games, projections, replay artifacts:
-# the tables the data classification manifest labels `none`) into staging, with no fan's data.
-# Run by hand only (owner, 2026-11-05: "it should be a manual step (to allow for local iteration
-# not getting stomped)"): Actions → Copy baseball data → Run workflow. No deploy, pull request or
-# push runs it. It only adds to staging (nothing there is deleted; rows already newer stay), migrates
-# staging first with `stage`'s migrations, reads production read-only and never migrates it, and
-# refuses production as a target. Agents never run it: only GitHub holds the Neon key.
+# S117: copy production's baseball data (MLB schedules, games, replay artifacts: the tables the data
+# classification manifest labels `none`; game projections are rebuilt from the copied games, not
+# copied) into staging, with no fan's data. Run by hand only (owner, 2026-11-05: "it should be a
+# manual step (to allow for local iteration not getting stomped)"; 2026-11-13: "I want it to be a
+# manual thing for now"): Actions → Copy baseball data → Run workflow. No deploy, pull request or
+# push runs it. It only adds to staging (nothing there is deleted; a row staging changed later than
+# production keeps staging's copy), migrates staging first with `stage`'s migrations, skips any table
+# a migration production hasn't run touches, refuses if staging has run a migration `stage` doesn't
+# have, reads production read-only and never migrates it, and refuses production as a target.
+# Agents never run it: only GitHub holds the Neon key.
 
 on:
     workflow_dispatch:

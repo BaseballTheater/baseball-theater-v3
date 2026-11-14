@@ -19,7 +19,7 @@ It counts as the backlog review for that drift event; log it with `scripts/audit
 
 ## Fresh context, two reviewers
 
-Run it **without** the transcript that wrote the stories or the designs. For a full intake (several surfaces, or new frontend ADRs), run **two independent reviewers** that do not see each other's work, each producing a report. The coordinating agent merges them: union the findings (coverage), and for every disagreement state both positions and the resolution, or put it to the owner. Reviewers report; they do not edit. The coordinator applies the merged result.
+Run it **without** the transcript that wrote the stories or the designs. For a full intake (several surfaces, or new frontend ADRs), run **two independent reviewers** that do not see each other's work, each producing a report (two `design-intake-reviewer` subagents started at once: read-only, with the Figma tools, each loading this skill). The coordinating agent (or the `design-intake-merger` it hands both reports to) merges them: union the findings (coverage), and for every disagreement state both positions and the resolution, or put it to the owner. Reviewers report; they do not edit. The coordinator applies the merged result, or hands both reports to a `design-intake-merger` subagent (always under `/run-stories`), which merges, applies, logs and commits, so the merge stays out of the coordinating thread.
 
 ## Inputs — read all of them
 
