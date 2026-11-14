@@ -234,10 +234,12 @@ automatically 2. Mirror"):
   still needs to be deployed, it'd need a new release."): `scripts/release-order.sh` fails the run
   before anything installs or deploys when another published release (pre-releases included) has the
   same or a higher version, or when the release's commit doesn't contain `main`. If an older draft
-  still needs to ship, discard it (the REST delete above, safe since a draft has no tag)
-  and prepare a new release; its pull requests move into the lowest remaining draft whose commit
-  contains them (its notes re-edited with the owner's approval), otherwise into the next open
-  milestone. A published release the Release order step refused never counts as released: with the
+  holds something production doesn't already run and still needs to ship, discard it (the REST
+  delete above, safe since a draft has no tag) and prepare a new release. A discarded draft's pull
+  requests move into the milestone of the published release whose commit already contains them (its
+  notes edited to add them, with the owner's approval); those no published release contains move
+  into the lowest remaining draft whose commit contains them (its notes re-edited with the owner's
+  approval), otherwise into the next open milestone. A published release the Release order step refused never counts as released: with the
   owner's OK, delete it and its tag (`git push origin :refs/tags/<tag>`) and move its pull requests
   the same way. A release ships everything on `stage` up to its target; there is no
   picking single stories out of the middle, and releasing is no longer done by merging `stage` into
