@@ -228,7 +228,7 @@ describe("scripts/build-release.sh require <number> (CI's milestone check)", () 
 		expect(calls()).toHaveLength(2);
 	});
 
-	it("refuses a closed milestone (a release already published), saying so", () =>
+	it("refuses a closed milestone (a release already prepared or published), saying so", () =>
 	{
 		answers({
 			milestone: {
@@ -240,6 +240,8 @@ describe("scripts/build-release.sh require <number> (CI's milestone check)", () 
 		expect(r.status).toBe(1);
 		expect(r.output).toBe("");
 		expect(r.stderr).toContain("closed");
+		// A milestone closes when its release is prepared, before it publishes (CLAUDE.md release rule).
+		expect(r.stderr).toContain("a release already prepared or published");
 	});
 
 	it("treats a failed request as no answer yet and asks again", () =>

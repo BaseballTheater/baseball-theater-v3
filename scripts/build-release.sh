@@ -15,7 +15,8 @@
 #     A pull request's own milestone, or `unreleased` (a preview, built before it merges).
 #   scripts/build-release.sh require <number>
 #     Exits 1 unless the pull request has an open milestone: a closed one is a release already
-#     published, so the build would be labelled with a release it isn't in. It is read live, not
+#     prepared or published (the release rule closes it at prepare time), so the build would be
+#     labelled with a release it isn't in. It is read live, not
 #     from the event that started the run: the release rule assigns the milestone right after
 #     opening the pull request, and a re-run replays the original event. So it asks again for a
 #     while first, and a failed request counts as no answer yet until the last try.
@@ -69,7 +70,7 @@ open_milestone()
 		return 3
 	fi
 	if [[ "$title" == closed:* ]]; then
-		why="the closed milestone ${title#closed:} (a release already published)"
+		why="the closed milestone ${title#closed:} (a release already prepared or published)"
 		return 1
 	fi
 	if [[ -z "$title" ]]; then
